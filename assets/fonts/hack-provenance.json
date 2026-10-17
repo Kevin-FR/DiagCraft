@@ -1,0 +1,5 @@
+{
+  "source": "epaint_default_fonts 0.33.3/fonts/Hack-Regular.ttf",
+  "repository": "https://github.com/emilk/egui",
+  "sha256": "15f55cc0c85a2988d2b4b3a8cdb5d77fdfbaf319e1bb5309d725db9818fb7125"
+}

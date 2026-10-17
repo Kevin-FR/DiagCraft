@@ -1,0 +1,969 @@
+{
+  "format_version": 7,
+  "title": "Dossier de diagrammes",
+  "page_name": "Demande interne",
+  "page_size": [
+    1280.0,
+    1230.0
+  ],
+  "nodes": [
+    {
+      "id": 1,
+      "kind": "text",
+      "position": [
+        35.0,
+        25.0
+      ],
+      "size": [
+        1210.0,
+        85.0
+      ],
+      "text": "Une demande, une réponse",
+      "fill": [
+        255,
+        247,
+        234
+      ],
+      "stroke": [
+        248,
+        208,
+        126
+      ],
+      "text_color": [
+        32,
+        36,
+        42
+      ],
+      "stroke_width": 1.2,
+      "font_size": 34.0,
+      "text_style": {
+        "bold": true,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "left",
+        "wrap": true
+      }
+    },
+    {
+      "id": 2,
+      "kind": "terminator",
+      "position": [
+        440.0,
+        130.0
+      ],
+      "size": [
+        240.0,
+        80.0
+      ],
+      "text": "Début",
+      "fill": [
+        236,
+        238,
+        255
+      ],
+      "stroke": [
+        148,
+        165,
+        252
+      ],
+      "text_color": [
+        32,
+        36,
+        42
+      ],
+      "stroke_width": 1.2,
+      "font_size": 22.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": true
+      }
+    },
+    {
+      "id": 3,
+      "kind": "rectangle",
+      "position": [
+        420.0,
+        270.0
+      ],
+      "size": [
+        280.0,
+        90.0
+      ],
+      "text": "Décrire le besoin",
+      "fill": [
+        255,
+        247,
+        234
+      ],
+      "stroke": [
+        248,
+        208,
+        126
+      ],
+      "text_color": [
+        32,
+        36,
+        42
+      ],
+      "stroke_width": 1.2,
+      "font_size": 22.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": true
+      }
+    },
+    {
+      "id": 5,
+      "kind": "rectangle",
+      "position": [
+        420.0,
+        420.0
+      ],
+      "size": [
+        280.0,
+        90.0
+      ],
+      "text": "Choisir le bon interlocuteur",
+      "fill": [
+        255,
+        247,
+        234
+      ],
+      "stroke": [
+        248,
+        208,
+        126
+      ],
+      "text_color": [
+        32,
+        36,
+        42
+      ],
+      "stroke_width": 1.2,
+      "font_size": 22.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": true
+      }
+    },
+    {
+      "id": 7,
+      "kind": "rectangle",
+      "position": [
+        420.0,
+        570.0
+      ],
+      "size": [
+        280.0,
+        90.0
+      ],
+      "text": "Préparer une proposition",
+      "fill": [
+        255,
+        247,
+        234
+      ],
+      "stroke": [
+        248,
+        208,
+        126
+      ],
+      "text_color": [
+        32,
+        36,
+        42
+      ],
+      "stroke_width": 1.2,
+      "font_size": 22.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": true
+      }
+    },
+    {
+      "id": 9,
+      "kind": "rectangle",
+      "position": [
+        420.0,
+        720.0
+      ],
+      "size": [
+        280.0,
+        90.0
+      ],
+      "text": "Recueillir un retour",
+      "fill": [
+        255,
+        247,
+        234
+      ],
+      "stroke": [
+        248,
+        208,
+        126
+      ],
+      "text_color": [
+        32,
+        36,
+        42
+      ],
+      "stroke_width": 1.2,
+      "font_size": 22.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": true
+      }
+    },
+    {
+      "id": 11,
+      "kind": "diamond",
+      "position": [
+        430.0,
+        870.0
+      ],
+      "size": [
+        260.0,
+        140.0
+      ],
+      "text": "Tout est prêt ?",
+      "fill": [
+        233,
+        248,
+        245
+      ],
+      "stroke": [
+        110,
+        213,
+        201
+      ],
+      "text_color": [
+        32,
+        36,
+        42
+      ],
+      "stroke_width": 1.2,
+      "font_size": 22.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": true
+      }
+    },
+    {
+      "id": 13,
+      "kind": "rectangle",
+      "position": [
+        880.0,
+        890.0
+      ],
+      "size": [
+        240.0,
+        100.0
+      ],
+      "text": "Ajuster et\nrecommencer",
+      "fill": [
+        255,
+        247,
+        234
+      ],
+      "stroke": [
+        248,
+        208,
+        126
+      ],
+      "text_color": [
+        32,
+        36,
+        42
+      ],
+      "stroke_width": 1.2,
+      "font_size": 22.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": true
+      }
+    },
+    {
+      "id": 16,
+      "kind": "terminator",
+      "position": [
+        440.0,
+        1090.0
+      ],
+      "size": [
+        240.0,
+        80.0
+      ],
+      "text": "Terminé",
+      "fill": [
+        236,
+        238,
+        255
+      ],
+      "stroke": [
+        148,
+        165,
+        252
+      ],
+      "text_color": [
+        32,
+        36,
+        42
+      ],
+      "stroke_width": 1.2,
+      "font_size": 22.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": true
+      }
+    }
+  ],
+  "connectors": [
+    {
+      "id": 4,
+      "from": 2,
+      "to": 3,
+      "free_start": null,
+      "free_end": null,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        78,
+        83,
+        91
+      ],
+      "width": 1.5,
+      "arrow": true,
+      "arrow_start": false,
+      "from_port": "bottom",
+      "to_port": "top",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "solid",
+      "start_head": "triangle",
+      "end_head": "triangle"
+    },
+    {
+      "id": 6,
+      "from": 3,
+      "to": 5,
+      "free_start": null,
+      "free_end": null,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        78,
+        83,
+        91
+      ],
+      "width": 1.5,
+      "arrow": true,
+      "arrow_start": false,
+      "from_port": "bottom",
+      "to_port": "top",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "solid",
+      "start_head": "triangle",
+      "end_head": "triangle"
+    },
+    {
+      "id": 8,
+      "from": 5,
+      "to": 7,
+      "free_start": null,
+      "free_end": null,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        78,
+        83,
+        91
+      ],
+      "width": 1.5,
+      "arrow": true,
+      "arrow_start": false,
+      "from_port": "bottom",
+      "to_port": "top",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "solid",
+      "start_head": "triangle",
+      "end_head": "triangle"
+    },
+    {
+      "id": 10,
+      "from": 7,
+      "to": 9,
+      "free_start": null,
+      "free_end": null,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        78,
+        83,
+        91
+      ],
+      "width": 1.5,
+      "arrow": true,
+      "arrow_start": false,
+      "from_port": "bottom",
+      "to_port": "top",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "solid",
+      "start_head": "triangle",
+      "end_head": "triangle"
+    },
+    {
+      "id": 12,
+      "from": 9,
+      "to": 11,
+      "free_start": null,
+      "free_end": null,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        78,
+        83,
+        91
+      ],
+      "width": 1.5,
+      "arrow": true,
+      "arrow_start": false,
+      "from_port": "bottom",
+      "to_port": "top",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "solid",
+      "start_head": "triangle",
+      "end_head": "triangle"
+    },
+    {
+      "id": 14,
+      "from": 11,
+      "to": 13,
+      "free_start": null,
+      "free_end": null,
+      "kind": "straight",
+      "label": "Non",
+      "color": [
+        78,
+        83,
+        91
+      ],
+      "width": 1.5,
+      "arrow": true,
+      "arrow_start": false,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "solid",
+      "start_head": "triangle",
+      "end_head": "triangle"
+    },
+    {
+      "id": 15,
+      "from": 13,
+      "to": 9,
+      "free_start": null,
+      "free_end": null,
+      "kind": "elbow",
+      "label": "",
+      "color": [
+        78,
+        83,
+        91
+      ],
+      "width": 1.5,
+      "arrow": true,
+      "arrow_start": false,
+      "from_port": "top",
+      "to_port": "right",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "solid",
+      "start_head": "triangle",
+      "end_head": "triangle"
+    },
+    {
+      "id": 17,
+      "from": 11,
+      "to": 16,
+      "free_start": null,
+      "free_end": null,
+      "kind": "straight",
+      "label": "Oui",
+      "color": [
+        78,
+        83,
+        91
+      ],
+      "width": 1.5,
+      "arrow": true,
+      "arrow_start": false,
+      "from_port": "bottom",
+      "to_port": "top",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "solid",
+      "start_head": "triangle",
+      "end_head": "triangle"
+    }
+  ],
+  "drawings": [],
+  "charts": [],
+  "page_style": {
+    "background": [
+      255,
+      255,
+      255
+    ],
+    "grid_spacing": 20.0,
+    "margin": 40.0,
+    "watermark": "",
+    "grid_style": "dots",
+    "export_grid": false
+  },
+  "page_layout": {
+    "unit": "pixels",
+    "auto_size": false
+  },
+  "pages": [
+    {
+      "page_name": "Connecteurs libres",
+      "page_size": [
+        1600.0,
+        900.0
+      ],
+      "nodes": [
+        {
+          "id": 1,
+          "kind": "text",
+          "position": [
+            100.0,
+            50.0
+          ],
+          "size": [
+            1400.0,
+            64.0
+          ],
+          "text": "Reliez vos idées, même en cours de dessin",
+          "fill": [
+            233,
+            246,
+            241
+          ],
+          "stroke": [
+            39,
+            128,
+            107
+          ],
+          "text_color": [
+            32,
+            53,
+            64
+          ],
+          "stroke_width": 1.5,
+          "font_size": 32.0,
+          "text_style": {
+            "bold": true,
+            "italic": false,
+            "underline": false,
+            "strikethrough": false,
+            "monospace": false,
+            "align": "center",
+            "wrap": false
+          }
+        },
+        {
+          "id": 2,
+          "kind": "rounded",
+          "position": [
+            220.0,
+            258.0
+          ],
+          "size": [
+            220.0,
+            84.0
+          ],
+          "text": "Point de départ",
+          "fill": [
+            233,
+            246,
+            241
+          ],
+          "stroke": [
+            39,
+            128,
+            107
+          ],
+          "text_color": [
+            32,
+            53,
+            64
+          ],
+          "stroke_width": 1.5,
+          "font_size": 18.0,
+          "text_style": {
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strikethrough": false,
+            "monospace": false,
+            "align": "center",
+            "wrap": false
+          }
+        },
+        {
+          "id": 3,
+          "kind": "diamond",
+          "position": [
+            950.0,
+            240.0
+          ],
+          "size": [
+            200.0,
+            120.0
+          ],
+          "text": "À valider ?",
+          "fill": [
+            233,
+            246,
+            241
+          ],
+          "stroke": [
+            39,
+            128,
+            107
+          ],
+          "text_color": [
+            32,
+            53,
+            64
+          ],
+          "stroke_width": 1.5,
+          "font_size": 18.0,
+          "text_style": {
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strikethrough": false,
+            "monospace": false,
+            "align": "center",
+            "wrap": false
+          }
+        }
+      ],
+      "connectors": [
+        {
+          "id": 4,
+          "from": 2,
+          "to": 3,
+          "free_start": null,
+          "free_end": null,
+          "kind": "elbow",
+          "label": "Lien attaché",
+          "color": [
+            111,
+            128,
+            139
+          ],
+          "width": 1.8,
+          "arrow": true,
+          "arrow_start": false,
+          "from_port": "auto",
+          "to_port": "auto",
+          "waypoints": [],
+          "label_t": 0.5,
+          "pattern": "solid",
+          "start_head": "triangle",
+          "end_head": "triangle"
+        },
+        {
+          "id": 5,
+          "from": 2,
+          "to": 0,
+          "free_start": null,
+          "free_end": [
+            620.0,
+            620.0
+          ],
+          "kind": "elbow",
+          "label": "Extrémité libre",
+          "color": [
+            111,
+            128,
+            139
+          ],
+          "width": 1.8,
+          "arrow": true,
+          "arrow_start": false,
+          "from_port": "bottom",
+          "to_port": "auto",
+          "waypoints": [
+            [
+              330.0,
+              550.0
+            ],
+            [
+              620.0,
+              550.0
+            ]
+          ],
+          "label_t": 0.5,
+          "pattern": "dashed",
+          "start_head": "triangle",
+          "end_head": "triangle"
+        },
+        {
+          "id": 6,
+          "from": 0,
+          "to": 0,
+          "free_start": [
+            850.0,
+            660.0
+          ],
+          "free_end": [
+            1350.0,
+            660.0
+          ],
+          "kind": "straight",
+          "label": "Deux points libres",
+          "color": [
+            111,
+            128,
+            139
+          ],
+          "width": 1.8,
+          "arrow": true,
+          "arrow_start": true,
+          "from_port": "auto",
+          "to_port": "auto",
+          "waypoints": [],
+          "label_t": 0.5,
+          "pattern": "dotted",
+          "start_head": "circle",
+          "end_head": "triangle"
+        }
+      ],
+      "drawings": [],
+      "charts": [],
+      "page_style": {
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "grid_spacing": 25.0,
+        "margin": 40.0,
+        "watermark": "",
+        "grid_style": "lines",
+        "export_grid": true
+      },
+      "page_layout": {
+        "unit": "pixels",
+        "auto_size": false
+      }
+    },
+    {
+      "page_name": "Bilan A4 portrait",
+      "page_size": [
+        793.7008,
+        1122.5198
+      ],
+      "nodes": [
+        {
+          "id": 1,
+          "kind": "text",
+          "position": [
+            70.0,
+            60.0
+          ],
+          "size": [
+            650.0,
+            60.0
+          ],
+          "text": "Bilan de l’activité",
+          "fill": [
+            233,
+            246,
+            241
+          ],
+          "stroke": [
+            39,
+            128,
+            107
+          ],
+          "text_color": [
+            32,
+            53,
+            64
+          ],
+          "stroke_width": 1.5,
+          "font_size": 30.0,
+          "text_style": {
+            "bold": true,
+            "italic": false,
+            "underline": false,
+            "strikethrough": false,
+            "monospace": false,
+            "align": "center",
+            "wrap": false
+          }
+        },
+        {
+          "id": 3,
+          "kind": "text",
+          "position": [
+            77.0,
+            740.0
+          ],
+          "size": [
+            640.0,
+            120.0
+          ],
+          "text": "Une page A4 indépendante, exportée avec ses dimensions.\nLes autres pages conservent leur propre format.",
+          "fill": [
+            233,
+            246,
+            241
+          ],
+          "stroke": [
+            39,
+            128,
+            107
+          ],
+          "text_color": [
+            32,
+            53,
+            64
+          ],
+          "stroke_width": 1.5,
+          "font_size": 18.0,
+          "text_style": {
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strikethrough": false,
+            "monospace": false,
+            "align": "center",
+            "wrap": true
+          }
+        }
+      ],
+      "connectors": [],
+      "drawings": [],
+      "charts": [
+        {
+          "id": 2,
+          "kind": "columns",
+          "position": [
+            157.0,
+            260.0
+          ],
+          "size": [
+            480.0,
+            320.0
+          ],
+          "title": "Colonnes groupées",
+          "categories": [
+            "T1",
+            "T2",
+            "T3",
+            "T4"
+          ],
+          "series": [
+            {
+              "name": "Série A",
+              "values": [
+                30.0,
+                55.0,
+                40.0,
+                75.0
+              ],
+              "color": [
+                69,
+                161,
+                252
+              ]
+            },
+            {
+              "name": "Série B",
+              "values": [
+                20.0,
+                35.0,
+                60.0,
+                50.0
+              ],
+              "color": [
+                172,
+                221,
+                250
+              ]
+            }
+          ],
+          "legend": true
+        }
+      ],
+      "page_style": {
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "grid_spacing": 25.0,
+        "margin": 40.0,
+        "watermark": "",
+        "grid_style": "lines",
+        "export_grid": true
+      },
+      "page_layout": {
+        "unit": "millimeters",
+        "auto_size": false
+      }
+    }
+  ]
+}

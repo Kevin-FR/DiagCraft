@@ -1,0 +1,1690 @@
+{
+  "format_version": 6,
+  "title": "Connecteurs — styles de trait et flèches",
+  "page_size": [
+    1600,
+    900
+  ],
+  "nodes": [
+    {
+      "id": 1,
+      "kind": "text",
+      "position": [
+        40,
+        20
+      ],
+      "size": [
+        1520,
+        55
+      ],
+      "text": "Connecteurs — styles de trait et flèches",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 28,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 2,
+      "kind": "text",
+      "position": [
+        50,
+        85
+      ],
+      "size": [
+        460,
+        40
+      ],
+      "text": "Continu",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 23,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 3,
+      "kind": "text",
+      "position": [
+        180,
+        140
+      ],
+      "size": [
+        200,
+        34
+      ],
+      "text": "Triangle",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 18,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 4,
+      "kind": "rounded",
+      "position": [
+        50,
+        190
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Départ",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 5,
+      "kind": "rounded",
+      "position": [
+        410,
+        190
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Arrivée",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 7,
+      "kind": "text",
+      "position": [
+        180,
+        310
+      ],
+      "size": [
+        200,
+        34
+      ],
+      "text": "Ouverte",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 18,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 8,
+      "kind": "rounded",
+      "position": [
+        50,
+        360
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Départ",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 9,
+      "kind": "rounded",
+      "position": [
+        410,
+        360
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Arrivée",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 11,
+      "kind": "text",
+      "position": [
+        180,
+        480
+      ],
+      "size": [
+        200,
+        34
+      ],
+      "text": "Losange",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 18,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 12,
+      "kind": "rounded",
+      "position": [
+        50,
+        530
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Départ",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 13,
+      "kind": "rounded",
+      "position": [
+        410,
+        530
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Arrivée",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 15,
+      "kind": "text",
+      "position": [
+        180,
+        650
+      ],
+      "size": [
+        200,
+        34
+      ],
+      "text": "Cercle",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 18,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 16,
+      "kind": "rounded",
+      "position": [
+        50,
+        700
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Départ",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 17,
+      "kind": "rounded",
+      "position": [
+        410,
+        700
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Arrivée",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 19,
+      "kind": "text",
+      "position": [
+        570,
+        85
+      ],
+      "size": [
+        460,
+        40
+      ],
+      "text": "Tirets",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 23,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 20,
+      "kind": "text",
+      "position": [
+        700,
+        140
+      ],
+      "size": [
+        200,
+        34
+      ],
+      "text": "Triangle",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 18,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 21,
+      "kind": "rounded",
+      "position": [
+        570,
+        190
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Départ",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 22,
+      "kind": "rounded",
+      "position": [
+        930,
+        190
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Arrivée",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 24,
+      "kind": "text",
+      "position": [
+        700,
+        310
+      ],
+      "size": [
+        200,
+        34
+      ],
+      "text": "Ouverte",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 18,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 25,
+      "kind": "rounded",
+      "position": [
+        570,
+        360
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Départ",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 26,
+      "kind": "rounded",
+      "position": [
+        930,
+        360
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Arrivée",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 28,
+      "kind": "text",
+      "position": [
+        700,
+        480
+      ],
+      "size": [
+        200,
+        34
+      ],
+      "text": "Losange",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 18,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 29,
+      "kind": "rounded",
+      "position": [
+        570,
+        530
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Départ",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 30,
+      "kind": "rounded",
+      "position": [
+        930,
+        530
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Arrivée",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 32,
+      "kind": "text",
+      "position": [
+        700,
+        650
+      ],
+      "size": [
+        200,
+        34
+      ],
+      "text": "Cercle",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 18,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 33,
+      "kind": "rounded",
+      "position": [
+        570,
+        700
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Départ",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 34,
+      "kind": "rounded",
+      "position": [
+        930,
+        700
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Arrivée",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 36,
+      "kind": "text",
+      "position": [
+        1090,
+        85
+      ],
+      "size": [
+        460,
+        40
+      ],
+      "text": "Pointillés",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 23,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 37,
+      "kind": "text",
+      "position": [
+        1220,
+        140
+      ],
+      "size": [
+        200,
+        34
+      ],
+      "text": "Triangle",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 18,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 38,
+      "kind": "rounded",
+      "position": [
+        1090,
+        190
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Départ",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 39,
+      "kind": "rounded",
+      "position": [
+        1450,
+        190
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Arrivée",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 41,
+      "kind": "text",
+      "position": [
+        1220,
+        310
+      ],
+      "size": [
+        200,
+        34
+      ],
+      "text": "Ouverte",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 18,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 42,
+      "kind": "rounded",
+      "position": [
+        1090,
+        360
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Départ",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 43,
+      "kind": "rounded",
+      "position": [
+        1450,
+        360
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Arrivée",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 45,
+      "kind": "text",
+      "position": [
+        1220,
+        480
+      ],
+      "size": [
+        200,
+        34
+      ],
+      "text": "Losange",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 18,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 46,
+      "kind": "rounded",
+      "position": [
+        1090,
+        530
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Départ",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 47,
+      "kind": "rounded",
+      "position": [
+        1450,
+        530
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Arrivée",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 49,
+      "kind": "text",
+      "position": [
+        1220,
+        650
+      ],
+      "size": [
+        200,
+        34
+      ],
+      "text": "Cercle",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 18,
+      "text_style": {
+        "wrap": true,
+        "bold": true,
+        "align": "center"
+      }
+    },
+    {
+      "id": 50,
+      "kind": "rounded",
+      "position": [
+        1090,
+        700
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Départ",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 51,
+      "kind": "rounded",
+      "position": [
+        1450,
+        700
+      ],
+      "size": [
+        100,
+        42
+      ],
+      "text": "Arrivée",
+      "fill": [
+        239,
+        245,
+        255
+      ],
+      "stroke": [
+        90,
+        128,
+        191
+      ],
+      "text_color": [
+        36,
+        51,
+        76
+      ],
+      "stroke_width": 1.2,
+      "font_size": 17,
+      "text_style": {
+        "wrap": true,
+        "bold": false,
+        "align": "center"
+      }
+    }
+  ],
+  "connectors": [
+    {
+      "id": 6,
+      "from": 4,
+      "to": 5,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        55,
+        92,
+        153
+      ],
+      "width": 2.5,
+      "arrow": true,
+      "arrow_start": true,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "solid",
+      "start_head": "triangle",
+      "end_head": "triangle"
+    },
+    {
+      "id": 10,
+      "from": 8,
+      "to": 9,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        55,
+        92,
+        153
+      ],
+      "width": 2.5,
+      "arrow": true,
+      "arrow_start": true,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "solid",
+      "start_head": "open",
+      "end_head": "open"
+    },
+    {
+      "id": 14,
+      "from": 12,
+      "to": 13,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        55,
+        92,
+        153
+      ],
+      "width": 2.5,
+      "arrow": true,
+      "arrow_start": true,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "solid",
+      "start_head": "diamond",
+      "end_head": "diamond"
+    },
+    {
+      "id": 18,
+      "from": 16,
+      "to": 17,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        55,
+        92,
+        153
+      ],
+      "width": 2.5,
+      "arrow": true,
+      "arrow_start": true,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "solid",
+      "start_head": "circle",
+      "end_head": "circle"
+    },
+    {
+      "id": 23,
+      "from": 21,
+      "to": 22,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        55,
+        92,
+        153
+      ],
+      "width": 2.5,
+      "arrow": true,
+      "arrow_start": true,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "dashed",
+      "start_head": "triangle",
+      "end_head": "triangle"
+    },
+    {
+      "id": 27,
+      "from": 25,
+      "to": 26,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        55,
+        92,
+        153
+      ],
+      "width": 2.5,
+      "arrow": true,
+      "arrow_start": true,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "dashed",
+      "start_head": "open",
+      "end_head": "open"
+    },
+    {
+      "id": 31,
+      "from": 29,
+      "to": 30,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        55,
+        92,
+        153
+      ],
+      "width": 2.5,
+      "arrow": true,
+      "arrow_start": true,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "dashed",
+      "start_head": "diamond",
+      "end_head": "diamond"
+    },
+    {
+      "id": 35,
+      "from": 33,
+      "to": 34,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        55,
+        92,
+        153
+      ],
+      "width": 2.5,
+      "arrow": true,
+      "arrow_start": true,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "dashed",
+      "start_head": "circle",
+      "end_head": "circle"
+    },
+    {
+      "id": 40,
+      "from": 38,
+      "to": 39,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        55,
+        92,
+        153
+      ],
+      "width": 2.5,
+      "arrow": true,
+      "arrow_start": true,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "dotted",
+      "start_head": "triangle",
+      "end_head": "triangle"
+    },
+    {
+      "id": 44,
+      "from": 42,
+      "to": 43,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        55,
+        92,
+        153
+      ],
+      "width": 2.5,
+      "arrow": true,
+      "arrow_start": true,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "dotted",
+      "start_head": "open",
+      "end_head": "open"
+    },
+    {
+      "id": 48,
+      "from": 46,
+      "to": 47,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        55,
+        92,
+        153
+      ],
+      "width": 2.5,
+      "arrow": true,
+      "arrow_start": true,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "dotted",
+      "start_head": "diamond",
+      "end_head": "diamond"
+    },
+    {
+      "id": 52,
+      "from": 50,
+      "to": 51,
+      "kind": "straight",
+      "label": "",
+      "color": [
+        55,
+        92,
+        153
+      ],
+      "width": 2.5,
+      "arrow": true,
+      "arrow_start": true,
+      "from_port": "right",
+      "to_port": "left",
+      "waypoints": [],
+      "label_t": 0.5,
+      "pattern": "dotted",
+      "start_head": "circle",
+      "end_head": "circle"
+    }
+  ],
+  "drawings": [],
+  "page_style": {
+    "background": [
+      255,
+      255,
+      255
+    ],
+    "grid_spacing": 25.0,
+    "margin": 40.0,
+    "watermark": "",
+    "grid_style": "lines",
+    "export_grid": false
+  },
+  "charts": []
+}

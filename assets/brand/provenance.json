@@ -1,0 +1,61 @@
+{
+  "tool": "built-in image_gen",
+  "use": "DiagCraft app logo and macOS icon",
+  "creation": "Original generated mark; PNG resized and ICNS assembled using macOS tools. No external icon pack.",
+  "license": "MIT",
+  "sha256": "1a6b5b591a8534f3dd891e9331c6d69b21603ed5aee18e5c7be230d9943e22aa",
+  "assets": [
+    {
+      "file": "assets/brand/DiagCraft.icns",
+      "sha256": "8e1daa84d586ce009cbb7ec0e0b940e58ebc16e40a794206612e84d989343d64"
+    },
+    {
+      "file": "assets/brand/DiagCraft.iconset/icon_128x128.png",
+      "sha256": "1440098eacbca864408ff05a727da486aa41caa32590fdf9525ed32bcb8aa239"
+    },
+    {
+      "file": "assets/brand/DiagCraft.iconset/icon_128x128@2x.png",
+      "sha256": "517b94c58b1ca1de9bc5229947b0d6ef1f4447e50a58f1e887dac589584362ae"
+    },
+    {
+      "file": "assets/brand/DiagCraft.iconset/icon_16x16.png",
+      "sha256": "cbc1dbc03431bdd45b48be616d31174c6fce47176a7e2f4b6828f737f562eae4"
+    },
+    {
+      "file": "assets/brand/DiagCraft.iconset/icon_16x16@2x.png",
+      "sha256": "2a05e32d84fbe3abde0190ebb21e8e16bf23268b2a319254c1ce9a75158e2c04"
+    },
+    {
+      "file": "assets/brand/DiagCraft.iconset/icon_256x256.png",
+      "sha256": "517b94c58b1ca1de9bc5229947b0d6ef1f4447e50a58f1e887dac589584362ae"
+    },
+    {
+      "file": "assets/brand/DiagCraft.iconset/icon_256x256@2x.png",
+      "sha256": "a8f23a58ee91fca192ae2088f5c0b8df1bc917af5bbcc3443b3a136ce9d51cb8"
+    },
+    {
+      "file": "assets/brand/DiagCraft.iconset/icon_32x32.png",
+      "sha256": "2a05e32d84fbe3abde0190ebb21e8e16bf23268b2a319254c1ce9a75158e2c04"
+    },
+    {
+      "file": "assets/brand/DiagCraft.iconset/icon_32x32@2x.png",
+      "sha256": "719cf18b17a92a62b8240a5a20c4254f4817a763905f8013957a4fbb5b1e860f"
+    },
+    {
+      "file": "assets/brand/DiagCraft.iconset/icon_512x512.png",
+      "sha256": "a8f23a58ee91fca192ae2088f5c0b8df1bc917af5bbcc3443b3a136ce9d51cb8"
+    },
+    {
+      "file": "assets/brand/DiagCraft.iconset/icon_512x512@2x.png",
+      "sha256": "c2ce2aca1695b1fda49bd5b8fa6a9832958cf72b9f0b534b02a113b19af123dd"
+    },
+    {
+      "file": "assets/brand/diagcraft-logo.png",
+      "sha256": "1a6b5b591a8534f3dd891e9331c6d69b21603ed5aee18e5c7be230d9943e22aa"
+    },
+    {
+      "file": "assets/brand/diagcraft-mark-64.png",
+      "sha256": "719cf18b17a92a62b8240a5a20c4254f4817a763905f8013957a4fbb5b1e860f"
+    }
+  ]
+}

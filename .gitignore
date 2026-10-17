@@ -1,0 +1,14 @@
+/target/
+/dist/
+/output/
+/research/
+.DS_Store
+__pycache__/
+*.pyc
+*.tmp
+*.log
+.env
+.env.*
+*.p12
+*.pfx
+*.mobileprovision

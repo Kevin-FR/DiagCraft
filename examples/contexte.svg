@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1230" viewBox="0 0 1280 1230" role="img">
+<title>Menu contextuel – exemple</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<polyline points="560,210 560,270" fill="none" stroke="#4e535b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="560,270 555.725,260.5 564.275,260.5" fill="#4e535b" stroke="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="560,360 560,420" fill="none" stroke="#4e535b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="560,420 555.725,410.5 564.275,410.5" fill="#4e535b" stroke="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="560,510 560,570" fill="none" stroke="#4e535b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="560,570 555.725,560.5 564.275,560.5" fill="#4e535b" stroke="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="560,660 560,720" fill="none" stroke="#4e535b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="560,720 555.725,710.5 564.275,710.5" fill="#4e535b" stroke="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="560,810 560,870" fill="none" stroke="#4e535b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="560,870 555.725,860.5 564.275,860.5" fill="#4e535b" stroke="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="690,940 880,940" fill="none" stroke="#4e535b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="880,940 870.5,944.275 870.5,935.725" fill="#4e535b" stroke="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="769" y="915" width="32" height="20" rx="2" fill="white"/>
+<text x="785" y="930" text-anchor="middle" font-family="'Source Sans 3',Arial,sans-serif" font-size="14" fill="#4e535b">Non</text>
+<polyline points="1000,890 1000,866 724,866 724,765 700,765" fill="none" stroke="#4e535b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="700,765 709.5,760.725 709.5,769.275" fill="#4e535b" stroke="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="560,1010 560,1090" fill="none" stroke="#4e535b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="560,1090 555.725,1080.5 564.275,1080.5" fill="#4e535b" stroke="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="556" y="1025" width="32" height="20" rx="2" fill="white"/>
+<text x="572" y="1040" text-anchor="middle" font-family="'Source Sans 3',Arial,sans-serif" font-size="14" fill="#4e535b">Oui</text>
+<text text-anchor="start" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="34" fill="#20242a" font-weight="700" font-style="normal" text-decoration="none"><tspan x="47" y="67.5">Une demande, une réponse</tspan></text>
+<polygon points="620,130 629.38605,130.49246 638.541,131.95773 647.23944,134.35974 655.2671,137.63931 662.4264,141.71573 668.541,146.48859 673.4604,151.84038 677.06335,157.63931 679.2613,163.74261 680,170 679.2613,176.25739 677.06335,182.36069 673.4604,188.1596 668.541,193.51141 662.4264,198.28427 655.2671,202.36069 647.23944,205.64026 638.541,208.04227 629.3861,209.50754 620,210 500,210 490.61392,209.50754 481.45898,208.04227 472.76056,205.64026 464.73288,202.36069 457.5736,198.28427 451.45898,193.51141 446.5396,188.1596 442.9366,182.36067 440.7387,176.25739 440,170 440.7387,163.74261 442.9366,157.63931 446.5396,151.84038 451.45898,146.48859 457.5736,141.71573 464.7329,137.63931 472.7606,134.35974 481.45898,131.95773 490.61392,130.49246 500,130" fill="#eceeff" stroke="#94a5fc" stroke-width="1.2"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="22" fill="#20242a" font-weight="400" font-style="normal" text-decoration="none"><tspan x="560" y="170">Début</tspan></text>
+<rect x="420" y="270" width="280" height="90" rx="2" fill="#fff7ea" stroke="#f8d07e" stroke-width="1.2"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="22" fill="#20242a" font-weight="400" font-style="normal" text-decoration="none"><tspan x="560" y="315">Décrire le besoin</tspan></text>
+<rect x="420" y="420" width="280" height="90" rx="2" fill="#fff7ea" stroke="#f8d07e" stroke-width="1.2"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="22" fill="#20242a" font-weight="400" font-style="normal" text-decoration="none"><tspan x="560" y="451.25">Choisir le bon</tspan><tspan x="560" y="478.75">interlocuteur</tspan></text>
+<rect x="420" y="570" width="280" height="90" rx="2" fill="#fff7ea" stroke="#f8d07e" stroke-width="1.2"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="22" fill="#20242a" font-weight="400" font-style="normal" text-decoration="none"><tspan x="560" y="601.25">Préparer une</tspan><tspan x="560" y="628.75">proposition</tspan></text>
+<rect x="420" y="720" width="280" height="90" rx="2" fill="#fff7ea" stroke="#f8d07e" stroke-width="1.2"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="22" fill="#20242a" font-weight="400" font-style="normal" text-decoration="none"><tspan x="560" y="765">Recueillir un retour</tspan></text>
+<polygon points="560,870 690,940 560,1010 430,940" fill="#e9f8f5" stroke="#6ed5c9" stroke-width="1.2"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="22" fill="#20242a" font-weight="400" font-style="normal" text-decoration="none"><tspan x="560" y="926.25">Tout est</tspan><tspan x="560" y="953.75">prêt ?</tspan></text>
+<rect x="880" y="890" width="240" height="100" rx="2" fill="#fff7ea" stroke="#f8d07e" stroke-width="1.2"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="22" fill="#20242a" font-weight="400" font-style="normal" text-decoration="none"><tspan x="1000" y="926.25">Ajuster et</tspan><tspan x="1000" y="953.75">recommencer</tspan></text>
+<polygon points="620,1090 629.38605,1090.4924 638.541,1091.9578 647.23944,1094.3597 655.2671,1097.6393 662.4264,1101.7157 668.541,1106.4886 673.4604,1111.8403 677.06335,1117.6393 679.2613,1123.7427 680,1130 679.2613,1136.2573 677.06335,1142.3607 673.4604,1148.1597 668.541,1153.5114 662.4264,1158.2843 655.2671,1162.3607 647.23944,1165.6403 638.541,1168.0422 629.3861,1169.5076 620,1170 500,1170 490.61392,1169.5076 481.45898,1168.0422 472.76056,1165.6403 464.73288,1162.3607 457.5736,1158.2843 451.45898,1153.5114 446.5396,1148.1597 442.9366,1142.3607 440.7387,1136.2573 440,1130 440.7387,1123.7427 442.9366,1117.6393 446.5396,1111.8403 451.45898,1106.4885 457.5736,1101.7157 464.7329,1097.6393 472.7606,1094.3597 481.45898,1091.9578 490.61392,1090.4924 500,1090" fill="#eceeff" stroke="#94a5fc" stroke-width="1.2"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="22" fill="#20242a" font-weight="400" font-style="normal" text-decoration="none"><tspan x="560" y="1130">Terminé</tspan></text>
+</svg>

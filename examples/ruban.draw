@@ -1,0 +1,380 @@
+{
+  "format_version": 2,
+  "title": "Styles, courbes et page",
+  "page_size": [
+    1280.0,
+    900.0
+  ],
+  "nodes": [
+    {
+      "id": 1,
+      "kind": "text",
+      "position": [
+        340.0,
+        50.0
+      ],
+      "size": [
+        600.0,
+        52.0
+      ],
+      "text": "Donnez forme à vos idées",
+      "fill": [
+        233,
+        246,
+        241
+      ],
+      "stroke": [
+        39,
+        128,
+        107
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 30.0,
+      "text_style": {
+        "bold": true,
+        "italic": true,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 2,
+      "kind": "text",
+      "position": [
+        340.0,
+        105.0
+      ],
+      "size": [
+        600.0,
+        36.0
+      ],
+      "text": "Un parcours simple, prêt à devenir le vôtre.",
+      "fill": [
+        233,
+        246,
+        241
+      ],
+      "stroke": [
+        39,
+        128,
+        107
+      ],
+      "text_color": [
+        132,
+        143,
+        153
+      ],
+      "stroke_width": 1.5,
+      "font_size": 16.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 3,
+      "kind": "rounded",
+      "position": [
+        430.0,
+        188.0
+      ],
+      "size": [
+        220.0,
+        84.0
+      ],
+      "text": "Une idée",
+      "fill": [
+        233,
+        246,
+        241
+      ],
+      "stroke": [
+        39,
+        128,
+        107
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": true,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 4,
+      "kind": "rectangle",
+      "position": [
+        430.0,
+        348.0
+      ],
+      "size": [
+        220.0,
+        84.0
+      ],
+      "text": "Dessiner le parcours",
+      "fill": [
+        237,
+        241,
+        254
+      ],
+      "stroke": [
+        113,
+        131,
+        207
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 5,
+      "kind": "diamond",
+      "position": [
+        420.0,
+        495.0
+      ],
+      "size": [
+        240.0,
+        140.0
+      ],
+      "text": "Prêt à partager ?",
+      "fill": [
+        255,
+        246,
+        225
+      ],
+      "stroke": [
+        202,
+        158,
+        66
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 17.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 6,
+      "kind": "rectangle",
+      "position": [
+        820.0,
+        523.0
+      ],
+      "size": [
+        220.0,
+        84.0
+      ],
+      "text": "Ajuster les détails",
+      "fill": [
+        252,
+        237,
+        236
+      ],
+      "stroke": [
+        202,
+        140,
+        132
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center"
+      }
+    },
+    {
+      "id": 7,
+      "kind": "rounded",
+      "position": [
+        430.0,
+        708.0
+      ],
+      "size": [
+        220.0,
+        84.0
+      ],
+      "text": "Exporter en SVG",
+      "fill": [
+        233,
+        246,
+        241
+      ],
+      "stroke": [
+        39,
+        128,
+        107
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center"
+      }
+    }
+  ],
+  "connectors": [
+    {
+      "id": 8,
+      "from": 3,
+      "to": 4,
+      "kind": "elbow",
+      "label": "",
+      "color": [
+        111,
+        128,
+        139
+      ],
+      "width": 1.8,
+      "arrow": true
+    },
+    {
+      "id": 9,
+      "from": 4,
+      "to": 5,
+      "kind": "elbow",
+      "label": "",
+      "color": [
+        111,
+        128,
+        139
+      ],
+      "width": 1.8,
+      "arrow": true
+    },
+    {
+      "id": 10,
+      "from": 5,
+      "to": 7,
+      "kind": "elbow",
+      "label": "Oui",
+      "color": [
+        111,
+        128,
+        139
+      ],
+      "width": 1.8,
+      "arrow": true
+    },
+    {
+      "id": 11,
+      "from": 5,
+      "to": 6,
+      "kind": "elbow",
+      "label": "À peaufiner",
+      "color": [
+        111,
+        128,
+        139
+      ],
+      "width": 1.8,
+      "arrow": true
+    },
+    {
+      "id": 12,
+      "from": 6,
+      "to": 4,
+      "kind": "elbow",
+      "label": "",
+      "color": [
+        111,
+        128,
+        139
+      ],
+      "width": 1.8,
+      "arrow": true
+    }
+  ],
+  "drawings": [
+    {
+      "id": 100,
+      "kind": "bezier",
+      "start": [
+        90,
+        680
+      ],
+      "end": [
+        330,
+        790
+      ],
+      "bend": -65,
+      "color": [
+        0,
+        125,
+        250
+      ],
+      "width": 3,
+      "arrow": true
+    }
+  ],
+  "page_style": {
+    "background": [
+      249,
+      250,
+      254
+    ],
+    "grid_spacing": 20.0,
+    "margin": 40.0,
+    "watermark": "BROUILLON"
+  }
+}

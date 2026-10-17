@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img">
+<title>Styles, courbes et page</title>
+<rect width="100%" height="100%" fill="#f9fafe"/>
+<text x="640" y="450" text-anchor="middle" fill="#8796a8" opacity="0.15" font-family="sans-serif" font-size="64">BROUILLON</text>
+<path d="M 90 680 C 197.08255 657.57745, 277.08255 694.2441, 330 790" stroke="#007dfa" stroke-width="3" fill="none" stroke-linecap="round"/>
+<polygon points="330,790 320.26056,782.8834 328.86713,777.99084" fill="#007dfa"/>
+<polyline points="540,272 540,310 540,310 540,348" fill="none" stroke="#6f808b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="540,348 535.59,338.2 544.41,338.2" fill="#6f808b" stroke="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="540,432 540,463.5 540,463.5 540,495" fill="none" stroke="#6f808b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="540,495 535.59,485.2 544.41,485.2" fill="#6f808b" stroke="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="540,635 540,671.5 540,671.5 540,708" fill="none" stroke="#6f808b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="540,708 535.59,698.2 544.41,698.2" fill="#6f808b" stroke="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="536" y="646.5" width="32" height="20" rx="2" fill="white"/>
+<text x="552" y="661.5" text-anchor="middle" font-family="'Source Sans 3',Arial,sans-serif" font-size="14" fill="#6f808b">Oui</text>
+<polyline points="660,565 740,565 740,565 820,565" fill="none" stroke="#6f808b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="820,565 810.2,569.41 810.2,560.59" fill="#6f808b" stroke="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="692" y="540" width="96" height="20" rx="2" fill="white"/>
+<text x="740" y="555" text-anchor="middle" font-family="'Source Sans 3',Arial,sans-serif" font-size="14" fill="#6f808b">À peaufiner</text>
+<polyline points="820,565 735,565 735,390 650,390" fill="none" stroke="#6f808b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="650,390 659.8,385.59 659.8,394.41" fill="#6f808b" stroke="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="30" fill="#203540" font-weight="700" font-style="italic" text-decoration="none"><tspan x="640" y="76">Donnez forme à vos idées</tspan></text>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="16" fill="#848f99" font-weight="400" font-style="normal" text-decoration="none"><tspan x="640" y="123">Un parcours simple, prêt à devenir le vôtre.</tspan></text>
+<rect x="430" y="188" width="220" height="84" rx="20" fill="#e9f6f1" stroke="#27806b" stroke-width="1.5"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="18" fill="#203540" font-weight="400" font-style="normal" text-decoration="underline"><tspan x="540" y="230">Une idée</tspan></text>
+<rect x="430" y="348" width="220" height="84" rx="2" fill="#edf1fe" stroke="#7183cf" stroke-width="1.5"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="18" fill="#203540" font-weight="400" font-style="normal" text-decoration="none"><tspan x="540" y="390">Dessiner le parcours</tspan></text>
+<polygon points="540,495 660,565 540,635 420,565" fill="#fff6e1" stroke="#ca9e42" stroke-width="1.5"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="17" fill="#203540" font-weight="400" font-style="normal" text-decoration="none"><tspan x="540" y="565">Prêt à partager ?</tspan></text>
+<rect x="820" y="523" width="220" height="84" rx="2" fill="#fcedec" stroke="#ca8c84" stroke-width="1.5"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="18" fill="#203540" font-weight="400" font-style="normal" text-decoration="none"><tspan x="930" y="565">Ajuster les détails</tspan></text>
+<rect x="430" y="708" width="220" height="84" rx="20" fill="#e9f6f1" stroke="#27806b" stroke-width="1.5"/>
+<text text-anchor="middle" dominant-baseline="central" font-family="'Source Sans 3',Arial,sans-serif" font-size="18" fill="#203540" font-weight="400" font-style="normal" text-decoration="none"><tspan x="540" y="750">Exporter en SVG</tspan></text>
+</svg>

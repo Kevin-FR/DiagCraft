@@ -1,0 +1,8 @@
+DiagCraft
+Copyright (c) 2026 DiagCraft contributors
+https://github.com/Kevin-FR/DiagCraft
+
+Project contributions are licensed under the MIT License; see LICENSE.
+Third-party components retain their own licenses and copyright notices.
+See THIRD_PARTY.md, assets/fonts and assets/licenses. Binary distributions
+include target-specific notices in Dependency-Licenses and Rust notices.

@@ -1,0 +1,832 @@
+{
+  "format_version": 7,
+  "title": "Remplir, ligne et ombre",
+  "page_name": "Page 1",
+  "page_size": [
+    1180.0,
+    880.0
+  ],
+  "nodes": [
+    {
+      "id": 1,
+      "kind": "rounded",
+      "position": [
+        100.0,
+        118.0
+      ],
+      "size": [
+        240.0,
+        112.0
+      ],
+      "text": "Dégradé linéaire",
+      "fill": [
+        225,
+        240,
+        255
+      ],
+      "stroke": [
+        45,
+        120,
+        220
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": false
+      },
+      "appearance": {
+        "fill": {
+          "mode": "linear",
+          "secondary": [
+            230,
+            220,
+            255
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 25.0,
+          "pattern": "diagonal",
+          "texture": "paper",
+          "spacing": 12.0
+        },
+        "line": {
+          "mode": "solid",
+          "secondary": [
+            90,
+            165,
+            250
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "solid",
+          "cap": "round",
+          "join": "round",
+          "compound": "single",
+          "corner_radius": null,
+          "start_scale": 1.0,
+          "end_scale": 1.0
+        },
+        "shadow": {
+          "kind": "none",
+          "color": [
+            25,
+            38,
+            55
+          ],
+          "transparency": 72.0,
+          "scale": 100.0,
+          "blur": 6.0,
+          "angle": 0.0,
+          "offset": [
+            6.0,
+            8.0
+          ]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "kind": "diamond",
+      "position": [
+        480.0,
+        100.0
+      ],
+      "size": [
+        240.0,
+        112.0
+      ],
+      "text": "Dégradé radial",
+      "fill": [
+        225,
+        240,
+        255
+      ],
+      "stroke": [
+        45,
+        120,
+        220
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": false
+      },
+      "appearance": {
+        "fill": {
+          "mode": "radial",
+          "secondary": [
+            230,
+            220,
+            255
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "diagonal",
+          "texture": "paper",
+          "spacing": 12.0
+        },
+        "line": {
+          "mode": "solid",
+          "secondary": [
+            90,
+            165,
+            250
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "solid",
+          "cap": "round",
+          "join": "round",
+          "compound": "single",
+          "corner_radius": null,
+          "start_scale": 1.0,
+          "end_scale": 1.0
+        },
+        "shadow": {
+          "kind": "none",
+          "color": [
+            25,
+            38,
+            55
+          ],
+          "transparency": 72.0,
+          "scale": 100.0,
+          "blur": 6.0,
+          "angle": 0.0,
+          "offset": [
+            6.0,
+            8.0
+          ]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "kind": "rounded",
+      "position": [
+        840.0,
+        118.0
+      ],
+      "size": [
+        240.0,
+        112.0
+      ],
+      "text": "Motif diagonal",
+      "fill": [
+        225,
+        240,
+        255
+      ],
+      "stroke": [
+        45,
+        120,
+        220
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": false
+      },
+      "appearance": {
+        "fill": {
+          "mode": "pattern",
+          "secondary": [
+            165,
+            194,
+            230
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "diagonal",
+          "texture": "paper",
+          "spacing": 12.0
+        },
+        "line": {
+          "mode": "solid",
+          "secondary": [
+            90,
+            165,
+            250
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "solid",
+          "cap": "round",
+          "join": "round",
+          "compound": "single",
+          "corner_radius": null,
+          "start_scale": 1.0,
+          "end_scale": 1.0
+        },
+        "shadow": {
+          "kind": "none",
+          "color": [
+            25,
+            38,
+            55
+          ],
+          "transparency": 72.0,
+          "scale": 100.0,
+          "blur": 6.0,
+          "angle": 0.0,
+          "offset": [
+            6.0,
+            8.0
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "kind": "rounded",
+      "position": [
+        100.0,
+        388.0
+      ],
+      "size": [
+        240.0,
+        112.0
+      ],
+      "text": "Ombre portée",
+      "fill": [
+        225,
+        240,
+        255
+      ],
+      "stroke": [
+        45,
+        120,
+        220
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": false
+      },
+      "appearance": {
+        "fill": {
+          "mode": "solid",
+          "secondary": [
+            230,
+            220,
+            255
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "diagonal",
+          "texture": "paper",
+          "spacing": 12.0
+        },
+        "line": {
+          "mode": "solid",
+          "secondary": [
+            90,
+            165,
+            250
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "solid",
+          "cap": "round",
+          "join": "round",
+          "compound": "single",
+          "corner_radius": null,
+          "start_scale": 1.0,
+          "end_scale": 1.0
+        },
+        "shadow": {
+          "kind": "outer",
+          "color": [
+            25,
+            38,
+            55
+          ],
+          "transparency": 45.0,
+          "scale": 100.0,
+          "blur": 6.0,
+          "angle": 0.0,
+          "offset": [
+            9.0,
+            9.0
+          ]
+        }
+      }
+    },
+    {
+      "id": 5,
+      "kind": "diamond",
+      "position": [
+        480.0,
+        370.0
+      ],
+      "size": [
+        240.0,
+        112.0
+      ],
+      "text": "Ombre intérieure",
+      "fill": [
+        225,
+        240,
+        255
+      ],
+      "stroke": [
+        45,
+        120,
+        220
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": false
+      },
+      "appearance": {
+        "fill": {
+          "mode": "solid",
+          "secondary": [
+            230,
+            220,
+            255
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "diagonal",
+          "texture": "paper",
+          "spacing": 12.0
+        },
+        "line": {
+          "mode": "solid",
+          "secondary": [
+            90,
+            165,
+            250
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "solid",
+          "cap": "round",
+          "join": "round",
+          "compound": "single",
+          "corner_radius": null,
+          "start_scale": 1.0,
+          "end_scale": 1.0
+        },
+        "shadow": {
+          "kind": "inner",
+          "color": [
+            25,
+            38,
+            55
+          ],
+          "transparency": 45.0,
+          "scale": 100.0,
+          "blur": 4.0,
+          "angle": 0.0,
+          "offset": [
+            9.0,
+            9.0
+          ]
+        }
+      }
+    },
+    {
+      "id": 6,
+      "kind": "rounded",
+      "position": [
+        840.0,
+        388.0
+      ],
+      "size": [
+        240.0,
+        112.0
+      ],
+      "text": "Perspective",
+      "fill": [
+        225,
+        240,
+        255
+      ],
+      "stroke": [
+        45,
+        120,
+        220
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": false
+      },
+      "appearance": {
+        "fill": {
+          "mode": "solid",
+          "secondary": [
+            230,
+            220,
+            255
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "diagonal",
+          "texture": "paper",
+          "spacing": 12.0
+        },
+        "line": {
+          "mode": "solid",
+          "secondary": [
+            90,
+            165,
+            250
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "solid",
+          "cap": "round",
+          "join": "round",
+          "compound": "single",
+          "corner_radius": null,
+          "start_scale": 1.0,
+          "end_scale": 1.0
+        },
+        "shadow": {
+          "kind": "perspective",
+          "color": [
+            25,
+            38,
+            55
+          ],
+          "transparency": 45.0,
+          "scale": 110.0,
+          "blur": 6.0,
+          "angle": 15.0,
+          "offset": [
+            9.0,
+            9.0
+          ]
+        }
+      }
+    },
+    {
+      "id": 7,
+      "kind": "rounded",
+      "position": [
+        100.0,
+        658.0
+      ],
+      "size": [
+        240.0,
+        112.0
+      ],
+      "text": "Contour dégradé",
+      "fill": [
+        225,
+        240,
+        255
+      ],
+      "stroke": [
+        45,
+        120,
+        220
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 7.0,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": false
+      },
+      "appearance": {
+        "fill": {
+          "mode": "solid",
+          "secondary": [
+            230,
+            220,
+            255
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "diagonal",
+          "texture": "paper",
+          "spacing": 12.0
+        },
+        "line": {
+          "mode": "linear",
+          "secondary": [
+            205,
+            85,
+            170
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "solid",
+          "cap": "round",
+          "join": "round",
+          "compound": "single",
+          "corner_radius": null,
+          "start_scale": 1.0,
+          "end_scale": 1.0
+        },
+        "shadow": {
+          "kind": "none",
+          "color": [
+            25,
+            38,
+            55
+          ],
+          "transparency": 72.0,
+          "scale": 100.0,
+          "blur": 6.0,
+          "angle": 0.0,
+          "offset": [
+            6.0,
+            8.0
+          ]
+        }
+      }
+    },
+    {
+      "id": 8,
+      "kind": "rounded",
+      "position": [
+        470.0,
+        658.0
+      ],
+      "size": [
+        240.0,
+        112.0
+      ],
+      "text": "Double contour",
+      "fill": [
+        225,
+        240,
+        255
+      ],
+      "stroke": [
+        45,
+        120,
+        220
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 8.0,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": false
+      },
+      "appearance": {
+        "fill": {
+          "mode": "solid",
+          "secondary": [
+            230,
+            220,
+            255
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "diagonal",
+          "texture": "paper",
+          "spacing": 12.0
+        },
+        "line": {
+          "mode": "solid",
+          "secondary": [
+            90,
+            165,
+            250
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "solid",
+          "cap": "round",
+          "join": "round",
+          "compound": "double",
+          "corner_radius": null,
+          "start_scale": 1.0,
+          "end_scale": 1.0
+        },
+        "shadow": {
+          "kind": "none",
+          "color": [
+            25,
+            38,
+            55
+          ],
+          "transparency": 72.0,
+          "scale": 100.0,
+          "blur": 6.0,
+          "angle": 0.0,
+          "offset": [
+            6.0,
+            8.0
+          ]
+        }
+      }
+    },
+    {
+      "id": 9,
+      "kind": "rounded",
+      "position": [
+        840.0,
+        658.0
+      ],
+      "size": [
+        240.0,
+        112.0
+      ],
+      "text": "Texture papier",
+      "fill": [
+        225,
+        240,
+        255
+      ],
+      "stroke": [
+        45,
+        120,
+        220
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 1.5,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": false
+      },
+      "appearance": {
+        "fill": {
+          "mode": "texture",
+          "secondary": [
+            80,
+            110,
+            150
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "diagonal",
+          "texture": "paper",
+          "spacing": 12.0
+        },
+        "line": {
+          "mode": "solid",
+          "secondary": [
+            90,
+            165,
+            250
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "solid",
+          "cap": "round",
+          "join": "round",
+          "compound": "single",
+          "corner_radius": null,
+          "start_scale": 1.0,
+          "end_scale": 1.0
+        },
+        "shadow": {
+          "kind": "none",
+          "color": [
+            25,
+            38,
+            55
+          ],
+          "transparency": 72.0,
+          "scale": 100.0,
+          "blur": 6.0,
+          "angle": 0.0,
+          "offset": [
+            6.0,
+            8.0
+          ]
+        }
+      }
+    }
+  ],
+  "connectors": [],
+  "drawings": [],
+  "charts": [],
+  "page_style": {
+    "background": [
+      255,
+      255,
+      255
+    ],
+    "grid_spacing": 20.0,
+    "margin": 40.0,
+    "watermark": "",
+    "grid_style": "dots",
+    "export_grid": false
+  },
+  "page_layout": {
+    "unit": "pixels",
+    "auto_size": false
+  },
+  "pages": []
+}

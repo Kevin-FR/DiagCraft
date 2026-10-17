@@ -1,0 +1,100 @@
+{
+  "api_version": 1,
+  "expected_revision": "sha256:3793b8654407226c8f612b6ca222a96182efa504d6b075b91033ce2d4aeb14ab",
+  "operations": [
+    {
+      "op": "set_title",
+      "title": "Dossier travaillé avec un agent"
+    },
+    {
+      "op": "update_node",
+      "page": 0,
+      "target": 2,
+      "changes": {
+        "text": "Demande précisée",
+        "fill": [
+          237,
+          241,
+          254
+        ],
+        "position": [
+          440.0,
+          130.0
+        ]
+      }
+    },
+    {
+      "op": "add_connector",
+      "page": 0,
+      "alias": "suite_libre",
+      "start": {
+        "node": 2,
+        "port": "left"
+      },
+      "end": {
+        "point": [
+          200.0,
+          300.0
+        ]
+      },
+      "style": {
+        "label": "À compléter",
+        "pattern": "dashed"
+      }
+    },
+    {
+      "op": "add_page",
+      "name": "Notes de l’agent",
+      "size": [
+        960,
+        640
+      ]
+    },
+    {
+      "op": "add_node",
+      "page": 3,
+      "alias": "titre",
+      "kind": "text",
+      "position": [
+        60,
+        50
+      ],
+      "size": [
+        840,
+        80
+      ],
+      "text": "Relecture du dossier",
+      "style": {
+        "font_size": 30,
+        "text_style": {
+          "bold": true,
+          "align": "left",
+          "wrap": true
+        }
+      }
+    },
+    {
+      "op": "add_node",
+      "page": 3,
+      "alias": "notes",
+      "kind": "note",
+      "position": [
+        60,
+        170
+      ],
+      "size": [
+        560,
+        240
+      ],
+      "text": "À vérifier\n• Clarté du besoin et du retour\n• Connecteur libre à compléter\n• Dimensions de chaque page",
+      "style": {
+        "fill": [
+          255,
+          246,
+          225
+        ],
+        "font_size": 22
+      }
+    }
+  ]
+}

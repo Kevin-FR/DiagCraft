@@ -1,0 +1,225 @@
+{
+  "format_version": 3,
+  "title": "Graphiques – données modifiables",
+  "page_size": [
+    1100.0,
+    840.0
+  ],
+  "nodes": [],
+  "connectors": [],
+  "drawings": [],
+  "page_style": {
+    "background": [
+      255,
+      255,
+      255
+    ],
+    "grid_spacing": 20.0,
+    "margin": 40.0,
+    "watermark": "",
+    "grid_style": "dots",
+    "export_grid": false
+  },
+  "charts": [
+    {
+      "id": 1,
+      "kind": "columns",
+      "position": [
+        40.0,
+        60.0
+      ],
+      "size": [
+        480.0,
+        320.0
+      ],
+      "title": "Colonnes groupées",
+      "categories": [
+        "T1",
+        "T2",
+        "T3",
+        "T4"
+      ],
+      "series": [
+        {
+          "name": "Série A",
+          "values": [
+            30.0,
+            55.0,
+            40.0,
+            75.0
+          ],
+          "color": [
+            69,
+            161,
+            252
+          ]
+        },
+        {
+          "name": "Série B",
+          "values": [
+            20.0,
+            35.0,
+            60.0,
+            50.0
+          ],
+          "color": [
+            172,
+            221,
+            250
+          ]
+        }
+      ],
+      "legend": true
+    },
+    {
+      "id": 2,
+      "kind": "stacked_bars",
+      "position": [
+        580.0,
+        60.0
+      ],
+      "size": [
+        480.0,
+        320.0
+      ],
+      "title": "Barres empilées",
+      "categories": [
+        "T1",
+        "T2",
+        "T3",
+        "T4"
+      ],
+      "series": [
+        {
+          "name": "Série A",
+          "values": [
+            30.0,
+            55.0,
+            40.0,
+            75.0
+          ],
+          "color": [
+            69,
+            161,
+            252
+          ]
+        },
+        {
+          "name": "Série B",
+          "values": [
+            20.0,
+            35.0,
+            60.0,
+            50.0
+          ],
+          "color": [
+            172,
+            221,
+            250
+          ]
+        }
+      ],
+      "legend": true
+    },
+    {
+      "id": 3,
+      "kind": "line",
+      "position": [
+        40.0,
+        460.0
+      ],
+      "size": [
+        480.0,
+        320.0
+      ],
+      "title": "Courbes",
+      "categories": [
+        "T1",
+        "T2",
+        "T3",
+        "T4"
+      ],
+      "series": [
+        {
+          "name": "Série A",
+          "values": [
+            30.0,
+            55.0,
+            40.0,
+            75.0
+          ],
+          "color": [
+            69,
+            161,
+            252
+          ]
+        },
+        {
+          "name": "Série B",
+          "values": [
+            20.0,
+            35.0,
+            60.0,
+            50.0
+          ],
+          "color": [
+            172,
+            221,
+            250
+          ]
+        }
+      ],
+      "legend": true
+    },
+    {
+      "id": 4,
+      "kind": "area",
+      "position": [
+        580.0,
+        460.0
+      ],
+      "size": [
+        480.0,
+        320.0
+      ],
+      "title": "Graphique de zone",
+      "categories": [
+        "T1",
+        "T2",
+        "T3",
+        "T4"
+      ],
+      "series": [
+        {
+          "name": "Série A",
+          "values": [
+            30.0,
+            55.0,
+            40.0,
+            75.0
+          ],
+          "color": [
+            69,
+            161,
+            252
+          ]
+        },
+        {
+          "name": "Série B",
+          "values": [
+            20.0,
+            35.0,
+            60.0,
+            50.0
+          ],
+          "color": [
+            172,
+            221,
+            250
+          ]
+        }
+      ],
+      "legend": true
+    }
+  ]
+}

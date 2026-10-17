@@ -1,0 +1,1370 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": 1
+    },
+    "expected_revision": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "add_node"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "alias": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "kind": {
+                "enum": [
+                  "rectangle",
+                  "rounded",
+                  "ellipse",
+                  "diamond",
+                  "triangle",
+                  "right_triangle",
+                  "pentagon",
+                  "hexagon",
+                  "octagon",
+                  "plus",
+                  "cross",
+                  "heart",
+                  "cloud",
+                  "shield",
+                  "drop",
+                  "star",
+                  "star4",
+                  "star8",
+                  "gear",
+                  "lightning",
+                  "document",
+                  "data",
+                  "terminator",
+                  "predefined_process",
+                  "internal_storage",
+                  "database",
+                  "trapezoid",
+                  "manual_input",
+                  "manual_operation",
+                  "delay",
+                  "display",
+                  "off_page",
+                  "note",
+                  "arrow_right",
+                  "arrow_left",
+                  "arrow_down",
+                  "arrow_up",
+                  "double_arrow",
+                  "chevron",
+                  "notched_arrow",
+                  "elbow_arrow",
+                  "frame",
+                  "swimlane",
+                  "title_block",
+                  "package",
+                  "text",
+                  "callout",
+                  "brace_left",
+                  "brace_right",
+                  "cube",
+                  "cone",
+                  "pyramid",
+                  "uml_class",
+                  "component",
+                  "actor",
+                  "lifeline",
+                  "fork",
+                  "initial_state",
+                  "final_state",
+                  "use_case"
+                ]
+              },
+              "position": {
+                "$ref": "#/$defs/point"
+              },
+              "size": {
+                "$ref": "#/$defs/point"
+              },
+              "text": {
+                "type": "string"
+              },
+              "style": {
+                "$ref": "#/$defs/nodeChanges"
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "alias",
+              "kind",
+              "position",
+              "size",
+              "text"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "update_node"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "target": {
+                "$ref": "#/$defs/ref"
+              },
+              "changes": {
+                "$ref": "#/$defs/nodeChanges"
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "target",
+              "changes"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "add_connector"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "alias": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "start": {
+                "$ref": "#/$defs/endpoint"
+              },
+              "end": {
+                "$ref": "#/$defs/endpoint"
+              },
+              "style": {
+                "$ref": "#/$defs/edgeChanges"
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "alias",
+              "start",
+              "end"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "update_connector"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "target": {
+                "$ref": "#/$defs/ref"
+              },
+              "changes": {
+                "$ref": "#/$defs/edgeChanges"
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "target",
+              "changes"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "add_chart"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "alias": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "kind": {
+                "enum": [
+                  "columns",
+                  "stacked_columns",
+                  "percent_columns",
+                  "bars",
+                  "stacked_bars",
+                  "percent_bars",
+                  "line",
+                  "step_line",
+                  "percent_line",
+                  "area",
+                  "step_area"
+                ]
+              },
+              "position": {
+                "$ref": "#/$defs/point"
+              },
+              "changes": {
+                "$ref": "#/$defs/chartChanges"
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "alias",
+              "kind",
+              "position"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "update_chart"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "target": {
+                "$ref": "#/$defs/ref"
+              },
+              "changes": {
+                "$ref": "#/$defs/chartChanges"
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "target",
+              "changes"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "add_drawing"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "alias": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "kind": {
+                "enum": [
+                  "line",
+                  "bezier"
+                ]
+              },
+              "start": {
+                "$ref": "#/$defs/point"
+              },
+              "end": {
+                "$ref": "#/$defs/point"
+              },
+              "appearance": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/appearanceLine"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "alias",
+              "kind",
+              "start",
+              "end"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "update_drawing"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "target": {
+                "$ref": "#/$defs/ref"
+              },
+              "start": {
+                "$ref": "#/$defs/point"
+              },
+              "end": {
+                "$ref": "#/$defs/point"
+              },
+              "bend": {
+                "type": "number"
+              },
+              "appearance": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/appearanceLine"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "target",
+              "start",
+              "end",
+              "bend"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "delete"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "target": {
+                "$ref": "#/$defs/ref"
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "target"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "set_title"
+              },
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "op",
+              "title"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "add_page"
+              },
+              "name": {
+                "type": "string"
+              },
+              "size": {
+                "$ref": "#/$defs/point"
+              },
+              "unit": {
+                "enum": [
+                  "pixels",
+                  "millimeters",
+                  "inches"
+                ]
+              }
+            },
+            "required": [
+              "op",
+              "name",
+              "size"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "update_page"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "size": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/point"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unit": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "pixels",
+                      "millimeters",
+                      "inches"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "auto_size": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "op",
+              "page"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "move_page"
+              },
+              "from": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "to": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              }
+            },
+            "required": [
+              "op",
+              "from",
+              "to"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "delete_page"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              }
+            },
+            "required": [
+              "op",
+              "page"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "fit_page"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              }
+            },
+            "required": [
+              "op",
+              "page"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "api_version",
+    "expected_revision",
+    "operations"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DiagCraft Agent Patch API 1",
+  "$defs": {
+    "point": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "color": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 255
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "ref": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1
+        },
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      ]
+    },
+    "endpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "node": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "point": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/point"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "port": {
+          "enum": [
+            "auto",
+            "left",
+            "right",
+            "top",
+            "bottom"
+          ]
+        }
+      },
+      "required": [],
+      "oneOf": [
+        {
+          "required": [
+            "node"
+          ],
+          "properties": {
+            "node": {
+              "$ref": "#/$defs/ref"
+            },
+            "point": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "required": [
+            "point"
+          ],
+          "properties": {
+            "node": {
+              "type": "null"
+            },
+            "point": {
+              "$ref": "#/$defs/point"
+            },
+            "port": {
+              "enum": [
+                "auto"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "textStyle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bold": {
+          "type": "boolean"
+        },
+        "italic": {
+          "type": "boolean"
+        },
+        "underline": {
+          "type": "boolean"
+        },
+        "strikethrough": {
+          "type": "boolean"
+        },
+        "monospace": {
+          "type": "boolean"
+        },
+        "wrap": {
+          "type": "boolean"
+        },
+        "align": {
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        }
+      },
+      "required": []
+    },
+    "series": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "color": {
+          "$ref": "#/$defs/color"
+        }
+      },
+      "required": [
+        "name",
+        "values",
+        "color"
+      ]
+    },
+    "nodeChanges": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "rectangle",
+                "rounded",
+                "ellipse",
+                "diamond",
+                "triangle",
+                "right_triangle",
+                "pentagon",
+                "hexagon",
+                "octagon",
+                "plus",
+                "cross",
+                "heart",
+                "cloud",
+                "shield",
+                "drop",
+                "star",
+                "star4",
+                "star8",
+                "gear",
+                "lightning",
+                "document",
+                "data",
+                "terminator",
+                "predefined_process",
+                "internal_storage",
+                "database",
+                "trapezoid",
+                "manual_input",
+                "manual_operation",
+                "delay",
+                "display",
+                "off_page",
+                "note",
+                "arrow_right",
+                "arrow_left",
+                "arrow_down",
+                "arrow_up",
+                "double_arrow",
+                "chevron",
+                "notched_arrow",
+                "elbow_arrow",
+                "frame",
+                "swimlane",
+                "title_block",
+                "package",
+                "text",
+                "callout",
+                "brace_left",
+                "brace_right",
+                "cube",
+                "cone",
+                "pyramid",
+                "uml_class",
+                "component",
+                "actor",
+                "lifeline",
+                "fork",
+                "initial_state",
+                "final_state",
+                "use_case"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "position": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/point"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "size": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/point"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fill": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/color"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stroke": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/color"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "text_color": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/color"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stroke_width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "font_size": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "text_style": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/textStyle"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "appearance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/appearance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "edgeChanges": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "straight",
+                "elbow"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "color": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/color"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "arrow": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "arrow_start": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "waypoints": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/point"
+              },
+              "maxItems": 16
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "label_t": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "enum": [
+                "solid",
+                "dashed",
+                "dotted"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "start_head": {
+          "anyOf": [
+            {
+              "enum": [
+                "triangle",
+                "open",
+                "diamond",
+                "circle"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end_head": {
+          "anyOf": [
+            {
+              "enum": [
+                "triangle",
+                "open",
+                "diamond",
+                "circle"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "start": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/endpoint"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/endpoint"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "appearance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/appearanceLine"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "chartChanges": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "columns",
+                "stacked_columns",
+                "percent_columns",
+                "bars",
+                "stacked_bars",
+                "percent_bars",
+                "line",
+                "step_line",
+                "percent_line",
+                "area",
+                "step_area"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "position": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/point"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "size": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/point"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "categories": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "series": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/series"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "legend": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "appearanceFill": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "none",
+            "solid",
+            "linear",
+            "radial",
+            "monochrome",
+            "pattern",
+            "texture"
+          ]
+        },
+        "secondary": {
+          "$ref": "#/$defs/color"
+        },
+        "tint": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "transparency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "angle": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "pattern": {
+          "enum": [
+            "diagonal",
+            "cross",
+            "dots",
+            "horizontal"
+          ]
+        },
+        "texture": {
+          "enum": [
+            "paper",
+            "canvas",
+            "grain"
+          ]
+        },
+        "spacing": {
+          "type": "number",
+          "minimum": 4,
+          "maximum": 64
+        }
+      }
+    },
+    "appearanceLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "none",
+            "solid",
+            "linear",
+            "monochrome"
+          ]
+        },
+        "secondary": {
+          "$ref": "#/$defs/color"
+        },
+        "tint": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "transparency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "angle": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "pattern": {
+          "enum": [
+            "solid",
+            "dashed",
+            "dotted"
+          ]
+        },
+        "cap": {
+          "enum": [
+            "flat",
+            "round",
+            "square"
+          ]
+        },
+        "join": {
+          "enum": [
+            "miter",
+            "round",
+            "bevel"
+          ]
+        },
+        "compound": {
+          "enum": [
+            "single",
+            "double",
+            "triple"
+          ]
+        },
+        "corner_radius": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "start_scale": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 3
+        },
+        "end_scale": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 3
+        }
+      }
+    },
+    "appearanceShadow": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "none",
+            "outer",
+            "inner",
+            "perspective"
+          ]
+        },
+        "color": {
+          "$ref": "#/$defs/color"
+        },
+        "transparency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "scale": {
+          "type": "number",
+          "minimum": 10,
+          "maximum": 300
+        },
+        "blur": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "angle": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "offset": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -200,
+            "maximum": 200
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "appearance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fill": {
+          "$ref": "#/$defs/appearanceFill"
+        },
+        "line": {
+          "$ref": "#/$defs/appearanceLine"
+        },
+        "shadow": {
+          "$ref": "#/$defs/appearanceShadow"
+        }
+      }
+    }
+  }
+}

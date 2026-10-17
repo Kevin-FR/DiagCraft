@@ -1,0 +1,27 @@
+[package]
+name = "diagcraft-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+publish = false
+description = "Document model, geometry, exports and local automation for DiagCraft"
+
+[lib]
+name = "diagcraft"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+tempfile.workspace = true
+svg2pdf.workspace = true
+sha2.workspace = true
+pdf-writer.workspace = true
+
+[dev-dependencies]
+resvg.workspace = true
+
+[lints]
+workspace = true
