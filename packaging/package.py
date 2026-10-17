@@ -51,7 +51,10 @@ def main():
     for filename in ("COPYRIGHT.html", "COPYRIGHT-library.html"):
         shutil.copy2(sysroot / "share/doc/rust" / filename, stage / ("Rust-" + filename))
     if system == "windows":
-        with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as output:
+        # Toolchain notices can retain Unix-epoch dates, outside ZIP's range.
+        # Clamp archive timestamps while copying the file contents unchanged.
+        with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED,
+                             strict_timestamps=False) as output:
             for path in sorted(stage.rglob("*")):
                 if path.is_file():
                     output.write(path, path.relative_to(stage.parent))
