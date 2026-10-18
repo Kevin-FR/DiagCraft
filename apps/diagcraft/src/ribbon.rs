@@ -318,25 +318,11 @@ impl DrawApp {
                             .strong()
                             .color(ACCENT),
                     );
-                    if panels_ui::panel_toggle(
-                        ui,
-                        self.show_library,
-                        false,
-                        if self.show_library {
-                            "Réduire la bibliothèque"
-                        } else {
-                            "Afficher la bibliothèque"
-                        },
-                    )
-                    .clicked()
-                    {
-                        self.show_library = !self.show_library;
-                    }
                     ui.add_space(6.);
                     let mut switch = None;
                     let mut close = None;
                     egui::ScrollArea::horizontal()
-                        .max_width((ui.available_width() - 100.).max(100.))
+                        .max_width((ui.available_width() - 44.).max(100.))
                         .show(ui, |ui| {
                             ui.horizontal(|ui| {
                                 for (i, tab) in self.tabs.iter().enumerate() {
@@ -391,21 +377,6 @@ impl DrawApp {
                         .clicked()
                     {
                         self.request(Pending::New);
-                    }
-                    ui.add_space((ui.available_width() - 32.).max(0.));
-                    if panels_ui::panel_toggle(
-                        ui,
-                        self.show_inspector,
-                        true,
-                        if self.show_inspector {
-                            "Masquer les propriétés"
-                        } else {
-                            "Afficher les propriétés"
-                        },
-                    )
-                    .clicked()
-                    {
-                        self.show_inspector = !self.show_inspector;
                     }
                     if let Some(i) = switch {
                         self.switch_tab(i);

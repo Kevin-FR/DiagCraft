@@ -4,14 +4,9 @@ impl DrawApp {
     pub(super) fn library_sidebar(&mut self, ctx: &egui::Context) {
         let compact = !self.show_library;
         egui::SidePanel::left("library_rail")
-            .exact_width(48.)
+            .exact_width(panels_ui::RAIL_WIDTH)
             .resizable(false)
-            .frame(
-                egui::Frame::new()
-                    .fill(Color32::WHITE)
-                    .inner_margin(6)
-                    .stroke(Stroke::new(1., BORDER)),
-            )
+            .frame(panels_ui::frame(false, false))
             .show(ctx, |ui| {
                 let label = if compact {
                     "Afficher la bibliothèque"
@@ -112,27 +107,27 @@ impl DrawApp {
         }
         let max_width = (ctx.available_rect().width()
             - panels_ui::MIN_CANVAS
-            - if self.show_inspector { 260. } else { 0. })
+            - if self.show_inspector {
+                260.
+            } else {
+                panels_ui::RAIL_WIDTH
+            })
         .clamp(240., 400.);
         panels_ui::prepare_width(ctx, "symbol_library", self.library_width, 240., max_width);
         let panel = egui::SidePanel::left("symbol_library")
             .default_width(self.library_width)
             .width_range(240. ..=max_width)
             .resizable(true)
-            .frame(
-                egui::Frame::new()
-                    .fill(Color32::WHITE)
-                    .inner_margin(12)
-                    .stroke(Stroke::new(1., BORDER)),
-            )
+            .frame(panels_ui::frame(false, true))
             .show(ctx, |ui| {
+                ui.spacing_mut().item_spacing.y = 6.;
                 panels_ui::heading(ui, match self.library_panel {
                     LibraryPanel::Symbols => "Symboles",
                     LibraryPanel::Models => "Modèles",
                     LibraryPanel::Text => "Texte",
                     LibraryPanel::Charts => "Graphiques",
                     LibraryPanel::Projects => "Mes travaux",
-                }, &mut self.show_library, false);
+                }, None);
                 ui.add(egui::TextEdit::singleline(&mut self.symbol_search)
                     .hint_text(t("Rechercher…")).desired_width(f32::INFINITY).char_limit(120));
                 ui.add_space(8.);

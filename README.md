@@ -21,13 +21,14 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.7.0 is experimental** and adds object search and keyboard placement.
+**0.7.1 is experimental** and fixes panel controls and inspector integration.
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).
 
 ## Features
 
+- One panel toggle per side, aligned below the ribbon and available when panels are collapsed.
 - Find page objects by text, type or ID; place, edit and connect blocks with the keyboard.
 - Edit text directly inside blocks: double-click or F2/Enter, select words and use the floating formatting toolbar. Click outside to finish; Escape cancels.
 - Interface in English, French, German, Spanish, Italian, Portuguese and Simplified Chinese.

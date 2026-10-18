@@ -33,6 +33,13 @@ avec écriture atomique. Les captures et tests n’accèdent pas aux préférenc
 Les dimensions voulues restent distinctes des limites temporaires de fenêtre.
 Le moteur documentaire et son historique ne connaissent pas ces préférences.
 
+`panels_ui.rs` centralise les marges et en-têtes des volets. Le rail gauche
+contient son unique commande ; le volet droit fermé utilise un rail de 48 points
+distinct du panneau redimensionnable pour conserver la largeur préférée.
+Son bouton garde les mêmes coordonnées ouvert ou fermé. Le ruban et la barre
+des documents ne dupliquent pas ces icônes. Le corps de l’inspecteur défile
+indépendamment de son en-tête.
+
 ## Référence structurelle
 
 L’organisation de [PhotoCraft](https://github.com/storytold/photocraft) sépare

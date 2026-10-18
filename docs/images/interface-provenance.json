@@ -1,9 +1,30 @@
 [
   {
-    "file": "docs/images/interface.png",
-    "sha256": "3688c6d57a40c8d0be4ef8862555c0988a5ae12d2c4c8b01e0aba558f9515408",
-    "source": "Native DiagCraft 0.2.1 capture using its own demo and symbols; no external application artwork.",
+    "file": "docs/images/interface-en.png",
+    "sha256": "6e5aaea436c3e9a3c02bd26be86acf61de70cc8ccad097df6603db279ecabe03",
+    "source": "Native DiagCraft 0.7.1 capture using its own demo and symbols; no external application artwork.",
     "license": "MIT",
-    "command": "diagcraft --screenshot docs/images/interface.png interface"
+    "command": "diagcraft --language en --screenshot docs/images/interface-en.png interface"
+  },
+  {
+    "file": "docs/images/interface.png",
+    "sha256": "cde02e78f52255dd4e499c54441613a163d6e9e6dfb463ec645d3a3700813758",
+    "source": "Native DiagCraft 0.7.1 capture using its own demo and symbols; no external application artwork.",
+    "license": "MIT",
+    "command": "diagcraft --language fr --screenshot docs/images/interface.png interface"
+  },
+  {
+    "file": "docs/images/panels.png",
+    "sha256": "612bd12d15c4dbc8fdfd6b8aae37eee7c19543d7a34ec50e3b8bd1e0c6c33cfd",
+    "source": "Native DiagCraft 0.7.1 capture using its own demo and symbols; no external application artwork.",
+    "license": "MIT",
+    "command": "diagcraft --language fr --screenshot docs/images/panels.png volets"
+  },
+  {
+    "file": "docs/images/panels-collapsed.png",
+    "sha256": "d06a901d4445234a89f6be50931764ce6f51def0c2520409efa6e5009fe2b174",
+    "source": "Native DiagCraft 0.7.1 capture using its own demo and symbols; no external application artwork.",
+    "license": "MIT",
+    "command": "diagcraft --language fr --screenshot docs/images/panels-collapsed.png volets-fermes"
   }
 ]

@@ -273,6 +273,14 @@ impl DrawApp {
                     .unwrap_or_default();
             }
         }
+        if matches!(name, "volets" | "volets-fermes") {
+            self.show_library = name == "volets";
+            self.show_inspector = name == "volets";
+            self.library_panel = LibraryPanel::Projects;
+            self.show_quick_toolbar = false;
+            self.ribbon_tab = RibbonTab::Advanced;
+            self.ribbon_expanded = Some(name == "volets");
+        }
         match name {
             "remplissage" | "contours" | "ombres" | "ombres-prereglages" | "selection-multiple"
             | "selection-contours" | "selection-ombres" | "selection-cadre" => {
@@ -485,6 +493,9 @@ impl DrawApp {
             self.show_inspector = false;
             self.ribbon_expanded = Some(false);
             self.open_object_search();
+        }
+        if matches!(name, "volets" | "volets-fermes") {
+            self.selected.clear();
         }
     }
     fn prepare_rich_text_capture(&mut self, editor: bool) {
@@ -1315,10 +1326,10 @@ impl DrawApp {
         let before = self.doc.clone();
         let max_width = (ctx.available_rect().width() - panels_ui::MIN_CANVAS).clamp(260., 400.);
         panels_ui::prepare_width(ctx, "inspector", self.inspector_width, 260., max_width);
-        let panel = egui::SidePanel::right("inspector").default_width(self.inspector_width).width_range(260. ..=max_width).resizable(true).show_separator_line(false).frame(egui::Frame::new().fill(Color32::WHITE).inner_margin(12).stroke(Stroke::new(1.,BORDER))).show(ctx,|ui| {
+        let panel = egui::SidePanel::right("inspector").default_width(self.inspector_width).width_range(260. ..=max_width).resizable(true).frame(panels_ui::frame(true, true)).show(ctx,|ui| {
             ui.spacing_mut().item_spacing.y=6.;ui.spacing_mut().interact_size.y=30.;ui.spacing_mut().button_padding.y=5.;
-            panels_ui::heading(ui, if self.selected.is_empty() { "Document" } else { "Propriétés" }, &mut self.show_inspector, true);
-            egui::ScrollArea::vertical().show(ui,|ui| {
+            panels_ui::heading(ui, if self.selected.is_empty() { "Document" } else { "Propriétés" }, Some(&mut self.show_inspector));
+            egui::ScrollArea::vertical().id_salt("inspector_scroll").auto_shrink([false, false]).show(ui,|ui| {
                 if self.selected.len()==1 {
                     let id=self.selected[0];
                     ui.horizontal(|ui|{ui.monospace(i18n::render("page:{0} / objet:{1}", &[("0", format!("{}", self.doc.page_index)),("1", format!("{}", id))]));if ui.small_button(t("Copier")).on_hover_text(t("Référence JSON pour un agent")).clicked(){ctx.copy_text(serde_json::json!({"page":self.doc.page_index,"target":id}).to_string());}});ui.add_space(10.);
@@ -1358,18 +1369,13 @@ impl DrawApp {
                 } else if self.selected.len()>1 {
                     self.selection_inspector(ui);
                 } else {
-                    ui.label(RichText::new(t("Votre document")).size(20.).strong());
-                    ui.label(RichText::new(t("Les détails font la différence.")).size(12.).color(MUTED));ui.add_space(22.);
                     field_label(ui,"NOM DU DIAGRAMME");
-                    ui.add(egui::TextEdit::singleline(&mut self.doc.title).desired_width(f32::INFINITY).char_limit(200));
-                    ui.add_space(22.);field_label(ui,"PAGE");
+                    ui.add(egui::TextEdit::singleline(&mut self.doc.title).id(egui::Id::new("inspector_document_title")).desired_width(f32::INFINITY).char_limit(200));
+                    ui.add_space(12.);ui.separator();field_label(ui,"PAGE");
                     ui.label(format!("{} · {:.0} × {:.0} px",self.doc.page_name,self.doc.page_size[0],self.doc.page_size[1]));
                     if ui.button(t("Nom et dimensions de page…")).clicked(){self.open_page_settings();}
                     if ui.button(t("Gérer les pages…")).clicked(){self.show_pages=true;}
-                    ui.add_space(18.);
-                    ui.label(RichText::new(t("À vous de jouer")).strong().size(14.));
-                    for text in ["01   Choisissez une forme.","02   Cliquez sur la page.","03   Reliez vos idées.","04   Exportez votre diagramme."] {ui.add_space(8.);ui.label(RichText::new(t(text)).size(12.).color(MUTED));}
-                    ui.add_space(20.);
+                    ui.add_space(12.);ui.separator();
                     ui.label(RichText::new(t("Sélectionnez un objet pour modifier son texte, ses couleurs et sa taille.")).size(12.).color(MUTED));
                 }
             });

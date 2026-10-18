@@ -6,11 +6,45 @@ impl DrawApp {
         self.sidebar(ctx);
         if self.show_inspector {
             self.inspector(ctx);
+        } else {
+            egui::SidePanel::right("inspector_rail")
+                .exact_width(RAIL_WIDTH)
+                .resizable(false)
+                .frame(frame(true, false))
+                .show(ctx, |ui| {
+                    if panel_toggle(ui, false, true, "Afficher les propriétés").clicked() {
+                        self.show_inspector = true;
+                    }
+                });
         }
     }
 }
 
 pub(super) const MIN_CANVAS: f32 = 520.;
+pub(super) const RAIL_WIDTH: f32 = 48.;
+
+pub(super) fn frame(right: bool, wide: bool) -> egui::Frame {
+    egui::Frame::new()
+        .fill(Color32::WHITE)
+        .inner_margin(egui::Margin {
+            left: if wide {
+                12
+            } else if right {
+                8
+            } else {
+                6
+            },
+            right: if right {
+                8
+            } else if wide {
+                12
+            } else {
+                6
+            },
+            top: 6,
+            bottom: 6,
+        })
+}
 
 /// Restore the user's preferred width before applying temporary window limits.
 /// egui's panel memory otherwise retains the width of a shrunken window.
@@ -32,25 +66,17 @@ pub(super) fn remember_width(ctx: &egui::Context, name: &str, rect: Rect, prefer
     }
 }
 
-pub(super) fn heading(ui: &mut egui::Ui, title: &str, open: &mut bool, right: bool) {
+pub(super) fn heading(ui: &mut egui::Ui, title: &str, open: Option<&mut bool>) {
     ui.horizontal(|ui| {
+        ui.set_min_height(30.);
         ui.add(egui::Label::new(RichText::new(t(title)).size(15.).strong()).truncate());
-        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            if panel_toggle(
-                ui,
-                true,
-                right,
-                if right {
-                    "Masquer les propriétés"
-                } else {
-                    "Réduire la bibliothèque"
-                },
-            )
-            .clicked()
-            {
-                *open = false;
-            }
-        });
+        if let Some(open) = open {
+            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                if panel_toggle(ui, true, true, "Masquer les propriétés").clicked() {
+                    *open = false;
+                }
+            });
+        }
     });
     ui.separator();
 }
@@ -91,7 +117,7 @@ pub(super) fn panel_toggle(
         .add_sized([32., 30.], egui::Button::new("").selected(open))
         .on_hover_text(t(label));
     response.widget_info(|| {
-        egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), label)
+        egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), t(label))
     });
     let r = Rect::from_center_size(response.rect.center(), vec2(20., 16.));
     let color = if open { ACCENT } else { INK };

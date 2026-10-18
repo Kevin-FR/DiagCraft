@@ -2486,15 +2486,13 @@ fn panel_click(ctx: &egui::Context, app: &mut DrawApp, size: Vec2, p: Pos2) {
     panel_pointer(ctx, app, size, p, true);
     panel_pointer(ctx, app, size, p, false);
 }
-fn header_panel_icons(out: egui::FullOutput) -> Vec<Pos2> {
+fn workspace_panel_icons(out: egui::FullOutput) -> Vec<Pos2> {
     let mut result = out
         .shapes
         .into_iter()
         .filter_map(|s| {
             if let Shape::Rect(r) = s.shape {
-                ((r.rect.width() - 20.).abs() < 0.1
-                    && (r.rect.height() - 16.).abs() < 0.1
-                    && r.rect.center().y < 38.)
+                ((r.rect.width() - 20.).abs() < 0.1 && (r.rect.height() - 16.).abs() < 0.1)
                     .then_some(r.rect.center())
             } else {
                 None
@@ -2519,9 +2517,9 @@ fn default_window_hides_document_properties_and_simple_selection_keeps_them_hidd
     for _ in 0..3 {
         let out = panel_frame(&ctx, &mut app, size, vec![]);
         assert!(
-            !out.shapes
-                .iter()
-                .any(|s| matches!(&s.shape,Shape::Text(t) if t.galley.job.text=="Votre document"))
+            !out.shapes.iter().any(
+                |s| matches!(&s.shape,Shape::Text(t) if t.galley.job.text=="NOM DU DIAGRAMME")
+            )
         );
     }
     assert!(app.canvas.width() > 900.);
@@ -2541,13 +2539,13 @@ fn default_window_hides_document_properties_and_simple_selection_keeps_them_hidd
     assert_eq!(app.rich_editor.as_ref().unwrap().draft.id, id);
 }
 #[test]
-fn header_icons_collapse_and_reopen_panels_without_modifying_the_drawing() {
+fn workspace_icons_collapse_and_reopen_panels_without_modifying_the_drawing() {
     let (ctx, mut app, _) = panel_setup();
     let size = vec2(1280., 800.);
     let before = app.doc.clone();
     let mut icons = vec![];
     for _ in 0..3 {
-        icons = header_panel_icons(panel_frame(&ctx, &mut app, size, vec![]));
+        icons = workspace_panel_icons(panel_frame(&ctx, &mut app, size, vec![]));
     }
     assert_eq!(icons.len(), 2);
     let width = app.canvas.width();
@@ -2564,13 +2562,87 @@ fn header_icons_collapse_and_reopen_panels_without_modifying_the_drawing() {
     for _ in 0..3 {
         panel_frame(&ctx, &mut app, size, vec![]);
     }
-    assert!(app.canvas.width() < collapsed - 240.);
+    assert!(app.canvas.width() < collapsed - 200.);
     panel_click(&ctx, &mut app, size, icons[1]);
     assert!(!app.show_inspector);
     panel_click(&ctx, &mut app, size, icons[0]);
     assert!(app.show_library);
     assert_eq!(app.doc, before);
     assert!(!app.history.can_undo());
+}
+#[test]
+fn panel_openers_are_unique_aligned_and_stay_in_place_in_every_layout_and_language() {
+    for language in Language::ALL {
+        let (ctx, mut app, _) = panel_setup();
+        app.set_language(Some(language));
+        app.show_quick_toolbar = false;
+        let before = app.doc.clone();
+        for size in [vec2(1200., 760.), vec2(1600., 960.)] {
+            for expanded in [false, true] {
+                app.ribbon_expanded = Some(expanded);
+                let mut previous: Option<Vec<Pos2>> = None;
+                for (library, inspector) in
+                    [(true, true), (false, true), (false, false), (true, false)]
+                {
+                    app.show_library = library;
+                    app.show_inspector = inspector;
+                    let out = stable_panel(&ctx, &mut app, size);
+                    let icons = workspace_panel_icons(out);
+                    assert_eq!(icons.len(), 2, "{}", language.code());
+                    assert!((icons[0].y - icons[1].y).abs() < 1.);
+                    assert!(icons[0].x < 48. && icons[1].x > size.x - 48.);
+                    let top = egui::containers::panel::PanelState::load(
+                        &ctx,
+                        egui::Id::new("library_rail"),
+                    )
+                    .unwrap()
+                    .rect
+                    .top();
+                    assert!(icons.iter().all(|p| p.y > top && p.y < top + 32.));
+                    if let Some(previous) = previous {
+                        assert_eq!(icons, previous, "openers must not move when a panel closes");
+                    }
+                    previous = Some(icons);
+                    assert!(app.canvas.width() >= 490.);
+                    assert_eq!(app.doc, before);
+                    assert!(!app.history.can_undo());
+                }
+            }
+        }
+    }
+    i18n::activate(Language::French);
+}
+#[test]
+fn document_panel_keeps_page_actions_visible_on_a_small_screen_and_title_edits_undoable() {
+    let (ctx, mut app, _) = panel_setup();
+    let size = vec2(1200., 760.);
+    app.show_inspector = true;
+    app.ribbon_expanded = Some(true);
+    let before = app.doc.clone();
+    let out = stable_panel(&ctx, &mut app, size);
+    let page = Rect::from_min_size(
+        app.screen([0., 0.]),
+        vec2(app.doc.page_size[0], app.doc.page_size[1]) * app.zoom,
+    );
+    assert!(
+        app.canvas.contains_rect(page),
+        "page {page:?}, canvas {:?}, zoom {}",
+        app.canvas,
+        app.zoom
+    );
+    for label in ["Nom et dimensions de page…", "Gérer les pages…"] {
+        let p = ux_text(&out, label);
+        assert!(p.x > app.canvas.right() && p.y < app.canvas.bottom());
+    }
+    let title = ctx
+        .read_response(egui::Id::new("inspector_document_title"))
+        .unwrap();
+    panel_click(&ctx, &mut app, size, title.rect.center());
+    panel_frame(&ctx, &mut app, size, vec![egui::Event::Text("!".into())]);
+    assert_ne!(app.doc.title, before.title);
+    assert!(app.history.can_undo());
+    app.undo();
+    assert_eq!(app.doc, before);
 }
 #[test]
 fn compact_rail_keeps_all_five_icons_and_symbols_reopens_in_one_click() {
@@ -2616,7 +2688,7 @@ fn inspector_close_button_returns_space_and_text_edit_opens_without_reopening_it
                 && (r.rect.width() - 20.).abs() < 0.1
                 && (r.rect.height() - 16.).abs() < 0.1
                 && r.rect.center().x > size.x - 70.
-                && r.rect.center().y > app.canvas.top()
+                && r.rect.center().y > app.canvas.top() - 30.
             {
                 close = Some(r.rect.center());
             }
@@ -2637,11 +2709,11 @@ fn compact_panels_fit_small_windows_and_restore_at_larger_sizes() {
     for size in [vec2(1000., 660.), vec2(1280., 800.), vec2(1440., 960.)] {
         let mut icons = vec![];
         for _ in 0..3 {
-            icons = header_panel_icons(panel_frame(&ctx, &mut app, size, vec![]));
+            icons = workspace_panel_icons(panel_frame(&ctx, &mut app, size, vec![]));
         }
         assert_eq!(icons.len(), 2);
-        assert!(icons.iter().all(|p| p.x > 0. && p.x < size.x && p.y < 38.));
-        assert!(app.canvas.width() > 900.);
+        assert!(icons.iter().all(|p| p.x > 0. && p.x < size.x && p.y > 100.));
+        assert!(app.canvas.width() > size.x - 140.);
         assert!(app.canvas.height() > 330.);
         assert!(app.canvas.bottom() < size.y);
     }
@@ -3172,6 +3244,7 @@ fn shadow_offsets_can_be_reached_by_scrolling_the_small_screen_inspector() {
     for _ in 0..3 {
         panel_frame(&ctx, &mut app, size, vec![]);
     }
+    let openers = workspace_panel_icons(stable_panel(&ctx, &mut app, size));
     let pan = app.pan;
     panel_frame(
         &ctx,
@@ -3191,6 +3264,17 @@ fn shadow_offsets_can_be_reached_by_scrolling_the_small_screen_inspector() {
     assert_eq!(app.doc, before);
     assert_eq!(app.pan, pan);
     assert!(!app.history.can_undo());
+    assert_eq!(
+        workspace_panel_icons(stable_panel(&ctx, &mut app, size)),
+        openers
+    );
+    panel_click(&ctx, &mut app, size, openers[1]);
+    assert!(
+        !app.show_inspector,
+        "the pinned header remains reachable after scrolling"
+    );
+    assert_eq!(app.selected, vec![id]);
+    assert_eq!(app.doc, before);
 }
 
 fn multi_style_setup() -> (egui::Context, DrawApp, [u64; 2]) {

@@ -15,14 +15,25 @@ restent accessibles par défilement horizontal.
 ## Garder de la place pour dessiner
 
 - Glisser le bord intérieur d’un volet pour le redimensionner.
-- Le bouton dans son en-tête le réduit. Les icônes de la barre supérieure et le
-  rail gauche permettent de le rouvrir immédiatement.
+- Une seule icône par côté, sous le ruban au bord de la zone de travail, ouvre
+  ou réduit le volet. À gauche, elle reste dans le rail de navigation ; à droite,
+  elle conserve exactement sa position quand les propriétés sont fermées.
+  La barre des documents ne contient plus de commandes de volet.
 - Les largeurs choisies sont temporairement limitées sur une petite fenêtre pour
   conserver au moins environ 490 points de dessin, règles comprises, à 1200 points
   de largeur avec les deux volets. Elles sont restaurées quand on agrandit la fenêtre.
 - Les propriétés du document restent masquées au premier lancement. Un simple
   clic sur un objet les laisse masquées ; le double-clic demande explicitement
   l’édition du texte.
+
+Les deux en-têtes partagent leurs marges et leurs séparateurs. Le contenu des
+propriétés défile sous l’en-tête : le bouton de fermeture reste toujours visible.
+Sans sélection, le volet présente directement le nom du document, les dimensions
+de la page et le gestionnaire multipage, sans longue introduction.
+
+![Document et volets ouverts](images/panels.png)
+
+![Commandes accessibles avec les volets fermés](images/panels-collapsed.png)
 
 La visibilité, les largeurs, l’onglet actif et le mode du ruban sont mémorisés à
 la fermeture normale dans `interface-v1.json`, près de la bibliothèque locale.

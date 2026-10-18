@@ -21,13 +21,14 @@ Le applicazioni e le relative somme di controllo SHA-256 sono disponibili nella
 | Windows x86_64 | ZIP portatile con applicazione e CLI |
 | Linux x86_64 | Pacchetto `.deb` per amd64 o archivio `.tar.gz`, con applicazione e CLI |
 
-**0.7.0 è sperimentale** e aggiunge la ricerca di oggetti e il posizionamento tramite tastiera.
+**0.7.1 è sperimentale** e corregge i controlli dei pannelli e l’integrazione delle proprietà.
 Il pacchetto Mac ha una firma ad hoc e non è stato autenticato da Apple tramite
 notarizzazione. I pacchetti Windows non sono firmati con un certificato dell’editore.
 Consulta la [guida all’installazione](../installation.md).
 
 ## Funzionalità
 
+- Un solo pulsante per pannello, allineato sotto la barra multifunzione e accessibile anche a pannello chiuso.
 - Cerca oggetti nella pagina per testo, tipo o identificatore; inserisci, modifica e collega blocchi tramite tastiera.
 - Modifica il testo direttamente nei blocchi: doppio clic o F2/Invio, selezione delle parole e barra di formattazione mobile. Un clic all’esterno conferma; Escape annulla.
 - Interfaccia in inglese, francese, tedesco, spagnolo, italiano, portoghese e cinese semplificato.

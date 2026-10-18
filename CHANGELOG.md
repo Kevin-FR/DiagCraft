@@ -3,6 +3,17 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.7.1 — volets intégrés à la feuille
+
+- Une seule icône par côté, alignée sous le ruban ; suppression des doublons dans la barre des documents et la bibliothèque.
+- Réouverture du volet droit au même emplacement, même lorsqu’il est fermé.
+- En-têtes, marges et séparateurs communs ; propriétés défilantes avec fermeture toujours accessible.
+- Document compact : nom, page et gestionnaire directement accessibles, sans introduction encombrante.
+- Largeurs mémorisées, sélection et historique conservés ; libellés des icônes d’accessibilité localisés.
+- Tests des quatre combinaisons de volets, deux tailles de fenêtre, deux états du ruban et sept langues.
+
+Le format `.draw` reste **v7**, l’API agents **v1**. Aucune dépendance ajoutée.
+
 ## 0.7.0 — retrouver les objets et dessiner au clavier
 
 - Recherche temporaire des objets de la page avec ⌘F / Ctrl+F, Affichage ou la palette.
