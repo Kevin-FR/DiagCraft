@@ -3,6 +3,19 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.7.2 — placement précis au clavier
+
+- Flèches de 1 px et Maj + flèches de 10 px, indépendantes du zoom et du magnétisme.
+- Translation commune aux blocs, graphiques, tracés et liens libres sélectionnés : les écarts et longueurs sont conservés aux bords de page.
+- Maintenir une touche produit une seule annulation ; Échap ou Ctrl/⌘ Z annule le geste en gardant la sélection et les modifications précédentes.
+- Déplacements hors page corrigés sans saut sur un autre axe ; limites globales des coordonnées respectées.
+- Indicateur compact de déplacement ΔX/ΔY et message de fin explicite, traduits dans les sept langues.
+- Quatre commandes de placement dans la palette et l’aide clavier ; champs de texte et modales gardent leurs flèches.
+- Validation avant enregistrement, changement de document, clic ou perte de focus ; répétitions bloquées jusqu’au relâchement après interruption.
+- Récupération automatique différée pendant le geste ; treize nouveaux tests de non-régression.
+
+Le format `.draw` reste **v7**, l’API agents **v1**. Aucune dépendance ajoutée.
+
 ## 0.7.1 — volets intégrés à la feuille
 
 - Une seule icône par côté, alignée sous le ruban ; suppression des doublons dans la barre des documents et la bibliothèque.

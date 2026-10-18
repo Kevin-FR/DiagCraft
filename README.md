@@ -21,13 +21,14 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.7.1 is experimental** and fixes panel controls and inspector integration.
+**0.7.2 is experimental** and improves precise keyboard placement.
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).
 
 ## Features
 
+- Arrow keys move by 1 px, Shift by 10 px; a held key makes one cancellable move and keeps selected objects together.
 - One panel toggle per side, aligned below the ribbon and available when panels are collapsed.
 - Find page objects by text, type or ID; place, edit and connect blocks with the keyboard.
 - Edit text directly inside blocks: double-click or F2/Enter, select words and use the floating formatting toolbar. Click outside to finish; Escape cancels.

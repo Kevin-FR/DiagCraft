@@ -149,6 +149,9 @@ impl DrawApp {
     }
 
     pub(super) fn begin_edit_drag(&mut self) {
+        if self.keyboard_move.is_some() {
+            self.commit();
+        }
         // Flush previous edits without growing an automatic page just because
         // an object was pressed. Cancellation preserves the redo branch too.
         self.history.record(&self.doc);
@@ -326,6 +329,7 @@ impl DrawApp {
             }
             Some(Drag::Waypoint { .. }) => "Déplacer le coude · ⌥ : libre · Échap : annuler".into(),
             Some(Drag::DrawPath { .. }) => "Dessiner le tracé · Échap : annuler".into(),
+            _ if self.keyboard_move.is_some() => self.keyboard_move_hint().unwrap(),
             _ => return,
         };
         let mut p = p.clone();

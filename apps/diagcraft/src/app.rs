@@ -238,6 +238,8 @@ pub struct DrawApp {
     styled_cache: appearance_ui::SharedCache,
     property_edit: bool,
     drag_snapshot: Option<gestures_ui::DragSnapshot>,
+    keyboard_move: Option<keyboard_ui::Move>,
+    keyboard_move_cancelled: bool,
     move_guides: Vec<alignment_ui::Guide>,
     capture_alignment: bool,
 }
@@ -496,6 +498,9 @@ impl DrawApp {
         }
         if matches!(name, "volets" | "volets-fermes") {
             self.selected.clear();
+        }
+        if name == "placement-clavier" {
+            self.prepare_keyboard_capture();
         }
     }
     fn prepare_rich_text_capture(&mut self, editor: bool) {
@@ -798,6 +803,8 @@ impl DrawApp {
             styled_cache: Default::default(),
             property_edit: false,
             drag_snapshot: None,
+            keyboard_move: None,
+            keyboard_move_cancelled: false,
             move_guides: vec![],
             capture_alignment: false,
         };
@@ -814,6 +821,7 @@ impl DrawApp {
         self.recovered || self.doc != self.saved
     }
     fn commit(&mut self) {
+        let keyboard_move = self.keyboard_move.take();
         if self.drag_snapshot.take().is_some() {
             self.drag = None;
             self.move_guides.clear();
@@ -824,9 +832,18 @@ impl DrawApp {
         self.doc.grow_page_to_content();
         self.history.record(&self.doc);
         self.property_edit = false;
+        if let Some(movement) = keyboard_move {
+            self.status = if movement.changed(&self.doc) {
+                "Déplacement terminé · Ctrl/⌘ Z pour annuler"
+            } else {
+                "Position d’origine retrouvée"
+            }
+            .into();
+        }
     }
     fn finish_frame_edit(&mut self, ctx: &egui::Context, before: &Document) {
         if self.drag.is_none()
+            && self.keyboard_move.is_none()
             && (self.property_edit || self.doc != *before)
             && !(self.property_edit && ctx.input(|i| i.pointer.primary_down() && i.focused))
         {
@@ -1046,6 +1063,8 @@ impl DrawApp {
         }
     }
     fn replace(&mut self, doc: Document, path: Option<PathBuf>) {
+        self.keyboard_move = None;
+        self.keyboard_move_cancelled = false;
         self.property_edit = false;
         self.drag_snapshot = None;
         self.context_open = false;
@@ -1177,6 +1196,9 @@ impl DrawApp {
         self.fit_next = s.fit_next;
     }
     fn shortcuts(&mut self, ctx: &egui::Context) {
+        if self.keyboard_move_shortcuts(ctx) {
+            return;
+        }
         if self.rich_editor.is_some() {
             self.inline_text_shortcuts(ctx);
             if self.rich_editor.is_some() {
@@ -1247,68 +1269,13 @@ impl DrawApp {
             self.paste_position = None;
             return;
         }
-        let shift = ctx.input(|i| i.modifiers.shift);
-        if !ctx.input(|i| i.modifiers.command || i.modifiers.ctrl || i.modifiers.alt) {
-            if ctx.input(|i| i.key_pressed(Key::Escape)) {
-                self.set_tool(Tool::Select);
-                self.format_brush = None;
-                self.edge_brush = None;
-                self.selected.clear();
-            }
-            let step = if shift { 10. } else { 1. };
-            let mut delta = [0., 0.];
-            for (key, x, y) in [
-                (Key::ArrowLeft, -step, 0.),
-                (Key::ArrowRight, step, 0.),
-                (Key::ArrowUp, 0., -step),
-                (Key::ArrowDown, 0., step),
-            ] {
-                if ctx.input(|i| i.key_pressed(key)) {
-                    delta[0] += x;
-                    delta[1] += y;
-                }
-            }
-            if delta != [0., 0.] {
-                let page = self.doc.edit_bounds();
-                for n in &mut self.doc.nodes {
-                    if self.selected.contains(&n.id) {
-                        n.position[0] =
-                            (n.position[0] + delta[0]).clamp(0., (page[0] - n.size[0]).max(0.));
-                        n.position[1] =
-                            (n.position[1] + delta[1]).clamp(0., (page[1] - n.size[1]).max(0.));
-                    }
-                }
-                for c in &mut self.doc.charts {
-                    if self.selected.contains(&c.id) {
-                        for a in 0..2 {
-                            c.position[a] =
-                                (c.position[a] + delta[a]).clamp(0., (page[a] - c.size[a]).max(0.));
-                        }
-                    }
-                }
-                for e in &mut self.doc.connectors {
-                    if self.selected.contains(&e.id) && (e.from == 0 || e.to == 0) {
-                        for p in [&mut e.free_start, &mut e.free_end]
-                            .into_iter()
-                            .flatten()
-                            .chain(e.waypoints.iter_mut())
-                        {
-                            for a in 0..2 {
-                                p[a] = (p[a] + delta[a]).clamp(-100_000., 100_000.);
-                            }
-                        }
-                    }
-                }
-                for d in &mut self.doc.drawings {
-                    if self.selected.contains(&d.id) {
-                        for p in [&mut d.start, &mut d.end] {
-                            p[0] = (p[0] + delta[0]).clamp(-100_000., 100_000.);
-                            p[1] = (p[1] + delta[1]).clamp(-100_000., 100_000.);
-                        }
-                    }
-                }
-                self.commit();
-            }
+        if !ctx.input(|i| i.modifiers.command || i.modifiers.ctrl || i.modifiers.alt)
+            && ctx.input(|i| i.key_pressed(Key::Escape))
+        {
+            self.set_tool(Tool::Select);
+            self.format_brush = None;
+            self.edge_brush = None;
+            self.selected.clear();
         }
         for event in ctx.input(|i| i.events.clone()) {
             if let egui::Event::Paste(text) = event {
@@ -2679,6 +2646,8 @@ mod alignment_ui;
 
 #[path = "gestures_ui.rs"]
 mod gestures_ui;
+#[path = "keyboard_ui.rs"]
+mod keyboard_ui;
 
 #[path = "commands_ui.rs"]
 mod commands_ui;

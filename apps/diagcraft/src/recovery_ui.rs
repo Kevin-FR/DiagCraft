@@ -130,6 +130,7 @@ impl DrawApp {
         }
         // A partial pointer gesture must never replace the last committed drawing.
         if self.drag.is_none()
+            && self.keyboard_move.is_none()
             && !self.property_edit
             && (self.recovery.force || self.recovery.last_attempt.elapsed() >= recovery::INTERVAL)
             && self
@@ -310,6 +311,58 @@ mod tests {
         while recovery::scan(root).unwrap().is_empty() {
             assert!(Instant::now() < deadline);
             std::thread::sleep(Duration::from_millis(10));
+        }
+    }
+
+    #[test]
+    fn recovery_waits_for_keyboard_motion_and_never_saves_a_cancelled_draft() {
+        for cancel in [false, true] {
+            let root = tempfile::tempdir().unwrap();
+            let (ctx, mut app) = app();
+            let id = app.doc.add_node(ShapeKind::Rounded, [250., 250.]);
+            app.selected = vec![id];
+            app.commit();
+            let before = app.doc.clone();
+            app.start_recovery(root.path());
+            app.nudge_selection([10., 0.], true);
+            let moved = app.doc.clone();
+            app.recovery.force = true;
+            app.tick_recovery(&ctx);
+            assert_eq!(app.recovery.serial, 0);
+            if cancel {
+                let _ = ctx.run(
+                    egui::RawInput {
+                        events: vec![egui::Event::Key {
+                            key: Key::Escape,
+                            physical_key: None,
+                            pressed: true,
+                            repeat: false,
+                            modifiers: egui::Modifiers::NONE,
+                        }],
+                        ..Default::default()
+                    },
+                    |ctx| app.shortcuts(ctx),
+                );
+            } else {
+                app.commit();
+            }
+            app.tick_recovery(&ctx);
+            wait(&mut app, &ctx);
+            assert_eq!(app.recovery.serial, 1);
+            drop(app.recovery.worker.take());
+            let deadline = Instant::now() + Duration::from_secs(5);
+            let candidates = loop {
+                let candidates = recovery::scan(root.path()).unwrap();
+                if !candidates.is_empty() {
+                    break candidates;
+                }
+                assert!(Instant::now() < deadline);
+                std::thread::sleep(Duration::from_millis(10));
+            };
+            assert_eq!(
+                candidates[0].snapshot.as_ref().unwrap().copies[0].document,
+                if cancel { before } else { moved }
+            );
         }
     }
 

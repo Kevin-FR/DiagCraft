@@ -1,0 +1,9 @@
+[
+  {
+    "file": "docs/images/keyboard-placement.png",
+    "sha256": "ff737c160d97302009bd251f363574cccbdfb0a8d3853d6d293f2f1d2bc9477c",
+    "source": "Native DiagCraft 0.7.2 capture using its own demo and synthetic keyboard gesture; no external application artwork.",
+    "license": "MIT",
+    "command": "diagcraft --language fr --screenshot docs/images/keyboard-placement.png placement-clavier"
+  }
+]

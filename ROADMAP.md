@@ -15,6 +15,8 @@ travaux prévus, sans promesse de date.
 
 ## Prochaine étape — stabilité et prise en main
 
+- [x] Placement précis au clavier : translation commune, geste continu annulable, indicateur et commandes dans l’aide (0.7.2).
+
 - [x] Une seule commande par volet au niveau de la feuille, position stable fermé/ouvert et propriétés de document compactes (0.7.1).
 
 - [x] Recherche des objets de la page par texte, type et ID, sélection additive et navigation vers les objets hors écran (0.7.0).

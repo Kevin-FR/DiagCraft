@@ -1,5 +1,669 @@
 use super::*;
 
+fn nudge_key(key: Key, pressed: bool, repeat: bool, modifiers: egui::Modifiers) -> egui::Event {
+    egui::Event::Key {
+        key,
+        physical_key: Some(key),
+        pressed,
+        repeat,
+        modifiers,
+    }
+}
+
+fn nudge_setup() -> (egui::Context, DrawApp, u64) {
+    let (ctx, mut app, id) = panel_setup();
+    app.selected = vec![id];
+    app.show_library = false;
+    app.show_quick_toolbar = false;
+    app.ribbon_expanded = Some(false);
+    stable_panel(&ctx, &mut app, vec2(1200., 760.));
+    (ctx, app, id)
+}
+
+#[test]
+fn held_arrows_and_shift_translate_precisely_in_one_undo_after_release() {
+    let (ctx, mut app, id) = nudge_setup();
+    let before = app.doc.clone();
+    for repeat in [false, true, true] {
+        panel_frame(
+            &ctx,
+            &mut app,
+            vec2(1200., 760.),
+            vec![nudge_key(
+                Key::ArrowRight,
+                true,
+                repeat,
+                egui::Modifiers::NONE,
+            )],
+        );
+    }
+    panel_frame(
+        &ctx,
+        &mut app,
+        vec2(1200., 760.),
+        vec![nudge_key(
+            Key::ArrowDown,
+            true,
+            false,
+            egui::Modifiers::SHIFT,
+        )],
+    );
+    let old = before.node(id).unwrap().position;
+    assert_eq!(
+        app.doc.node(id).unwrap().position,
+        [old[0] + 3., old[1] + 10.]
+    );
+    assert!(app.keyboard_move.is_some());
+    assert!(!app.history.can_undo());
+    panel_frame(
+        &ctx,
+        &mut app,
+        vec2(1200., 760.),
+        vec![
+            nudge_key(Key::ArrowRight, false, false, egui::Modifiers::NONE),
+            nudge_key(Key::ArrowDown, false, false, egui::Modifiers::NONE),
+        ],
+    );
+    assert!(app.keyboard_move.is_none());
+    let moved = app.doc.clone();
+    app.undo();
+    assert_eq!(app.doc, before);
+    assert!(!app.history.can_undo());
+    app.redo();
+    assert_eq!(app.doc, moved);
+}
+
+#[test]
+fn cancelling_keyboard_motion_preserves_selection_prior_edits_and_the_redo_branch() {
+    for cancel in [Key::Escape, Key::Z] {
+        let (ctx, mut app, id) = nudge_setup();
+        app.doc.title = "Earlier unsaved edit".into();
+        app.commit();
+        let before = app.doc.clone();
+        app.doc.title = "A redo step".into();
+        app.commit();
+        app.undo();
+        app.selected = vec![id];
+        let size = vec2(1200., 760.);
+        panel_frame(
+            &ctx,
+            &mut app,
+            size,
+            vec![nudge_key(
+                Key::ArrowRight,
+                true,
+                false,
+                egui::Modifiers::SHIFT,
+            )],
+        );
+        panel_frame(
+            &ctx,
+            &mut app,
+            size,
+            vec![nudge_key(
+                cancel,
+                true,
+                false,
+                if cancel == Key::Z {
+                    egui::Modifiers::COMMAND
+                } else {
+                    egui::Modifiers::SHIFT
+                },
+            )],
+        );
+        assert_eq!(app.doc, before);
+        assert_eq!(app.selected, vec![id]);
+        assert!(app.history.can_redo());
+        panel_frame(
+            &ctx,
+            &mut app,
+            size,
+            vec![nudge_key(
+                Key::ArrowRight,
+                true,
+                true,
+                egui::Modifiers::NONE,
+            )],
+        );
+        assert_eq!(
+            app.doc, before,
+            "a cancelled held key must not restart the gesture"
+        );
+        panel_frame(
+            &ctx,
+            &mut app,
+            size,
+            vec![
+                nudge_key(Key::ArrowRight, false, false, egui::Modifiers::NONE),
+                nudge_key(cancel, false, false, egui::Modifiers::NONE),
+            ],
+        );
+        app.redo();
+        assert_eq!(app.doc.title, "A redo step");
+    }
+}
+
+#[test]
+fn keyboard_translation_keeps_a_mixed_selection_and_attached_routes_together_at_page_edges() {
+    let (ctx, mut app, a) = nudge_setup();
+    app.doc.page_size = [1000., 700.];
+    app.doc.node_mut(a).unwrap().position = [5., 100.];
+    app.doc.node_mut(a).unwrap().size = [100., 60.];
+    let b = app.doc.add_node(ShapeKind::Rectangle, [400., 300.]);
+    let c = app.doc.add_chart(ChartKind::Columns, [400., 400.]);
+    let d = app
+        .doc
+        .add_drawing(DrawingKind::Bezier, [200., 400.], [300., 450.]);
+    let edge = app
+        .doc
+        .connect_endpoints(a, 0, None, Some([800., 500.]), ConnectorKind::Elbow)
+        .unwrap();
+    app.doc.connect(a, b, ConnectorKind::Straight).unwrap();
+    app.selected = vec![a, b, c, d, edge];
+    app.commit();
+    let before = app.doc.clone();
+    panel_frame(
+        &ctx,
+        &mut app,
+        vec2(1200., 760.),
+        vec![nudge_key(
+            Key::ArrowLeft,
+            true,
+            false,
+            egui::Modifiers::SHIFT,
+        )],
+    );
+    for (old, new) in before.nodes.iter().zip(&app.doc.nodes) {
+        assert_eq!(new.position, [old.position[0] - 5., old.position[1]]);
+        assert_eq!(new.text, old.text);
+    }
+    assert_eq!(
+        app.doc.charts[0].position[0],
+        before.charts[0].position[0] - 5.
+    );
+    assert_eq!(
+        app.doc.drawings[0].start[0],
+        before.drawings[0].start[0] - 5.
+    );
+    assert_eq!(app.doc.drawings[0].end[0], before.drawings[0].end[0] - 5.);
+    assert_eq!(app.doc.connectors[0].free_end.unwrap()[0], 795.);
+    for (old, new) in before
+        .route(&before.connectors[1])
+        .iter()
+        .zip(app.doc.route(&app.doc.connectors[1]))
+    {
+        assert_eq!(new, [old[0] - 5., old[1]]);
+    }
+    app.doc.validate().unwrap();
+    panel_frame(
+        &ctx,
+        &mut app,
+        vec2(1200., 760.),
+        vec![nudge_key(
+            Key::ArrowLeft,
+            false,
+            false,
+            egui::Modifiers::NONE,
+        )],
+    );
+    app.undo();
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn keyboard_movement_never_teleports_imported_off_page_objects_on_the_other_axis() {
+    let (ctx, mut app, id) = nudge_setup();
+    app.doc.node_mut(id).unwrap().position = [-100., 100000.];
+    app.commit();
+    app.run_command(commands_ui::Command::NudgeRight, &ctx);
+    assert_eq!(app.doc.node(id).unwrap().position, [-99., 100000.]);
+    app.run_command(commands_ui::Command::NudgeLeft, &ctx);
+    assert_eq!(app.doc.node(id).unwrap().position, [-99., 100000.]);
+    app.run_command(commands_ui::Command::NudgeUp, &ctx);
+    assert_eq!(app.doc.node(id).unwrap().position, [-99., 99999.]);
+    app.doc.validate().unwrap();
+}
+
+#[test]
+fn keyboard_movement_clamps_free_geometry_as_a_whole_and_does_not_record_a_blocked_move() {
+    let (ctx, mut app, _) = nudge_setup();
+    let id = app
+        .doc
+        .add_drawing(DrawingKind::Line, [99998.5, 20.], [99999.5, 30.]);
+    app.selected = vec![id];
+    app.commit();
+    let before = app.doc.clone();
+    let size = vec2(1200., 760.);
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![nudge_key(
+            Key::ArrowRight,
+            true,
+            false,
+            egui::Modifiers::SHIFT,
+        )],
+    );
+    assert_eq!(app.doc.drawings[0].start, [99999., 20.]);
+    assert_eq!(app.doc.drawings[0].end, [100000., 30.]);
+    assert!(app.keyboard_move_hint().unwrap().contains("0.5"));
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![nudge_key(
+            Key::ArrowRight,
+            false,
+            false,
+            egui::Modifiers::NONE,
+        )],
+    );
+    let moved = app.doc.clone();
+    app.run_command(commands_ui::Command::NudgeRight, &ctx);
+    assert_eq!(app.doc, moved);
+    assert!(app.keyboard_move.is_none());
+    app.undo();
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn saving_or_switching_tabs_finishes_keyboard_motion_before_another_document_can_be_cancelled() {
+    for action in ["save", "tab", "focus"] {
+        let (ctx, mut app, _) = nudge_setup();
+        let before = app.doc.clone();
+        let size = vec2(1200., 760.);
+        panel_frame(
+            &ctx,
+            &mut app,
+            size,
+            vec![nudge_key(
+                Key::ArrowDown,
+                true,
+                false,
+                egui::Modifiers::NONE,
+            )],
+        );
+        let moved = app.doc.clone();
+        let directory = tempfile::tempdir().unwrap();
+        match action {
+            "save" => {
+                let p = directory.path().join("moved.draw");
+                assert!(app.save_to(p.clone()));
+                assert_eq!(Document::load(&p).unwrap(), moved);
+            }
+            "tab" => {
+                app.open_tab(Document::default(), None);
+                let other = app.doc.clone();
+                panel_frame(
+                    &ctx,
+                    &mut app,
+                    size,
+                    vec![nudge_key(Key::Escape, true, false, egui::Modifiers::NONE)],
+                );
+                assert_eq!(app.doc, other);
+                app.switch_tab(0);
+            }
+            _ => {
+                panel_frame(
+                    &ctx,
+                    &mut app,
+                    size,
+                    vec![egui::Event::WindowFocused(false)],
+                );
+            }
+        }
+        assert!(app.keyboard_move.is_none());
+        assert_eq!(app.doc, moved);
+        app.undo();
+        assert_eq!(app.doc, before);
+    }
+}
+
+#[test]
+fn keyboard_motion_does_not_steal_arrows_from_text_or_dialogs_and_attached_links_explain_unavailability()
+ {
+    let (ctx, mut app, id) = nudge_setup();
+    let size = vec2(1200., 760.);
+    let before = app.doc.clone();
+    app.open_node_text(id);
+    panel_frame(&ctx, &mut app, size, vec![]);
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![nudge_key(
+            Key::ArrowRight,
+            true,
+            false,
+            egui::Modifiers::NONE,
+        )],
+    );
+    assert_eq!(app.doc, before);
+    assert!(app.keyboard_move.is_none());
+    app.rich_editor = None;
+    app.settings.open = true;
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![nudge_key(
+            Key::ArrowRight,
+            true,
+            true,
+            egui::Modifiers::NONE,
+        )],
+    );
+    assert_eq!(app.doc, before);
+    let b = app.doc.add_node(ShapeKind::Rectangle, [700., 500.]);
+    let e = app.doc.connect(id, b, ConnectorKind::Straight).unwrap();
+    app.selected = vec![e];
+    assert!(
+        app.command_unavailable(commands_ui::Command::NudgeRight)
+            .is_some()
+    );
+}
+
+#[test]
+fn keyboard_movement_hint_fits_small_canvases_in_seven_languages() {
+    for language in Language::ALL {
+        let (ctx, mut app, _) = nudge_setup();
+        app.set_language(Some(language));
+        app.show_library = true;
+        app.show_inspector = true;
+        let size = vec2(1200., 760.);
+        stable_panel(&ctx, &mut app, size);
+        let out = panel_frame(
+            &ctx,
+            &mut app,
+            size,
+            vec![nudge_key(
+                Key::ArrowRight,
+                true,
+                false,
+                egui::Modifiers::NONE,
+            )],
+        );
+        let hint = out
+            .shapes
+            .iter()
+            .find_map(|s| match &s.shape {
+                Shape::Text(t) if t.galley.job.text.contains("ΔX") => {
+                    Some((s.clip_rect, Rect::from_min_size(t.pos, t.galley.size())))
+                }
+                _ => None,
+            })
+            .unwrap();
+        assert!(hint.0.contains_rect(hint.1));
+        assert!(app.canvas.contains_rect(hint.1));
+        assert!(hint.1.bottom() < app.canvas.bottom() - 65.);
+    }
+    i18n::activate(Language::French);
+}
+
+#[test]
+fn pointer_selection_finishes_keyboard_motion_and_held_repeats_do_not_move_the_next_block() {
+    let (ctx, mut app, _) = nudge_setup();
+    let other = app.doc.add_node(ShapeKind::Rectangle, [220., 220.]);
+    app.commit();
+    let before = app.doc.clone();
+    let size = vec2(1200., 760.);
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![nudge_key(
+            Key::ArrowRight,
+            true,
+            false,
+            egui::Modifiers::NONE,
+        )],
+    );
+    let pos = app.screen(app.doc.node(other).unwrap().center());
+    panel_click(&ctx, &mut app, size, pos);
+    assert_eq!(app.selected, vec![other]);
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![nudge_key(
+            Key::ArrowRight,
+            true,
+            true,
+            egui::Modifiers::NONE,
+        )],
+    );
+    assert_eq!(app.doc.node(other), before.node(other));
+    assert!(app.keyboard_move.is_none());
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![
+            nudge_key(Key::ArrowRight, true, true, egui::Modifiers::NONE),
+            nudge_key(Key::T, true, false, egui::Modifiers::NONE),
+        ],
+    );
+    assert!(
+        app.tool == Tool::Shape(ShapeKind::Text),
+        "a suppressed repeat must not swallow another shortcut in the same frame"
+    );
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![nudge_key(
+            Key::ArrowRight,
+            false,
+            false,
+            egui::Modifiers::NONE,
+        )],
+    );
+    app.undo();
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn keyboard_placement_commands_are_searchable_in_help_and_palette_and_discrete_invocation_commits()
+{
+    let (ctx, mut app, id) = nudge_setup();
+    let before = app.doc.clone();
+    app.run_command(commands_ui::Command::NudgeRight, &ctx);
+    assert!(app.keyboard_move.is_none());
+    assert!(app.history.can_undo());
+    app.undo();
+    assert_eq!(app.doc, before);
+    app.run_command(commands_ui::Command::Help, &ctx);
+    app.help_state.query = "placement".into();
+    command_frame(&ctx, &mut app, vec![], egui::Modifiers::NONE);
+    command_frame(&ctx, &mut app, vec![], egui::Modifiers::NONE);
+    let out = command_frame(&ctx, &mut app, vec![], egui::Modifiers::NONE);
+    ux_text(&out, "Déplacer la sélection à droite");
+    let shortcut = ctx.format_shortcut(&egui::KeyboardShortcut::new(
+        egui::Modifiers::SHIFT,
+        Key::ArrowRight,
+    ));
+    assert!(
+        out.shapes
+            .iter()
+            .any(|s| matches!(&s.shape,Shape::Text(t) if t.galley.job.text.contains(&shortcut)))
+    );
+    app.show_help = false;
+    app.selected = vec![id];
+    app.open_command_palette();
+    app.command_palette.query = "déplacer gauche".into();
+    command_frame(&ctx, &mut app, vec![], egui::Modifiers::NONE);
+    command_frame(&ctx, &mut app, vec![], egui::Modifiers::NONE);
+    let out = command_frame(&ctx, &mut app, vec![], egui::Modifiers::NONE);
+    assert!(out.shapes.iter().any(|s| matches!(&s.shape,Shape::Text(t) if t.galley.job.text.starts_with("Déplacer la sélection à gauche\n"))));
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::Enter, egui::Modifiers::NONE)],
+        egui::Modifiers::NONE,
+    );
+    assert!(!app.command_palette.open && app.keyboard_move.is_none());
+    assert_eq!(
+        app.doc.node(id).unwrap().position[0],
+        before.node(id).unwrap().position[0] - 1.
+    );
+    app.undo();
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn separate_arrow_presses_have_separate_undo_steps_and_returning_to_origin_preserves_redo() {
+    let (ctx, mut app, _) = nudge_setup();
+    let before = app.doc.clone();
+    let size = vec2(1200., 760.);
+    for _ in 0..2 {
+        panel_frame(
+            &ctx,
+            &mut app,
+            size,
+            vec![nudge_key(
+                Key::ArrowRight,
+                true,
+                false,
+                egui::Modifiers::NONE,
+            )],
+        );
+        panel_frame(
+            &ctx,
+            &mut app,
+            size,
+            vec![nudge_key(
+                Key::ArrowRight,
+                false,
+                false,
+                egui::Modifiers::NONE,
+            )],
+        );
+    }
+    app.undo();
+    assert_ne!(app.doc, before);
+    app.undo();
+    assert_eq!(app.doc, before);
+    app.selected = vec![app.doc.nodes[0].id];
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![nudge_key(
+            Key::ArrowRight,
+            true,
+            false,
+            egui::Modifiers::NONE,
+        )],
+    );
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![nudge_key(
+            Key::ArrowLeft,
+            true,
+            false,
+            egui::Modifiers::NONE,
+        )],
+    );
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![
+            nudge_key(Key::ArrowRight, false, false, egui::Modifiers::NONE),
+            nudge_key(Key::ArrowLeft, false, false, egui::Modifiers::NONE),
+        ],
+    );
+    assert_eq!(app.doc, before);
+    assert!(app.history.can_redo());
+    assert_eq!(app.status, "Position d’origine retrouvée");
+
+    let (ctx, mut app, _) = nudge_setup();
+    let before = app.doc.clone();
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![nudge_key(
+            Key::ArrowRight,
+            true,
+            false,
+            egui::Modifiers::NONE,
+        )],
+    );
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![
+            nudge_key(Key::ArrowRight, false, false, egui::Modifiers::NONE),
+            nudge_key(Key::ArrowRight, true, false, egui::Modifiers::NONE),
+        ],
+    );
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![nudge_key(
+            Key::ArrowRight,
+            false,
+            false,
+            egui::Modifiers::NONE,
+        )],
+    );
+    app.undo();
+    assert_ne!(
+        app.doc, before,
+        "two physical presses stay distinct even within one frame"
+    );
+    app.undo();
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn keyboard_move_grows_an_automatic_page_only_on_commit_and_undo_restores_its_size() {
+    let (ctx, mut app, id) = nudge_setup();
+    app.doc.page_size = [400., 300.];
+    app.doc.page_layout.auto_size = true;
+    let node = app.doc.node_mut(id).unwrap();
+    node.position = [290., 200.];
+    node.size = [100., 60.];
+    app.commit();
+    let before = app.doc.clone();
+    let size = vec2(1200., 760.);
+    for repeat in [false, true, true, true] {
+        panel_frame(
+            &ctx,
+            &mut app,
+            size,
+            vec![nudge_key(
+                Key::ArrowRight,
+                true,
+                repeat,
+                egui::Modifiers::SHIFT,
+            )],
+        );
+    }
+    assert_eq!(app.doc.page_size, before.page_size);
+    panel_frame(
+        &ctx,
+        &mut app,
+        size,
+        vec![nudge_key(
+            Key::ArrowRight,
+            false,
+            false,
+            egui::Modifiers::NONE,
+        )],
+    );
+    assert!(app.doc.page_size[0] >= 430.);
+    assert!(!app.status.contains("Échap"));
+    app.undo();
+    assert_eq!(app.doc, before);
+}
+
 #[test]
 fn automatic_text_fitting_is_one_undo_and_keeps_the_selected_connected_node() {
     let (_, mut app) = setup();

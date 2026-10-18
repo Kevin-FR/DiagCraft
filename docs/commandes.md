@@ -50,3 +50,10 @@ l’ajoute à la sélection et **F2** modifie directement son texte.
 **R / T**, puis **Entrée**, place un rectangle ou un texte dans la zone visible.
 Avec deux blocs sélectionnés, **C** crée leur lien.
 Voir [le parcours complet](recherche-objets.md).
+
+## Placement précis
+
+**Flèches : 1 px ; Maj + flèches : 10 px**. Maintenir une touche crée un seul
+geste annulable ; **Échap** annule avant de la relâcher. Les objets sélectionnés
+restent ensemble aux bords de page. Les quatre directions se trouvent aussi dans
+la palette et l’aide, sous **Placement**. Voir [le guide](placement-clavier.md).

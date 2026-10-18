@@ -134,3 +134,17 @@ vue puis sur la page, conserve le symbole en attente et ouvre la saisie directe.
 La création et le texte gardent leurs annulations distinctes. Après fermeture
 d’une modale, une demande de focus refusée est réessayée ; les événements de
 saisie non traités sont rejoués avant la validation du texte.
+
+## Déplacement au clavier
+
+`keyboard_ui.rs` conserve un snapshot transitoire par pression continue des
+flèches. Une intersection de limites donne la même translation aux formes,
+graphiques, tracés et géométries libres sélectionnés. Les limites hors page
+incluent zéro pour éviter tout repositionnement implicite sur un autre axe.
+Le magnétisme n’intervient pas dans les pas de 1 et 10 pixels.
+
+La validation centrale termine le geste avant une autre édition ou un changement
+de document ; `finish_frame_edit` et la récupération ignorent le brouillon actif.
+Échap restaure le snapshot sans ajouter d’historique. Après interruption, les
+répétitions sont ignorées jusqu’au relâchement. Les commandes de la palette
+utilisent le même chemin, avec validation immédiate si aucune flèche n’est maintenue.

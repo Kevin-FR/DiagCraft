@@ -8188,5 +8188,122 @@
     "it": "Connettori",
     "pt": "Conectores",
     "zh-Hans": "连接线"
+  },
+  "Clavier · ΔX {0} · ΔY {1} px · Échap : annuler": {
+    "fr": "Clavier · ΔX {0} · ΔY {1} px · Échap : annuler",
+    "en": "Keyboard · ΔX {0} · ΔY {1} px · Escape: cancel",
+    "de": "Tastatur · ΔX {0} · ΔY {1} px · Esc: abbrechen",
+    "es": "Teclado · ΔX {0} · ΔY {1} px · Esc: cancelar",
+    "it": "Tastiera · ΔX {0} · ΔY {1} px · Esc: annulla",
+    "pt": "Teclado · ΔX {0} · ΔY {1} px · Esc: cancelar",
+    "zh-Hans": "键盘 · ΔX {0} · ΔY {1} 像素 · Esc：取消"
+  },
+  "Déplacement annulé · la sélection est conservée": {
+    "fr": "Déplacement annulé · la sélection est conservée",
+    "en": "Movement cancelled · selection kept",
+    "de": "Verschiebung abgebrochen · Auswahl beibehalten",
+    "es": "Movimiento cancelado · selección conservada",
+    "it": "Spostamento annullato · selezione mantenuta",
+    "pt": "Movimento cancelado · seleção mantida",
+    "zh-Hans": "已取消移动 · 保留选择"
+  },
+  "Déplacer de 1 ou 10 pixels. Maintenir une flèche : une seule annulation. Échap annule le déplacement.": {
+    "fr": "Déplacer de 1 ou 10 pixels. Maintenir une flèche : une seule annulation. Échap annule le déplacement.",
+    "en": "Move by 1 or 10 pixels. Holding an arrow key makes one undo step. Escape cancels the movement.",
+    "de": "Um 1 oder 10 Pixel verschieben. Ein gehaltener Pfeil ergibt einen Rückgängig-Schritt. Esc bricht die Verschiebung ab.",
+    "es": "Mover 1 o 10 píxeles. Mantener una flecha crea un solo paso de deshacer. Esc cancela el movimiento.",
+    "it": "Sposta di 1 o 10 pixel. Tenere premuta una freccia crea un solo passo di annullamento. Esc annulla lo spostamento.",
+    "pt": "Mover 1 ou 10 píxeis. Manter uma seta premida cria um único passo de anulação. Esc cancela o movimento.",
+    "zh-Hans": "移动 1 或 10 像素。按住方向键产生一次撤销记录。Esc 取消移动。"
+  },
+  "Déplacer la sélection vers le bas": {
+    "fr": "Déplacer la sélection vers le bas",
+    "en": "Move selection down",
+    "de": "Auswahl nach unten verschieben",
+    "es": "Mover selección hacia abajo",
+    "it": "Sposta la selezione in basso",
+    "pt": "Mover seleção para baixo",
+    "zh-Hans": "向下移动所选对象"
+  },
+  "Déplacer la sélection vers le haut": {
+    "fr": "Déplacer la sélection vers le haut",
+    "en": "Move selection up",
+    "de": "Auswahl nach oben verschieben",
+    "es": "Mover selección hacia arriba",
+    "it": "Sposta la selezione in alto",
+    "pt": "Mover seleção para cima",
+    "zh-Hans": "向上移动所选对象"
+  },
+  "Déplacer la sélection à droite": {
+    "fr": "Déplacer la sélection à droite",
+    "en": "Move selection right",
+    "de": "Auswahl nach rechts verschieben",
+    "es": "Mover selección a la derecha",
+    "it": "Sposta la selezione a destra",
+    "pt": "Mover seleção para a direita",
+    "zh-Hans": "向右移动所选对象"
+  },
+  "Déplacer la sélection à gauche": {
+    "fr": "Déplacer la sélection à gauche",
+    "en": "Move selection left",
+    "de": "Auswahl nach links verschieben",
+    "es": "Mover selección a la izquierda",
+    "it": "Sposta la selezione a sinistra",
+    "pt": "Mover seleção para a esquerda",
+    "zh-Hans": "向左移动所选对象"
+  },
+  "Flèches : 1 px · Maj : 10 px · Échap : annuler le déplacement": {
+    "fr": "Flèches : 1 px · Maj : 10 px · Échap : annuler le déplacement",
+    "en": "Arrows: 1 px · Shift: 10 px · Escape: cancel movement",
+    "de": "Pfeile: 1 px · Umschalt: 10 px · Esc: Verschiebung abbrechen",
+    "es": "Flechas: 1 px · Mayús: 10 px · Esc: cancelar movimiento",
+    "it": "Frecce: 1 px · Maiusc: 10 px · Esc: annulla spostamento",
+    "pt": "Setas: 1 px · Shift: 10 px · Esc: cancelar movimento",
+    "zh-Hans": "方向键：1 像素 · Shift：10 像素 · Esc：取消移动"
+  },
+  "Limite de déplacement atteinte": {
+    "fr": "Limite de déplacement atteinte",
+    "en": "Movement limit reached",
+    "de": "Verschiebungsgrenze erreicht",
+    "es": "Límite de movimiento alcanzado",
+    "it": "Limite di spostamento raggiunto",
+    "pt": "Limite de movimento atingido",
+    "zh-Hans": "已达到移动边界"
+  },
+  "Placement": {
+    "fr": "Placement",
+    "en": "Placement",
+    "de": "Platzierung",
+    "es": "Colocación",
+    "it": "Posizionamento",
+    "pt": "Posicionamento",
+    "zh-Hans": "放置"
+  },
+  "Sélectionnez une forme, un graphique, un tracé ou un lien libre": {
+    "fr": "Sélectionnez une forme, un graphique, un tracé ou un lien libre",
+    "en": "Select a shape, chart, path or free connector",
+    "de": "Wählen Sie eine Form, ein Diagramm, einen Pfad oder einen freien Verbinder",
+    "es": "Seleccione una forma, un gráfico, un trazado o un conector libre",
+    "it": "Seleziona una forma, un grafico, un tracciato o un connettore libero",
+    "pt": "Selecione uma forma, um gráfico, um traçado ou um conector livre",
+    "zh-Hans": "请选择形状、图表、路径或自由连接线"
+  },
+  "Déplacement terminé · Ctrl/⌘ Z pour annuler": {
+    "fr": "Déplacement terminé · Ctrl/⌘ Z pour annuler",
+    "en": "Movement finished · Ctrl/⌘ Z to undo",
+    "de": "Verschiebung abgeschlossen · Strg/⌘ Z zum Rückgängigmachen",
+    "es": "Movimiento terminado · Ctrl/⌘ Z para deshacer",
+    "it": "Spostamento terminato · Ctrl/⌘ Z per annullare",
+    "pt": "Movimento concluído · Ctrl/⌘ Z para anular",
+    "zh-Hans": "移动完成 · Ctrl/⌘ Z 撤销"
+  },
+  "Position d’origine retrouvée": {
+    "fr": "Position d’origine retrouvée",
+    "en": "Original position restored",
+    "de": "Ursprüngliche Position wiederhergestellt",
+    "es": "Posición original restaurada",
+    "it": "Posizione originale ripristinata",
+    "pt": "Posição original restaurada",
+    "zh-Hans": "已恢复原始位置"
   }
 }

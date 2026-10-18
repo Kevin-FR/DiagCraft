@@ -21,12 +21,13 @@ As aplicações e as respetivas somas de verificação SHA-256 estão disponíve
 | Windows x86_64 | ZIP portátil com a aplicação e a CLI |
 | Linux x86_64 | Pacote `.deb` para amd64 ou arquivo `.tar.gz`, com a aplicação e a CLI |
 
-**A versão 0.7.1 é experimental** e corrige os controlos dos painéis e a integração das propriedades. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
+**A versão 0.7.2 é experimental** e melhora o posicionamento preciso pelo teclado. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
 Os pacotes Windows não estão assinados com um certificado de editor.
 Consulte o [guia de instalação](../installation.md).
 
 ## Funcionalidades
 
+- Setas: 1 px; Shift: 10 px. Manter uma tecla premida cria um único movimento anulável sem deformar a seleção.
 - Um único botão por painel, alinhado sob a faixa de opções e acessível quando o painel está fechado.
 - Procura objetos da página por texto, tipo ou identificador; coloca, edita e liga blocos pelo teclado.
 - Edita texto diretamente nos blocos: duplo clique ou F2/Enter, seleção de palavras e barra flutuante de formatação. Clica fora para concluir; Escape cancela.

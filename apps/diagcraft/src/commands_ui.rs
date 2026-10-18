@@ -24,6 +24,10 @@ pub(super) enum Command {
     Duplicate,
     Delete,
     SelectAll,
+    NudgeLeft,
+    NudgeRight,
+    NudgeUp,
+    NudgeDown,
     Bold,
     Italic,
     Underline,
@@ -117,6 +121,10 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
     command!(Duplicate, "Dupliquer la sélection", "Édition", "copie duplicate", Modifiers::COMMAND => D),
     command!(Delete, "Supprimer la sélection", "Édition", "effacer delete", Modifiers::NONE => Delete, Modifiers::NONE => Backspace),
     command!(SelectAll, "Tout sélectionner", "Édition", "tous objets select all", Modifiers::COMMAND => A),
+    command!(NudgeLeft, "Déplacer la sélection à gauche", "Placement", "position clavier déplacer précision nudge left", Modifiers::NONE => ArrowLeft, Modifiers::SHIFT => ArrowLeft),
+    command!(NudgeRight, "Déplacer la sélection à droite", "Placement", "position clavier déplacer précision nudge right", Modifiers::NONE => ArrowRight, Modifiers::SHIFT => ArrowRight),
+    command!(NudgeUp, "Déplacer la sélection vers le haut", "Placement", "position clavier déplacer précision nudge up", Modifiers::NONE => ArrowUp, Modifiers::SHIFT => ArrowUp),
+    command!(NudgeDown, "Déplacer la sélection vers le bas", "Placement", "position clavier déplacer précision nudge down", Modifiers::NONE => ArrowDown, Modifiers::SHIFT => ArrowDown),
     command!(Bold, "Gras", "Texte", "bold", Modifiers::COMMAND => B),
     command!(Italic, "Italique", "Texte", "italic", Modifiers::COMMAND => I),
     command!(Underline, "Souligné", "Texte", "underline", Modifiers::COMMAND => U),
@@ -348,10 +356,18 @@ impl DrawApp {
             EditText if self.selected.len() != 1 || self.doc.node(self.selected[0]).is_none() => {
                 Some("Sélectionnez une forme ou un texte")
             }
-            Undo if !self.history.can_undo() && !self.property_edit => {
+            Undo if !self.history.can_undo()
+                && !self.property_edit
+                && self.keyboard_move.is_none() =>
+            {
                 Some("Aucune modification à annuler")
             }
             Redo if !self.history.can_redo() => Some("Aucune modification à rétablir"),
+            NudgeLeft | NudgeRight | NudgeUp | NudgeDown
+                if !self.selected.iter().any(|id| self.keyboard_movable(*id)) =>
+            {
+                Some("Sélectionnez une forme, un graphique, un tracé ou un lien libre")
+            }
             Copy | Cut | Duplicate | Delete | FitSelection if self.selected.is_empty() => {
                 Some("Sélectionnez au moins un objet")
             }
@@ -367,6 +383,14 @@ impl DrawApp {
     }
 
     pub(super) fn run_command(&mut self, command: Command, ctx: &egui::Context) {
+        if self.keyboard_move.is_some()
+            && !matches!(
+                command,
+                Command::NudgeLeft | Command::NudgeRight | Command::NudgeUp | Command::NudgeDown
+            )
+        {
+            self.commit();
+        }
         if let Some(reason) = self.command_unavailable(command) {
             self.status = reason.into();
             return;
@@ -404,6 +428,31 @@ impl DrawApp {
             Duplicate => self.perform_action(Action::Duplicate, ctx),
             Delete => self.perform_action(Action::Delete, ctx),
             SelectAll => self.perform_action(Action::SelectAll, ctx),
+            NudgeLeft | NudgeRight | NudgeUp | NudgeDown => {
+                let step = if ctx.input(|i| i.modifiers.shift) {
+                    10.
+                } else {
+                    1.
+                };
+                self.nudge_selection(
+                    match command {
+                        NudgeLeft => [-step, 0.],
+                        NudgeRight => [step, 0.],
+                        NudgeUp => [0., -step],
+                        _ => [0., step],
+                    },
+                    ctx.input(|i| {
+                        [
+                            Key::ArrowLeft,
+                            Key::ArrowRight,
+                            Key::ArrowUp,
+                            Key::ArrowDown,
+                        ]
+                        .iter()
+                        .any(|key| i.key_down(*key))
+                    }),
+                );
+            }
             Paste => {
                 self.paste_position = None;
                 if let Some(text) = ctx.input(|i| {
@@ -465,6 +514,17 @@ impl DrawApp {
 
     pub(super) fn command_shortcut(&mut self, ctx: &egui::Context, editing: bool) -> bool {
         for spec in COMMANDS {
+            if self.keyboard_move_cancelled
+                && matches!(
+                    spec.command,
+                    Command::NudgeLeft
+                        | Command::NudgeRight
+                        | Command::NudgeUp
+                        | Command::NudgeDown
+                )
+            {
+                continue;
+            }
             if spec.command == Command::PlaceShape
                 && self.command_unavailable(spec.command).is_some()
             {
@@ -753,7 +813,7 @@ const GESTURES: &[(&str, &str)] = &[
     ("Maj + clic", "Sélectionner plusieurs objets."),
     (
         "Flèches · Maj + flèches",
-        "Déplacer les objets sélectionnés de 1 ou 10 pixels.",
+        "Déplacer de 1 ou 10 pixels. Maintenir une flèche : une seule annulation. Échap annule le déplacement.",
     ),
     (
         "Maj + poignée",
