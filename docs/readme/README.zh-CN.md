@@ -19,7 +19,7 @@
 | Windows x86_64 | 包含应用和 CLI 的便携式 ZIP |
 | Linux x86_64 | 包含应用和 CLI 的 amd64 `.deb` 软件包或 `.tar.gz` 压缩包 |
 
-**0.4.0 为实验版本**，新增意外关闭后的绘图恢复功能。Mac 安装包使用临时签名（ad hoc），
+**0.5.0 为实验版本**，新增自动根据文本调整形状尺寸的功能。Mac 安装包使用临时签名（ad hoc），
 尚未通过 Apple 公证。Windows 安装包未使用发布者证书签名。
 请参阅[安装指南](../installation.md)。
 
@@ -35,6 +35,7 @@
 - 触控板导航、按选项卡组织的紧凑功能区，以及可调整大小并记住设置的侧栏。
 - 通过 ⌘K / Ctrl+K 打开命令面板，通过 F1 打开可搜索的键盘帮助。
 - 可编辑的 `.draw` 文件、带版本历史的本地项目图库，以及 SVG/PDF 导出。
+- 自动根据文本调整形状尺寸，测量字体并在界面、SVG 和 PDF 中共用文本布局。
 - 崩溃后的自动本地恢复副本，不覆盖原始文件。
 - 本地 CLI 和 MCP 服务器：检查、验证和原子 JSON 补丁。
 
@@ -47,7 +48,7 @@ v1–v6 格式的文件会在打开时于内存中迁移；保存前不会修改
 Mac 安装包仅包含 `arm64` 代码，使用 macOS 系统库：**无需 Rosetta**。
 
 详细指南目前为法语：[语言与更新](../langues-et-mises-a-jour.md)、[命令](../commandes.md)、
-[功能区与侧栏](../interface.md)、[绘图恢复](../recuperation.md)和[版本管理](../versioning.md)。
+[功能区与侧栏](../interface.md)、[绘图恢复](../recuperation.md)、[文本适应](../ajustement-texte.md)和[版本管理](../versioning.md)。
 
 ## 开发
 
@@ -90,8 +91,7 @@ python3 -m unittest discover -s packaging -p 'test_*.py'
 ## 参与贡献
 
 计划中的工作和验收标准见 [ROADMAP.md](../../ROADMAP.md)。分组、旋转、图片导入、PNG 导出、
-避开障碍物的连接线路由，以及集成安装程序仍待开发。形状尚不会自动根据文本调整大小。
-SVG 文本的显示取决于查看器所用的字体。
+避开障碍物的连接线路由，以及集成安装程序仍待开发。SVG 文本的显示取决于查看器所用的字体。
 
 请阅读 [CONTRIBUTING.md](../../CONTRIBUTING.md)。使用智能体操作绘图时，请遵循
 [智能体协议](../AGENTS-DRAW.md)。漏洞报告方式见 [SECURITY.md](../../SECURITY.md)。

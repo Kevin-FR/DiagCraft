@@ -21,7 +21,7 @@ Le applicazioni e le relative somme di controllo SHA-256 sono disponibili nella
 | Windows x86_64 | ZIP portatile con applicazione e CLI |
 | Linux x86_64 | Pacchetto `.deb` per amd64 o archivio `.tar.gz`, con applicazione e CLI |
 
-**0.4.0 è sperimentale** e aggiunge il recupero dopo una chiusura imprevista.
+**0.5.0 è sperimentale** e aggiunge l’adattamento automatico delle forme al testo.
 Il pacchetto Mac ha una firma ad hoc e non è stato autenticato da Apple tramite
 notarizzazione. I pacchetti Windows non sono firmati con un certificato dell’editore.
 Consulta la [guida all’installazione](../installation.md).
@@ -38,6 +38,7 @@ Consulta la [guida all’installazione](../installation.md).
 - Navigazione con trackpad, barra multifunzione compatta a schede e pannelli ridimensionabili con preferenze salvate.
 - Tavolozza dei comandi con ⌘K / Ctrl+K e guida da tastiera con ricerca tramite F1.
 - File `.draw` modificabili, galleria locale dei progetti con versioni ed esportazione SVG/PDF.
+- Adattamento automatico delle forme al testo, con misurazione dei font e disposizione condivisa tra interfaccia, SVG e PDF.
 - Copie locali automatiche per il recupero dopo un arresto anomalo, senza sovrascrivere gli originali.
 - CLI e server MCP locali: ispezione, validazione e patch JSON atomiche.
 
@@ -55,7 +56,7 @@ librerie di sistema macOS: **Rosetta non è necessario**.
 Le guide dettagliate sono attualmente in francese:
 [lingue e aggiornamenti](../langues-et-mises-a-jour.md), [comandi](../commandes.md),
 [barra multifunzione e pannelli](../interface.md), [recupero](../recuperation.md)
-e [gestione delle versioni](../versioning.md).
+[adattamento del testo](../ajustement-texte.md) e [gestione delle versioni](../versioning.md).
 
 ## Sviluppo
 
@@ -101,7 +102,6 @@ Consulta l’[architettura](../architecture.md) e le [scelte delle librerie](../
 Le attività previste e i criteri di accettazione sono in [ROADMAP.md](../../ROADMAP.md).
 Gruppi, rotazione, importazione di immagini, esportazione PNG, connettori che evitano
 gli ostacoli e programmi di installazione integrati sono ancora da sviluppare.
-Le forme non si ridimensionano ancora automaticamente in base al testo.
 La resa del testo SVG dipende dai font del visualizzatore.
 
 Leggi [CONTRIBUTING.md](../../CONTRIBUTING.md). Per lavorare su un disegno con un

@@ -16,6 +16,7 @@ criterion, avec des bibliothèques internes et plusieurs applications.
 | pdf-writer | Assemblage du PDF multipage. |
 | sha2 / tempfile | Révisions, intégrité et écritures atomiques, y compris les téléchargements vérifiés. |
 | semver 1.0.28 | Comparaison des versions et filtrage des versions expérimentales. |
+| ttf-parser 0.25.1 / unicode-segmentation 1.13.3 | Mesure des polices embarquées et retours à la ligne sans couper les graphèmes. Versions déjà verrouillées, également utilisées directement par le moteur depuis 0.5.0. |
 | curl système | Requêtes HTTPS GitHub dans un processus annulable en arrière-plan ; aucune pile HTTP Rust ajoutée. |
 
 Les bibliothèques de traitement photo, codecs RAW, profils colorimétriques,

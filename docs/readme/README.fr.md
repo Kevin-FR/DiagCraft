@@ -21,7 +21,7 @@ Les applications et leurs empreintes SHA-256 sont sur la page des
 | Windows x86_64 | ZIP portable avec application et CLI |
 | Linux x86_64 | Paquet `.deb` amd64 ou archive `.tar.gz`, application et CLI |
 
-La version **0.4.0** reste expérimentale et ajoute la récupération après une fermeture inattendue. Le paquet
+La version **0.5.0** reste expérimentale et ajoute l’ajustement automatique des formes au texte. Le paquet
 Mac est signé ad hoc et n’est pas notarié par Apple. Les paquets Windows ne
 sont pas signés avec un certificat éditeur. Voir [l’installation](../installation.md).
 
@@ -37,6 +37,7 @@ sont pas signés avec un certificat éditeur. Voir [l’installation](../install
 - Navigation au trackpad, ruban compact par onglet et volets redimensionnables mémorisés.
 - Palette de commandes avec ⌘K / Ctrl+K et aide clavier filtrable avec F1.
 - Fichiers `.draw` éditables, galerie locale avec versions, exports SVG et PDF.
+- Ajustement automatique des formes au texte, avec calcul partagé par le canevas et les exports SVG/PDF.
 - Copies automatiques locales et récupération des dessins après un plantage, sans écraser les originaux.
 - CLI et serveur MCP locaux : inspection, validation et patches JSON atomiques.
 
@@ -54,7 +55,7 @@ Voir [langues et mises à jour](../langues-et-mises-a-jour.md).
 
 Voir [la recherche de commandes](../commandes.md), [le ruban et les volets](../interface.md)
 et [les règles de version](../versioning.md).
-Voir aussi [la récupération des dessins](../recuperation.md).
+Voir aussi [la récupération des dessins](../recuperation.md) et [l’ajustement du texte](../ajustement-texte.md).
 
 ## Développer
 
@@ -99,8 +100,7 @@ Voir [l’architecture](../architecture.md) et [les choix de bibliothèques](../
 
 Les éléments à réaliser et leurs critères sont dans [ROADMAP.md](../../ROADMAP.md).
 Les groupes, rotations, images, export PNG, routage autour des obstacles et
-installateurs intégrés restent à développer. Le texte ne redimensionne pas
-encore automatiquement les formes. Le rendu SVG dépend des polices du lecteur.
+installateurs intégrés restent à développer. Le rendu SVG dépend des polices du lecteur.
 
 Lire [CONTRIBUTING.md](../../CONTRIBUTING.md). Pour piloter un dessin avec un agent,
 consulter [le contrat agents](../AGENTS-DRAW.md). Les vulnérabilités se signalent

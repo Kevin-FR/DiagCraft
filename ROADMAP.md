@@ -21,7 +21,8 @@ travaux prévus, sans promesse de date.
   recherche sans accents, navigation clavier et aide filtrable avec F1.
 - [x] Ruban compact par onglet, volets homogènes et redimensionnables, préférences
   locales et recherche dans les bibliothèques masquées (0.2.1).
-- [ ] Ajustement automatique du bloc au texte, avec rendu cohérent dans les exports.
+- [x] Ajustement automatique du bloc au texte, avec rendu cohérent dans les exports (0.5.0).
+  Mesure des polices embarquées, retours à la ligne partagés, commande de sélection et option automatique.
 - [x] Sauvegarde de récupération après fermeture anormale, sans écraser le dessin source (0.4.0).
   Copie locale des onglets modifiés, reprise dans de nouveaux onglets et verrous entre instances.
 - [ ] Tests d’intégration CLI/MCP sur les trois systèmes et diagnostics plus lisibles.

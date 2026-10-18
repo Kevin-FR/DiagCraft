@@ -21,7 +21,7 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.4.0 is experimental** and adds recovery after an unexpected shutdown.
+**0.5.0 is experimental** and adds automatic text fitting.
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).
@@ -38,6 +38,7 @@ packages are not signed with a publisher certificate. See the
 - Trackpad navigation, a compact tabbed ribbon and resizable panels with saved preferences.
 - Command palette with ⌘K / Ctrl+K and searchable keyboard help with F1.
 - Editable `.draw` files, a local project gallery with versions, and SVG/PDF exports.
+- Automatic text fitting with font measurements and shared canvas/SVG/PDF layout.
 - Automatic local recovery copies after a crash, without overwriting original files.
 - Local CLI and MCP server: inspection, validation and atomic JSON patches.
 
@@ -55,7 +56,8 @@ uses macOS system libraries: **Rosetta is not required**.
 Detailed guides are currently in French:
 [languages and updates](docs/langues-et-mises-a-jour.md),
 [commands](docs/commandes.md), [ribbon and panels](docs/interface.md),
-[drawing recovery](docs/recuperation.md) and [versioning](docs/versioning.md).
+[drawing recovery](docs/recuperation.md), [text fitting](docs/ajustement-texte.md)
+and [versioning](docs/versioning.md).
 
 ## Development
 
@@ -101,7 +103,7 @@ See the [architecture](docs/architecture.md) and
 
 Planned work and acceptance criteria are in [ROADMAP.md](ROADMAP.md).
 Groups, rotation, image import, PNG export, obstacle-aware routing and integrated
-installers are still planned. Shapes do not yet resize automatically to fit text.
+installers are still planned.
 SVG text rendering depends on the viewer's fonts.
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md). To work on a drawing with an agent,

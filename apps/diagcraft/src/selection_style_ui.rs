@@ -244,14 +244,19 @@ impl DrawApp {
                 });
                 ui.checkbox(&mut after.text_style.underline, t("Souligné"));
                 ui.checkbox(&mut after.text_style.wrap, t("Retour à la ligne automatique"));
+                if ui.checkbox(&mut after.text_style.auto_fit, t("Adapter automatiquement au texte")).changed()
+                    && after.text_style.auto_fit { after.text_style.wrap = true; }
                 let uniform = ui.button(t("Uniformiser ces réglages")).clicked();
                 for n in &mut self.doc.nodes {
                     if self.selected.contains(&n.id) {
                         changed_fields!(n, before, after, uniform; text_color, font_size);
-                        changed_fields!(n.text_style, before.text_style, after.text_style, uniform; bold, italic, underline, wrap);
+                        changed_fields!(n.text_style, before.text_style, after.text_style, uniform; bold, italic, underline, wrap, auto_fit);
                     }
                 }
             });
+            if ui.button(t("Ajuster les formes au texte")).clicked() {
+                self.fit_selection_text();
+            }
         }
     }
 }

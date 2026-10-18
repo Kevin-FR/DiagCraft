@@ -70,3 +70,18 @@ permet de reconnaître un processus arrêté sans heuristique de PID. Le numéro
 de checkpoint confirme le transfert avant suppression de la copie ancienne.
 Une fermeture acceptée nettoie la session courante ; les copies non ouvertes
 restent disponibles. Les tests et captures utilisent seulement des dossiers temporaires.
+
+## Texte et ajustement
+
+`text_layout.rs` mesure les polices embarquées avec ttf-parser et coupe les lignes
+aux frontières de graphèmes Unicode. Il fournit les lignes, interlignes, marges
+et dimensions au canevas, au SVG et à l’inspection agents. Hack est explicitement
+utilisée pour le texte monospace ; Noto Sans SC sert de repli pour le chinois.
+Le PDF consomme le même SVG avec les polices embarquées.
+
+`TextStyle::auto_fit` est un champ optionnel v7, faux par défaut et omis dans ce cas.
+L’interface applique l’ajustement au commit d’un geste ; les patches l’appliquent
+uniquement aux nœuds modifiés, avant validation et calcul de la révision résultante.
+Une sélection est ajustée atomiquement. Les positions et IDs sont conservés ; les
+routes de connecteurs suivent leurs formes par le mécanisme existant. Un redimensionnement
+manuel désactive l’option dans le même geste annulable. Le moteur ne connaît pas egui.

@@ -21,8 +21,7 @@ As aplicações e as respetivas somas de verificação SHA-256 estão disponíve
 | Windows x86_64 | ZIP portátil com a aplicação e a CLI |
 | Linux x86_64 | Pacote `.deb` para amd64 ou arquivo `.tar.gz`, com a aplicação e a CLI |
 
-**A versão 0.4.0 é experimental** e acrescenta recuperação após um encerramento
-inesperado. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
+**A versão 0.5.0 é experimental** e acrescenta o ajuste automático das formas ao texto. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
 Os pacotes Windows não estão assinados com um certificado de editor.
 Consulte o [guia de instalação](../installation.md).
 
@@ -38,6 +37,7 @@ Consulte o [guia de instalação](../installation.md).
 - Navegação por trackpad, faixa de opções compacta por separador e painéis redimensionáveis com preferências guardadas.
 - Paleta de comandos com ⌘K / Ctrl+K e ajuda de teclado pesquisável com F1.
 - Ficheiros `.draw` editáveis, galeria local de projetos com versões e exportação SVG/PDF.
+- Ajuste automático das formas ao texto, com medição dos tipos de letra e disposição partilhada entre a interface, SVG e PDF.
 - Cópias locais automáticas para recuperação após uma falha, sem substituir os originais.
 - CLI e servidor MCP locais: inspeção, validação e patches JSON atómicos.
 
@@ -55,7 +55,7 @@ bibliotecas de sistema do macOS: **não é necessário Rosetta**.
 Os guias detalhados estão atualmente em francês:
 [idiomas e atualizações](../langues-et-mises-a-jour.md), [comandos](../commandes.md),
 [faixa de opções e painéis](../interface.md), [recuperação](../recuperation.md)
-e [gestão de versões](../versioning.md).
+[ajuste do texto](../ajustement-texte.md) e [gestão de versões](../versioning.md).
 
 ## Desenvolvimento
 
@@ -100,8 +100,7 @@ Consulte a [arquitetura](../architecture.md) e as [escolhas de bibliotecas](../d
 
 As tarefas previstas e os critérios de aceitação estão em [ROADMAP.md](../../ROADMAP.md).
 Grupos, rotação, importação de imagens, exportação PNG, conectores que evitam
-obstáculos e instaladores integrados ainda estão por desenvolver. As formas ainda
-não se redimensionam automaticamente para acomodar o texto. O texto SVG depende dos tipos de letra do visualizador.
+obstáculos e instaladores integrados ainda estão por desenvolver. O texto SVG depende dos tipos de letra do visualizador.
 
 Leia [CONTRIBUTING.md](../../CONTRIBUTING.md). Para trabalhar num desenho com um
 agente, consulte o [contrato para agentes](../AGENTS-DRAW.md). Comunique vulnerabilidades

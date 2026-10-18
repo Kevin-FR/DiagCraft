@@ -250,7 +250,8 @@ pub(super) fn node_inspector(
     cache: &SharedCache,
     focus: &mut Option<u64>,
     capture_presets: bool,
-) -> (bool, bool) {
+) -> (bool, bool, bool) {
+    let mut fit_text = false;
     ui.label(RichText::new(t(n.kind.label())).size(20.).strong());
     ui.add_space(10.);
     if n.kind != ShapeKind::Text {
@@ -275,6 +276,27 @@ pub(super) fn node_inspector(
                 *focus = None;
             }
             ui.checkbox(&mut n.text_style.wrap, t("Retour à la ligne automatique"));
+            if ui
+                .checkbox(
+                    &mut n.text_style.auto_fit,
+                    t("Adapter automatiquement au texte"),
+                )
+                .on_hover_text(t(
+                    "Un redimensionnement manuel désactive l’ajustement automatique.",
+                ))
+                .changed()
+                && n.text_style.auto_fit
+            {
+                n.text_style.wrap = true;
+            }
+            ui.label(
+                RichText::new(t(
+                    "Avec retour automatique, la largeur est conservée et la hauteur s’adapte.",
+                ))
+                .small()
+                .color(MUTED),
+            );
+            fit_text = ui.button(t("Ajuster la forme au texte")).clicked();
             color(ui, "Couleur du texte", &mut n.text_color);
             ui.add(
                 egui::Slider::new(&mut n.font_size, 8.0..=64.0)
@@ -282,6 +304,7 @@ pub(super) fn node_inspector(
                     .text(t("Taille")),
             );
         });
+    let before_geometry = n.size;
     egui::CollapsingHeader::new(t("Position et dimensions"))
         .id_salt(("position", n.id))
         .show(ui, |ui| {
@@ -314,10 +337,14 @@ pub(super) fn node_inspector(
                     }
                 });
         });
+    if n.size != before_geometry {
+        n.text_style.auto_fit = false;
+    }
     ui.add_space(8.);
     (
         ui.button(t("Mettre au premier plan")).clicked(),
         ui.button(t("Mettre à l’arrière-plan")).clicked(),
+        fit_text,
     )
 }
 pub(super) fn node_controls(

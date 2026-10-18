@@ -27,6 +27,7 @@ pub(super) enum Command {
     Bold,
     Italic,
     Underline,
+    FitText,
     Select,
     Rectangle,
     Text,
@@ -116,6 +117,12 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
     command!(Bold, "Gras", "Texte", "bold", Modifiers::COMMAND => B),
     command!(Italic, "Italique", "Texte", "italic", Modifiers::COMMAND => I),
     command!(Underline, "Souligné", "Texte", "underline", Modifiers::COMMAND => U),
+    command!(
+        FitText,
+        "Ajuster la forme au texte",
+        "Texte",
+        "fit text auto size hauteur largeur ajustement dimension"
+    ),
     command!(Select, "Outil Sélection", "Outils", "pointeur déplacer select", Modifiers::NONE => V),
     command!(Rectangle, "Outil Rectangle", "Outils", "bloc forme rectangle", Modifiers::NONE => R),
     command!(Text, "Outil Texte", "Outils", "ajouter écrire text", Modifiers::NONE => T),
@@ -331,7 +338,7 @@ impl DrawApp {
             Copy | Cut | Duplicate | Delete | FitSelection if self.selected.is_empty() => {
                 Some("Sélectionnez au moins un objet")
             }
-            Bold | Italic | Underline
+            Bold | Italic | Underline | FitText
                 if !self.selected.iter().any(|id| self.doc.node(*id).is_some()) =>
             {
                 Some("Sélectionnez une forme ou un texte")
@@ -399,6 +406,7 @@ impl DrawApp {
             Bold => self.change_text(|s| s.bold = !s.bold),
             Italic => self.change_text(|s| s.italic = !s.italic),
             Underline => self.change_text(|s| s.underline = !s.underline),
+            FitText => self.fit_selection_text(),
             Select => self.set_tool(Tool::Select),
             Rectangle => self.set_tool(Tool::Shape(ShapeKind::Rectangle)),
             Text => self.set_tool(Tool::Shape(ShapeKind::Text)),

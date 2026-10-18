@@ -213,6 +213,7 @@ fn check_nested_fields(value: &Value) -> Result<(), String> {
                             "strikethrough",
                             "monospace",
                             "wrap",
+                            "auto_fit",
                             "align",
                         ]
                         .contains(&field.as_str())
@@ -263,6 +264,11 @@ pub fn inspect(doc: &Document) -> Result<Value, String> {
                 });
                 v["ref"] = json!(format!("page:{index}/object:{}", n.id));
                 v["center"] = json!(n.center());
+                let text = n.text_layout();
+                let (position, size) = crate::text_layout::area(n);
+                v["text_layout"] = json!({"lines":text.lines,"size":[text.width,text.height],
+                    "line_height":text.line_height,"content_area":{"position":position,"size":size},
+                    "overflow":text.width > size[0] || text.height > size[1]});
                 v
             })
             .collect();
@@ -523,6 +529,9 @@ fn execute(
             n.size = *size;
             n.text = text.clone();
             node_changes(n, style);
+            if n.text_style.auto_fit {
+                n.fit_to_text()?;
+            }
             created = Some(id);
             "Ajouter une forme ou un texte"
         }
@@ -530,7 +539,11 @@ fn execute(
             target, changes, ..
         } => {
             let id = resolve(target, doc.page_index, aliases)?;
-            node_changes(doc.node_mut(id).ok_or("Nœud introuvable.")?, changes);
+            let node = doc.node_mut(id).ok_or("Nœud introuvable.")?;
+            node_changes(node, changes);
+            if node.text_style.auto_fit {
+                node.fit_to_text()?;
+            }
             created = Some(id);
             "Modifier une forme ou un texte"
         }

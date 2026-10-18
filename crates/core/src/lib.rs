@@ -25,3 +25,4 @@ pub mod appearance;
 pub mod appearance_svg;
 
 pub mod cli;
+pub mod text_layout;

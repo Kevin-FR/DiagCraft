@@ -3,6 +3,22 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.5.0 — ajustement des formes au texte
+
+- Commande d’ajustement depuis les propriétés, le menu contextuel et la palette, y compris en sélection multiple.
+- Option automatique par forme ; avec retour à la ligne, la largeur est conservée et la hauteur s’adapte.
+- Mesures des polices Source Sans 3, Hack et Noto Sans SC, marges adaptées aux formes et interlignage partagé.
+- Retours à la ligne fondés sur la largeur réelle des glyphes, sans séparer les accents combinés ; espaces et paragraphes préservés.
+- Même disposition de texte dans l’interface, SVG et PDF ; police monospace Hack explicite.
+- Identifiants, positions et connecteurs conservés, une seule annulation et désactivation lors d’un redimensionnement manuel.
+- API agents : `text_style.auto_fit`, dimensions calculées avant aperçu, métriques de texte et débordement dans l’inspection.
+- Messages traduits dans les sept langues et README multilingues mis à jour ensemble.
+
+Le format `.draw` reste v7 et l’API agents v1. Le champ optionnel est désactivé
+par défaut ; les fichiers existants ne changent pas de taille à l’ouverture.
+Les versions verrouillées de ttf-parser et unicode-segmentation, déjà présentes
+dans le workspace, deviennent aussi des dépendances directes du moteur.
+
 ## 0.4.0 — récupération des dessins après une fermeture inattendue
 
 - Copie locale atomique des onglets modifiés toutes les 10 secondes, hors gestes en cours.

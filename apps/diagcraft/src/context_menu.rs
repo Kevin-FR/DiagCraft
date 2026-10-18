@@ -13,6 +13,7 @@ pub(super) enum Action {
     Back,
     Properties,
     Text,
+    FitText,
     SelectAll,
     Fit,
     Export,
@@ -141,6 +142,9 @@ impl DrawApp {
             if menu_item(ui, "Modifier le texte…", None, true) {
                 action = Some(Action::Text);
             }
+            if menu_item(ui, "Ajuster la forme au texte", None, true) {
+                action = Some(Action::FitText);
+            }
             ui.menu_button(t("Remplacer la forme"), |ui| {
                 if let Some(kind) = shape_picker(ui) {
                     action = Some(Action::Replace(kind));
@@ -165,6 +169,12 @@ impl DrawApp {
             if menu_item(ui, "Ajouter à ma bibliothèque", None, true) {
                 action = Some(Action::Library);
             }
+        }
+        if node.is_none()
+            && self.selected.iter().any(|id| self.doc.node(*id).is_some())
+            && menu_item(ui, "Ajuster les formes au texte", None, true)
+        {
+            action = Some(Action::FitText);
         }
         if let Some(e) = &edge {
             ui.separator();
@@ -477,6 +487,7 @@ impl DrawApp {
             Action::Back => self.reorder(false),
             Action::Properties => self.show_inspector = true,
             Action::Fit => self.fit_next = true,
+            Action::FitText => self.fit_selection_text(),
             Action::Export => self.export(),
             Action::ExportPdf => self.show_pdf_export = true,
             Action::SelectAll => {

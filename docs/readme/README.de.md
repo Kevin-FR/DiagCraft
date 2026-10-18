@@ -21,8 +21,7 @@ Die Anwendungen und ihre SHA-256-Prüfsummen stehen auf der
 | Windows x86_64 | Portables ZIP mit Anwendung und CLI |
 | Linux x86_64 | `.deb`-Paket für amd64 oder `.tar.gz`-Archiv mit Anwendung und CLI |
 
-**0.4.0 ist experimentell** und ergänzt die Wiederherstellung nach unerwartetem
-Beenden. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
+**0.5.0 ist experimentell** und ergänzt die automatische Größenanpassung an den Text. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
 Die Windows-Pakete sind nicht mit einem Herausgeberzertifikat signiert.
 Siehe die [Installationsanleitung](../installation.md).
 
@@ -38,6 +37,7 @@ Siehe die [Installationsanleitung](../installation.md).
 - Trackpad-Navigation, kompakte Menüband-Tabs und verstellbare Seitenleisten mit gespeicherten Einstellungen.
 - Befehlspalette mit ⌘K / Ctrl+K und durchsuchbare Tastaturhilfe mit F1.
 - Bearbeitbare `.draw`-Dateien, lokale Projektgalerie mit Versionen und SVG/PDF-Export.
+- Automatische Größenanpassung an den Text mit Schriftmessung und gemeinsamer Anordnung in Oberfläche, SVG und PDF.
 - Automatische lokale Wiederherstellungskopien nach einem Absturz, ohne Originaldateien zu überschreiben.
 - Lokale CLI und lokaler MCP-Server: Inspektion, Validierung und atomare JSON-Patches.
 
@@ -55,7 +55,7 @@ und verwendet macOS-Systembibliotheken: **Rosetta ist nicht erforderlich**.
 Die ausführlichen Anleitungen sind derzeit auf Französisch:
 [Sprachen und Updates](../langues-et-mises-a-jour.md), [Befehle](../commandes.md),
 [Menüband und Seitenleisten](../interface.md), [Wiederherstellung](../recuperation.md)
-und [Versionierung](../versioning.md).
+[Textanpassung](../ajustement-texte.md) und [Versionierung](../versioning.md).
 
 ## Entwicklung
 
@@ -100,8 +100,7 @@ Siehe [Architektur](../architecture.md) und [Bibliotheksauswahl](../dependencies
 
 Geplante Arbeiten und Abnahmekriterien stehen in [ROADMAP.md](../../ROADMAP.md).
 Gruppen, Drehung, Bildimport, PNG-Export, Hindernisse umgehende Verbinder und
-integrierte Installationsprogramme sind noch geplant. Formen passen ihre Größe
-noch nicht automatisch an den Text an. SVG-Text hängt von den Schriften des Betrachters ab.
+integrierte Installationsprogramme sind noch geplant. SVG-Text hängt von den Schriften des Betrachters ab.
 
 Bitte [CONTRIBUTING.md](../../CONTRIBUTING.md) lesen. Für die Arbeit an Zeichnungen
 mit einem Agenten gilt der [Agentenvertrag](../AGENTS-DRAW.md). Sicherheitslücken

@@ -562,7 +562,19 @@ fn svg_escapes_all_text_and_strips_invalid_xml_controls() {
     doc.connectors[0].label = text.into();
     let out = svg::export(&doc).unwrap();
     let escaped = "Été 日本語 &lt;script&gt; &amp; &quot;double&quot; &apos;simple&apos;\t\r";
-    assert_eq!(out.matches(escaped).count(), 3);
+    assert_eq!(
+        out.matches(escaped).count(),
+        2,
+        "title and connector keep their whitespace"
+    );
+    assert!(
+        out.contains(&escaped.replace('\t', "    ").replace('\r', "")),
+        "node tabs are expanded and CR is a line break"
+    );
+    assert_eq!(
+        doc.nodes[0].text, text,
+        "display normalization never edits the source"
+    );
     assert!(!out.contains("<script>"));
     for forbidden in ['\u{0}', '\u{1}', '\u{b}', '\u{1f}', '\u{fffe}', '\u{ffff}'] {
         assert!(!out.contains(forbidden));
@@ -603,7 +615,7 @@ fn svg_exports_page_shape_geometry_styles_and_multiline_text() {
     assert!(out.contains("fill=\"#010203\" stroke=\"#040506\" stroke-width=\"2\""));
     assert!(out.contains("font-size=\"20\" fill=\"#070809\""));
     assert!(out.contains(
-        "<tspan x=\"110\" y=\"447.5\">Première</tspan><tspan x=\"110\" y=\"472.5\">Deuxième</tspan>"
+        "<tspan x=\"110\" y=\"453.24\">Première</tspan><tspan x=\"110\" y=\"480.24\">Deuxième</tspan>"
     ));
     assert_eq!(
         out.matches("<rect ").count(),

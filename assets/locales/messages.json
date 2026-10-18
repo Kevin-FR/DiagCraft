@@ -215,6 +215,15 @@
     "pt": "Atualizar",
     "zh-Hans": "刷新"
   },
+  "Adapter automatiquement au texte": {
+    "fr": "Adapter automatiquement au texte",
+    "en": "Automatically fit to text",
+    "de": "Automatisch an Text anpassen",
+    "es": "Ajustar automáticamente al texto",
+    "it": "Adatta automaticamente al testo",
+    "pt": "Ajustar automaticamente ao texto",
+    "zh-Hans": "自动适应文本"
+  },
   "Adapter le ruban à la fenêtre": {
     "fr": "Adapter le ruban à la fenêtre",
     "en": "Fit ribbon to window",
@@ -467,6 +476,15 @@
     "pt": "Ajustar ao desenho",
     "zh-Hans": "适应绘图"
   },
+  "Ajuster la forme au texte": {
+    "fr": "Ajuster la forme au texte",
+    "en": "Fit shape to text",
+    "de": "Form an Text anpassen",
+    "es": "Ajustar forma al texto",
+    "it": "Adatta la forma al testo",
+    "pt": "Ajustar forma ao texto",
+    "zh-Hans": "使形状适应文本"
+  },
   "Ajuster la page à la fenêtre": {
     "fr": "Ajuster la page à la fenêtre",
     "en": "Fit page to window",
@@ -475,6 +493,15 @@
     "it": "Adatta pagina alla finestra",
     "pt": "Ajustar página à janela",
     "zh-Hans": "使页面适应窗口"
+  },
+  "Ajuster les formes au texte": {
+    "fr": "Ajuster les formes au texte",
+    "en": "Fit shapes to text",
+    "de": "Formen an Text anpassen",
+    "es": "Ajustar formas al texto",
+    "it": "Adatta le forme al testo",
+    "pt": "Ajustar formas ao texto",
+    "zh-Hans": "使形状适应各自文本"
   },
   "Aligner": {
     "fr": "Aligner",
@@ -898,6 +925,15 @@
     "it": "Avanzato",
     "pt": "Avançado",
     "zh-Hans": "高级"
+  },
+  "Avec retour automatique, la largeur est conservée et la hauteur s’adapte.": {
+    "fr": "Avec retour automatique, la largeur est conservée et la hauteur s’adapte.",
+    "en": "With wrapping enabled, width stays fixed and height adjusts.",
+    "de": "Bei automatischem Zeilenumbruch bleibt die Breite erhalten und die Höhe passt sich an.",
+    "es": "Con el ajuste de línea activado, se conserva el ancho y se adapta la altura.",
+    "it": "Con il ritorno a capo automatico, la larghezza resta fissa e l’altezza si adatta.",
+    "pt": "Com quebra automática de linha, a largura mantém-se e a altura ajusta-se.",
+    "zh-Hans": "启用自动换行后，宽度保持不变，高度自动调整。"
   },
   "A−": {
     "fr": "A−",
@@ -2032,6 +2068,15 @@
     "it": "Diagramma salvato su questo computer",
     "pt": "Diagrama salvo neste computador",
     "zh-Hans": "保存在此电脑上的图表"
+  },
+  "Dimensions ajustées au texte. Les liens suivent les formes.": {
+    "fr": "Dimensions ajustées au texte. Les liens suivent les formes.",
+    "en": "Shapes fitted to text. Connectors follow the shapes.",
+    "de": "Größen an den Text angepasst. Verbinder folgen den Formen.",
+    "es": "Dimensiones ajustadas al texto. Los conectores siguen las formas.",
+    "it": "Dimensioni adattate al testo. I connettori seguono le forme.",
+    "pt": "Dimensões ajustadas ao texto. Os conectores acompanham as formas.",
+    "zh-Hans": "尺寸已适应文本。连接线会跟随形状。"
   },
   "Direct": {
     "fr": "Direct",
@@ -7171,6 +7216,15 @@
     "it": "Un agente può usare il binario senza aprire finestre. L’accesso MCP è limitato alla cartella scelta nella configurazione del client.",
     "pt": "Um agente pode usar o binário sem abrir janela. O acesso MCP é limitado à pasta escolhida na configuração do cliente.",
     "zh-Hans": "智能体可以不打开窗口直接使用应用程序。MCP 访问范围仅限于客户端配置中选择的文件夹。"
+  },
+  "Un redimensionnement manuel désactive l’ajustement automatique.": {
+    "fr": "Un redimensionnement manuel désactive l’ajustement automatique.",
+    "en": "Resizing manually turns off automatic fitting.",
+    "de": "Manuelles Ändern der Größe deaktiviert die automatische Anpassung.",
+    "es": "Cambiar el tamaño manualmente desactiva el ajuste automático.",
+    "it": "Il ridimensionamento manuale disattiva l’adattamento automatico.",
+    "pt": "Redimensionar manualmente desativa o ajuste automático.",
+    "zh-Hans": "手动调整大小会关闭自动适应。"
   },
   "Un seul ⌘ Z annule tout le lot.": {
     "fr": "Un seul ⌘ Z annule tout le lot.",

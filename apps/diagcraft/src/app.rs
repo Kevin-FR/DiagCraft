@@ -470,6 +470,43 @@ impl DrawApp {
             self.show_quick_toolbar = false;
             self.capture_link_preview = name == "lier-apercu";
         }
+        if name == "ajuster-texte" {
+            self.prepare_text_fit_capture();
+        }
+    }
+    fn prepare_text_fit_capture(&mut self) {
+        let mut doc = Document {
+            title: "Du texte, de la place".into(),
+            page_size: [1000., 680.],
+            ..Default::default()
+        };
+        let heading = doc.add_node(ShapeKind::Text, [500., 85.]);
+        let node = doc.node_mut(heading).unwrap();
+        node.text = "Ajuster le bloc, garder les liens".into();
+        node.size = [850., 60.];
+        node.position = [75., 55.];
+        node.font_size = 28.;
+        node.text_style.bold = true;
+        let a = doc.add_node(ShapeKind::Rounded, [220., 250.]);
+        let b = doc.add_node(ShapeKind::Rounded, [680., 250.]);
+        for id in [a, b] {
+            let node = doc.node_mut(id).unwrap();
+            node.size = [240., 72.];
+            node.position = [if id == a { 100. } else { 560. }, 190.];
+            node.text = "Un libellé peut contenir plusieurs lignes, des accents et du chinois : 中文绘图. Le bloc s’adapte au contenu.".into();
+            node.text_style.wrap = true;
+        }
+        doc.node_mut(b).unwrap().text_style.auto_fit = true;
+        doc.fit_automatic_text().unwrap();
+        doc.connect(a, b, ConnectorKind::Elbow).unwrap();
+        self.replace(doc, None);
+        self.selected = vec![b];
+        self.focus_text = Some(b);
+        self.show_library = false;
+        self.show_inspector = true;
+        self.show_quick_toolbar = false;
+        self.ribbon_expanded = Some(false);
+        self.fit_next = true;
     }
     pub fn new(
         cc: &eframe::CreationContext<'_>,
@@ -693,6 +730,9 @@ impl DrawApp {
             self.drag = None;
             self.move_guides.clear();
         }
+        if let Err(error) = self.doc.fit_automatic_text() {
+            self.status = error;
+        }
         self.doc.grow_page_to_content();
         self.history.record(&self.doc);
         self.property_edit = false;
@@ -703,6 +743,15 @@ impl DrawApp {
             && !(self.property_edit && ctx.input(|i| i.pointer.primary_down() && i.focused))
         {
             self.commit();
+        }
+    }
+    fn fit_selection_text(&mut self) {
+        match self.doc.fit_nodes_to_text(&self.selected) {
+            Ok(_) => {
+                self.commit();
+                self.status = "Dimensions ajustées au texte. Les liens suivent les formes.".into();
+            }
+            Err(error) => self.error = Some(error),
         }
     }
     fn set_tool(&mut self, tool: Tool) {
@@ -1175,7 +1224,8 @@ impl DrawApp {
                     let id=self.selected[0];
                     ui.horizontal(|ui|{ui.monospace(i18n::render("page:{0} / objet:{1}", &[("0", format!("{}", self.doc.page_index)),("1", format!("{}", id))]));if ui.small_button(t("Copier")).on_hover_text(t("Référence JSON pour un agent")).clicked(){ctx.copy_text(serde_json::json!({"page":self.doc.page_index,"target":id}).to_string());}});ui.add_space(10.);
                     if let Some(n)=self.doc.node_mut(id) {
-                        let (front,back)=appearance_ui::node_inspector(ui,n,&mut self.style_tab,&self.styled_cache,&mut self.focus_text,self.capture_shadow_presets);
+                        let (front,back,fit_text)=appearance_ui::node_inspector(ui,n,&mut self.style_tab,&self.styled_cache,&mut self.focus_text,self.capture_shadow_presets);
+                        if fit_text { self.fit_selection_text(); }
                         if (front || back) && let Some(index)=self.doc.nodes.iter().position(|n|n.id==id) {let node=self.doc.nodes.remove(index);if front{self.doc.nodes.push(node);}else{self.doc.nodes.insert(0,node);}}
                     } else if self.doc.charts.iter().any(|c|c.id==id) { self.chart_inspector(ui,id);
                     } else if let Some(edge)=self.doc.connectors.iter_mut().find(|e|e.id==id) {
@@ -1830,6 +1880,9 @@ impl DrawApp {
                         }
                     } else if let Some((id, origin, size, handle)) = handle {
                         self.begin_edit_drag();
+                        if let Some(node) = self.doc.node_mut(id) {
+                            node.text_style.auto_fit = false;
+                        }
                         self.drag = Some(Drag::Resize {
                             id,
                             start: world,
@@ -2161,14 +2214,16 @@ impl DrawApp {
                 kind => paint_geometry(p, kind, r, fill, stroke),
             }
         }
-        // Explicit line breaks are preserved in both the canvas and SVG.
+        let text = n.text_layout();
+        let (text_origin, text_size) = diagcraft::text_layout::area(n);
         let family = if n.text_style.monospace {
-            egui::FontFamily::Monospace
+            egui::FontFamily::Name("DiagCraftMono".into())
         } else {
             egui::FontFamily::Name(font_name(&n.text_style).into())
         };
         let format = egui::TextFormat {
             font_id: FontId::new(n.font_size * self.zoom, family),
+            line_height: Some(text.line_height * self.zoom),
             color: rgb(n.text_color),
             italics: n.text_style.monospace && n.text_style.italic,
             underline: if n.text_style.underline {
@@ -2183,7 +2238,7 @@ impl DrawApp {
             },
             ..Default::default()
         };
-        let mut job = egui::text::LayoutJob::simple_format(n.display_text(), format);
+        let mut job = egui::text::LayoutJob::simple_format(text.text(), format);
         job.halign = match n.text_style.align {
             TextAlign::Left => Align::LEFT,
             TextAlign::Center => Align::Center,
@@ -2191,9 +2246,11 @@ impl DrawApp {
         };
         let galley = p.layout_job(job);
         let x = match n.text_style.align {
-            TextAlign::Left => r.left() + 12. * self.zoom,
+            TextAlign::Left => self.screen(text_origin).x,
             TextAlign::Center => r.center().x - galley.size().x / 2.,
-            TextAlign::Right => r.right() - 12. * self.zoom - galley.size().x,
+            TextAlign::Right => {
+                self.screen([text_origin[0] + text_size[0], 0.]).x - galley.size().x
+            }
         };
         let pos = pos2(x, r.center().y - galley.size().y / 2.) - galley.rect.min.to_vec2();
         if n.text_style.monospace && n.text_style.bold {
@@ -2388,6 +2445,15 @@ fn install_fonts(ctx: &egui::Context) {
         .get_mut(&egui::FontFamily::Proportional)
         .unwrap()
         .insert(0, "SourceSans3-Regular".into());
+    fonts.font_data.insert(
+        "DiagCraftHack".into(),
+        egui::FontData::from_static(include_bytes!("../../../assets/fonts/Hack-Regular.ttf"))
+            .into(),
+    );
+    fonts.families.insert(
+        egui::FontFamily::Name("DiagCraftMono".into()),
+        vec!["DiagCraftHack".into()],
+    );
     fonts.font_data.insert(
         "NotoSansSC".into(),
         egui::FontData::from_static(include_bytes!(

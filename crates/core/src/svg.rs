@@ -254,13 +254,13 @@ pub fn export(doc: &Document) -> Result<String, String> {
                 }
             }
         }
-        let display = n.display_text();
-        let lines: Vec<_> = display.split('\n').collect();
-        let start = c[1] - (lines.len() as f32 - 1.) * n.font_size * 0.625;
+        let text = n.text_layout();
+        let (text_origin, text_size) = crate::text_layout::area(n);
+        let start = text.first_baseline(c[1]);
         let (anchor, text_x) = match n.text_style.align {
-            TextAlign::Left => ("start", x + 12.),
+            TextAlign::Left => ("start", text_origin[0]),
             TextAlign::Center => ("middle", c[0]),
-            TextAlign::Right => ("end", x + w - 12.),
+            TextAlign::Right => ("end", text_origin[0] + text_size[0]),
         };
         let decoration = match (n.text_style.underline, n.text_style.strikethrough) {
             (true, true) => "underline line-through",
@@ -270,9 +270,9 @@ pub fn export(doc: &Document) -> Result<String, String> {
         };
         let _ = write!(
             out,
-            "<text text-anchor=\"{anchor}\" dominant-baseline=\"central\" font-family=\"{}\" font-size=\"{}\" fill=\"{}\" font-weight=\"{}\" font-style=\"{}\" text-decoration=\"{decoration}\">",
+            "<text text-anchor=\"{anchor}\" xml:space=\"preserve\" font-family=\"{}\" font-size=\"{}\" fill=\"{}\" font-weight=\"{}\" font-style=\"{}\" text-decoration=\"{decoration}\">",
             if n.text_style.monospace {
-                "monospace"
+                "'Hack','Noto Sans SC',monospace"
             } else {
                 "'Source Sans 3','Noto Sans SC',Arial,sans-serif"
             },
@@ -285,12 +285,12 @@ pub fn export(doc: &Document) -> Result<String, String> {
                 "normal"
             }
         );
-        for (i, line) in lines.iter().enumerate() {
+        for (i, line) in text.lines.iter().enumerate() {
             let _ = write!(
                 out,
                 "<tspan x=\"{}\" y=\"{}\">{}</tspan>",
                 text_x,
-                start + i as f32 * n.font_size * 1.25,
+                start + i as f32 * text.line_height,
                 escape(line)
             );
         }

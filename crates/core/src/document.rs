@@ -25,6 +25,8 @@ pub struct TextStyle {
     pub monospace: bool,
     pub align: TextAlign,
     pub wrap: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub auto_fit: bool,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -373,45 +375,7 @@ impl Node {
         }
     }
     pub fn display_text(&self) -> String {
-        if !self.text_style.wrap {
-            return self.text.clone();
-        }
-        let fraction = match self.kind {
-            ShapeKind::Diamond => 0.63,
-            ShapeKind::Ellipse | ShapeKind::Terminator => 0.75,
-            _ => 1.,
-        };
-        let count = (((self.size[0] * fraction - 24.).max(1.))
-            / (self.font_size
-                * if self.text_style.monospace {
-                    0.62
-                } else {
-                    0.52
-                }))
-        .floor()
-        .max(1.) as usize;
-        let mut lines = vec![];
-        for paragraph in self.text.split('\n') {
-            let mut line = String::new();
-            for word in paragraph.split_whitespace() {
-                let mut rest = word.chars().collect::<Vec<_>>();
-                if !line.is_empty() && line.chars().count() + 1 + rest.len() > count {
-                    lines.push(std::mem::take(&mut line));
-                }
-                while rest.len() > count {
-                    if !line.is_empty() {
-                        lines.push(std::mem::take(&mut line));
-                    }
-                    lines.push(rest.drain(..count).collect());
-                }
-                if !line.is_empty() {
-                    line.push(' ');
-                }
-                line.extend(rest);
-            }
-            lines.push(line);
-        }
-        lines.join("\n")
+        self.text_layout().text()
     }
     pub fn port_position(&self, port: Port, towards: Point) -> Point {
         let c = self.center();

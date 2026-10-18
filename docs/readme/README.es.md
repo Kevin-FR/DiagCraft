@@ -21,7 +21,7 @@ Las aplicaciones y sus sumas de comprobación SHA-256 están en la
 | Windows x86_64 | ZIP portátil con la aplicación y la CLI |
 | Linux x86_64 | Paquete `.deb` para amd64 o archivo `.tar.gz`, con la aplicación y la CLI |
 
-**0.4.0 es experimental** y añade la recuperación tras un cierre inesperado.
+**0.5.0 es experimental** y añade el ajuste automático de las formas al texto.
 El paquete para Mac tiene firma ad hoc y no ha sido notarizado por Apple.
 Los paquetes de Windows no están firmados con un certificado de editor.
 Consulta la [guía de instalación](../installation.md).
@@ -38,6 +38,7 @@ Consulta la [guía de instalación](../installation.md).
 - Navegación con trackpad, cinta compacta por pestañas y paneles redimensionables con preferencias guardadas.
 - Paleta de comandos con ⌘K / Ctrl+K y ayuda de teclado con búsqueda mediante F1.
 - Archivos `.draw` editables, galería local de proyectos con versiones y exportación SVG/PDF.
+- Ajuste automático de las formas al texto, con medición de fuentes y disposición compartida entre la interfaz, SVG y PDF.
 - Copias locales automáticas para recuperarse de un fallo, sin sobrescribir los originales.
 - CLI y servidor MCP locales: inspección, validación y parches JSON atómicos.
 
@@ -55,7 +56,7 @@ las bibliotecas del sistema macOS: **no se necesita Rosetta**.
 Las guías detalladas están actualmente en francés:
 [idiomas y actualizaciones](../langues-et-mises-a-jour.md), [comandos](../commandes.md),
 [cinta y paneles](../interface.md), [recuperación](../recuperation.md)
-y [versionado](../versioning.md).
+[ajuste del texto](../ajustement-texte.md) y [versionado](../versioning.md).
 
 ## Desarrollo
 
@@ -101,7 +102,7 @@ Consulta la [arquitectura](../architecture.md) y la [elección de bibliotecas](.
 Las tareas previstas y sus criterios de aceptación están en [ROADMAP.md](../../ROADMAP.md).
 Los grupos, la rotación, la importación de imágenes, la exportación PNG, el trazado
 de conectores que evitan obstáculos y los instaladores integrados están pendientes.
-Las formas aún no se ajustan automáticamente al texto. El texto en SVG depende de las fuentes del visor.
+El texto en SVG depende de las fuentes del visor.
 
 Lee [CONTRIBUTING.md](../../CONTRIBUTING.md). Para trabajar en un dibujo con un
 agente, consulta el [contrato para agentes](../AGENTS-DRAW.md). Informa de las

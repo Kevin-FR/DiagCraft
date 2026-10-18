@@ -51,6 +51,14 @@ avec `kind: "text"` pour un texte ; les blocs sont aussi des nœuds.
 `update_node.changes` ne remplace que les champs fournis. `text_style`, si fourni,
 remplace le style entier (champs omis = valeurs par défaut). Les styles optionnels
 à la création peuvent remplacer la géométrie et le contenu explicitement fournis.
+`text_style.auto_fit: true` ajuste automatiquement la taille du nœud après une
+création ou modification. Avec `wrap: true`, la largeur est conservée, sauf si un
+seul graphème ne tient pas ; la hauteur s’adapte. Sans retour automatique, les
+deux dimensions s’adaptent. La position et l’ID restent inchangés. Une dimension
+calculée supérieure à 20 000 px rejette le lot sans modifier le document source.
+L’inspection ajoute `text_layout` (lignes, taille, interligne, `content_area` en px
+de document et booléen `overflow`). Ces valeurs sont dérivées, non modifiables
+dans un patch. Les fichiers existants gardent l’option désactivée par défaut.
 Les alias sont des chaînes uniques dans le lot, réservées aux objets créés.
 Un `target` est un ID numérique existant ou un alias déjà créé sur la même page.
 Une extrémité est soit `{ "node": 12, "port": "right" }`, soit

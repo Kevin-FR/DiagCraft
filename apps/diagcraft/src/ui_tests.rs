@@ -1,6 +1,153 @@
 use super::*;
 
 #[test]
+fn automatic_text_fitting_is_one_undo_and_keeps_the_selected_connected_node() {
+    let (_, mut app) = setup();
+    let a = app.doc.add_node(ShapeKind::Rectangle, [250., 250.]);
+    let b = app.doc.add_node(ShapeKind::Diamond, [600., 250.]);
+    app.doc.connect(a, b, ConnectorKind::Straight).unwrap();
+    app.selected = vec![a];
+    app.commit();
+    let before = app.doc.clone();
+    let node = app.doc.node_mut(a).unwrap();
+    node.text = "A long label 中文 français Deutsch español italiano português ".repeat(6);
+    node.text_style.wrap = true;
+    node.text_style.auto_fit = true;
+    app.commit();
+    assert_eq!(app.selected, vec![a]);
+    assert_eq!(
+        app.doc.node(a).unwrap().position,
+        before.node(a).unwrap().position
+    );
+    assert_eq!(
+        app.doc.node(a).unwrap().size[0],
+        before.node(a).unwrap().size[0]
+    );
+    assert!(app.doc.node(a).unwrap().size[1] > before.node(a).unwrap().size[1]);
+    let fitted = app.doc.clone();
+    app.undo();
+    assert_eq!(app.doc, before);
+    app.redo();
+    assert_eq!(app.doc, fitted);
+}
+
+#[test]
+fn fit_text_command_handles_a_mixed_selection_and_undoes_once() {
+    let (ctx, mut app) = setup();
+    let a = app.doc.add_node(ShapeKind::Rectangle, [250., 250.]);
+    let b = app.doc.add_node(ShapeKind::Diamond, [600., 250.]);
+    let e = app.doc.connect(a, b, ConnectorKind::Straight).unwrap();
+    app.doc.node_mut(a).unwrap().text = "A significantly longer label to fit".into();
+    app.doc.node_mut(b).unwrap().text = "中文\nA decision".into();
+    app.commit();
+    app.selected = vec![a, b, e];
+    let before = app.doc.clone();
+    app.run_command(commands_ui::Command::FitText, &ctx);
+    assert_eq!(app.selected, vec![a, b, e]);
+    assert_eq!(app.doc.connectors, before.connectors);
+    assert!(!app.doc.node(a).unwrap().text_style.auto_fit);
+    assert_ne!(app.doc, before);
+    app.undo();
+    assert_eq!(app.doc, before);
+    app.selected = vec![e];
+    assert!(
+        app.command_unavailable(commands_ui::Command::FitText)
+            .is_some()
+    );
+}
+
+#[test]
+fn manual_resize_turns_off_fitting_and_escape_restores_the_automatic_setting() {
+    for cancel in [false, true] {
+        let (ctx, mut app) = setup();
+        app.snap = false;
+        app.show_quick_toolbar = false;
+        let id = app.doc.add_node(ShapeKind::Rectangle, [600., 400.]);
+        let node = app.doc.node_mut(id).unwrap();
+        node.text_style.auto_fit = true;
+        node.text_style.wrap = true;
+        app.selected = vec![id];
+        app.commit();
+        let before = app.doc.clone();
+        let node = app.doc.node(id).unwrap();
+        let rect = Rect::from_min_size(app.screen(node.position), vec2(node.size[0], node.size[1]));
+        let (at, _) = resize_handles(rect)[4];
+        pointer(&ctx, &mut app, at, true, egui::Modifiers::NONE);
+        assert!(matches!(app.drag, Some(Drag::Resize { .. })));
+        assert!(!app.doc.node(id).unwrap().text_style.auto_fit);
+        if cancel {
+            gesture_key(&ctx, &mut app, Key::Escape, egui::Modifiers::NONE);
+            assert_eq!(app.doc, before);
+        } else {
+            pointer(
+                &ctx,
+                &mut app,
+                at + vec2(40., 30.),
+                false,
+                egui::Modifiers::NONE,
+            );
+            assert!(!app.doc.node(id).unwrap().text_style.auto_fit);
+            app.undo();
+            assert_eq!(app.doc, before);
+        }
+    }
+}
+
+#[test]
+fn native_document_text_uses_shared_lines_fonts_and_fits_the_reserved_area() {
+    for monospace in [false, true] {
+        for bold in [false, true] {
+            let (ctx, mut app) = setup();
+            let id = app.doc.add_node(ShapeKind::Diamond, [350., 350.]);
+            let node = app.doc.node_mut(id).unwrap();
+            node.text = "English français Grüße 中文绘图 español português italiano".into();
+            node.text_style.wrap = true;
+            node.text_style.auto_fit = true;
+            node.text_style.monospace = monospace;
+            node.text_style.bold = bold;
+            app.commit();
+            let node = app.doc.node(id).unwrap().clone();
+            let expected = node.display_text();
+            let output = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1200., 800.))),
+                    ..Default::default()
+                },
+                |ctx| {
+                    egui::CentralPanel::default().show(ctx, |ui| {
+                        app.canvas = ui.max_rect();
+                        app.paint_node(ui.painter(), &node);
+                    });
+                },
+            );
+            let (origin, size) = diagcraft::text_layout::area(&node);
+            let area = Rect::from_min_size(app.screen(origin), vec2(size[0], size[1]) * app.zoom)
+                .expand(2.);
+            let text = output
+                .shapes
+                .iter()
+                .find_map(|shape| {
+                    if let Shape::Text(text) = &shape.shape {
+                        (text.galley.job.text == expected).then_some(text)
+                    } else {
+                        None
+                    }
+                })
+                .unwrap();
+            let bounds = text.galley.rect.translate(text.pos.to_vec2());
+            assert!(
+                area.contains_rect(bounds),
+                "mono={monospace} bold={bold}: text {bounds:?}, area {area:?}"
+            );
+            assert_eq!(
+                text.galley.job.sections[0].format.line_height,
+                Some(node.text_layout().line_height * app.zoom)
+            );
+        }
+    }
+}
+
+#[test]
 fn language_changes_preserve_user_text_selection_and_undo_and_persist_separately() {
     let (ctx, mut app) = setup();
     let id = app.doc.add_node(ShapeKind::Rectangle, [300., 300.]);

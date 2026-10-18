@@ -693,6 +693,9 @@
         "wrap": {
           "type": "boolean"
         },
+        "auto_fit": {
+          "type": "boolean"
+        },
         "align": {
           "enum": [
             "left",
