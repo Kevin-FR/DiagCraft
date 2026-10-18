@@ -42,7 +42,11 @@ L’archive `.tar.gz` reste disponible : la décompresser et lancer `./diagcraft
 La CLI est `./diagcraft-cli`.
 Le paquet x86_64 est construit sur Ubuntu 22.04 et utilise les bibliothèques
 graphiques et pilotes du système. X11 ou Wayland, EGL et xkbcommon sont requis.
-Sur Ubuntu : `sudo apt install libxkbcommon0 libegl1 libgl1 libwayland-client0 libx11-6`.
+Pour l’archive portable, installer les bibliothèques chargées au lancement :
+
+```sh
+sudo apt install libxkbcommon0 libxkbcommon-x11-0 libegl1 libgl1 libx11-6 libx11-xcb1 libxcursor1 libxi6 libxrandr2 libwayland-client0 libwayland-cursor0 libwayland-egl1
+```
 Le paquet Debian installe ces dépendances automatiquement. AppImage et RPM restent prévus.
 
 ## Données

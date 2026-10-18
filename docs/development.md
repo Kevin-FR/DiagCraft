@@ -15,7 +15,7 @@ Sur Ubuntu/Debian :
 
 ```sh
 sudo apt-get update
-sudo apt-get install -y libxkbcommon-dev libwayland-dev libegl1-mesa-dev libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev
+sudo apt-get install -y libxkbcommon-dev libwayland-dev libegl1-mesa-dev libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev libxkbcommon-x11-0
 ```
 
 Installer le contrôleur de licences :
