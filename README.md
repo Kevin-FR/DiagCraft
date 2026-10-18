@@ -1,62 +1,65 @@
 # DiagCraft
 
-**Reliez vos idées.** Un éditeur de diagrammes natif, local et open source,
-avec une interface en sept langues et une API pour les agents IA.
+**English** · [Français](docs/readme/README.fr.md) · [Deutsch](docs/readme/README.de.md) · [Español](docs/readme/README.es.md) · [Italiano](docs/readme/README.it.md) · [Português](docs/readme/README.pt.md) · [简体中文](docs/readme/README.zh-CN.md)
+
+**Connect your ideas.** A native, local, open-source diagram editor with an
+interface in seven languages and an API for AI agents.
 
 [![CI](https://github.com/Kevin-FR/DiagCraft/actions/workflows/build.yml/badge.svg)](https://github.com/Kevin-FR/DiagCraft/actions/workflows/build.yml)
-[![MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-![Interface de DiagCraft](docs/images/interface.png)
+![DiagCraft interface in English](docs/images/interface-en.png)
 
-## Télécharger
+## Download
 
-Les applications et leurs empreintes SHA-256 sont sur la page des
-[releases](https://github.com/Kevin-FR/DiagCraft/releases).
+Applications and their SHA-256 checksums are available on the
+[releases page](https://github.com/Kevin-FR/DiagCraft/releases).
 
-| Plateforme | Paquet |
+| Platform | Package |
 | --- | --- |
-| macOS 13+, Apple Silicon | Application `.app` dans un ZIP ; CLI séparée |
-| Windows x86_64 | ZIP portable avec application et CLI |
-| Linux x86_64 | Paquet `.deb` amd64 ou archive `.tar.gz`, application et CLI |
+| macOS 13+, Apple Silicon | `.app` in a ZIP archive; separate CLI archive |
+| Windows x86_64 | Portable ZIP with the application and CLI |
+| Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-La version **0.4.0** reste expérimentale et ajoute la récupération après une fermeture inattendue. Le paquet
-Mac est signé ad hoc et n’est pas notarié par Apple. Les paquets Windows ne
-sont pas signés avec un certificat éditeur. Voir [l’installation](docs/installation.md).
+**0.4.0 is experimental** and adds recovery after an unexpected shutdown.
+The Mac package is ad hoc signed and has not been notarized by Apple. Windows
+packages are not signed with a publisher certificate. See the
+[installation guide](docs/installation.md).
 
-## Fonctions disponibles
+## Features
 
-- Interface anglais, français, allemand, espagnol, italien, portugais et chinois simplifié.
-- Mises à jour GitHub facultatives, téléchargement vérifié SHA-256 et installation manuelle.
-- Formes, textes, graphiques, huit bibliothèques de symboles et neuf modèles.
-- Connecteurs liés aux blocs ou à extrémités libres, ports et coudes modifiables.
-- Documents multipages, formats de papier, tailles personnalisées et ajustement au dessin.
-- Remplissages, dégradés, motifs, contours, flèches et ombres.
-- Sélection multiple, alignement, espacement, repères, annulation des gestes et historique.
-- Navigation au trackpad, ruban compact par onglet et volets redimensionnables mémorisés.
-- Palette de commandes avec ⌘K / Ctrl+K et aide clavier filtrable avec F1.
-- Fichiers `.draw` éditables, galerie locale avec versions, exports SVG et PDF.
-- Copies automatiques locales et récupération des dessins après un plantage, sans écraser les originaux.
-- CLI et serveur MCP locaux : inspection, validation et patches JSON atomiques.
+- Interface in English, French, German, Spanish, Italian, Portuguese and Simplified Chinese.
+- Optional GitHub update checks, SHA-256-verified downloads and manual installation.
+- Shapes, text, charts, eight symbol libraries and nine templates.
+- Connectors attached to shapes or with free endpoints, connection ports and editable bends.
+- Multipage documents, paper presets, custom page sizes and fit to drawing.
+- Fills, gradients, patterns, outlines, arrowheads and shadows.
+- Multiple selection, alignment, distribution, guides, gesture cancellation and undo history.
+- Trackpad navigation, a compact tabbed ribbon and resizable panels with saved preferences.
+- Command palette with ⌘K / Ctrl+K and searchable keyboard help with F1.
+- Editable `.draw` files, a local project gallery with versions, and SVG/PDF exports.
+- Automatic local recovery copies after a crash, without overwriting original files.
+- Local CLI and MCP server: inspection, validation and atomic JSON patches.
 
-Le format de document **v7** et l’API agents **v1** ont leurs propres numéros,
-indépendants de la version de l’application. Les fichiers des formats v1 à v6
-sont migrés en mémoire à l’ouverture. La source reste intacte jusqu’à l’enregistrement.
+The **v7** document format and **v1** agent API have their own version numbers,
+independent of the application. Files in formats v1–v6 are migrated in memory
+when opened. The source file stays unchanged until you save.
 
-Aucun compte ni clé API n’est nécessaire pour dessiner. Le serveur MCP travaille
-dans un dossier local choisi ; l’application ne contacte pas de modèle IA.
+No account or API key is needed to draw. The MCP server works inside a local
+folder you choose; the application does not contact an AI model.
 
-La langue se choisit dans **Fichier → Langue et paramètres…**. Les textes des
-dessins restent inchangés. Le paquet Mac contient uniquement du code `arm64` et
-utilise les bibliothèques système macOS : **Rosetta n’est pas nécessaire**.
-Voir [langues et mises à jour](docs/langues-et-mises-a-jour.md).
+Choose the interface language in **File → Language and settings…**. Text in
+your drawings stays unchanged. The Mac package contains only `arm64` code and
+uses macOS system libraries: **Rosetta is not required**.
 
-Voir [la recherche de commandes](docs/commandes.md), [le ruban et les volets](docs/interface.md)
-et [les règles de version](docs/versioning.md).
-Voir aussi [la récupération des dessins](docs/recuperation.md).
+Detailed guides are currently in French:
+[languages and updates](docs/langues-et-mises-a-jour.md),
+[commands](docs/commandes.md), [ribbon and panels](docs/interface.md),
+[drawing recovery](docs/recuperation.md) and [versioning](docs/versioning.md).
 
-## Développer
+## Development
 
-Installer [Rust](https://rustup.rs/) et Python 3.11 ou ultérieur, puis :
+Install [Rust](https://rustup.rs/) and Python 3.11 or newer, then run:
 
 ```sh
 git clone https://github.com/Kevin-FR/DiagCraft.git
@@ -65,8 +68,8 @@ cargo run --locked -p diagcraft
 cargo run --locked -p diagcraft-cli -- --help
 ```
 
-Sur Debian/Ubuntu, les dépendances système de compilation sont indiquées dans
-[le guide de développement](docs/development.md).
+Debian/Ubuntu build dependencies are listed in the
+[development guide](docs/development.md).
 
 ```sh
 cargo fmt --all --check
@@ -78,35 +81,36 @@ python3 scripts/check-locales.py
 python3 -m unittest discover -s packaging -p 'test_*.py'
 ```
 
-## Structure
+## Project structure
 
-| Dossier | Rôle |
+| Directory | Purpose |
 | --- | --- |
-| `crates/core` | Modèle, géométrie, pages, historique, SVG/PDF, galerie et API agents |
-| `apps/diagcraft` | Application native egui/eframe |
-| `apps/diagcraft-cli` | Exécutable console sans interface graphique |
-| `assets` | Polices, marque et notices avec provenance et empreintes |
-| `docs` | Architecture, formats, développement, sécurité et releases |
-| `packaging` | Construction des paquets et collecte des licences par cible |
-| `examples` | Documents de démonstration et de compatibilité du format |
+| `crates/core` | Document model, geometry, pages, history, SVG/PDF, gallery and agent API |
+| `apps/diagcraft` | Native egui/eframe application |
+| `apps/diagcraft-cli` | Console executable without a graphical interface |
+| `assets` | Fonts, branding and notices with provenance and checksums |
+| `docs` | Architecture, formats, development, security and releases |
+| `packaging` | Package creation and dependency license collection for each target |
+| `examples` | Demo documents and format compatibility fixtures |
 
-Le moteur est partagé par l’interface, la CLI et MCP. Il ne dépend pas d’egui.
-Voir [l’architecture](docs/architecture.md) et [les choix de bibliothèques](docs/dependencies.md).
+The interface, CLI and MCP share the same engine, which does not depend on egui.
+See the [architecture](docs/architecture.md) and
+[dependency choices](docs/dependencies.md).
 
-## Contribuer
+## Contributing
 
-Les éléments à réaliser et leurs critères sont dans [ROADMAP.md](ROADMAP.md).
-Les groupes, rotations, images, export PNG, routage autour des obstacles et
-installateurs intégrés restent à développer. Le texte ne redimensionne pas
-encore automatiquement les formes. Le rendu SVG dépend des polices du lecteur.
+Planned work and acceptance criteria are in [ROADMAP.md](ROADMAP.md).
+Groups, rotation, image import, PNG export, obstacle-aware routing and integrated
+installers are still planned. Shapes do not yet resize automatically to fit text.
+SVG text rendering depends on the viewer's fonts.
 
-Lire [CONTRIBUTING.md](CONTRIBUTING.md). Pour piloter un dessin avec un agent,
-consulter [le contrat agents](docs/AGENTS-DRAW.md). Les vulnérabilités se signalent
-selon [SECURITY.md](SECURITY.md).
+Read [CONTRIBUTING.md](CONTRIBUTING.md). To work on a drawing with an agent,
+see the [agent contract](docs/AGENTS-DRAW.md). Report vulnerabilities as described
+in [SECURITY.md](SECURITY.md). These contributor documents are currently in French.
 
-## Licence et provenance
+## License and provenance
 
-Le code du projet est sous [licence MIT](LICENSE). Les dépendances et polices
-gardent leurs licences propres ; les notices sont conservées dans les paquets.
-[THIRD_PARTY.md](THIRD_PARTY.md) décrit les attributions, et
-[l’audit de publication](docs/licensing.md) explique les contrôles et leurs limites.
+Project code is released under the [MIT license](LICENSE). Dependencies and fonts
+keep their own licenses; their notices are included in distribution packages.
+[THIRD_PARTY.md](THIRD_PARTY.md) lists attributions, and the
+[publication audit](docs/licensing.md) explains the checks and their limits.

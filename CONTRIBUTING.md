@@ -27,3 +27,11 @@ et tests de compatibilité. Ne pas commettre les résultats de compilation,
 archives de distribution, certificats, journaux personnels ou fichiers de travail.
 
 Les issues et pull requests peuvent être rédigées en français ou en anglais.
+
+## README et traductions
+
+[README.md](README.md) est la page d’accueil en anglais. Les six traductions sont
+dans [docs/readme](docs/readme) et reliées par le sélecteur de langue en haut de chaque fichier.
+Lorsqu’une information commune change (version, plateformes, fonctions ou commandes),
+mettre à jour les sept versions ensemble. Conserver les commandes exécutables et
+vérifier les liens relatifs avec `python3 scripts/check-publication.py`.
