@@ -92,6 +92,7 @@ jobs:
           test ! -e /usr/bin/diagcraft
           test ! -e /usr/share/applications/org.diagcraft.editor.desktop
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
         with:
           name: diagcraft-${{ matrix.name }}
           path: |

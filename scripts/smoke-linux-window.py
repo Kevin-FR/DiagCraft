@@ -98,6 +98,11 @@ def main():
                         return
                     time.sleep(0.25)
                 raise RuntimeError("Wayland window still has the fallback frame or no visible title/buttons")
+            except Exception:
+                for log in ("weston.log", "wayland.log"):
+                    print(f"{log} (last 60 lines):", flush=True)
+                    print("\n".join((args.output / log).read_text().splitlines()[-60:]), flush=True)
+                raise
             finally:
                 stop(app)
                 stop(weston)
