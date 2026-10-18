@@ -14,7 +14,7 @@ repository = os.environ["GITHUB_REPOSITORY"]
 assets = sorted(p for p in (root / "release-assets").iterdir()
                 if p.is_file() and p.name != "SHA256SUMS.txt")
 expected = {f"diagcraft-{tag[1:]}-macos-arm64.zip", f"diagcraft-cli-{tag[1:]}-macos-arm64.zip",
-            f"diagcraft-{tag[1:]}-windows-x86_64.zip", f"diagcraft-{tag[1:]}-linux-x86_64.tar.gz"}
+            f"diagcraft_{tag[1:]}_amd64.deb", f"diagcraft-{tag[1:]}-windows-x86_64.zip", f"diagcraft-{tag[1:]}-linux-x86_64.tar.gz"}
 assert {p.name for p in assets} == expected, "Incomplete or unexpected release asset set"
 checksums = root / "release-assets/SHA256SUMS.txt"
 checksums.write_text("".join(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n" for p in assets))

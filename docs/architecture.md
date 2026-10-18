@@ -28,6 +28,11 @@ ce catalogue et appellent les actions de l’application. Les saisies de texte e
 boîtes de dialogue gardent leurs touches ; une commande de dessin ne doit pas
 s’exécuter derrière une fenêtre modale.
 
+`interface_prefs.rs` conserve uniquement la disposition dans un JSON local borné,
+avec écriture atomique. Les captures et tests n’accèdent pas aux préférences utilisateur.
+Les dimensions voulues restent distinctes des limites temporaires de fenêtre.
+Le moteur documentaire et son historique ne connaissent pas ces préférences.
+
 ## Référence structurelle
 
 L’organisation de [PhotoCraft](https://github.com/storytold/photocraft) sépare

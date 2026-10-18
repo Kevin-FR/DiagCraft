@@ -25,11 +25,25 @@ et les agents. Les premiers paquets n’ont pas de signature éditeur Windows.
 
 ## Linux
 
-Décompresser l’archive et lancer `./diagcraft`. La CLI est `./diagcraft-cli`.
+Sur Debian/Ubuntu amd64, télécharger `diagcraft_<version>_amd64.deb`, puis :
+
+```sh
+sudo apt install ./diagcraft_<version>_amd64.deb
+```
+
+Remplacer `<version>` par le numéro téléchargé. L’application apparaît dans le
+menu Graphisme ; `diagcraft` et `diagcraft-cli` sont dans le PATH. Les fichiers
+`.draw` sont proposés à l’ouverture avec DiagCraft ; la préférence de votre
+application par défaut n’est pas remplacée. Les notices et guides sont dans
+`/usr/share/doc/diagcraft`. Pour désinstaller : `sudo apt remove diagcraft`.
+Vos dessins et données locales sont conservés.
+
+L’archive `.tar.gz` reste disponible : la décompresser et lancer `./diagcraft`.
+La CLI est `./diagcraft-cli`.
 Le paquet x86_64 est construit sur Ubuntu 22.04 et utilise les bibliothèques
 graphiques et pilotes du système. X11 ou Wayland, EGL et xkbcommon sont requis.
 Sur Ubuntu : `sudo apt install libxkbcommon0 libegl1 libgl1 libwayland-client0 libx11-6`.
-La création d’un raccourci desktop et les paquets AppImage/deb/rpm sont prévus.
+Le paquet Debian installe ces dépendances automatiquement. AppImage et RPM restent prévus.
 
 ## Données
 

@@ -34,6 +34,14 @@ python3 scripts/smoke.py --bin target/release/diagcraft-cli
 
 Sur macOS, compiler avec `MACOSX_DEPLOYMENT_TARGET=13.0`, puis
 `python3 scripts/package.py`. La release Mac est uniquement Apple Silicon.
+Sur Linux amd64, `python3 scripts/package.py` crée le tar.gz puis le `.deb`.
+Installer `dpkg-dev`, `desktop-file-utils` et `shared-mime-info` pour le packaging.
+Les dépendances ELF sont calculées par `dpkg-shlibdeps` ; les bibliothèques graphiques
+chargées dynamiquement sont déclarées explicitement. La CI valide le fichier desktop,
+installe le `.deb`, vérifie ses permissions, empreintes et notices, teste la CLI installée
+et une capture native sous Xvfb, puis le désinstalle.
+
+Voir [la politique de versions](versioning.md) avant de créer une release.
 Les fonctions de capture lancent une fenêtre isolée et ne sauvegardent pas
 la bibliothèque personnelle : `target/release/diagcraft --screenshot capture.png compact`.
 

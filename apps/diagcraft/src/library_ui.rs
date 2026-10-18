@@ -4,7 +4,7 @@ impl DrawApp {
     pub(super) fn library_sidebar(&mut self, ctx: &egui::Context) {
         let compact = !self.show_library;
         egui::SidePanel::left("library_rail")
-            .exact_width(if compact { 48. } else { 64. })
+            .exact_width(48.)
             .resizable(false)
             .frame(
                 egui::Frame::new()
@@ -33,10 +33,8 @@ impl DrawApp {
                             (LibraryPanel::Projects, "Travaux"),
                         ] {
                             let active = self.show_library && self.library_panel == panel;
-                            let response = ui.add_sized(
-                                if compact { [36., 40.] } else { [50., 48.] },
-                                egui::Button::new("").selected(active),
-                            );
+                            let response =
+                                ui.add_sized([36., 40.], egui::Button::new("").selected(active));
                             response.widget_info(|| {
                                 egui::WidgetInfo::labeled(
                                     egui::WidgetType::Button,
@@ -105,23 +103,22 @@ impl DrawApp {
                                     self.show_library = true;
                                 }
                             }
-                            if !compact {
-                                ui.label(RichText::new(label).size(10.).color(if active {
-                                    ACCENT
-                                } else {
-                                    MUTED
-                                }));
-                            }
-                            ui.add_space(if compact { 6. } else { 10. });
+                            ui.add_space(6.);
                         }
                     });
             });
         if !self.show_library {
             return;
         }
-        egui::SidePanel::left("symbol_library")
-            .exact_width(256.)
-            .resizable(false)
+        let max_width = (ctx.available_rect().width()
+            - panels_ui::MIN_CANVAS
+            - if self.show_inspector { 260. } else { 0. })
+        .clamp(240., 400.);
+        panels_ui::prepare_width(ctx, "symbol_library", self.library_width, 240., max_width);
+        let panel = egui::SidePanel::left("symbol_library")
+            .default_width(self.library_width)
+            .width_range(240. ..=max_width)
+            .resizable(true)
             .frame(
                 egui::Frame::new()
                     .fill(Color32::WHITE)
@@ -129,23 +126,22 @@ impl DrawApp {
                     .stroke(Stroke::new(1., BORDER)),
             )
             .show(ctx, |ui| {
-                ui.add(
-                    egui::TextEdit::singleline(&mut self.symbol_search)
-                        .hint_text("Rechercher…")
-                        .desired_width(f32::INFINITY)
-                        .char_limit(120),
-                );
-                ui.add_space(12.);
-                ui.heading(match self.library_panel {
+                panels_ui::heading(ui, match self.library_panel {
                     LibraryPanel::Symbols => "Symboles",
                     LibraryPanel::Models => "Modèles",
                     LibraryPanel::Text => "Texte",
                     LibraryPanel::Charts => "Graphiques",
                     LibraryPanel::Projects => "Mes travaux",
-                });
-                ui.separator();
+                }, &mut self.show_library, false);
+                ui.add(egui::TextEdit::singleline(&mut self.symbol_search)
+                    .hint_text("Rechercher…").desired_width(f32::INFINITY).char_limit(120));
+                ui.add_space(8.);
+                let library_footer = self.library_panel == LibraryPanel::Symbols;
+                let body_height = (ui.available_height() - if library_footer { 46. } else { 0. }).max(0.);
                 egui::ScrollArea::vertical()
                     .id_salt("library_scroll")
+                    .max_height(body_height)
+                    .auto_shrink([false, false])
                     .show(ui, |ui| match self.library_panel {
                         LibraryPanel::Projects => {
                             if ui.button("Ouvrir mes travaux enregistrés").clicked(){self.open_gallery();}
@@ -168,7 +164,7 @@ impl DrawApp {
                                 .cloned()
                                 .collect();
                             for t in items {
-                                if template_card(ui, &t, 220.).clicked() {
+                                if template_card(ui, &t, ui.available_width()).clicked() {
                                     self.open_template(&t);
                                 }
                             }
@@ -181,7 +177,7 @@ impl DrawApp {
                             ] {
                                 if ui
                                     .add_sized(
-                                        [220., 52.],
+                                        [ui.available_width(), 52.],
                                         egui::Button::new(
                                             RichText::new(name).size(size * 0.7).strong(),
                                         ),
@@ -205,15 +201,33 @@ impl DrawApp {
                             );
                         }
                     });
+                if library_footer {
+                    ui.separator();
+                    if ui.add_sized([ui.available_width(), 30.], egui::Button::new("+ Bibliothèques de symboles…")).clicked() {
+                        self.open_symbol_manager();
+                    }
+                }
             });
+        panels_ui::remember_width(
+            ctx,
+            "symbol_library",
+            panel.response.rect,
+            &mut self.library_width,
+        );
     }
     fn symbol_library(&mut self, ui: &mut egui::Ui) {
-        if ui.button("Gérer les bibliothèques…").clicked() {
-            self.open_symbol_manager();
-        }
-        ui.add_space(8.);
-        if self.library.visible("personal") {
+        let searching = !self.symbol_search.trim().is_empty();
+        if self.library.visible("personal")
+            || (searching
+                && self
+                    .library
+                    .symbols
+                    .iter()
+                    .any(|n| matches_search(&n.text, &self.symbol_search)))
+        {
             egui::CollapsingHeader::new("Ma bibliothèque")
+                .id_salt(("personal", searching))
+                .open(searching.then_some(true))
                 .default_open(true)
                 .show(ui, |ui| {
                     let selected = self
@@ -255,16 +269,35 @@ impl DrawApp {
                     });
                 });
         }
-        if self.library.visible_libraries.is_empty() {
+        if self.library.visible_libraries.is_empty() && self.symbol_search.trim().is_empty() {
             ui.label("Aucune bibliothèque affichée. Choisissez-en dans le gestionnaire.");
         }
+        if searching {
+            ui.label(
+                RichText::new("Recherche dans toutes les bibliothèques")
+                    .size(12.)
+                    .color(INK),
+            );
+        }
+        let mut matches = 0;
         for library in symbols::LIBRARIES {
-            if !self.library.visible(library.id) {
+            if !searching && !self.library.visible(library.id) {
                 continue;
             }
+            if searching
+                && !library
+                    .kinds
+                    .iter()
+                    .any(|kind| matches_search(kind.label(), &self.symbol_search))
+            {
+                continue;
+            }
+            matches += 1;
             let title = library.title;
             let kinds = library.kinds;
             egui::CollapsingHeader::new(title)
+                .id_salt((title, searching))
+                .open(searching.then_some(true))
                 .default_open(true)
                 .show(ui, |ui| {
                     egui::Grid::new(title)
@@ -287,6 +320,16 @@ impl DrawApp {
                         });
                 });
         }
+        if searching
+            && matches == 0
+            && !self
+                .library
+                .symbols
+                .iter()
+                .any(|n| matches_search(&n.text, &self.symbol_search))
+        {
+            ui.label("Aucun symbole trouvé. Essayez un autre mot.");
+        }
     }
     pub(super) fn choose_symbol(&mut self, n: Node) {
         self.set_tool(Tool::Shape(n.kind));
@@ -301,6 +344,7 @@ impl DrawApp {
         ] {
             ui.add_space(10.);
             ui.label(RichText::new(category).strong());
+            let card_width = ((ui.available_width() - 8.) / 2.).clamp(90., 160.);
             egui::Grid::new(category)
                 .num_columns(2)
                 .spacing(vec2(8., 10.))
@@ -314,7 +358,7 @@ impl DrawApp {
                         }
                         ui.vertical(|ui| {
                             let (r, response) =
-                                ui.allocate_exact_size(vec2(106., 78.), Sense::click());
+                                ui.allocate_exact_size(vec2(card_width, 78.), Sense::click());
                             response.widget_info(|| {
                                 egui::WidgetInfo::labeled(
                                     egui::WidgetType::Button,
@@ -700,7 +744,9 @@ impl DrawApp {
 }
 
 fn matches_search(text: &str, search: &str) -> bool {
-    text.to_lowercase().contains(&search.trim().to_lowercase())
+    commands_ui::normalize(search)
+        .split_whitespace()
+        .all(|word| commands_ui::normalize(text).contains(word))
 }
 pub(super) fn symbol_tile(ui: &mut egui::Ui, kind: ShapeKind, active: bool) -> egui::Response {
     let (r, response) = ui.allocate_exact_size(vec2(48., 56.), Sense::click());

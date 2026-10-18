@@ -19,6 +19,8 @@ travaux prévus, sans promesse de date.
   Critère : parcours créer → relier → enregistrer → rouvrir → exporter sans blocage.
 - [x] Tableau de raccourcis et recherche de commandes (0.2.0) : palette ⌘K / Ctrl+K,
   recherche sans accents, navigation clavier et aide filtrable avec F1.
+- [x] Ruban compact par onglet, volets homogènes et redimensionnables, préférences
+  locales et recherche dans les bibliothèques masquées (0.2.1).
 - [ ] Ajustement automatique du bloc au texte, avec rendu cohérent dans les exports.
 - [ ] Sauvegarde de récupération après fermeture anormale, sans écraser le dessin source.
 - [ ] Tests d’intégration CLI/MCP sur les trois systèmes et diagnostics plus lisibles.
@@ -35,7 +37,8 @@ travaux prévus, sans promesse de date.
 
 - [ ] Signature Developer ID et notarisation Apple, après configuration des certificats.
 - [ ] Icône et métadonnées natives Windows, installateur et signature éditeur.
-- [ ] Intégration Linux : fichier desktop, MIME, AppImage, puis deb/rpm si demandés.
+- [x] Intégration Linux : fichier desktop, icône, MIME et paquet Debian amd64 (0.2.1).
+- [ ] Paquets AppImage et RPM.
 - [ ] Linux ARM64 et Windows ARM64 après disponibilité de tests dédiés.
 - [ ] Vérification de mise à jour facultative, sans télémétrie.
 

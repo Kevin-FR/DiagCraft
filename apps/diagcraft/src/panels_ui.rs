@@ -9,6 +9,51 @@ impl DrawApp {
         }
     }
 }
+
+pub(super) const MIN_CANVAS: f32 = 520.;
+
+/// Restore the user's preferred width before applying temporary window limits.
+/// egui's panel memory otherwise retains the width of a shrunken window.
+pub(super) fn prepare_width(ctx: &egui::Context, name: &str, preferred: f32, min: f32, max: f32) {
+    let id = egui::Id::new(name);
+    let mut state = egui::containers::panel::PanelState::load(ctx, id)
+        .unwrap_or(egui::containers::panel::PanelState { rect: Rect::ZERO });
+    state.rect.max.x = state.rect.min.x + preferred.clamp(min, max.max(min));
+    ctx.data_mut(|data| data.insert_persisted(id, state));
+}
+
+pub(super) fn remember_width(ctx: &egui::Context, name: &str, rect: Rect, preferred: &mut f32) {
+    // egui 0.33's resize response distinguishes user drags from responsive clamps.
+    if ctx
+        .read_response(egui::Id::new(name).with("__resize"))
+        .is_some_and(|r| r.dragged())
+    {
+        *preferred = rect.width().clamp(240., 400.);
+    }
+}
+
+pub(super) fn heading(ui: &mut egui::Ui, title: &str, open: &mut bool, right: bool) {
+    ui.horizontal(|ui| {
+        ui.add(egui::Label::new(RichText::new(title).size(15.).strong()).truncate());
+        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+            if panel_toggle(
+                ui,
+                true,
+                right,
+                if right {
+                    "Masquer les propriétés"
+                } else {
+                    "Réduire la bibliothèque"
+                },
+            )
+            .clicked()
+            {
+                *open = false;
+            }
+        });
+    });
+    ui.separator();
+}
 pub(super) fn ribbon_toggle(ui: &mut egui::Ui, expanded: bool) -> egui::Response {
     let label = if expanded {
         "Réduire le ruban"

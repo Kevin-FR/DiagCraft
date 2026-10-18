@@ -1,0 +1,9 @@
+[
+  {
+    "file": "docs/images/interface.png",
+    "sha256": "3688c6d57a40c8d0be4ef8862555c0988a5ae12d2c4c8b01e0aba558f9515408",
+    "source": "Native DiagCraft 0.2.1 capture using its own demo and symbols; no external application artwork.",
+    "license": "MIT",
+    "command": "diagcraft --screenshot docs/images/interface.png interface"
+  }
+]

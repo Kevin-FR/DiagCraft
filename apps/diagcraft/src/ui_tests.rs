@@ -2271,7 +2271,7 @@ fn header_icons_collapse_and_reopen_panels_without_modifying_the_drawing() {
     for _ in 0..3 {
         panel_frame(&ctx, &mut app, size, vec![]);
     }
-    assert!(app.canvas.width() > width + 260.);
+    assert!(app.canvas.width() > width + 250.);
     let collapsed = app.canvas.width();
     panel_click(&ctx, &mut app, size, icons[1]);
     assert!(app.show_inspector);
@@ -2326,12 +2326,13 @@ fn inspector_close_button_returns_space_and_explicit_text_edit_can_reopen_it() {
     for _ in 0..3 {
         let out = panel_frame(&ctx, &mut app, size, vec![]);
         for s in out.shapes {
-            if let Shape::Text(t) = s.shape
-                && t.galley.job.text == "×"
-                && t.pos.x > size.x - 70.
-                && t.pos.y > app.canvas.top()
+            if let Shape::Rect(r) = s.shape
+                && (r.rect.width() - 20.).abs() < 0.1
+                && (r.rect.height() - 16.).abs() < 0.1
+                && r.rect.center().x > size.x - 70.
+                && r.rect.center().y > app.canvas.top()
             {
-                close = Some(t.pos + t.galley.size() / 2.);
+                close = Some(r.rect.center());
             }
         }
     }
@@ -3430,7 +3431,7 @@ fn compact_ribbon_gains_height_and_its_toggle_preserves_the_manual_choice() {
     panel_click(&ctx, &mut app, size, ribbon_chevron(&out));
     let out = stable_panel(&ctx, &mut app, size);
     assert!(app.ribbon_is_expanded(&ctx));
-    assert!((compact_height - app.canvas.height() - 72.).abs() < 1.);
+    assert!((compact_height - app.canvas.height() - 60.).abs() < 1.);
     panel_click(&ctx, &mut app, size, ribbon_chevron(&out));
     stable_panel(&ctx, &mut app, vec2(1440., 960.));
     assert!(!app.ribbon_is_expanded(&ctx));
@@ -3456,16 +3457,18 @@ fn automatic_ribbon_adapts_without_changing_the_document_or_selection() {
     }
 }
 #[test]
-fn clicking_a_ribbon_tab_expands_its_commands_and_compact_controls_still_work() {
+fn clicking_a_ribbon_tab_keeps_compact_mode_and_displays_its_own_commands() {
     let (ctx, mut app, id) = panel_setup();
     let size = vec2(1280., 800.);
     let before = app.doc.clone();
     let out = stable_panel(&ctx, &mut app, size);
     panel_click(&ctx, &mut app, size, ux_text(&out, "Insérer"));
     let out = stable_panel(&ctx, &mut app, size);
-    assert!(app.ribbon_is_expanded(&ctx));
+    assert!(!app.ribbon_is_expanded(&ctx));
     assert!(app.ribbon_tab == RibbonTab::Insert);
-    panel_click(&ctx, &mut app, size, ribbon_chevron(&out));
+    ux_text(&out, "Tableau");
+    ux_text(&out, "Ajouter une page");
+    panel_click(&ctx, &mut app, size, ux_text(&out, "Accueil"));
     let out = stable_panel(&ctx, &mut app, size);
     panel_click(&ctx, &mut app, size, ux_text(&out, "Propriétés"));
     stable_panel(&ctx, &mut app, size);
@@ -5233,4 +5236,204 @@ fn closing_an_inactive_tab_finishes_the_gesture_and_keeps_its_undo_step() {
     app.undo();
     assert_eq!(app.doc, before);
     assert!(!app.history.can_undo());
+}
+
+#[test]
+fn compact_tabs_have_distinct_commands_and_never_change_the_drawing() {
+    let (ctx, mut app, id) = panel_setup();
+    app.selected = vec![id];
+    app.ribbon_expanded = Some(false);
+    let before = app.doc.clone();
+    let size = vec2(1200., 760.);
+    let initial = stable_panel(&ctx, &mut app, size);
+    let height = app.canvas.height();
+    let mut out = initial;
+    for (label, tab, command) in [
+        ("Insérer", RibbonTab::Insert, "Tableau"),
+        ("Conception", RibbonTab::Design, "Thèmes"),
+        ("Affichage", RibbonTab::View, "Volets et ruban"),
+        ("Symboles", RibbonTab::Symbols, "Afficher les formes"),
+        ("Avancé", RibbonTab::Advanced, "Vérifier le document"),
+        ("Accueil", RibbonTab::Home, "Relier · C"),
+    ] {
+        panel_click(&ctx, &mut app, size, ux_text(&out, label));
+        out = stable_panel(&ctx, &mut app, size);
+        assert!(app.ribbon_tab == tab);
+        assert!(!app.ribbon_is_expanded(&ctx));
+        ux_text(&out, command);
+        assert!((app.canvas.height() - height).abs() < 1.);
+        assert_eq!(app.doc, before);
+        assert_eq!(app.selected, vec![id]);
+        assert!(!app.history.can_undo());
+    }
+}
+
+#[test]
+fn wide_panel_preferences_survive_a_temporary_small_window() {
+    let (ctx, mut app, id) = panel_setup();
+    app.show_inspector = true;
+    app.show_quick_toolbar = false;
+    app.selected = vec![id];
+    app.library_width = 400.;
+    app.inspector_width = 400.;
+    let before = app.doc.clone();
+    stable_panel(&ctx, &mut app, vec2(1600., 960.));
+    let left = app.canvas.left();
+    let right_width = 1600. - app.canvas.right();
+    stable_panel(&ctx, &mut app, vec2(1200., 760.));
+    assert!(app.canvas.width() >= 490., "{}", app.canvas.width());
+    assert!(app.canvas.height() > 400.);
+    assert_eq!((app.library_width, app.inspector_width), (400., 400.));
+    stable_panel(&ctx, &mut app, vec2(1600., 960.));
+    assert!((app.canvas.left() - left).abs() < 1.);
+    assert!((1600. - app.canvas.right() - right_width).abs() < 1.);
+    assert_eq!(app.doc, before);
+    assert_eq!(app.selected, vec![id]);
+    assert!(!app.history.can_undo());
+}
+
+#[test]
+fn panel_edge_drag_changes_the_preference_without_moving_objects() {
+    let (ctx, mut app, id) = panel_setup();
+    let size = vec2(1440., 960.);
+    app.show_inspector = true;
+    app.selected = vec![id];
+    app.show_quick_toolbar = false;
+    let before = app.doc.clone();
+    stable_panel(&ctx, &mut app, size);
+    for (name, right) in [("symbol_library", false), ("inspector", true)] {
+        let rect = egui::containers::panel::PanelState::load(&ctx, egui::Id::new(name))
+            .unwrap()
+            .rect;
+        let start = pos2(
+            if right { rect.left() } else { rect.right() },
+            rect.center().y,
+        );
+        let end = start + vec2(if right { -35. } else { 35. }, 0.);
+        let width = if right {
+            app.inspector_width
+        } else {
+            app.library_width
+        };
+        panel_frame(&ctx, &mut app, size, vec![egui::Event::PointerMoved(start)]);
+        panel_pointer(&ctx, &mut app, size, start, true);
+        panel_frame(&ctx, &mut app, size, vec![egui::Event::PointerMoved(end)]);
+        panel_frame(&ctx, &mut app, size, vec![]);
+        panel_pointer(&ctx, &mut app, size, end, false);
+        stable_panel(&ctx, &mut app, size);
+        let changed = if right {
+            app.inspector_width
+        } else {
+            app.library_width
+        };
+        assert!(changed > width + 25., "{name}: {width} -> {changed}");
+    }
+    assert_eq!(app.doc, before);
+    assert_eq!(app.selected, vec![id]);
+    assert!(!app.history.can_undo());
+    assert!(app.drag.is_none());
+}
+
+#[test]
+fn interface_preferences_roundtrip_and_reset_preserve_documents_and_undo() {
+    let (ctx, mut app, id) = panel_setup();
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("interface-v1.json");
+    app.interface_path = Some(path.clone());
+    app.library_width = 333.;
+    app.inspector_width = 345.;
+    app.show_library = false;
+    app.show_inspector = true;
+    app.ribbon_expanded = Some(false);
+    app.ribbon_tab = RibbonTab::Insert;
+    app.library_panel = LibraryPanel::Charts;
+    app.show_quick_toolbar = false;
+    app.save_interface().unwrap();
+    let (_, mut reopened, _) = panel_setup();
+    reopened.interface_path = Some(path.clone());
+    reopened.restore_interface();
+    assert_eq!(
+        (reopened.library_width, reopened.inspector_width),
+        (333., 345.)
+    );
+    assert!(!reopened.show_library && reopened.show_inspector && !reopened.show_quick_toolbar);
+    assert!(
+        reopened.ribbon_tab == RibbonTab::Insert && reopened.library_panel == LibraryPanel::Charts
+    );
+    assert_eq!(reopened.ribbon_expanded, Some(false));
+    app.doc.node_mut(id).unwrap().text = "Une modification annulable".into();
+    app.commit();
+    app.selected = vec![id];
+    let before = app.doc.clone();
+    app.run_command(commands_ui::Command::ResetInterface, &ctx);
+    assert_eq!((app.library_width, app.inspector_width), (256., 280.));
+    assert!(app.show_library && !app.show_inspector);
+    assert_eq!(app.ribbon_expanded, None);
+    assert_eq!(app.doc, before);
+    assert_eq!(app.selected, vec![id]);
+    app.undo();
+    assert_ne!(app.doc, before);
+    app.save_interface().unwrap();
+    reopened.restore_interface();
+    assert!(reopened.show_library && !reopened.show_inspector);
+    assert_eq!(reopened.library_width, 256.);
+}
+
+#[test]
+fn corrupt_or_future_interface_preferences_are_preserved_and_dimensions_are_bounded() {
+    let (_, mut app, _) = panel_setup();
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("interface-v1.json");
+    for bytes in [
+        b"broken JSON".to_vec(),
+        br#"{"version":999}"#.to_vec(),
+        vec![b' '; 8193],
+    ] {
+        std::fs::write(&path, &bytes).unwrap();
+        app.interface_path = Some(path.clone());
+        app.restore_interface();
+        assert!(app.interface_path.is_none());
+        app.save_interface().unwrap();
+        assert_eq!(std::fs::read(&path).unwrap(), bytes);
+    }
+    std::fs::write(&path, br#"{"library_width":-10,"inspector_width":99999}"#).unwrap();
+    app.interface_path = Some(path);
+    app.restore_interface();
+    assert_eq!((app.library_width, app.inspector_width), (240., 400.));
+    assert_eq!(app.doc, app.saved);
+}
+
+#[test]
+fn searching_hidden_symbol_libraries_does_not_change_enabled_libraries_or_the_document() {
+    let (ctx, mut app, _) = panel_setup();
+    app.library.visible_libraries = vec!["basic".into()];
+    app.symbol_search = "classe uml".into();
+    let before = app.doc.clone();
+    let size = vec2(1280., 800.);
+    let out = stable_panel(&ctx, &mut app, size);
+    ux_text(&out, "Recherche dans toutes les bibliothèques");
+    let tile = out
+        .shapes
+        .iter()
+        .find_map(|s| match &s.shape {
+            Shape::Rect(r)
+                if (r.rect.width() - 48.).abs() < 0.1
+                    && (r.rect.height() - 56.).abs() < 0.1
+                    && r.rect.left() < app.canvas.left()
+                    && s.clip_rect.contains_rect(r.rect) =>
+            {
+                Some(r.rect.center())
+            }
+            _ => None,
+        })
+        .expect("Class symbol found in a hidden library");
+    panel_click(&ctx, &mut app, size, tile);
+    assert!(app.pending_symbol.is_some());
+    assert_eq!(app.library.visible_libraries, vec!["basic"]);
+    assert_eq!(app.doc, before);
+    assert!(!app.history.can_undo());
+    app.symbol_search = "introuvable 123".into();
+    let out = stable_panel(&ctx, &mut app, size);
+    ux_text(&out, "Aucun symbole trouvé. Essayez un autre mot.");
+    ux_text(&out, "+ Bibliothèques de symboles…");
 }

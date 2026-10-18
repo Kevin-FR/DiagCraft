@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-diagcraft">
+    <comment>DiagCraft diagram</comment>
+    <comment xml:lang="fr">Diagramme DiagCraft</comment>
+    <sub-class-of type="application/json"/>
+    <glob pattern="*.draw" weight="60"/>
+    <icon name="org.diagcraft.editor"/>
+  </mime-type>
+</mime-info>

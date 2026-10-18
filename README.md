@@ -6,7 +6,7 @@ avec une interface en français et une API pour les agents IA.
 [![CI](https://github.com/Kevin-FR/DiagCraft/actions/workflows/build.yml/badge.svg)](https://github.com/Kevin-FR/DiagCraft/actions/workflows/build.yml)
 [![MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 
-![Interface de DiagCraft](docs/images/desktop.png)
+![Interface de DiagCraft](docs/images/interface.png)
 
 ## Télécharger
 
@@ -17,9 +17,9 @@ Les applications et leurs empreintes SHA-256 sont sur la page des
 | --- | --- |
 | macOS 13+, Apple Silicon | Application `.app` dans un ZIP ; CLI séparée |
 | Windows x86_64 | ZIP portable avec application et CLI |
-| Linux x86_64 | Archive `.tar.gz` avec application et CLI |
+| Linux x86_64 | Paquet `.deb` amd64 ou archive `.tar.gz`, application et CLI |
 
-La version **0.2.0** reste expérimentale et améliore la prise en main. Le paquet
+La version **0.2.1** reste expérimentale et améliore la prise en main. Le paquet
 Mac est signé ad hoc et n’est pas notarié par Apple. Les paquets Windows ne
 sont pas signés avec un certificat éditeur. Voir [l’installation](docs/installation.md).
 
@@ -30,7 +30,7 @@ sont pas signés avec un certificat éditeur. Voir [l’installation](docs/insta
 - Documents multipages, formats de papier, tailles personnalisées et ajustement au dessin.
 - Remplissages, dégradés, motifs, contours, flèches et ombres.
 - Sélection multiple, alignement, espacement, repères, annulation des gestes et historique.
-- Navigation au trackpad, zoom sous le pointeur, ruban et volets compacts.
+- Navigation au trackpad, ruban compact par onglet et volets redimensionnables mémorisés.
 - Palette de commandes avec ⌘K / Ctrl+K et aide clavier filtrable avec F1.
 - Fichiers `.draw` éditables, galerie locale avec versions, exports SVG et PDF.
 - CLI et serveur MCP locaux : inspection, validation et patches JSON atomiques.
@@ -42,7 +42,8 @@ sont migrés en mémoire à l’ouverture. La source reste intacte jusqu’à l�
 Aucun compte ni clé API n’est nécessaire pour dessiner. Le serveur MCP travaille
 dans un dossier local choisi ; l’application ne contacte pas de modèle IA.
 
-Voir [la recherche de commandes et les raccourcis](docs/commandes.md).
+Voir [la recherche de commandes](docs/commandes.md), [le ruban et les volets](docs/interface.md)
+et [les règles de version](docs/versioning.md).
 
 ## Développer
 

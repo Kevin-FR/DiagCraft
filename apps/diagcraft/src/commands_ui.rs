@@ -39,6 +39,7 @@ pub(super) enum Command {
     Library,
     Inspector,
     Ribbon,
+    ResetInterface,
     Grid,
     Snap,
     Guides,
@@ -128,6 +129,12 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
         "compact barre outils"
     ),
     command!(
+        ResetInterface,
+        "Réinitialiser l’interface",
+        "Affichage",
+        "volets disposition ruban défaut reset"
+    ),
+    command!(
         Grid,
         "Afficher / masquer la grille",
         "Affichage",
@@ -209,7 +216,7 @@ pub(super) struct HelpState {
     pub gestures: bool,
 }
 
-fn normalize(text: &str) -> String {
+pub(super) fn normalize(text: &str) -> String {
     text.to_lowercase()
         .chars()
         .map(|c| match c {
@@ -377,6 +384,7 @@ impl DrawApp {
             Library => self.show_library = !self.show_library,
             Inspector => self.show_inspector = !self.show_inspector,
             Ribbon => self.ribbon_expanded = Some(!self.ribbon_is_expanded(ctx)),
+            ResetInterface => self.reset_interface(ctx),
             Grid => self.grid = !self.grid,
             Snap => self.snap = !self.snap,
             Guides => self.smart_guides = !self.smart_guides,

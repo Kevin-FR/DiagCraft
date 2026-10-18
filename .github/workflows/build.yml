@@ -66,7 +66,7 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - name: Linux system libraries
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libegl1-mesa-dev libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libegl1-mesa-dev libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev dpkg-dev desktop-file-utils shared-mime-info xvfb xauth libgl1-mesa-dri
       - run: cargo fmt --all --check
       - run: cargo clippy --locked --workspace --all-targets -- -D warnings
       - run: cargo test --locked --workspace
@@ -78,12 +78,23 @@ jobs:
           if [ "$RUNNER_OS" = "Windows" ]; then BIN=target/release/diagcraft-cli.exe; fi
           python scripts/smoke.py --bin "$BIN"
       - run: python scripts/package.py
+      - name: Debian installation, desktop integration and installed CLI
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y ./dist/diagcraft_*_amd64.deb
+          python scripts/verify-debian.py
+          python scripts/smoke.py --bin /usr/bin/diagcraft-cli
+          timeout 60s xvfb-run -a /usr/bin/diagcraft --screenshot /tmp/diagcraft-debian.png ruban-compact
+          sudo apt-get remove -y diagcraft
+          test ! -e /usr/bin/diagcraft
+          test ! -e /usr/share/applications/org.diagcraft.editor.desktop
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: diagcraft-${{ matrix.name }}
           path: |
             dist/*.zip
             dist/*.tar.gz
+            dist/*.deb
           if-no-files-found: error
 
   release:

@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=DiagCraft
+Comment=Create diagrams with shapes and connectors
+Comment[fr]=Créer des diagrammes avec des formes et des connecteurs
+Exec=diagcraft %f
+TryExec=diagcraft
+Icon=org.diagcraft.editor
+Terminal=false
+Categories=Graphics;VectorGraphics;
+MimeType=application/x-diagcraft;
+StartupWMClass=org.diagcraft.editor
+Keywords=diagram;flowchart;drawing;MCP;
+Keywords[fr]=diagramme;organigramme;dessin;MCP;

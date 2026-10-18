@@ -89,7 +89,7 @@ enum Drag {
         id: u64,
     },
 }
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 enum LibraryPanel {
     Models,
     Symbols,
@@ -107,7 +107,7 @@ enum Pending {
     CloseTab(usize),
 }
 
-#[derive(Clone, Copy, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 enum RibbonTab {
     #[default]
     Home,
@@ -173,6 +173,9 @@ pub struct DrawApp {
     page_breaks: bool,
     show_library: bool,
     show_inspector: bool,
+    library_width: f32,
+    inspector_width: f32,
+    interface_path: Option<PathBuf>,
     symbol_search: String,
     clipboard: Option<Document>,
     tabs: Vec<Session>,
@@ -232,13 +235,27 @@ pub struct DrawApp {
 impl DrawApp {
     pub fn capture_tab(&mut self, name: &str) {
         self.ribbon_tab = match name {
-            "inserer" => RibbonTab::Insert,
+            "inserer" | "ruban-inserer" => RibbonTab::Insert,
             "conception" => RibbonTab::Design,
             "affichage" => RibbonTab::View,
             "symboles" => RibbonTab::Symbols,
             "avance" => RibbonTab::Advanced,
             _ => RibbonTab::Home,
         };
+        if matches!(name, "interface" | "ruban-inserer") {
+            self.ribbon_expanded = Some(false);
+            self.show_library = true;
+            self.show_inspector = name == "interface";
+            self.show_quick_toolbar = false;
+            if name == "interface" {
+                self.selected = self
+                    .doc
+                    .nodes
+                    .first()
+                    .map(|n| vec![n.id])
+                    .unwrap_or_default();
+            }
+        }
         match name {
             "remplissage" | "contours" | "ombres" | "ombres-prereglages" | "selection-multiple"
             | "selection-contours" | "selection-ombres" | "selection-cadre" => {
@@ -450,6 +467,9 @@ impl DrawApp {
         let persist = screenshot.is_none();
         let mut app = Self::from_context(&cc.egui_ctx, doc, path, screenshot);
         if persist {
+            app.interface_path =
+                library::default_path().map(|p| p.with_file_name("interface-v1.json"));
+            app.restore_interface();
             app.library_path = library::default_path();
             let load_path = app.library_path.as_ref().and_then(|p| {
                 if p.exists() {
@@ -567,6 +587,9 @@ impl DrawApp {
             page_breaks: false,
             show_library: true,
             show_inspector: false,
+            library_width: 256.,
+            inspector_width: 280.,
+            interface_path: None,
             symbol_search: String::new(),
             clipboard: None,
             tabs: vec![],
@@ -1067,9 +1090,11 @@ impl DrawApp {
     }
     fn inspector(&mut self, ctx: &egui::Context) {
         let before = self.doc.clone();
-        egui::SidePanel::right("inspector").exact_width(254.).resizable(false).show_separator_line(false).frame(egui::Frame::new().fill(Color32::WHITE).inner_margin(egui::Margin::symmetric(20,22)).stroke(Stroke::new(1.,BORDER))).show(ctx,|ui| {
-            ui.spacing_mut().item_spacing.y=6.;ui.spacing_mut().interact_size.y=26.;ui.spacing_mut().button_padding.y=4.;
-            ui.horizontal(|ui|{ui.label(RichText::new("PROPRIÉTÉS").size(11.).strong().color(MUTED));ui.with_layout(Layout::right_to_left(Align::Center),|ui|{if ui.button("×").on_hover_text("Masquer les propriétés").clicked(){self.show_inspector=false;}});});ui.add_space(10.);
+        let max_width = (ctx.available_rect().width() - panels_ui::MIN_CANVAS).clamp(260., 400.);
+        panels_ui::prepare_width(ctx, "inspector", self.inspector_width, 260., max_width);
+        let panel = egui::SidePanel::right("inspector").default_width(self.inspector_width).width_range(260. ..=max_width).resizable(true).show_separator_line(false).frame(egui::Frame::new().fill(Color32::WHITE).inner_margin(12).stroke(Stroke::new(1.,BORDER))).show(ctx,|ui| {
+            ui.spacing_mut().item_spacing.y=6.;ui.spacing_mut().interact_size.y=30.;ui.spacing_mut().button_padding.y=5.;
+            panels_ui::heading(ui, if self.selected.is_empty() { "Document" } else { "Propriétés" }, &mut self.show_inspector, true);
             egui::ScrollArea::vertical().show(ui,|ui| {
                 if self.selected.len()==1 {
                     let id=self.selected[0];
@@ -1124,6 +1149,12 @@ impl DrawApp {
                 }
             });
         });
+        panels_ui::remember_width(
+            ctx,
+            "inspector",
+            panel.response.rect,
+            &mut self.inspector_width,
+        );
         if self.doc != before && ctx.input(|i| i.pointer.primary_down()) {
             self.property_edit = true;
         }
@@ -1196,7 +1227,13 @@ impl DrawApp {
                 let outer = ui.available_rect_before_wrap();
                 let inset = if self.rulers { 24. } else { 0. };
                 let rect = Rect::from_min_max(outer.min + vec2(inset, inset), outer.max);
-                let response = ui.allocate_rect(rect, Sense::click_and_drag());
+                // Reserve panel resize grips: the canvas is registered after the
+                // panels and must not steal drags at their shared boundary.
+                let mut hit_rect = rect;
+                let grip = ui.style().interaction.resize_grab_radius_side + 1.;
+                if self.show_inspector { hit_rect.max.x -= grip; }
+                if self.show_library && !self.rulers { hit_rect.min.x += grip; }
+                let response = ui.allocate_rect(hit_rect, Sense::click_and_drag());
                 self.canvas = rect;
                 if self.fit_next {
                     self.fit();
@@ -2129,6 +2166,11 @@ impl DrawApp {
 }
 
 impl eframe::App for DrawApp {
+    fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+        if let Err(error) = self.save_interface() {
+            eprintln!("Préférences d’interface : {error}");
+        }
+    }
     fn clear_color(&self, visuals: &egui::Visuals) -> [f32; 4] {
         visuals.panel_fill.to_normalized_gamma_f32()
     }
@@ -2328,6 +2370,9 @@ mod connection_ui;
 
 #[path = "panels_ui.rs"]
 mod panels_ui;
+
+#[path = "interface_prefs.rs"]
+mod interface_prefs;
 
 #[path = "navigation_ui.rs"]
 mod navigation_ui;

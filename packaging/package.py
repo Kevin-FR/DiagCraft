@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def checksums():
-    files = sorted(p for p in (ROOT / "dist").iterdir() if p.suffix == ".zip" or p.name.endswith(".tar.gz"))
+    files = sorted(p for p in (ROOT / "dist").iterdir() if p.suffix in (".zip", ".deb") or p.name.endswith(".tar.gz"))
     (ROOT / "dist/SHA256SUMS.txt").write_text("".join(
         f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n" for p in files))
 
@@ -61,6 +61,9 @@ def main():
     else:
         with tarfile.open(archive, "w:gz") as output:
             output.add(stage, arcname=name)
+    if system == "linux":
+        from debian import build
+        print(f"Debian package: {build(stage, version)}")
     checksums()
     print(f"Archive: {archive}")
 

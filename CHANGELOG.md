@@ -3,6 +3,18 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.2.1 — interface homogène et paquet Debian
+
+- Ruban compact adapté à chaque onglet, sans déploiement automatique au clic.
+- Commandes homogènes, rail compact et en-têtes communs aux deux volets.
+- Largeurs ajustables avec protection de la feuille et restauration après réduction de fenêtre.
+- Préférences locales du ruban et des volets, réinitialisation indépendante du document.
+- Recherche sans accents dans les bibliothèques masquées et gestionnaire toujours visible.
+- `.deb` amd64, icône, entrée desktop et MIME `.draw`, installation/désinstallation vérifiées en CI.
+- Politique de versions documentée ; les tags 0.1.0 et 0.2.0 restent inchangés.
+
+Le format `.draw` reste v7 et l’API agents v1. Aucune nouvelle bibliothèque externe.
+
 ## 0.2.0 — commandes et aide clavier
 
 - Palette de commandes accessible depuis le bouton Rechercher ou ⌘K / Ctrl+K.

@@ -25,48 +25,186 @@ impl DrawApp {
             ctx.content_rect().height() >= 850. && ctx.content_rect().width() >= 1350.
         })
     }
-    fn compact_ribbon(&mut self, ui: &mut egui::Ui) {
-        ui.horizontal_centered(|ui| {
-            if ui
-                .selectable_label(self.tool == Tool::Select, "Sélection · V")
-                .clicked()
-            {
-                self.set_tool(Tool::Select);
-            }
-            if ui
-                .selectable_label(self.tool == Tool::Pan, "Main · H")
-                .clicked()
-            {
-                self.set_tool(Tool::Pan);
-            }
+    fn command_button(&mut self, ui: &mut egui::Ui, command: commands_ui::Command) {
+        let spec = commands_ui::COMMANDS
+            .iter()
+            .find(|s| s.command == command)
+            .unwrap();
+        let reason = self.command_unavailable(command);
+        let response = ui.add_enabled(reason.is_none(), egui::Button::new(spec.label));
+        let clicked = response.clicked();
+        if let Some(reason) = reason {
+            response.on_hover_text(reason);
+        }
+        if clicked {
+            self.run_command(command, ui.ctx());
+        }
+    }
+    fn panels_menu(&mut self, ui: &mut egui::Ui) {
+        ui.menu_button("Volets et ruban", |ui| {
+            ui.checkbox(&mut self.show_library, "Bibliothèque de symboles");
+            ui.checkbox(&mut self.show_inspector, "Propriétés de la sélection");
+            ui.checkbox(
+                &mut self.show_quick_toolbar,
+                "Barre de mise en forme flottante",
+            );
             ui.separator();
-            self.shape_menu(ui);
-            if ui.button("Texte · T").clicked() {
-                self.set_tool(Tool::Shape(ShapeKind::Text));
+            let mut expanded = self.ribbon_is_expanded(ui.ctx());
+            if ui.checkbox(&mut expanded, "Ruban développé").changed() {
+                self.ribbon_expanded = Some(expanded);
             }
-            if ui.button("Relier · C").clicked() {
-                self.activate_connect_tool();
+            if ui.button("Adapter le ruban à la fenêtre").clicked() {
+                self.ribbon_expanded = None;
+                ui.close();
             }
-            ui.separator();
-            if ui.button("Propriétés").clicked() {
-                self.show_inspector = !self.show_inspector;
+            if ui.button("Réinitialiser l’interface").clicked() {
+                self.reset_interface(ui.ctx());
+                ui.close();
             }
-            ui.add_enabled_ui(!self.selected.is_empty(), |ui| {
-                self.align_menu(ui);
-                if ui.button("Dupliquer").on_hover_text("Ctrl/⌘ D").clicked() {
-                    self.duplicate();
+        });
+    }
+    fn zoom_menu(&mut self, ui: &mut egui::Ui) {
+        ui.menu_button(format!("{} %", (self.zoom * 100.).round()), |ui| {
+            for percent in [25, 50, 75, 100, 150, 200] {
+                if ui.button(format!("{percent} %")).clicked() {
+                    self.set_zoom(percent as f32 / 100., self.canvas.center());
+                    ui.close();
                 }
-            });
-            if !self.selected.is_empty() {
-                ui.label(
-                    RichText::new(format!(
-                        "{} sélectionné{}",
-                        self.selected.len(),
-                        if self.selected.len() == 1 { "" } else { "s" }
-                    ))
-                    .size(12.)
-                    .color(MUTED),
+            }
+        });
+    }
+    fn compact_ribbon(&mut self, ui: &mut egui::Ui) {
+        use commands_ui::Command;
+        ui.horizontal_centered(|ui| match self.ribbon_tab {
+            RibbonTab::Home => {
+                for (tool, label) in [(Tool::Select, "Sélection · V"), (Tool::Pan, "Main · H")] {
+                    if ui
+                        .add(egui::Button::new(label).selected(self.tool == tool))
+                        .clicked()
+                    {
+                        self.set_tool(tool);
+                    }
+                }
+                ui.separator();
+                self.shape_menu(ui);
+                if ui
+                    .add(
+                        egui::Button::new("Texte · T")
+                            .selected(self.tool == Tool::Shape(ShapeKind::Text)),
+                    )
+                    .clicked()
+                {
+                    self.set_tool(Tool::Shape(ShapeKind::Text));
+                }
+                if ui
+                    .add(egui::Button::new("Relier · C").selected(self.tool == Tool::Connect))
+                    .on_hover_text(
+                        "Glissez entre deux blocs ou cliquez sur le départ puis l’arrivée.",
+                    )
+                    .clicked()
+                {
+                    if self.tool == Tool::Connect {
+                        self.set_tool(Tool::Select);
+                    } else {
+                        self.activate_connect_tool();
+                    }
+                }
+                ui.separator();
+                ui.add_enabled_ui(!self.selected.is_empty(), |ui| {
+                    self.align_menu(ui);
+                });
+                self.command_button(ui, Command::Duplicate);
+                if ui
+                    .add(egui::Button::new("Propriétés").selected(self.show_inspector))
+                    .clicked()
+                {
+                    self.show_inspector = !self.show_inspector;
+                }
+            }
+            RibbonTab::Insert => {
+                self.shape_menu(ui);
+                self.command_button(ui, Command::Text);
+                self.command_button(ui, Command::Connect);
+                ui.separator();
+                if ui.button("Tableau").clicked() {
+                    self.insert_table();
+                }
+                if ui.button("Graphique").clicked() {
+                    self.library_panel = LibraryPanel::Charts;
+                    self.show_library = true;
+                }
+                ui.menu_button("Dessin libre", |ui| {
+                    self.command_button(ui, Command::Line);
+                    self.command_button(ui, Command::Bezier);
+                });
+                ui.separator();
+                self.command_button(ui, Command::AddPage);
+                self.command_button(ui, Command::Templates);
+            }
+            RibbonTab::Design => {
+                ui.menu_button("Thèmes", |ui| {
+                    ui.label("Appliquer au diagramme");
+                    ui.horizontal(|ui| {
+                        for i in 0..5 {
+                            if theme_button(ui, i).clicked() {
+                                self.apply_theme(i, true);
+                                ui.close();
+                            }
+                        }
+                    });
+                });
+                ui.label("Fond");
+                ui.color_edit_button_srgb(&mut self.doc.page_style.background);
+                ui.checkbox(&mut self.grid, "Grille");
+                ui.checkbox(&mut self.margins, "Marges");
+                ui.separator();
+                self.page_menu(ui);
+                if ui.button("Orientation").clicked() {
+                    self.doc.page_size.swap(0, 1);
+                    self.fit_next = true;
+                }
+                if ui.button("Ajuster au dessin").clicked() {
+                    self.fit_drawing();
+                }
+            }
+            RibbonTab::View => {
+                self.command_button(ui, Command::FitPage);
+                self.zoom_menu(ui);
+                ui.separator();
+                ui.checkbox(&mut self.grid, "Grille");
+                ui.checkbox(&mut self.rulers, "Règles");
+                ui.checkbox(&mut self.snap, "Magnétisme");
+                self.panels_menu(ui);
+                self.command_button(ui, Command::Pages);
+            }
+            RibbonTab::Symbols => {
+                ui.label("Rechercher");
+                ui.add(
+                    egui::TextEdit::singleline(&mut self.symbol_search)
+                        .hint_text("Rectangle, décision…")
+                        .desired_width(190.)
+                        .char_limit(120),
                 );
+                if ui.button("Afficher les formes").clicked() {
+                    self.library_panel = LibraryPanel::Symbols;
+                    self.show_library = true;
+                }
+                self.command_button(ui, Command::Symbols);
+                if ui
+                    .add_enabled(!self.symbol_search.is_empty(), egui::Button::new("Effacer"))
+                    .clicked()
+                {
+                    self.symbol_search.clear();
+                }
+            }
+            RibbonTab::Advanced => {
+                ui.add_enabled_ui(!self.selected.is_empty(), |ui| {
+                    self.align_menu(ui);
+                });
+                self.command_button(ui, Command::SelectAll);
+                self.command_button(ui, Command::Validate);
+                self.command_button(ui, Command::Agents);
+                self.command_button(ui, Command::Help);
             }
         });
     }
@@ -269,7 +407,7 @@ impl DrawApp {
                 });
             });
         egui::TopBottomPanel::top("ribbon_tabs")
-            .exact_height(46.)
+            .exact_height(40.)
             .resizable(false)
             .show_separator_line(false)
             .frame(
@@ -279,7 +417,7 @@ impl DrawApp {
             )
             .show(ctx, |ui| {
                 ui.horizontal_centered(|ui| {
-                    ui.menu_button(RichText::new("Fichier").size(16.), |ui| {
+                    ui.menu_button(RichText::new("Fichier").size(14.), |ui| {
                         if ui.button("Nouveau document").clicked() {
                             ui.close();
                             self.request(Pending::New);
@@ -328,7 +466,7 @@ impl DrawApp {
                         ui,
                         Icon::Undo,
                         "Annuler · Ctrl/⌘ Z",
-                        self.history.can_undo(),
+                        self.history.can_undo() || self.property_edit,
                     )
                     .clicked()
                     {
@@ -351,7 +489,6 @@ impl DrawApp {
                         self.export();
                     }
                     ui.separator();
-                    ui.add_space(10.);
                     if ui
                         .button(RichText::new("Agents / IA").color(ACCENT))
                         .clicked()
@@ -388,7 +525,7 @@ impl DrawApp {
                                     let response = ui.add(
                                         egui::Button::new(
                                             RichText::new(label)
-                                                .size(16.)
+                                                .size(14.)
                                                 .color(if selected { ACCENT } else { INK })
                                                 .strong(),
                                         )
@@ -404,7 +541,6 @@ impl DrawApp {
                                     }
                                     if response.clicked() {
                                         self.ribbon_tab = tab;
-                                        self.ribbon_expanded = Some(true);
                                     }
                                 }
                             });
@@ -418,16 +554,16 @@ impl DrawApp {
             });
         egui::TopBottomPanel::top("ribbon")
             .exact_height(if self.ribbon_is_expanded(ctx) {
-                120.
+                104.
             } else {
-                48.
+                44.
             })
             .resizable(false)
             .show_separator_line(false)
             .frame(
                 egui::Frame::new()
                     .fill(Color32::WHITE)
-                    .inner_margin(egui::Margin::symmetric(14, 7))
+                    .inner_margin(egui::Margin::symmetric(12, 5))
                     .stroke(Stroke::new(1., BORDER)),
             )
             .show(ctx, |ui| {
@@ -806,22 +942,7 @@ impl DrawApp {
             });
         });
         group(ui, 255., "Panneaux", |ui| {
-            ui.menu_button("Panneaux et barre contextuelle", |ui| {
-                let mut expanded = self.ribbon_is_expanded(ui.ctx());
-                if ui.checkbox(&mut expanded, "Ruban développé").changed() {
-                    self.ribbon_expanded = Some(expanded);
-                }
-                if ui.button("Adapter le ruban à la fenêtre").clicked() {
-                    self.ribbon_expanded = None;
-                    ui.close();
-                }
-                ui.checkbox(&mut self.show_library, "Bibliothèque de symboles");
-                ui.checkbox(&mut self.show_inspector, "Propriétés de la sélection");
-                ui.checkbox(
-                    &mut self.show_quick_toolbar,
-                    "Barre de mise en forme flottante",
-                );
-            });
+            self.panels_menu(ui);
         });
         group(ui, 320., "Zoom", |ui| {
             ui.horizontal(|ui| {
@@ -838,14 +959,7 @@ impl DrawApp {
                 {
                     self.fit_selection(ui.ctx());
                 }
-                ui.menu_button(format!("{} %", (self.zoom * 100.).round()), |ui| {
-                    for percent in [25, 50, 75, 100, 150, 200] {
-                        if ui.button(format!("{percent} %")).clicked() {
-                            self.set_zoom(percent as f32 / 100., self.canvas.center());
-                            ui.close();
-                        }
-                    }
-                });
+                self.zoom_menu(ui);
             });
         });
         group(ui, 230., "Paramètres de page", |ui| {
@@ -948,15 +1062,6 @@ impl DrawApp {
                     Err(e) => self.error = Some(e),
                 }
             }
-            ui.label(
-                RichText::new(format!(
-                    "Format .draw v{} · {} objets",
-                    self.doc.format_version,
-                    self.doc.object_count()
-                ))
-                .size(12.)
-                .color(MUTED),
-            );
         });
         group(ui, 120., "Aide", |ui| {
             if tile(ui, Icon::Page, "Raccourcis").clicked() {
@@ -1179,54 +1284,35 @@ impl DrawApp {
 }
 
 fn group(ui: &mut egui::Ui, width: f32, label: &str, content: impl FnOnce(&mut egui::Ui)) {
-    ui.allocate_ui_with_layout(vec2(width, 100.), Layout::top_down(Align::Center), |ui| {
-        ui.allocate_ui_with_layout(vec2(width, 76.), Layout::top_down(Align::LEFT), content);
+    ui.allocate_ui_with_layout(vec2(width, 90.), Layout::top_down(Align::Center), |ui| {
+        ui.allocate_ui_with_layout(vec2(width, 68.), Layout::top_down(Align::LEFT), content);
         ui.label(RichText::new(label).size(11.).color(MUTED));
     });
     ui.separator();
 }
 fn quick(ui: &mut egui::Ui, icon: Icon, label: &str, enabled: bool) -> egui::Response {
-    ui.add_enabled_ui(enabled, |ui| {
-        let (r, response) = ui.allocate_exact_size(vec2(29., 32.), Sense::click());
-        if response.hovered() {
-            ui.painter()
-                .rect_filled(r, 4, Color32::from_rgb(228, 234, 246));
-        }
-        paint_icon(
-            ui.painter(),
-            r.shrink(6.),
-            icon,
-            if enabled { INK } else { MUTED },
-        );
-        response
-            .widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, enabled, label));
-        response.on_hover_text(label)
-    })
-    .inner
-}
-fn tile(ui: &mut egui::Ui, icon: Icon, label: &str) -> egui::Response {
-    let (r, response) = ui.allocate_exact_size(vec2(82., 72.), Sense::click());
-    if response.hovered() {
-        ui.painter()
-            .rect_filled(r, 5, Color32::from_rgb(238, 242, 250));
-    }
+    let response = ui.add_enabled(enabled, egui::Button::new("").min_size(vec2(30., 30.)));
     paint_icon(
         ui.painter(),
-        Rect::from_center_size(r.center_top() + vec2(0., 23.), vec2(26., 26.)),
+        response.rect.shrink(7.),
         icon,
-        INK,
+        if enabled { INK } else { MUTED },
     );
-    ui.painter().text(
-        r.center_bottom() - vec2(0., 13.),
-        Align2::CENTER_CENTER,
-        label,
-        FontId::proportional(13.),
-        INK,
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, enabled, label));
+    response.on_hover_text(label)
+}
+fn tile(ui: &mut egui::Ui, icon: Icon, label: &str) -> egui::Response {
+    let response = ui.add(egui::Button::new(format!("     {label}")).min_size(vec2(82., 30.)));
+    paint_icon(
+        ui.painter(),
+        Rect::from_center_size(response.rect.left_center() + vec2(15., 0.), vec2(17., 17.)),
+        icon,
+        if ui.is_enabled() { INK } else { MUTED },
     );
     response.widget_info(|| {
         egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), label)
     });
-    response
+    response.on_hover_text(label)
 }
 fn theme(index: usize) -> [[u8; 3]; 3] {
     match index {
