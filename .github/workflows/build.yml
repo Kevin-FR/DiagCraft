@@ -68,7 +68,7 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - name: Linux system libraries
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libegl1-mesa-dev libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev dpkg-dev desktop-file-utils shared-mime-info libglib2.0-bin xvfb xauth libgl1-mesa-dri
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libegl1-mesa-dev libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev dpkg-dev desktop-file-utils shared-mime-info libglib2.0-bin xvfb xauth libgl1-mesa-dri weston imagemagick python3-pil
       - run: cargo fmt --all --check
       - run: cargo clippy --locked --workspace --all-targets -- -D warnings
       - run: cargo test --locked --workspace
@@ -87,6 +87,7 @@ jobs:
           python scripts/verify-debian.py
           python scripts/smoke.py --bin /usr/bin/diagcraft-cli
           timeout 60s xvfb-run -a /usr/bin/diagcraft --screenshot /tmp/diagcraft-debian.png ruban-compact
+          timeout 60s xvfb-run -a -s '-screen 0 1700x1200x24' /usr/bin/python3 scripts/smoke-linux-window.py --bin /usr/bin/diagcraft --output /tmp/diagcraft-wayland
           sudo apt-get remove -y diagcraft
           test ! -e /usr/bin/diagcraft
           test ! -e /usr/share/applications/org.diagcraft.editor.desktop

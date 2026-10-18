@@ -21,7 +21,7 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.7.2 is experimental** and improves precise keyboard placement.
+**0.7.3 is experimental** and fixes the dark fallback window frame on Ubuntu/Wayland.
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).

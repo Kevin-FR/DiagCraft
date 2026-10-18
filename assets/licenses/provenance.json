@@ -333,5 +333,16 @@
     "file": "assets/licenses/upstream/khronos_api-3.1.0/LICENSE",
     "url": "https://raw.githubusercontent.com/brendanzab/gl-rs/f150967b1c44ae888e6676f93f639ebc82771bdc/LICENSE",
     "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+  },
+  {
+    "crate": "sctk-adwaita 0.10.1",
+    "file": "assets/licenses/upstream/sctk-adwaita-0.10.1/Cantarell-LICENSE.txt",
+    "url": "https://raw.githubusercontent.com/GNOME/cantarell-fonts/e8997b665880fc6d5e3461156f2f9872126e8f00/COPYING",
+    "sha256": "68ec100a583f5d781f12ccacbc9f2235b9dc3df79a276e6650146e9938594149",
+    "supplemental": true,
+    "source": "Copyright from the embedded font name table; complete OFL 1.1 terms from the pinned Cantarell upstream COPYING. The Cargo archive contains only the code MIT license.",
+    "source_asset": "src/title/Cantarell-Regular.ttf",
+    "source_asset_sha256": "d15f25bcdaba2e25f54c32d4e29e68fedeb1b7a1d8fbc83f7c4475916e93b55f",
+    "source_asset_url": "https://raw.githubusercontent.com/PolyMeilex/sctk-adwaita/d5f343c45c04d4a026db57f76760819b7325db00/src/title/Cantarell-Regular.ttf"
   }
 ]

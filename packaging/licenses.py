@@ -51,9 +51,9 @@ def collect(target, output):
         if not files:
             raise RuntimeError(f"Missing license text: {name} {version}")
         records = []
-        for file in sorted(files):
+
+        def add_notice(file, relative):
             text = file.read_text(encoding="utf-8")
-            relative = file.relative_to(source)
             destination = output / f"{name}-{version}" / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(file, destination)
@@ -61,6 +61,17 @@ def collect(target, output):
             combined.append(f"\n{'=' * 72}\n{name} {version} — {relative}\n"
                             f"Declared license: {package['license']}\n"
                             f"Repository: {package.get('repository') or 'See Cargo metadata'}\n\n{text}\n")
+
+        for file in sorted(files):
+            add_notice(file, file.relative_to(source))
+        # A crate may include its code license but omit the license of an
+        # embedded font. Supplement, rather than replace, its Cargo notices.
+        for entry in provenance:
+            if entry.get("supplemental") and entry["crate"] == f"{name} {version}":
+                if sha(cargo_source / entry["source_asset"]) != entry["source_asset_sha256"]:
+                    raise RuntimeError(f"Supplemental notice asset hash mismatch: {name} {version}")
+                notice = ROOT / entry["file"]
+                add_notice(notice, notice.name)
         # OpenGL registries carry their own copyright/licensing notices inside
         # XML comments. Retain these in addition to the enclosing crate license.
         if name == "khronos_api":

@@ -9,6 +9,7 @@ criterion, avec des bibliothèques internes et plusieurs applications.
 | Choix DiagCraft | Usage et décision |
 | --- | --- |
 | egui/eframe 0.33.3, glow | Interface native existante et testée. Wgpu sera évalué séparément sur performances et compatibilité. |
+| winit 0.30.13 / sctk-adwaita 0.10.1, Linux seulement | Activation ciblée des décorations Wayland Adwaita : titre, boutons, bordure et ombre adaptés au bureau. Même winit que celui d’eframe ; remplace son cadre de secours sombre. |
 | serde / serde_json | Documents et patches lisibles, contrôlés avant application. |
 | rfd 0.17.2 | Boîtes de dialogue de fichiers natives. |
 | image, fonctionnalité PNG | Icône et captures de l’application ; aucun codec photo supplémentaire nécessaire. |

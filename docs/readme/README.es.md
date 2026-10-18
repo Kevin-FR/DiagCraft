@@ -21,7 +21,7 @@ Las aplicaciones y sus sumas de comprobación SHA-256 están en la
 | Windows x86_64 | ZIP portátil con la aplicación y la CLI |
 | Linux x86_64 | Paquete `.deb` para amd64 o archivo `.tar.gz`, con la aplicación y la CLI |
 
-**0.7.2 es experimental** y mejora la colocación precisa con el teclado.
+**0.7.3 es experimental** y corrige el marco oscuro de la ventana en Ubuntu/Wayland.
 El paquete para Mac tiene firma ad hoc y no ha sido notarizado por Apple.
 Los paquetes de Windows no están firmados con un certificado de editor.
 Consulta la [guía de instalación](../installation.md).

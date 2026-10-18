@@ -3,6 +3,16 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.7.3 — fenêtre Ubuntu / Wayland
+
+- Remplacement du cadre de secours sombre sans titre par les décorations Wayland Adwaita.
+- Bordure fine, ombre transparente et titre de document visible ; déplacement, redimensionnement et boutons natifs conservés.
+- Activation limitée à Linux, sans changement du rendu de fenêtre Mac ou Windows ni mise à jour des dépendances existantes.
+- Test de fenêtre complète sous Weston sans décorations serveur, en complément du test X11 du paquet Debian installé.
+- Notices MIT et OFL de la police Cantarell ajoutées aux paquets Linux ; collecte des licences d’éléments embarqués contrôlée par empreintes et trois tests.
+
+Le format `.draw` reste **v7**, l’API agents **v1**. `sctk-adwaita` 0.10.1 est la seule nouvelle dépendance, spécifique à Linux.
+
 ## 0.7.2 — placement précis au clavier
 
 - Flèches de 1 px et Maj + flèches de 10 px, indépendantes du zoom et du magnétisme.

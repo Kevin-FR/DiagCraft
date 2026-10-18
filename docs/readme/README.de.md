@@ -21,7 +21,7 @@ Die Anwendungen und ihre SHA-256-Prüfsummen stehen auf der
 | Windows x86_64 | Portables ZIP mit Anwendung und CLI |
 | Linux x86_64 | `.deb`-Paket für amd64 oder `.tar.gz`-Archiv mit Anwendung und CLI |
 
-**0.7.2 ist experimentell** und verbessert die präzise Platzierung per Tastatur. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
+**0.7.3 ist experimentell** und korrigiert den dunklen Fensterrahmen unter Ubuntu/Wayland. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
 Die Windows-Pakete sind nicht mit einem Herausgeberzertifikat signiert.
 Siehe die [Installationsanleitung](../installation.md).
 

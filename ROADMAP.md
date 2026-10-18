@@ -55,6 +55,7 @@ travaux prévus, sans promesse de date.
 
 ## Distribution
 
+- [x] Décorations Ubuntu/Wayland adaptées au bureau, sans cadre de secours sombre, avec contrôle de fenêtre complète en CI (0.7.3).
 - [ ] Signature Developer ID et notarisation Apple, après configuration des certificats.
 - [ ] Icône et métadonnées natives Windows, installateur et signature éditeur.
 - [x] Intégration Linux : fichier desktop, icône, MIME et paquet Debian amd64 (0.2.1).

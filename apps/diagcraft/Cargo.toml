@@ -21,5 +21,11 @@ image.workspace = true
 resvg.workspace = true
 tempfile.workspace = true
 
+[target.'cfg(target_os = "linux")'.dependencies]
+# eframe disables winit defaults. Enable its themed Wayland decorations instead
+# of the dark, title-less fallback frame used by GNOME/Ubuntu without server-side decorations.
+# Pin the existing winit version so both dependencies share one window backend.
+winit = { version = "=0.30.13", default-features = false, features = ["wayland-csd-adwaita"] }
+
 [lints]
 workspace = true

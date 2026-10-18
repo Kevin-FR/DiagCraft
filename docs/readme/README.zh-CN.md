@@ -19,7 +19,7 @@
 | Windows x86_64 | 包含应用和 CLI 的便携式 ZIP |
 | Linux x86_64 | 包含应用和 CLI 的 amd64 `.deb` 软件包或 `.tar.gz` 压缩包 |
 
-**0.7.2 为实验版本**，改进键盘精确放置操作。Mac 安装包使用临时签名（ad hoc），
+**0.7.3 为实验版本**，修复 Ubuntu/Wayland 下的深色窗口边框。Mac 安装包使用临时签名（ad hoc），
 尚未通过 Apple 公证。Windows 安装包未使用发布者证书签名。
 请参阅[安装指南](../installation.md)。
 

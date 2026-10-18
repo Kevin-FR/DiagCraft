@@ -40,6 +40,9 @@ Les notices de la bibliothèque standard Rust accompagnent les binaires.
   accompagne l’interface et les exports PDF, sans téléchargement à l’exécution.
 - Les polices par défaut d’egui conservent leurs notices propres, dont OFL et
   Ubuntu Font Licence, dans l’inventaire de `epaint_default_fonts` des paquets.
+- Les décorations Wayland Linux utilisent `sctk-adwaita` sous MIT et sa police
+  Cantarell sous SIL Open Font License 1.1. Les textes sont conservés dans son
+  inventaire de licences ; cette dépendance n’est pas embarquée sur Mac ou Windows.
 
 ## Marque, symboles et modèles
 

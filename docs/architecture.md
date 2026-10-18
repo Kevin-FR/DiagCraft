@@ -22,6 +22,12 @@ Les tests du moteur sont dans `crates/core/tests`, ceux des interactions natives
 dans `apps/diagcraft/src/ui_tests.rs`. Les captures de documentation sont produites
 par `diagcraft --screenshot`, à partir des seuls modèles du projet.
 
+Sous Linux, la dépendance winit de l’interface active `wayland-csd-adwaita`
+sur la version déjà utilisée par eframe. Sans cette fonctionnalité, les bureaux
+Wayland sans décorations serveur affichent un cadre de secours sombre sans titre.
+Le bureau continue à gérer le déplacement, le redimensionnement et les boutons.
+X11 conserve ses décorations serveur ; macOS et Windows n’activent pas Adwaita.
+
 `apps/diagcraft/src/commands_ui.rs` centralise les commandes, leurs raccourcis et
 leurs conditions de disponibilité. La palette, l’aide et les raccourcis utilisent
 ce catalogue et appellent les actions de l’application. Les saisies de texte et
