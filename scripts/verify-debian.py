@@ -48,6 +48,11 @@ for name in ("LICENSE", "NOTICE", "THIRD_PARTY.md", "Rust-COPYRIGHT.html", "Rust
              "docs/commandes.md", "docs/images/commands.png", "docs/images/shortcuts.png"):
     assert (docs / name).is_file(), name
 subprocess.run(["desktop-file-validate", "/usr/share/applications/org.diagcraft.editor.desktop"], check=True)
-assert output("xdg-mime", "query", "filetype", str(ROOT / "examples/parcours.draw")) == "application/x-diagcraft"
+# xdg-mime query is only specified inside a desktop session; a CI runner has
+# none. GIO reads the same installed Shared MIME-info and desktop databases.
+mime = output("gio", "info", "-a", "standard::content-type", str(ROOT / "examples/parcours.draw"))
+assert "standard::content-type: application/x-diagcraft" in mime, mime
+handlers = output("gio", "mime", "application/x-diagcraft")
+assert "org.diagcraft.editor.desktop" in handlers, handlers
 assert Path("/usr/share/icons/hicolor/256x256/apps/org.diagcraft.editor.png").read_bytes() == (ROOT / "assets/brand/DiagCraft.iconset/icon_256x256.png").read_bytes()
 print("Debian installation verified: version, root ownership, permissions, payload checksums, licenses, desktop entry and MIME.")
