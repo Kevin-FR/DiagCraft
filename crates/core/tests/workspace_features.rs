@@ -195,6 +195,27 @@ fn pdf_is_vector_embeds_fonts_and_rejects_invalid_documents() {
     d.page_size[0] = f32::NAN;
     assert!(pdf::export(&d, PageFormat::Drawing).is_err());
 }
+
+#[test]
+fn chinese_and_latin_text_use_embedded_fonts_without_changing_the_document() {
+    let mut d = Document::default();
+    let id = d.add_node(ShapeKind::Text, [500., 400.]);
+    d.node_mut(id).unwrap().text = "中文图表 Grüße Español Português".into();
+    d.node_mut(id).unwrap().size = [800., 80.];
+    let before = d.clone();
+    let source = svg::export(&d).unwrap();
+    assert!(source.contains("中文图表 Grüße Español Português"));
+    assert!(source.contains("Noto Sans SC"));
+    let bytes = pdf::export(&d, PageFormat::Drawing).unwrap();
+    let text = String::from_utf8_lossy(&bytes);
+    assert!(
+        text.contains("NotoSansSC"),
+        "Chinese fallback font must be embedded"
+    );
+    assert!(text.contains("/ToUnicode"));
+    assert!(!text.contains("/Subtype /Image"));
+    assert_eq!(d, before);
+}
 #[test]
 fn paper_formats_preserve_page_orientation() {
     let d = Document::default();

@@ -10,6 +10,7 @@ import sys
 import tempfile
 import tomllib
 from licenses import collect
+from macos_audit import inspect
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -48,6 +49,9 @@ def main():
         "CFBundleDisplayName": "DiagCraft", "CFBundleIdentifier": "org.diagcraft.editor",
         "CFBundleVersion": version, "CFBundleShortVersionString": version,
         "CFBundlePackageType": "APPL", "NSHighResolutionCapable": True,
+        "CFBundleDevelopmentRegion": "en",
+        "CFBundleLocalizations": ["en", "fr", "de", "es", "it", "pt", "zh-Hans"],
+        "LSArchitecturePriority": ["arm64"],
         "CFBundleIconFile": "DiagCraft.icns", "LSMinimumSystemVersion": "13.0",
         "NSHumanReadableCopyright": "Copyright 2026 DiagCraft contributors",
     }
@@ -70,6 +74,8 @@ def main():
         if not source.is_file():
             raise RuntimeError(f"Missing Rust notice: {source}")
         shutil.copy2(source, resources / ("Rust-" + filename))
+    native_audit = inspect(app)
+    (resources / "Native-Architecture.json").write_text(json.dumps(native_audit, indent=2) + "\n")
     for binary in macos.iterdir():
         run("codesign", "--force", "--sign", "-", binary)
     run("codesign", "--force", "--sign", "-", app)
@@ -80,6 +86,7 @@ def main():
         run("ditto", "-x", "-k", archive, temp)
         extracted = Path(temp) / app.name
         run("codesign", "--verify", "--deep", "--strict", extracted)
+        assert inspect(extracted) == native_audit
         for filename in ("diagcraft", "diagcraft-cli"):
             binary = extracted / "Contents/MacOS" / filename
             assert run("lipo", "-archs", binary, capture_output=True, text=True, encoding="utf-8").stdout.strip() == "arm64"
@@ -96,6 +103,7 @@ def main():
     run("ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", cli_stage, cli_archive)
     report = {"version": version, "target": "aarch64-apple-darwin", "minimum_macos": "13.0",
               "signature": "ad hoc; verified before and after extraction", "notarized": False,
+              "native_architecture": native_audit,
               "dependency_notice_packages": len(manifest), "archive": archive.name,
               "sha256": hashlib.sha256(archive.read_bytes()).hexdigest()}
     (stage / "distribution-check.json").write_text(json.dumps(report, indent=2) + "\n")

@@ -4,7 +4,7 @@ members = ["crates/core", "apps/diagcraft", "apps/diagcraft-cli"]
 default-members = ["crates/core", "apps/diagcraft", "apps/diagcraft-cli"]
 
 [workspace.package]
-version = "0.2.1"
+version = "0.3.0"
 edition = "2024"
 rust-version = "1.88"
 license = "MIT"
@@ -12,7 +12,7 @@ repository = "https://github.com/Kevin-FR/DiagCraft"
 authors = ["DiagCraft contributors"]
 
 [workspace.dependencies]
-diagcraft = { package = "diagcraft-core", path = "crates/core", version = "0.2.1" }
+diagcraft = { package = "diagcraft-core", path = "crates/core", version = "0.3.0" }
 eframe = { version = "=0.33.3", default-features = false, features = ["default_fonts", "glow", "wayland", "x11", "accesskit"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -22,6 +22,7 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 svg2pdf = { version = "=0.13.0", default-features = false, features = ["text", "filters"] }
 resvg = { version = "=0.45.1", default-features = false }
 sha2 = "0.10"
+semver = "=1.0.28"
 pdf-writer = "=0.12.1"
 
 [workspace.lints.rust]

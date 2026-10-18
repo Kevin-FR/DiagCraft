@@ -218,7 +218,7 @@ impl DrawApp {
 
     pub(super) fn alignment_controls(&mut self, ui: &mut egui::Ui) {
         let count = self.placement_selection().len();
-        ui.label(RichText::new("Aligner et répartir").strong());
+        ui.label(RichText::new(t("Aligner et répartir")).strong());
         let button_width = ((ui.available_width() - 8.) / 3.).max(48.);
         egui::Grid::new("alignment_controls")
             .num_columns(3)
@@ -238,7 +238,7 @@ impl DrawApp {
                     if ui
                         .add_enabled(
                             count >= 2,
-                            egui::Button::new(RichText::new(label).size(12.))
+                            egui::Button::new(RichText::new(t(label)).size(12.))
                                 .min_size(vec2(button_width, 28.)),
                         )
                         .on_hover_text(hint)
@@ -253,11 +253,11 @@ impl DrawApp {
             });
         ui.horizontal(|ui| {
             for (label, vertical) in [("Espacer H", false), ("Espacer V", true)] {
-                if ui.add_enabled(count >= 3, egui::Button::new(label)).on_hover_text("Espaces égaux entre les objets ; le premier et le dernier restent en place. Au moins trois formes, textes ou graphiques.").clicked() { self.distribute(vertical); }
+                if ui.add_enabled(count >= 3, egui::Button::new(t(label))).on_hover_text(t("Espaces égaux entre les objets ; le premier et le dernier restent en place. Au moins trois formes, textes ou graphiques.")).clicked() { self.distribute(vertical); }
             }
         });
-        ui.label(RichText::new(format!("{count} formes, textes ou graphiques")).size(12.).color(MUTED))
-            .on_hover_text("Les liens et tracés libres ne sont pas déplacés par ces commandes. Les liens attachés suivent leurs blocs.");
+        ui.label(RichText::new(i18n::render("{0} formes, textes ou graphiques", &[("0", format!("{}", count))])).size(12.).color(MUTED))
+            .on_hover_text(t("Les liens et tracés libres ne sont pas déplacés par ces commandes. Les liens attachés suivent leurs blocs."));
     }
 
     fn set_placement_axis(&mut self, id: u64, axis: usize, position: f32) {
@@ -279,7 +279,10 @@ impl DrawApp {
             self.set_placement_axis(*id, axis, target - r.size()[axis] * anchor);
         }
         self.commit();
-        self.status = format!("{} objets alignés · ⌘Z pour annuler", objects.len());
+        self.status = i18n::render(
+            "{0} objets alignés · ⌘Z pour annuler",
+            &[("0", format!("{}", objects.len()))],
+        );
     }
 
     pub(super) fn distribute(&mut self, vertical: bool) {
@@ -299,6 +302,9 @@ impl DrawApp {
             at += r.size()[axis] + gap;
         }
         self.commit();
-        self.status = format!("{} objets répartis · ⌘Z pour annuler", objects.len());
+        self.status = i18n::render(
+            "{0} objets répartis · ⌘Z pour annuler",
+            &[("0", format!("{}", objects.len()))],
+        );
     }
 }

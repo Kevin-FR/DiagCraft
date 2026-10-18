@@ -72,6 +72,7 @@ fn tree(doc: &Document, format: PageFormat) -> Result<(svg2pdf::usvg::Tree, [f32
         include_bytes!("../../../assets/fonts/SourceSans3-It.ttf").as_slice(),
         include_bytes!("../../../assets/fonts/SourceSans3-BoldIt.ttf").as_slice(),
         include_bytes!("../../../assets/fonts/Hack-Regular.ttf").as_slice(),
+        include_bytes!("../../../assets/fonts/NotoSansSC-Regular.otf").as_slice(),
     ] {
         options.fontdb_mut().load_font_data(bytes.to_vec());
     }

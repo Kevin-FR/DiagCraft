@@ -59,30 +59,30 @@ impl DrawApp {
         if self.show_symbol_manager {
             let modal=egui::Modal::new("symbol_manager".into()).show(ctx,|ui|{
                 ui.set_width(940_f32.min(ctx.content_rect().width()-60.));
-                ui.heading("Ajouter une bibliothèque de symboles");
-                ui.label(RichText::new("Choisissez les bibliothèques affichées dans le volet de gauche.").color(MUTED));
+                ui.heading(t("Ajouter une bibliothèque de symboles"));
+                ui.label(RichText::new(t("Choisissez les bibliothèques affichées dans le volet de gauche.")).color(MUTED));
                 ui.add_space(8.);ui.separator();
                 let body_height=(ctx.content_rect().height()-240.).clamp(200.,560.);
                 ui.horizontal_top(|ui|{
                     ui.set_height(body_height);
                     ui.vertical(|ui|{
                         ui.set_width(175.);
-                        for category in ["Toutes","Ma bibliothèque","Base","Idées","Logiciel"] {ui.selectable_value(&mut self.manager_category,category.into(),category);}
+                        for category in ["Toutes","Ma bibliothèque","Base","Idées","Logiciel"] {ui.selectable_value(&mut self.manager_category,category.into(),t(category));}
                         ui.add_space(14.);
-                        if ui.button("Tout afficher").clicked(){self.visible_draft=std::iter::once("personal".into()).chain(symbols::LIBRARIES.iter().map(|l|l.id.into())).collect();}
-                        if ui.button("Tout masquer").clicked(){self.visible_draft.clear();}
+                        if ui.button(t("Tout afficher")).clicked(){self.visible_draft=std::iter::once("personal".into()).chain(symbols::LIBRARIES.iter().map(|l|l.id.into())).collect();}
+                        if ui.button(t("Tout masquer")).clicked(){self.visible_draft.clear();}
                     });
                     ui.separator();
                     ui.vertical(|ui|{
                         ui.set_width(ui.available_width());
-                        ui.add(egui::TextEdit::singleline(&mut self.manager_search).hint_text("Rechercher une bibliothèque ou un symbole…").desired_width(f32::INFINITY).char_limit(120));
+                        ui.add(egui::TextEdit::singleline(&mut self.manager_search).hint_text(t("Rechercher une bibliothèque ou un symbole…")).desired_width(f32::INFINITY).char_limit(120));
                         egui::ScrollArea::vertical().id_salt("manager_libraries").max_height(body_height-45.).show(ui,|ui|{
-                            if (self.manager_category=="Toutes"||self.manager_category=="Ma bibliothèque") && search("Ma bibliothèque",&self.manager_search) {
-                                library_card(ui,"personal","Ma bibliothèque",&mut self.visible_draft,|ui|{if self.library.symbols.is_empty(){ui.label("Ajoutez vos formes depuis la sélection ou son menu contextuel.");}else{ui.horizontal_wrapped(|ui|{for n in &self.library.symbols {let _=symbol_tile(ui,n.kind,false);}});}});
+                            if (self.manager_category=="Toutes"||self.manager_category=="Ma bibliothèque") && search(&t("Ma bibliothèque"),&self.manager_search) {
+                                library_card(ui,"personal","Ma bibliothèque",&mut self.visible_draft,|ui|{if self.library.symbols.is_empty(){ui.label(t("Ajoutez vos formes depuis la sélection ou son menu contextuel."));}else{ui.horizontal_wrapped(|ui|{for n in &self.library.symbols {let _=symbol_tile(ui,n.kind,false);}});}});
                             }
                             for lib in symbols::LIBRARIES {
                                 if self.manager_category!="Toutes" && self.manager_category!=lib.category {continue;}
-                                if !search(lib.title,&self.manager_search)&&!lib.kinds.iter().any(|k|search(k.label(),&self.manager_search)){continue;}
+                                if !search(&t(lib.title),&self.manager_search)&&!lib.kinds.iter().any(|k|search(&t(k.label()),&self.manager_search)){continue;}
                                 library_card(ui,lib.id,lib.title,&mut self.visible_draft,|ui|{
                                     ui.horizontal_wrapped(|ui|{for &kind in lib.kinds {let _=symbol_tile(ui,kind,false);}});
                                 });
@@ -91,10 +91,10 @@ impl DrawApp {
                     });
                 });
                 ui.separator();ui.horizontal(|ui|{
-                    ui.label(format!("{} bibliothèques visibles · {} formes disponibles",self.visible_draft.len(),symbols::all_kinds().len()));
+                    ui.label(i18n::render("{0} bibliothèques visibles · {1} formes disponibles", &[("0", format!("{}", self.visible_draft.len())),("1", format!("{}", symbols::all_kinds().len()))]));
                     ui.with_layout(Layout::right_to_left(Align::Center),|ui|{
-                        if ui.button(RichText::new("Appliquer").color(ACCENT)).clicked(){self.apply_libraries();}
-                        if ui.button("Annuler").clicked(){self.show_symbol_manager=false;}
+                        if ui.button(RichText::new(t("Appliquer")).color(ACCENT)).clicked(){self.apply_libraries();}
+                        if ui.button(t("Annuler")).clicked(){self.show_symbol_manager=false;}
                     });
                 });
             });
@@ -107,13 +107,13 @@ impl DrawApp {
                 ui.set_width(970_f32.min(ctx.content_rect().width()-60.));
                 ui.set_height((ctx.content_rect().height()-160.).clamp(400.,700.));
                 ui.horizontal(|ui|{
-                    ui.heading(if self.gallery_versions.is_some(){"Versions enregistrées"}else{"Mes travaux"});
-                    ui.with_layout(Layout::right_to_left(Align::Center),|ui|{if ui.button("Fermer").clicked(){self.show_gallery=false;}});
+                    ui.heading(t(if self.gallery_versions.is_some(){"Versions enregistrées"}else{"Mes travaux"}));
+                    ui.with_layout(Layout::right_to_left(Align::Center),|ui|{if ui.button(t("Fermer")).clicked(){self.show_gallery=false;}});
                 });
-                ui.label(RichText::new("Fichiers .draw éditables · 10 versions par travail · historique conservé sur cet ordinateur").color(MUTED));
+                ui.label(RichText::new(t("Fichiers .draw éditables · 10 versions par travail · historique conservé sur cet ordinateur")).color(MUTED));
                 ui.separator();
                 if let Some(key)=self.gallery_versions.clone(){
-                    if ui.button("← Tous mes travaux").clicked(){self.gallery_versions=None;}
+                    if ui.button(t("← Tous mes travaux")).clicked(){self.gallery_versions=None;}
                     if let Some(project)=self.gallery.projects().iter().find(|p|p.key==key).cloned(){
                         ui.label(RichText::new(&project.title).strong());
                         ui.label(RichText::new(project.path.to_string_lossy()).small().color(MUTED));
@@ -122,11 +122,11 @@ impl DrawApp {
                             for (i,r) in project.revisions.iter().enumerate(){
                                 egui::Frame::new().fill(SURFACE).corner_radius(8).inner_margin(12).show(ui,|ui|{
                                     ui.horizontal(|ui|{
-                                        if let Some(doc)=self.gallery_revision_previews.get(i).and_then(Option::as_ref){let (rect,_)=ui.allocate_exact_size(vec2(200.,130.),Sense::hover());paint_document_preview(ui.painter(),doc,rect);}else{ui.label("Aperçu indisponible");}
+                                        if let Some(doc)=self.gallery_revision_previews.get(i).and_then(Option::as_ref){let (rect,_)=ui.allocate_exact_size(vec2(200.,130.),Sense::hover());paint_document_preview(ui.painter(),doc,rect);}else{ui.label(t("Aperçu indisponible"));}
                                         ui.vertical(|ui|{
-                                            ui.label(RichText::new(if i==0 {"Dernière version".into()}else{format!("Version précédente {}",project.revisions.len()-i)}).strong());
+                                            ui.label(RichText::new(t(if i==0 {"Dernière version".into()}else{i18n::render("Version précédente {0}", &[("0", format!("{}", project.revisions.len()-i))])})).strong());
                                             ui.label(date(r.saved_at));ui.label(format!("{:.1} Ko",r.bytes as f32/1024.));
-                                            if ui.button("Récupérer une copie").clicked(){restore=Some(i);}
+                                            if ui.button(t("Récupérer une copie")).clicked(){restore=Some(i);}
                                         });
                                     });
                                 });ui.add_space(10.);
@@ -135,9 +135,9 @@ impl DrawApp {
                         if let Some(i)=restore{self.restore_revision(&key,i);}
                     }
                 }else{
-                    ui.add(egui::TextEdit::singleline(&mut self.gallery_search).hint_text("Rechercher dans mes travaux…").char_limit(120).desired_width(f32::INFINITY));
+                    ui.add(egui::TextEdit::singleline(&mut self.gallery_search).hint_text(t("Rechercher dans mes travaux…")).char_limit(120).desired_width(f32::INFINITY));
                     if self.gallery_previews.is_empty(){
-                        ui.add_space(50.);ui.heading("Vos dessins commencent ici");ui.label("Enregistrez un document avec Ctrl/⌘ S. Vous le retrouverez ici avec son aperçu et ses versions.");ui.add_space(50.);
+                        ui.add_space(50.);ui.heading(t("Vos dessins commencent ici"));ui.label(t("Enregistrez un document avec Ctrl/⌘ S. Vous le retrouverez ici avec son aperçu et ses versions."));ui.add_space(50.);
                     }
                     let entries=&self.gallery_previews;let mut open=None;let mut versions=None;
                     egui::ScrollArea::vertical().id_salt("saved_project_grid").max_height((ctx.content_rect().height()-220.).clamp(180.,570.)).show(ui,|ui|{
@@ -149,19 +149,19 @@ impl DrawApp {
                                 egui::Frame::new().fill(SURFACE).corner_radius(10).inner_margin(10).show(ui,|ui|{ui.vertical(|ui|{
                                     ui.set_width(width-20.);
                                     let (rect,response)=ui.allocate_exact_size(vec2(width-20.,155.),Sense::click());
-                                    if let Some(doc)=doc {paint_document_preview(ui.painter(),doc,rect);}else{ui.painter().text(rect.center(),Align2::CENTER_CENTER,"Aperçu indisponible",FontId::proportional(14.),MUTED);}
+                                    if let Some(doc)=doc {paint_document_preview(ui.painter(),doc,rect);}else{ui.painter().text(rect.center(),Align2::CENTER_CENTER,t("Aperçu indisponible"),FontId::proportional(14.),MUTED);}
                                     if response.double_clicked(){open=Some(p.clone());}
                                     ui.add(egui::Label::new(RichText::new(&p.title).strong()).truncate()).on_hover_text(&p.title);
                                     ui.add(egui::Label::new(RichText::new(p.path.file_name().unwrap_or_default().to_string_lossy()).small().color(MUTED)).truncate()).on_hover_text(p.path.to_string_lossy());
                                     if let Some(r)=p.revisions.first(){ui.label(RichText::new(date(r.saved_at)).small().color(MUTED));}
                                     ui.horizontal(|ui|{
-                                        if ui.button("Ouvrir").clicked(){open=Some(p.clone());}
-                                        if ui.button(format!("Versions ({})",p.revisions.len())).clicked(){versions=Some(p.key.clone());}
+                                        if ui.button(t("Ouvrir")).clicked(){open=Some(p.clone());}
+                                        if ui.button(i18n::render("Versions ({0})", &[("0",p.revisions.len().to_string())])).clicked(){versions=Some(p.key.clone());}
                                     });
                                 });});
                                 shown+=1;if shown%3==0{ui.end_row();}
                             }
-                            if shown==0&&!entries.is_empty(){ui.label("Aucun travail trouvé.");}
+                            if shown==0&&!entries.is_empty(){ui.label(t("Aucun travail trouvé."));}
                         });
                     });
                     if let Some(p)=open {
@@ -177,27 +177,30 @@ impl DrawApp {
         if self.show_pdf_export {
             let modal = egui::Modal::new("pdf_export".into()).show(ctx, |ui| {
                 ui.set_width(440.);
-                ui.heading("Exporter en PDF");
-                ui.label("Export vectoriel avec polices intégrées.");
+                ui.heading(t("Exporter en PDF"));
+                ui.label(t("Export vectoriel avec polices intégrées."));
                 ui.add_space(12.);
                 egui::ComboBox::from_id_salt("pdf_page_size")
-                    .selected_text(self.pdf_format.label())
+                    .selected_text(t(self.pdf_format.label()))
                     .show_ui(ui, |ui| {
                         for format in pdf::PageFormat::ALL {
-                            ui.selectable_value(&mut self.pdf_format, format, format.label());
+                            ui.selectable_value(&mut self.pdf_format, format, t(format.label()));
                         }
                     });
                 ui.checkbox(
                     &mut self.pdf_all_pages,
-                    format!("Toutes les pages ({})", self.doc.page_count()),
+                    i18n::render(
+                        "Toutes les pages ({0})",
+                        &[("0", format!("{}", self.doc.page_count()))],
+                    ),
                 );
-                ui.label("Chaque dessin est ajusté en conservant ses proportions.");
+                ui.label(t("Chaque dessin est ajusté en conservant ses proportions."));
                 ui.add_space(14.);
                 ui.horizontal(|ui| {
-                    if ui.button("Annuler").clicked() {
+                    if ui.button(t("Annuler")).clicked() {
                         self.show_pdf_export = false;
                     }
-                    if ui.button("Exporter…").clicked() {
+                    if ui.button(t("Exporter…")).clicked() {
                         self.export_pdf();
                     }
                 });
@@ -209,8 +212,8 @@ impl DrawApp {
     }
     fn export_pdf(&mut self) {
         let Some(path) = rfd::FileDialog::new()
-            .set_title("Exporter en PDF")
-            .add_filter("Document PDF", &["pdf"])
+            .set_title(t("Exporter en PDF"))
+            .add_filter(t("Document PDF"), &["pdf"])
             .set_file_name("diagramme.pdf")
             .save_file()
         else {
@@ -223,13 +226,21 @@ impl DrawApp {
         };
         match result.and_then(|b| document::atomic_write(&path, &b)) {
             Ok(()) => {
-                self.status = format!(
-                    "PDF exporté : {}",
-                    path.file_name().unwrap_or_default().to_string_lossy()
+                self.status = i18n::render(
+                    "PDF exporté : {0}",
+                    &[(
+                        "0",
+                        format!("{}", path.file_name().unwrap_or_default().to_string_lossy()),
+                    )],
                 );
                 self.show_pdf_export = false;
             }
-            Err(e) => self.error = Some(format!("Impossible d’exporter le PDF : {e}")),
+            Err(e) => {
+                self.error = Some(i18n::render(
+                    "Impossible d’exporter le PDF : {0}",
+                    &[("0", e.to_string())],
+                ))
+            }
         }
     }
 }
@@ -251,7 +262,7 @@ fn library_card(
             ui.set_width(ui.available_width());
             let mut checked = draft.iter().any(|s| s == id);
             if ui
-                .checkbox(&mut checked, RichText::new(title).strong())
+                .checkbox(&mut checked, RichText::new(t(title)).strong())
                 .changed()
             {
                 draft.retain(|s| s != id);

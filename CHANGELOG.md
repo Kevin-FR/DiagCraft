@@ -3,6 +3,17 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.3.0 — sept langues et mises à jour GitHub
+
+- Choix immédiat de langue, préférence système et mémorisation locale indépendante des dessins.
+- Interface en anglais, français, allemand, espagnol, italien, portugais et chinois simplifié.
+- Recherche de commandes et symboles dans la langue active ; textes des dessins préservés.
+- Police Noto Sans SC sous OFL embarquée pour l’interface et les PDF.
+- Vérification GitHub en arrière-plan, manuelle ou facultative au démarrage, avec canal expérimental.
+- Téléchargement ciblé par plateforme et vérification SHA-256 avant écriture atomique ; installation manuelle.
+- Audit de chaque Mach-O et dépendance du paquet Mac : arm64 uniquement, aucune bibliothèque Intel.
+- Métadonnées macOS des sept langues, tests des traductions, glyphes, exports et téléchargements.
+
 ## 0.2.1 — interface homogène et paquet Debian
 
 - Ruban compact adapté à chaque onglet, sans déploiement automatique au clic.

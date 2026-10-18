@@ -9,14 +9,14 @@ pub(super) fn arrow_selector(
 ) {
     egui::ComboBox::from_id_salt(salt)
         .width(96.)
-        .selected_text(if *enabled { head.label() } else { "Aucune" })
+        .selected_text(t(if *enabled { head.label() } else { "Aucune" }))
         .show_ui(ui, |ui| {
-            if ui.selectable_label(!*enabled, "Aucune").clicked() {
+            if ui.selectable_label(!*enabled, t("Aucune")).clicked() {
                 *enabled = false;
             }
             for candidate in ArrowHead::ALL {
                 if ui
-                    .selectable_label(*enabled && *head == candidate, candidate.label())
+                    .selectable_label(*enabled && *head == candidate, t(candidate.label()))
                     .clicked()
                 {
                     *enabled = true;
@@ -27,14 +27,14 @@ pub(super) fn arrow_selector(
 }
 pub(super) fn edge_style_controls(ui: &mut egui::Ui, e: &mut document::Connector) {
     egui::ComboBox::from_id_salt(("edge_pattern", e.id))
-        .selected_text(e.pattern.label())
+        .selected_text(t(e.pattern.label()))
         .show_ui(ui, |ui| {
             for pattern in LinePattern::ALL {
-                ui.selectable_value(&mut e.pattern, pattern, pattern.label());
+                ui.selectable_value(&mut e.pattern, pattern, t(pattern.label()));
             }
         });
     ui.horizontal(|ui| {
-        ui.label("Départ");
+        ui.label(t("Départ"));
         arrow_selector(
             ui,
             ("start_head", e.id),
@@ -43,7 +43,7 @@ pub(super) fn edge_style_controls(ui: &mut egui::Ui, e: &mut document::Connector
         );
     });
     ui.horizontal(|ui| {
-        ui.label("Arrivée");
+        ui.label(t("Arrivée"));
         arrow_selector(ui, ("end_head", e.id), &mut e.arrow, &mut e.end_head);
     });
 }
@@ -51,7 +51,7 @@ fn group(ui: &mut egui::Ui, width: f32, label: &str, body: impl FnOnce(&mut egui
     ui.vertical(|ui| {
         ui.set_width(width);
         body(ui);
-        ui.label(RichText::new(label).small().color(MUTED));
+        ui.label(RichText::new(t(label)).small().color(MUTED));
     });
     ui.separator();
 }
@@ -107,19 +107,21 @@ impl DrawApp {
                                     ui.painter().circle_filled(pos2(x, y), 1., MUTED);
                                 }
                             }
-                            if grip.on_hover_text("Déplacer la barre").dragged() {
+                            if grip.on_hover_text(t("Déplacer la barre")).dragged() {
                                 self.toolbar_position =
                                     Some(pos + ctx.input(|i| i.pointer.delta()));
                                 self.toolbar_pinned = true;
                             }
                             ui.label(
-                                RichText::new(if self.doc.connectors.iter().any(|e| e.id == id) {
-                                    "Connecteur"
-                                } else if self.doc.node(id).is_some() {
-                                    "Forme"
-                                } else {
-                                    "Mise en forme"
-                                })
+                                RichText::new(t(
+                                    if self.doc.connectors.iter().any(|e| e.id == id) {
+                                        "Connecteur"
+                                    } else if self.doc.node(id).is_some() {
+                                        "Forme"
+                                    } else {
+                                        "Mise en forme"
+                                    },
+                                ))
                                 .strong()
                                 .size(12.)
                                 .color(MUTED),
@@ -127,7 +129,7 @@ impl DrawApp {
                             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                                 if ui
                                     .small_button("×")
-                                    .on_hover_text("Masquer la barre · Affichage → Panneaux")
+                                    .on_hover_text(t("Masquer la barre · Affichage → Panneaux"))
                                     .clicked()
                                 {
                                     self.show_quick_toolbar = false;
@@ -135,15 +137,15 @@ impl DrawApp {
                                 if ui
                                     .selectable_label(
                                         self.toolbar_pinned,
-                                        if self.toolbar_pinned {
+                                        t(if self.toolbar_pinned {
                                             "Détacher"
                                         } else {
                                             "Épingler"
-                                        },
+                                        }),
                                     )
-                                    .on_hover_text(
+                                    .on_hover_text(t(
                                         "Conserver la position de la barre lors des sélections",
-                                    )
+                                    ))
                                     .clicked()
                                 {
                                     self.toolbar_pinned = !self.toolbar_pinned;
@@ -162,11 +164,11 @@ impl DrawApp {
                                             ui.horizontal(|ui| {
                                                 egui::ComboBox::from_id_salt(("toolbar_font", id))
                                                     .width(125.)
-                                                    .selected_text(if n.text_style.monospace {
+                                                    .selected_text(t(if n.text_style.monospace {
                                                         "Monospace"
                                                     } else {
                                                         "Source Sans 3"
-                                                    })
+                                                    }))
                                                     .show_ui(ui, |ui| {
                                                         ui.selectable_value(
                                                             &mut n.text_style.monospace,
@@ -191,18 +193,20 @@ impl DrawApp {
                                                     ("I", &mut n.text_style.italic),
                                                     ("U", &mut n.text_style.underline),
                                                 ] {
-                                                    if ui.selectable_label(*value, label).clicked()
+                                                    if ui
+                                                        .selectable_label(*value, t(label))
+                                                        .clicked()
                                                     {
                                                         *value = !*value;
                                                     }
                                                 }
                                                 egui::ComboBox::from_id_salt(("toolbar_align", id))
                                                     .width(78.)
-                                                    .selected_text(match n.text_style.align {
+                                                    .selected_text(t(match n.text_style.align {
                                                         TextAlign::Left => "Gauche",
                                                         TextAlign::Center => "Centré",
                                                         TextAlign::Right => "Droite",
-                                                    })
+                                                    }))
                                                     .show_ui(ui, |ui| {
                                                         for (v, label) in [
                                                             (TextAlign::Left, "Gauche"),
@@ -212,7 +216,7 @@ impl DrawApp {
                                                             ui.selectable_value(
                                                                 &mut n.text_style.align,
                                                                 v,
-                                                                label,
+                                                                t(label),
                                                             );
                                                         }
                                                     });
@@ -220,13 +224,13 @@ impl DrawApp {
                                         });
                                         group(ui, 178., "Couleurs", |ui| {
                                             ui.horizontal(|ui| {
-                                                ui.label("Fond");
+                                                ui.label(t("Fond"));
                                                 ui.color_edit_button_srgb(&mut n.fill);
-                                                ui.label("Trait");
+                                                ui.label(t("Trait"));
                                                 ui.color_edit_button_srgb(&mut n.stroke);
                                             });
                                             ui.horizontal(|ui| {
-                                                ui.label("Texte");
+                                                ui.label(t("Texte"));
                                                 ui.color_edit_button_srgb(&mut n.text_color);
                                                 ui.add(
                                                     egui::DragValue::new(&mut n.stroke_width)
@@ -237,7 +241,7 @@ impl DrawApp {
                                             });
                                         });
                                         group(ui, 130., "Styles", |ui| {
-                                            ui.menu_button("Styles de forme", |ui| {
+                                            ui.menu_button(t("Styles de forme"), |ui| {
                                                 for (i, color) in PALETTE.iter().enumerate() {
                                                     if ui
                                                         .button(
@@ -254,32 +258,32 @@ impl DrawApp {
                                                     }
                                                 }
                                             });
-                                            if ui.button("Reproduire le style").clicked() {
+                                            if ui.button(t("Reproduire le style")).clicked() {
                                                 action = Some(Action::Brush);
                                             }
                                         });
                                         group(ui, 220., "Organiser", |ui| {
                                             ui.horizontal(|ui| {
-                                                if ui.button("Premier plan").clicked() {
+                                                if ui.button(t("Premier plan")).clicked() {
                                                     action = Some(Action::Front);
                                                 }
-                                                if ui.button("Arrière-plan").clicked() {
+                                                if ui.button(t("Arrière-plan")).clicked() {
                                                     action = Some(Action::Back);
                                                 }
                                             });
                                             ui.horizontal(|ui| {
-                                                ui.menu_button("Remplacer", |ui| {
+                                                ui.menu_button(t("Remplacer"), |ui| {
                                                     if let Some(kind) = shape_picker(ui) {
                                                         action = Some(Action::Replace(kind));
                                                         ui.close();
                                                     }
                                                 });
-                                                if ui.button("Texte").clicked() {
+                                                if ui.button(t("Texte")).clicked() {
                                                     action = Some(Action::Text);
                                                 }
                                             });
                                         });
-                                        if ui.button("Paramètres").clicked() {
+                                        if ui.button(t("Paramètres")).clicked() {
                                             action = Some(Action::Properties);
                                         }
                                     } else if let Some(e) =
@@ -287,7 +291,7 @@ impl DrawApp {
                                     {
                                         group(ui, 176., "Flèches", |ui| {
                                             ui.horizontal(|ui| {
-                                                ui.label("Départ");
+                                                ui.label(t("Départ"));
                                                 arrow_selector(
                                                     ui,
                                                     ("toolbar_start", id),
@@ -296,7 +300,7 @@ impl DrawApp {
                                                 );
                                             });
                                             ui.horizontal(|ui| {
-                                                ui.label("Arrivée");
+                                                ui.label(t("Arrivée"));
                                                 arrow_selector(
                                                     ui,
                                                     ("toolbar_end", id),
@@ -306,8 +310,8 @@ impl DrawApp {
                                             });
                                         });
                                         if ui
-                                            .button("Inverser")
-                                            .on_hover_text("Inverser les flèches")
+                                            .button(t("Inverser"))
+                                            .on_hover_text(t("Inverser les flèches"))
                                             .clicked()
                                         {
                                             action = Some(Action::SwapArrows);
@@ -316,21 +320,23 @@ impl DrawApp {
                                             let old = e.kind;
                                             egui::ComboBox::from_id_salt(("toolbar_route", id))
                                                 .width(115.)
-                                                .selected_text(if e.kind == ConnectorKind::Elbow {
-                                                    "Angle droit"
-                                                } else {
-                                                    "Direct"
-                                                })
+                                                .selected_text(t(
+                                                    if e.kind == ConnectorKind::Elbow {
+                                                        "Angle droit"
+                                                    } else {
+                                                        "Direct"
+                                                    },
+                                                ))
                                                 .show_ui(ui, |ui| {
                                                     ui.selectable_value(
                                                         &mut e.kind,
                                                         ConnectorKind::Elbow,
-                                                        "Angle droit",
+                                                        t("Angle droit"),
                                                     );
                                                     ui.selectable_value(
                                                         &mut e.kind,
                                                         ConnectorKind::Straight,
-                                                        "Direct",
+                                                        t("Direct"),
                                                     );
                                                 });
                                             if old != e.kind && e.kind == ConnectorKind::Straight {
@@ -339,11 +345,13 @@ impl DrawApp {
                                             if ui
                                                 .add_enabled(
                                                     e.kind == ConnectorKind::Elbow,
-                                                    egui::Button::new(if e.waypoints.is_empty() {
-                                                        "Automatique"
-                                                    } else {
-                                                        "Manuel"
-                                                    }),
+                                                    egui::Button::new(t(
+                                                        if e.waypoints.is_empty() {
+                                                            "Automatique"
+                                                        } else {
+                                                            "Manuel"
+                                                        },
+                                                    )),
                                                 )
                                                 .clicked()
                                             {
@@ -364,33 +372,33 @@ impl DrawApp {
                                             });
                                             egui::ComboBox::from_id_salt(("toolbar_pattern", id))
                                                 .width(130.)
-                                                .selected_text(e.pattern.label())
+                                                .selected_text(t(e.pattern.label()))
                                                 .show_ui(ui, |ui| {
                                                     for pattern in LinePattern::ALL {
                                                         ui.selectable_value(
                                                             &mut e.pattern,
                                                             pattern,
-                                                            pattern.label(),
+                                                            t(pattern.label()),
                                                         );
                                                     }
                                                 });
                                         });
                                         group(ui, 140., "Mise en forme", |ui| {
-                                            if ui.button("Texte du lien").clicked() {
+                                            if ui.button(t("Texte du lien")).clicked() {
                                                 action = Some(Action::Text);
                                             }
-                                            if ui.button("Reproduire le style").clicked() {
+                                            if ui.button(t("Reproduire le style")).clicked() {
                                                 action = Some(Action::Brush);
                                             }
                                         });
                                         group(ui, 172., "Formes", |ui| {
-                                            ui.menu_button("Insérer une forme", |ui| {
+                                            ui.menu_button(t("Insérer une forme"), |ui| {
                                                 if let Some(kind) = shape_picker(ui) {
                                                     action = Some(Action::Insert(kind));
                                                     ui.close();
                                                 }
                                             });
-                                            if ui.button("Paramètres").clicked() {
+                                            if ui.button(t("Paramètres")).clicked() {
                                                 action = Some(Action::Properties);
                                             }
                                         });
@@ -398,18 +406,18 @@ impl DrawApp {
                                         self.doc.charts.iter_mut().find(|c| c.id == id)
                                     {
                                         egui::ComboBox::from_id_salt(("toolbar_chart", id))
-                                            .selected_text(c.kind.label())
+                                            .selected_text(t(c.kind.label()))
                                             .show_ui(ui, |ui| {
                                                 for kind in ChartKind::ALL {
                                                     ui.selectable_value(
                                                         &mut c.kind,
                                                         kind,
-                                                        kind.label(),
+                                                        t(kind.label()),
                                                     );
                                                 }
                                             });
-                                        ui.checkbox(&mut c.legend, "Légende");
-                                        if ui.button("Paramètres").clicked() {
+                                        ui.checkbox(&mut c.legend, t("Légende"));
+                                        if ui.button(t("Paramètres")).clicked() {
                                             action = Some(Action::Properties);
                                         }
                                     } else if let Some(d) =
@@ -422,8 +430,8 @@ impl DrawApp {
                                                 .speed(0.1)
                                                 .suffix(" px"),
                                         );
-                                        ui.checkbox(&mut d.arrow, "Flèche");
-                                        if ui.button("Paramètres").clicked() {
+                                        ui.checkbox(&mut d.arrow, t("Flèche"));
+                                        if ui.button(t("Paramètres")).clicked() {
                                             action = Some(Action::Properties);
                                         }
                                     }

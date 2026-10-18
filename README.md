@@ -1,7 +1,7 @@
 # DiagCraft
 
 **Reliez vos idées.** Un éditeur de diagrammes natif, local et open source,
-avec une interface en français et une API pour les agents IA.
+avec une interface en sept langues et une API pour les agents IA.
 
 [![CI](https://github.com/Kevin-FR/DiagCraft/actions/workflows/build.yml/badge.svg)](https://github.com/Kevin-FR/DiagCraft/actions/workflows/build.yml)
 [![MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
@@ -19,12 +19,14 @@ Les applications et leurs empreintes SHA-256 sont sur la page des
 | Windows x86_64 | ZIP portable avec application et CLI |
 | Linux x86_64 | Paquet `.deb` amd64 ou archive `.tar.gz`, application et CLI |
 
-La version **0.2.1** reste expérimentale et améliore la prise en main. Le paquet
+La version **0.3.0** reste expérimentale et ajoute les langues et les mises à jour. Le paquet
 Mac est signé ad hoc et n’est pas notarié par Apple. Les paquets Windows ne
 sont pas signés avec un certificat éditeur. Voir [l’installation](docs/installation.md).
 
 ## Fonctions disponibles
 
+- Interface anglais, français, allemand, espagnol, italien, portugais et chinois simplifié.
+- Mises à jour GitHub facultatives, téléchargement vérifié SHA-256 et installation manuelle.
 - Formes, textes, graphiques, huit bibliothèques de symboles et neuf modèles.
 - Connecteurs liés aux blocs ou à extrémités libres, ports et coudes modifiables.
 - Documents multipages, formats de papier, tailles personnalisées et ajustement au dessin.
@@ -41,6 +43,11 @@ sont migrés en mémoire à l’ouverture. La source reste intacte jusqu’à l�
 
 Aucun compte ni clé API n’est nécessaire pour dessiner. Le serveur MCP travaille
 dans un dossier local choisi ; l’application ne contacte pas de modèle IA.
+
+La langue se choisit dans **Fichier → Langue et paramètres…**. Les textes des
+dessins restent inchangés. Le paquet Mac contient uniquement du code `arm64` et
+utilise les bibliothèques système macOS : **Rosetta n’est pas nécessaire**.
+Voir [langues et mises à jour](docs/langues-et-mises-a-jour.md).
 
 Voir [la recherche de commandes](docs/commandes.md), [le ruban et les volets](docs/interface.md)
 et [les règles de version](docs/versioning.md).
@@ -65,6 +72,8 @@ cargo clippy --locked --workspace --all-targets -- -D warnings
 cargo test --locked --workspace
 cargo deny check licenses sources advisories
 python3 scripts/check-publication.py
+python3 scripts/check-locales.py
+python3 -m unittest discover -s packaging -p 'test_*.py'
 ```
 
 ## Structure

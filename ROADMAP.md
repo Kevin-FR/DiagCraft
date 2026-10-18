@@ -25,6 +25,13 @@ travaux prévus, sans promesse de date.
 - [ ] Sauvegarde de récupération après fermeture anormale, sans écraser le dessin source.
 - [ ] Tests d’intégration CLI/MCP sur les trois systèmes et diagnostics plus lisibles.
 
+## Internationalisation
+
+- [x] Interface en anglais, français, allemand, espagnol, italien, portugais et chinois simplifié (0.3.0).
+- [x] Police chinoise embarquée sous OFL pour l’interface et les exports PDF.
+- [ ] Relecture des traductions par des locuteurs natifs et localisation des contenus des modèles.
+- [ ] Chinois traditionnel et autres langues selon les contributions.
+
 ## Diagrammes plus riches
 
 - [ ] Groupes persistants, verrouillage, couches et rotation.
@@ -40,7 +47,9 @@ travaux prévus, sans promesse de date.
 - [x] Intégration Linux : fichier desktop, icône, MIME et paquet Debian amd64 (0.2.1).
 - [ ] Paquets AppImage et RPM.
 - [ ] Linux ARM64 et Windows ARM64 après disponibilité de tests dédiés.
-- [ ] Vérification de mise à jour facultative, sans télémétrie.
+- [x] Vérification GitHub facultative, choix du canal et téléchargement vérifié SHA-256 (0.3.0).
+- [x] Paquets Mac et dépendances embarquées contrôlés `arm64`, sans Rosetta (0.3.0).
+- [ ] Installation intégrée des mises à jour avec signature éditeur et reprise après échec.
 
 ## Qualité à maintenir
 

@@ -40,6 +40,8 @@ pub(super) enum Command {
     Inspector,
     Ribbon,
     ResetInterface,
+    Settings,
+    Updates,
     Grid,
     Snap,
     Guides,
@@ -69,6 +71,18 @@ macro_rules! command {
 }
 
 pub(super) const COMMANDS: &[CommandSpec] = &[
+    command!(
+        Settings,
+        "Langue et paramètres…",
+        "Application",
+        "language langue idioma sprache lingua 中文 settings preferences"
+    ),
+    command!(
+        Updates,
+        "Vérifier les mises à jour…",
+        "Application",
+        "update github version mise à jour actualiser"
+    ),
     command!(Palette, "Rechercher une commande…", "Aide", "palette command search", Modifiers::COMMAND => K),
     command!(Help, "Raccourcis et gestes…", "Aide", "aide clavier trackpad help", Modifiers::NONE => F1),
     command!(New, "Nouveau document", "Fichier", "créer new", Modifiers::COMMAND => N),
@@ -84,7 +98,7 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
         "galerie historique versions"
     ),
     command!(Close, "Fermer le document", "Fichier", "onglet close"),
-    command!(Undo, "Annuler", "Édition", "undo revenir", Modifiers::COMMAND => Z),
+    command!(Undo, "Annuler la modification", "Édition", "undo revenir", Modifiers::COMMAND => Z),
     command!(Redo, "Rétablir", "Édition", "redo refaire", Modifiers::COMMAND.plus(Modifiers::SHIFT) => Z, Modifiers::COMMAND => Y),
     command!(Copy, "Copier", "Édition", "copy presse papiers", Modifiers::COMMAND => C),
     command!(Cut, "Couper", "Édition", "cut presse papiers", Modifiers::COMMAND => X),
@@ -212,7 +226,7 @@ pub(super) struct PaletteState {
 
 #[derive(Default)]
 pub(super) struct HelpState {
-    query: String,
+    pub(super) query: String,
     pub gestures: bool,
 }
 
@@ -236,7 +250,9 @@ pub(super) fn normalize(text: &str) -> String {
 fn matches(spec: &CommandSpec, query: &str) -> bool {
     let haystack = normalize(&format!(
         "{} {} {}",
-        spec.label, spec.category, spec.aliases
+        t(spec.label),
+        t(spec.category),
+        spec.aliases
     ));
     normalize(query)
         .split_whitespace()
@@ -250,7 +266,7 @@ pub(super) fn results(query: &str) -> Vec<&'static CommandSpec> {
         .collect();
     let query = normalize(query);
     if !query.trim().is_empty() {
-        results.sort_by_key(|s| !normalize(s.label).starts_with(query.trim()));
+        results.sort_by_key(|s| !normalize(&t(s.label)).starts_with(query.trim()));
     }
     results
 }
@@ -265,7 +281,8 @@ fn shortcut_text(ctx: &egui::Context, spec: &CommandSpec) -> String {
 
 impl DrawApp {
     pub(super) fn command_dialog_blocked(&self) -> bool {
-        self.pending.is_some()
+        self.settings.open
+            || self.pending.is_some()
             || self.error.is_some()
             || self.show_templates
             || self.save_template_open
@@ -325,6 +342,11 @@ impl DrawApp {
         use Command::*;
         use context_menu::Action;
         match command {
+            Settings => self.settings.open = true,
+            Updates => {
+                self.settings.open = true;
+                self.check_updates();
+            }
             Palette => self.open_command_palette(),
             Help => {
                 self.help_state = HelpState::default();
@@ -466,17 +488,17 @@ impl DrawApp {
         let modal = egui::Modal::new("command_palette".into()).show(ctx, |ui| {
             ui.set_width(620_f32.min(ctx.content_rect().width() - 48.));
             ui.horizontal(|ui| {
-                ui.heading("Rechercher une commande");
+                ui.heading(t("Rechercher une commande"));
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    close = ui.button("Fermer").clicked();
+                    close = ui.button(t("Fermer")).clicked();
                 });
             });
-            ui.label(RichText::new("Outils, fichiers, pages et affichage").color(SECONDARY));
+            ui.label(RichText::new(t("Outils, fichiers, pages et affichage")).color(SECONDARY));
             ui.add_space(8.);
             let response = ui.add(
                 egui::TextEdit::singleline(&mut self.command_palette.query)
                     .id(egui::Id::new("command_query"))
-                    .hint_text("Ex. exporter PDF, taille de page, propriétés…")
+                    .hint_text(t("Ex. exporter PDF, taille de page, propriétés…"))
                     .char_limit(120)
                     .desired_width(f32::INFINITY),
             );
@@ -519,8 +541,8 @@ impl DrawApp {
                         let selected = index == self.command_palette.selected;
                         let button = egui::Button::new(format!(
                             "{}\n{}",
-                            spec.label,
-                            reason.unwrap_or(spec.category)
+                            t(spec.label),
+                            t(reason.unwrap_or(spec.category))
                         ))
                         .selected(selected)
                         .shortcut_text(shortcut_text(ctx, spec));
@@ -537,20 +559,20 @@ impl DrawApp {
                     }
                     if entries.is_empty() {
                         ui.add_space(16.);
-                        ui.label("Aucune commande trouvée.");
-                        ui.label("Essayez un outil, un format d’export ou un réglage.");
+                        ui.label(t("Aucune commande trouvée."));
+                        ui.label(t("Essayez un outil, un format d’export ou un réglage."));
                         ui.add_space(16.);
                     }
                 });
             ui.separator();
             ui.horizontal(|ui| {
                 ui.label(
-                    RichText::new("↑ ↓ Choisir · Entrée Exécuter · Échap Fermer")
+                    RichText::new(t("↑ ↓ Choisir · Entrée Exécuter · Échap Fermer"))
                         .size(12.)
                         .color(SECONDARY),
                 );
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if ui.small_button("Tous les raccourcis").clicked() {
+                    if ui.small_button(t("Tous les raccourcis")).clicked() {
                         chosen = Some(Command::Help);
                     }
                 });
@@ -582,19 +604,19 @@ impl DrawApp {
         let modal = egui::Modal::new("keyboard_help".into()).show(ctx, |ui| {
             ui.set_width(660_f32.min(ctx.content_rect().width() - 48.));
             ui.horizontal(|ui| {
-                ui.heading("Raccourcis et gestes");
+                ui.heading(t("Raccourcis et gestes"));
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    close = ui.button("Fermer").clicked();
+                    close = ui.button(t("Fermer")).clicked();
                 });
             });
             ui.horizontal(|ui| {
-                ui.selectable_value(&mut self.help_state.gestures, false, "Clavier");
-                ui.selectable_value(&mut self.help_state.gestures, true, "Souris et trackpad");
+                ui.selectable_value(&mut self.help_state.gestures, false, t("Clavier"));
+                ui.selectable_value(&mut self.help_state.gestures, true, t("Souris et trackpad"));
             });
             ui.add_space(8.);
             ui.add(
                 egui::TextEdit::singleline(&mut self.help_state.query)
-                    .hint_text("Filtrer l’aide…")
+                    .hint_text(t("Filtrer l’aide…"))
                     .char_limit(120)
                     .desired_width(f32::INFINITY),
             );
@@ -606,15 +628,15 @@ impl DrawApp {
                     let mut count = 0;
                     if self.help_state.gestures {
                         for (gesture, action) in GESTURES {
-                            let text = normalize(&format!("{gesture} {action}"));
+                            let text = normalize(&format!("{} {}", t(gesture), t(action)));
                             if !normalize(&self.help_state.query)
                                 .split_whitespace()
                                 .all(|q| text.contains(q))
                             {
                                 continue;
                             }
-                            ui.label(RichText::new(*gesture).strong());
-                            ui.label(*action);
+                            ui.label(RichText::new(t(*gesture)).strong());
+                            ui.label(t(*action));
                             ui.add_space(8.);
                             count += 1;
                         }
@@ -631,10 +653,10 @@ impl DrawApp {
                             if category != spec.category {
                                 category = spec.category;
                                 ui.add_space(6.);
-                                ui.label(RichText::new(category).strong().color(ACCENT));
+                                ui.label(RichText::new(t(category)).strong().color(ACCENT));
                             }
                             ui.horizontal(|ui| {
-                                ui.label(spec.label);
+                                ui.label(t(spec.label));
                                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                                     ui.label(RichText::new(keys).strong());
                                 });
@@ -643,14 +665,16 @@ impl DrawApp {
                         }
                     }
                     if count == 0 {
-                        ui.label("Aucun raccourci trouvé pour cette recherche.");
+                        ui.label(t("Aucun raccourci trouvé pour cette recherche."));
                     }
                 });
             ui.separator();
             ui.label(
-                RichText::new("Les lettres seules agissent sur la feuille, hors saisie de texte.")
-                    .size(12.)
-                    .color(SECONDARY),
+                RichText::new(t(
+                    "Les lettres seules agissent sur la feuille, hors saisie de texte.",
+                ))
+                .size(12.)
+                .color(SECONDARY),
             );
         });
         if close || modal.should_close() {

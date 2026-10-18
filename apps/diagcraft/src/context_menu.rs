@@ -95,7 +95,7 @@ impl DrawApp {
     fn context_contents(&mut self, ui: &mut egui::Ui) -> Option<Action> {
         let mut action = None;
         if let Some(port) = self.quick_link_port {
-            ui.label(RichText::new("Ajouter une forme liée").strong());
+            ui.label(RichText::new(t("Ajouter une forme liée")).strong());
             if let Some(kind) = shape_picker(ui) {
                 ui.close();
                 return Some(Action::Linked(kind, port));
@@ -114,7 +114,7 @@ impl DrawApp {
             .and_then(|id| self.doc.drawings.iter().find(|d| d.id == id))
             .cloned();
         ui.label(
-            RichText::new(if let Some(n) = &node {
+            RichText::new(t(if let Some(n) = &node {
                 n.kind.label().into()
             } else if edge.is_some() {
                 "Connecteur".into()
@@ -125,8 +125,11 @@ impl DrawApp {
             } else if self.selected.is_empty() {
                 "Page".into()
             } else {
-                format!("{} objets sélectionnés", self.selected.len())
-            })
+                i18n::render(
+                    "{0} objets sélectionnés",
+                    &[("0", format!("{}", self.selected.len()))],
+                )
+            }))
             .strong()
             .size(16.),
         );
@@ -138,20 +141,20 @@ impl DrawApp {
             if menu_item(ui, "Modifier le texte…", None, true) {
                 action = Some(Action::Text);
             }
-            ui.menu_button("Remplacer la forme", |ui| {
+            ui.menu_button(t("Remplacer la forme"), |ui| {
                 if let Some(kind) = shape_picker(ui) {
                     action = Some(Action::Replace(kind));
                     ui.close();
                 }
             });
-            ui.menu_button("Ajouter une forme liée", |ui| {
+            ui.menu_button(t("Ajouter une forme liée"), |ui| {
                 for (port, label) in [
                     (Port::Right, "À droite"),
                     (Port::Bottom, "En dessous"),
                     (Port::Left, "À gauche"),
                     (Port::Top, "Au-dessus"),
                 ] {
-                    ui.menu_button(label, |ui| {
+                    ui.menu_button(t(label), |ui| {
                         if let Some(kind) = shape_picker(ui) {
                             action = Some(Action::Linked(kind, port));
                             ui.close();
@@ -200,24 +203,29 @@ impl DrawApp {
             {
                 action = Some(Action::RemovePoint(index));
             }
-            ui.menu_button("Insérer une forme sur le connecteur", |ui| {
+            ui.menu_button(t("Insérer une forme sur le connecteur"), |ui| {
                 if let Some(kind) = shape_picker(ui) {
                     action = Some(Action::Insert(kind));
                     ui.close();
                 }
             });
             ui.label(
-                RichText::new(if automatic {
+                RichText::new(t(if automatic {
                     "Le tracé automatique suit les formes."
                 } else {
                     "Glissez les losanges bleus pour modifier le tracé."
-                })
+                }))
                 .size(11.)
                 .color(MUTED),
             );
         }
         ui.separator();
-        if menu_item(ui, "Annuler", Some("Ctrl/⌘ Z"), self.history.can_undo()) {
+        if menu_item(
+            ui,
+            "Annuler la modification",
+            Some("Ctrl/⌘ Z"),
+            self.history.can_undo(),
+        ) {
             action = Some(Action::Undo);
         }
         if menu_item(
@@ -260,11 +268,11 @@ impl DrawApp {
         } else {
             ui.separator();
             ui.horizontal(|ui| {
-                ui.label("Fond de page");
+                ui.label(t("Fond de page"));
                 ui.color_edit_button_srgb(&mut self.doc.page_style.background);
             });
-            ui.checkbox(&mut self.grid, "Afficher la grille");
-            ui.checkbox(&mut self.snap, "Magnétisme");
+            ui.checkbox(&mut self.grid, t("Afficher la grille"));
+            ui.checkbox(&mut self.snap, t("Magnétisme"));
             if menu_item(ui, "Ajouter un texte ici", None, true) {
                 action = Some(Action::Text);
             }
@@ -289,7 +297,7 @@ impl DrawApp {
         ui.separator();
         ui.checkbox(
             &mut self.show_quick_toolbar,
-            "Barre de mise en forme flottante",
+            t("Barre de mise en forme flottante"),
         );
         if action.is_some() {
             ui.close();
@@ -311,58 +319,58 @@ impl DrawApp {
                     ("I", &mut n.text_style.italic),
                     ("U", &mut n.text_style.underline),
                 ] {
-                    if ui.selectable_label(*value, label).clicked() {
+                    if ui.selectable_label(*value, t(label)).clicked() {
                         *value = !*value;
                     }
                 }
                 egui::ComboBox::from_id_salt(("quick_align", id))
                     .width(80.)
-                    .selected_text(match n.text_style.align {
+                    .selected_text(t(match n.text_style.align {
                         TextAlign::Left => "Gauche",
                         TextAlign::Center => "Centré",
                         TextAlign::Right => "Droite",
-                    })
+                    }))
                     .show_ui(ui, |ui| {
                         for (v, name) in [
                             (TextAlign::Left, "Gauche"),
                             (TextAlign::Center, "Centré"),
                             (TextAlign::Right, "Droite"),
                         ] {
-                            ui.selectable_value(&mut n.text_style.align, v, name);
+                            ui.selectable_value(&mut n.text_style.align, v, t(name));
                         }
                     });
             });
             ui.horizontal_wrapped(|ui| {
-                ui.label("Fond");
+                ui.label(t("Fond"));
                 ui.color_edit_button_srgb(&mut n.fill);
-                ui.label("Ligne");
+                ui.label(t("Ligne"));
                 ui.color_edit_button_srgb(&mut n.stroke);
-                ui.label("Texte");
+                ui.label(t("Texte"));
                 ui.color_edit_button_srgb(&mut n.text_color);
             });
         } else if let Some(e) = self.doc.connectors.iter_mut().find(|e| e.id == id) {
             contextual_toolbar::edge_style_controls(ui, e);
             ui.horizontal_wrapped(|ui| {
-                ui.checkbox(&mut e.arrow_start, "Flèche départ");
-                ui.checkbox(&mut e.arrow, "Flèche arrivée");
+                ui.checkbox(&mut e.arrow_start, t("Flèche départ"));
+                ui.checkbox(&mut e.arrow, t("Flèche arrivée"));
                 let old = e.kind;
                 egui::ComboBox::from_id_salt(("quick_edge_kind", id))
                     .width(95.)
-                    .selected_text(if e.kind == ConnectorKind::Elbow {
+                    .selected_text(t(if e.kind == ConnectorKind::Elbow {
                         "Angle droit"
                     } else {
                         "Direct"
-                    })
+                    }))
                     .show_ui(ui, |ui| {
-                        ui.selectable_value(&mut e.kind, ConnectorKind::Elbow, "Angle droit");
-                        ui.selectable_value(&mut e.kind, ConnectorKind::Straight, "Direct");
+                        ui.selectable_value(&mut e.kind, ConnectorKind::Elbow, t("Angle droit"));
+                        ui.selectable_value(&mut e.kind, ConnectorKind::Straight, t("Direct"));
                     });
                 if old != e.kind && e.kind == ConnectorKind::Straight {
                     e.waypoints.clear();
                 }
             });
             ui.horizontal_wrapped(|ui| {
-                ui.label("Trait");
+                ui.label(t("Trait"));
                 ui.color_edit_button_srgb(&mut e.color);
                 ui.add(
                     egui::DragValue::new(&mut e.width)
@@ -373,11 +381,11 @@ impl DrawApp {
                 if e.kind == ConnectorKind::Elbow {
                     let automatic = e.waypoints.is_empty();
                     if ui
-                        .small_button(if automatic {
+                        .small_button(t(if automatic {
                             "Routage : automatique"
                         } else {
                             "Routage : manuel"
-                        })
+                        }))
                         .clicked()
                     {
                         action = Some(Action::Automatic(!automatic));
@@ -387,17 +395,17 @@ impl DrawApp {
         } else if let Some(c) = self.doc.charts.iter_mut().find(|c| c.id == id) {
             ui.horizontal_wrapped(|ui| {
                 egui::ComboBox::from_id_salt(("quick_chart", id))
-                    .selected_text(c.kind.label())
+                    .selected_text(t(c.kind.label()))
                     .show_ui(ui, |ui| {
                         for kind in ChartKind::ALL {
-                            ui.selectable_value(&mut c.kind, kind, kind.label());
+                            ui.selectable_value(&mut c.kind, kind, t(kind.label()));
                         }
                     });
-                ui.checkbox(&mut c.legend, "Légende");
+                ui.checkbox(&mut c.legend, t("Légende"));
             });
         } else if let Some(d) = self.doc.drawings.iter_mut().find(|d| d.id == id) {
             ui.horizontal_wrapped(|ui| {
-                ui.label("Trait");
+                ui.label(t("Trait"));
                 ui.color_edit_button_srgb(&mut d.color);
                 ui.add(
                     egui::DragValue::new(&mut d.width)
@@ -405,7 +413,7 @@ impl DrawApp {
                         .speed(0.1)
                         .suffix(" px"),
                 );
-                ui.checkbox(&mut d.arrow, "Flèche");
+                ui.checkbox(&mut d.arrow, t("Flèche"));
             });
         }
         action
@@ -490,7 +498,7 @@ impl DrawApp {
                     self.focus_text = Some(id);
                     self.show_inspector = true;
                 } else if self.selected.is_empty() && self.doc.object_count() < 10_000 {
-                    let id = self.doc.add_node(ShapeKind::Text, self.context_position);
+                    let id = self.add_node(ShapeKind::Text, self.context_position);
                     self.selected = vec![id];
                     self.show_inspector = true;
                     self.focus_text = Some(id);
@@ -698,7 +706,7 @@ impl DrawApp {
         } else if text.len() <= 4000 && !text.trim().is_empty() && self.doc.object_count() < 10_000
         {
             let center = point.unwrap_or_else(|| self.world(self.canvas.center()));
-            let id = self.doc.add_node(ShapeKind::Text, center);
+            let id = self.add_node(ShapeKind::Text, center);
             self.doc.node_mut(id).unwrap().text = text.into();
             self.selected = vec![id];
             self.commit();
@@ -706,7 +714,7 @@ impl DrawApp {
     }
 }
 fn menu_item(ui: &mut egui::Ui, label: &str, shortcut: Option<&str>, enabled: bool) -> bool {
-    let mut button = egui::Button::new(label);
+    let mut button = egui::Button::new(t(label));
     if let Some(text) = shortcut {
         button = button.shortcut_text(text);
     }
@@ -747,7 +755,7 @@ pub(super) fn shape_picker(ui: &mut egui::Ui) -> Option<ShapeKind> {
                     Color32::WHITE,
                     Stroke::new(1., MUTED),
                 );
-                if response.on_hover_text(kind.label()).clicked() {
+                if response.on_hover_text(t(kind.label())).clicked() {
                     chosen = Some(kind);
                 }
                 if i % 4 == 3 {

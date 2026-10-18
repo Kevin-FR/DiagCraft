@@ -148,11 +148,9 @@ impl DrawApp {
                 self.selected.clear();
             }
             self.drag = None;
-            self.status = format!(
-                "{} objet{} sélectionné{} · Maj + F pour zoomer",
-                self.selected.len(),
-                if self.selected.len() == 1 { "" } else { "s" },
-                if self.selected.len() == 1 { "" } else { "s" }
+            self.status = i18n::render(
+                "Objets sélectionnés : {0} · Maj + F pour zoomer",
+                &[("0", self.selected.len().to_string())],
             );
         }
         true
@@ -180,11 +178,19 @@ impl DrawApp {
             StrokeKind::Inside,
         );
         let text = p.layout_no_wrap(
-            format!(
-                "{} objet{}{} · Échap : annuler",
-                self.selected.len(),
-                if self.selected.len() == 1 { "" } else { "s" },
-                if *additive { " · ajout" } else { "" }
+            i18n::render(
+                "Sélection : {0}{1} · Échap : annuler",
+                &[
+                    ("0", self.selected.len().to_string()),
+                    (
+                        "1",
+                        if *additive {
+                            t(" · ajout")
+                        } else {
+                            String::new()
+                        },
+                    ),
+                ],
             ),
             FontId::proportional(12.),
             INK,

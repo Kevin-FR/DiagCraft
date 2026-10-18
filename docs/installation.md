@@ -58,3 +58,15 @@ Le format de document v7 est indépendant du numéro de l’application.
 Pour vérifier un téléchargement sur macOS : `shasum -a 256 <archive>` ;
 sur Linux : `sha256sum <archive>` ; sous PowerShell :
 `Get-FileHash <archive> -Algorithm SHA256`. Comparer au fichier SHA256SUMS.txt.
+
+## Apple Silicon et mises à jour
+
+Le paquet Mac contient uniquement des exécutables et bibliothèques `arm64`.
+L’audit `Native-Architecture.json` dans les ressources de l’app liste les fichiers
+Mach-O et leurs dépendances système. Rosetta n’est pas nécessaire. Le packaging
+refuse les dépendances Intel, Homebrew externes et chemins non résolus.
+
+La langue et la vérification GitHub se règlent dans Fichier → Langue et paramètres…
+Voir [le guide](langues-et-mises-a-jour.md). La vérification automatique est
+facultative ; l’installation des paquets reste manuelle. Pour l’archive Linux,
+installer aussi `curl` et `ca-certificates` afin d’utiliser la vérification intégrée.

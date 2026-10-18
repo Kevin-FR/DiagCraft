@@ -8,22 +8,31 @@ use diagcraft::document::Document;
 use std::path::PathBuf;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args: Vec<String> = std::env::args().skip(1).collect();
+    let mut args: Vec<String> = std::env::args().skip(1).collect();
     if args.first().map(String::as_str) == Some("--version") {
         println!("DiagCraft {}", env!("CARGO_PKG_VERSION"));
         return Ok(());
     }
     if matches!(args.first().map(String::as_str), Some("--help" | "-h")) {
         println!(
-            "DiagCraft\n  diagcraft --agent catalog|inspect FILE|validate FILE|apply FILE PATCH OUTPUT [--dry-run]\n  diagcraft --mcp DOSSIER\n  diagcraft [document.draw]\n  diagcraft --export document.draw diagramme.svg\n  diagcraft --export-pdf document.draw diagramme.pdf [dessin|a4-paysage|a4-portrait|lettre]\n  diagcraft --pages-demo dossier.draw\n  diagcraft --symbols-demo symboles.draw\n  diagcraft --styles-demo styles.draw\n  diagcraft --demo exemple.draw\n  diagcraft --template support exemple.draw\n  diagcraft --charts-demo graphiques.draw\n  diagcraft --screenshot capture.png [accueil|inserer|conception|affichage|symboles|avance|graphiques|modeles|support|contexte-forme|contexte-connecteur|contexte-page|barre-contextuelle|barre-connecteur|compact|trackpad|proprietes|remplissage|contours|ombres|ombres-prereglages|selection-multiple|selection-contours|selection-ombres|selection-cadre|ruban-compact|alignement|reperes|redimensionnement|pages|tailles-pages|connecteurs-libres|lier-blocs|lier-apercu|connexions-rapides|bibliotheques|travaux|versions|nouveaux-symboles|commandes|raccourcis|interface|ruban-inserer]\n"
+            "DiagCraft\n  diagcraft [--language en|fr|de|es|it|pt|zh-Hans] [document.draw]\n  diagcraft --agent catalog|inspect FILE|validate FILE|apply FILE PATCH OUTPUT [--dry-run]\n  diagcraft --mcp DOSSIER\n  diagcraft [document.draw]\n  diagcraft --export document.draw diagramme.svg\n  diagcraft --export-pdf document.draw diagramme.pdf [dessin|a4-paysage|a4-portrait|lettre]\n  diagcraft --pages-demo dossier.draw\n  diagcraft --symbols-demo symboles.draw\n  diagcraft --styles-demo styles.draw\n  diagcraft --demo exemple.draw\n  diagcraft --template support exemple.draw\n  diagcraft --charts-demo graphiques.draw\n  diagcraft --screenshot capture.png [accueil|inserer|conception|affichage|symboles|avance|graphiques|modeles|support|contexte-forme|contexte-connecteur|contexte-page|barre-contextuelle|barre-connecteur|compact|trackpad|proprietes|remplissage|contours|ombres|ombres-prereglages|selection-multiple|selection-contours|selection-ombres|selection-cadre|ruban-compact|alignement|reperes|redimensionnement|pages|tailles-pages|connecteurs-libres|lier-blocs|lier-apercu|connexions-rapides|bibliotheques|travaux|versions|nouveaux-symboles|commandes|raccourcis|interface|ruban-inserer|parametres]\n"
         );
         return Ok(());
     }
+    let language = if args.first().map(String::as_str) == Some("--language") {
+        let code = args.get(1).ok_or("Missing --language code")?;
+        let language = app::i18n::Language::parse(code)
+            .ok_or("Unsupported language: en, fr, de, es, it, pt, zh-Hans")?;
+        args.drain(..2);
+        Some(language)
+    } else {
+        None
+    };
     if diagcraft::cli::run(&args)? {
         return Ok(());
     }
     let screenshot = if args.first().map(String::as_str) == Some("--screenshot") {
-        Some(PathBuf::from(&args[1]))
+        Some(PathBuf::from(args.get(1).ok_or("Missing screenshot path")?))
     } else {
         None
     };
@@ -78,6 +87,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "raccourcis",
             "interface",
             "ruban-inserer",
+            "parametres",
         ]
         .contains(&name.as_str())
     {
@@ -99,6 +109,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     matches!(
                         mode,
                         "interface"
+                            | "parametres"
                             | "ruban-inserer"
                             | "commandes"
                             | "raccourcis"
@@ -139,6 +150,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut app = app::DrawApp::new(cc, doc, path, screenshot);
             if let Some(name) = capture_tab {
                 app.capture_tab(&name);
+            }
+            if let Some(language) = language {
+                app.set_language(Some(language));
             }
             Ok(Box::new(app))
         }),

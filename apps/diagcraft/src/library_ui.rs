@@ -71,7 +71,7 @@ impl DrawApp {
                                     p.text(
                                         r.center(),
                                         Align2::CENTER_CENTER,
-                                        "T",
+                                        t("T"),
                                         FontId::proportional(25.),
                                         color,
                                     );
@@ -95,7 +95,7 @@ impl DrawApp {
                                     ));
                                 }
                             }
-                            if response.on_hover_text(label).clicked() {
+                            if response.on_hover_text(t(label)).clicked() {
                                 self.library_panel = panel;
                                 if panel == LibraryPanel::Projects {
                                     self.open_gallery();
@@ -134,7 +134,7 @@ impl DrawApp {
                     LibraryPanel::Projects => "Mes travaux",
                 }, &mut self.show_library, false);
                 ui.add(egui::TextEdit::singleline(&mut self.symbol_search)
-                    .hint_text("Rechercher…").desired_width(f32::INFINITY).char_limit(120));
+                    .hint_text(t("Rechercher…")).desired_width(f32::INFINITY).char_limit(120));
                 ui.add_space(8.);
                 let library_footer = self.library_panel == LibraryPanel::Symbols;
                 let body_height = (ui.available_height() - if library_footer { 46. } else { 0. }).max(0.);
@@ -144,16 +144,16 @@ impl DrawApp {
                     .auto_shrink([false, false])
                     .show(ui, |ui| match self.library_panel {
                         LibraryPanel::Projects => {
-                            if ui.button("Ouvrir mes travaux enregistrés").clicked(){self.open_gallery();}
+                            if ui.button(t("Ouvrir mes travaux enregistrés")).clicked(){self.open_gallery();}
                             ui.add_space(12.);
-                            ui.label("Retrouvez vos dessins et leurs dernières versions enregistrées.");
+                            ui.label(t("Retrouvez vos dessins et leurs dernières versions enregistrées."));
                             ui.add_space(12.);
-                            ui.label(RichText::new("Enregistrez un dessin avec Ctrl/⌘ S pour l’ajouter à la galerie.").color(MUTED));
+                            ui.label(RichText::new(t("Enregistrez un dessin avec Ctrl/⌘ S pour l’ajouter à la galerie.")).color(MUTED));
                         }
                         LibraryPanel::Symbols => self.symbol_library(ui),
                         LibraryPanel::Charts => self.chart_library(ui),
                         LibraryPanel::Models => {
-                            if ui.button("Ouvrir la galerie de modèles").clicked() {
+                            if ui.button(t("Ouvrir la galerie de modèles")).clicked() {
                                 self.show_templates = true;
                             }
                             ui.add_space(10.);
@@ -179,7 +179,7 @@ impl DrawApp {
                                     .add_sized(
                                         [ui.available_width(), 52.],
                                         egui::Button::new(
-                                            RichText::new(name).size(size * 0.7).strong(),
+                                            RichText::new(t(name)).size(size * 0.7).strong(),
                                         ),
                                     )
                                     .clicked()
@@ -187,7 +187,7 @@ impl DrawApp {
                                     let mut d = Document::default();
                                     let id = d.add_node(ShapeKind::Text, [0., 0.]);
                                     let mut n = d.node(id).unwrap().clone();
-                                    n.text = name.into();
+                                    n.text = t(name);
                                     n.font_size = size;
                                     n.text_style.bold = bold;
                                     n.text_style.wrap = true;
@@ -196,14 +196,14 @@ impl DrawApp {
                                 }
                             }
                             ui.label(
-                                RichText::new("Choisissez un style puis cliquez sur la page.")
+                                RichText::new(t("Choisissez un style puis cliquez sur la page."))
                                     .color(MUTED),
                             );
                         }
                     });
                 if library_footer {
                     ui.separator();
-                    if ui.add_sized([ui.available_width(), 30.], egui::Button::new("+ Bibliothèques de symboles…")).clicked() {
+                    if ui.add_sized([ui.available_width(), 30.], egui::Button::new(t("+ Bibliothèques de symboles…"))).clicked() {
                         self.open_symbol_manager();
                     }
                 }
@@ -225,7 +225,7 @@ impl DrawApp {
                     .iter()
                     .any(|n| matches_search(&n.text, &self.symbol_search)))
         {
-            egui::CollapsingHeader::new("Ma bibliothèque")
+            egui::CollapsingHeader::new(t("Ma bibliothèque"))
                 .id_salt(("personal", searching))
                 .open(searching.then_some(true))
                 .default_open(true)
@@ -238,7 +238,7 @@ impl DrawApp {
                     if ui
                         .add_enabled(
                             selected.is_some(),
-                            egui::Button::new("+ Ajouter la forme sélectionnée"),
+                            egui::Button::new(t("+ Ajouter la forme sélectionnée")),
                         )
                         .clicked()
                         && let Some(node) = selected
@@ -270,11 +270,13 @@ impl DrawApp {
                 });
         }
         if self.library.visible_libraries.is_empty() && self.symbol_search.trim().is_empty() {
-            ui.label("Aucune bibliothèque affichée. Choisissez-en dans le gestionnaire.");
+            ui.label(t(
+                "Aucune bibliothèque affichée. Choisissez-en dans le gestionnaire.",
+            ));
         }
         if searching {
             ui.label(
-                RichText::new("Recherche dans toutes les bibliothèques")
+                RichText::new(t("Recherche dans toutes les bibliothèques"))
                     .size(12.)
                     .color(INK),
             );
@@ -285,17 +287,19 @@ impl DrawApp {
                 continue;
             }
             if searching
-                && !library
-                    .kinds
-                    .iter()
-                    .any(|kind| matches_search(kind.label(), &self.symbol_search))
+                && !library.kinds.iter().any(|kind| {
+                    matches_search(
+                        &format!("{} {}", t(kind.label()), kind.label()),
+                        &self.symbol_search,
+                    )
+                })
             {
                 continue;
             }
             matches += 1;
             let title = library.title;
             let kinds = library.kinds;
-            egui::CollapsingHeader::new(title)
+            egui::CollapsingHeader::new(t(title))
                 .id_salt((title, searching))
                 .open(searching.then_some(true))
                 .default_open(true)
@@ -306,11 +310,16 @@ impl DrawApp {
                         .show(ui, |ui| {
                             let mut index = 0;
                             for &kind in kinds {
-                                if !matches_search(kind.label(), &self.symbol_search) {
+                                if !matches_search(
+                                    &format!("{} {}", t(kind.label()), kind.label()),
+                                    &self.symbol_search,
+                                ) {
                                     continue;
                                 }
                                 if symbol_tile(ui, kind, self.tool == Tool::Shape(kind)).clicked() {
-                                    self.choose_symbol(symbols::preset(kind));
+                                    let mut preset = symbols::preset(kind);
+                                    preset.text = t(&preset.text);
+                                    self.choose_symbol(preset);
                                 }
                                 index += 1;
                                 if index % 4 == 0 {
@@ -328,7 +337,7 @@ impl DrawApp {
                 .iter()
                 .any(|n| matches_search(&n.text, &self.symbol_search))
         {
-            ui.label("Aucun symbole trouvé. Essayez un autre mot.");
+            ui.label(t("Aucun symbole trouvé. Essayez un autre mot."));
         }
     }
     pub(super) fn choose_symbol(&mut self, n: Node) {
@@ -343,7 +352,7 @@ impl DrawApp {
             "Graphique de zone",
         ] {
             ui.add_space(10.);
-            ui.label(RichText::new(category).strong());
+            ui.label(RichText::new(t(category)).strong());
             let card_width = ((ui.available_width() - 8.) / 2.).clamp(90., 160.);
             egui::Grid::new(category)
                 .num_columns(2)
@@ -352,7 +361,10 @@ impl DrawApp {
                     let mut index = 0;
                     for kind in ChartKind::ALL {
                         if kind.category() != category
-                            || !matches_search(kind.label(), &self.symbol_search)
+                            || !matches_search(
+                                &format!("{} {}", t(kind.label()), kind.label()),
+                                &self.symbol_search,
+                            )
                         {
                             continue;
                         }
@@ -377,8 +389,10 @@ impl DrawApp {
                             c.title.clear();
                             c.legend = false;
                             paint_chart(ui.painter(), &c, r.shrink(6.));
-                            ui.add(egui::Label::new(RichText::new(kind.label()).size(11.)).wrap());
-                            if response.on_hover_text(kind.label()).clicked() {
+                            ui.add(
+                                egui::Label::new(RichText::new(t(kind.label())).size(11.)).wrap(),
+                            );
+                            if response.on_hover_text(t(kind.label())).clicked() {
                                 self.insert_chart(kind);
                             }
                         });
@@ -391,7 +405,7 @@ impl DrawApp {
         }
         ui.add_space(12.);
         ui.label(
-            RichText::new("Modifiez les valeurs et les séries dans Propriétés.")
+            RichText::new(t("Modifiez les valeurs et les séries dans Propriétés."))
                 .size(12.)
                 .color(MUTED),
         );
@@ -414,7 +428,7 @@ impl DrawApp {
     }
     pub(super) fn chart_inspector(&mut self, ui: &mut egui::Ui, id: u64) {
         let c = self.doc.charts.iter_mut().find(|c| c.id == id).unwrap();
-        ui.heading("Graphique");
+        ui.heading(t("Graphique"));
         ui.add_space(10.);
         ui.add(
             egui::TextEdit::singleline(&mut c.title)
@@ -422,13 +436,13 @@ impl DrawApp {
                 .char_limit(1000),
         );
         egui::ComboBox::from_id_salt("chart_type")
-            .selected_text(c.kind.label())
+            .selected_text(t(c.kind.label()))
             .show_ui(ui, |ui| {
                 for k in ChartKind::ALL {
-                    ui.selectable_value(&mut c.kind, k, k.label());
+                    ui.selectable_value(&mut c.kind, k, t(k.label()));
                 }
             });
-        ui.checkbox(&mut c.legend, "Afficher la légende");
+        ui.checkbox(&mut c.legend, t("Afficher la légende"));
         ui.add_space(10.);
         egui::Grid::new("chart_geometry")
             .num_columns(2)
@@ -460,7 +474,7 @@ impl DrawApp {
         ui.add_space(16.);
         field_label(ui, "DONNÉES");
         ui.label(
-            RichText::new("Valeurs positives · 24 catégories, 8 séries maximum")
+            RichText::new(t("Valeurs positives · 24 catégories, 8 séries maximum"))
                 .size(11.)
                 .color(MUTED),
         );
@@ -485,7 +499,7 @@ impl DrawApp {
         }
         ui.horizontal(|ui| {
             if ui
-                .add_enabled(c.categories.len() < 24, egui::Button::new("+ Catégorie"))
+                .add_enabled(c.categories.len() < 24, egui::Button::new(t("+ Catégorie")))
                 .clicked()
             {
                 c.categories.push(format!("C{}", c.categories.len() + 1));
@@ -495,7 +509,7 @@ impl DrawApp {
             }
             if ui
                 .add_enabled(c.categories.len() > 1, egui::Button::new("−"))
-                .on_hover_text("Supprimer la dernière catégorie")
+                .on_hover_text(t("Supprimer la dernière catégorie"))
                 .clicked()
             {
                 c.categories.pop();
@@ -520,18 +534,18 @@ impl DrawApp {
         }
         ui.horizontal(|ui| {
             if ui
-                .add_enabled(c.series.len() < 8, egui::Button::new("+ Série"))
+                .add_enabled(c.series.len() < 8, egui::Button::new(t("+ Série")))
                 .clicked()
             {
                 c.series.push(Series {
-                    name: format!("Série {}", c.series.len() + 1),
+                    name: i18n::render("Série {0}", &[("0", format!("{}", c.series.len() + 1))]),
                     values: vec![0.; c.categories.len()],
                     color: [123, 118, 242],
                 });
             }
             if ui
                 .add_enabled(c.series.len() > 1, egui::Button::new("−"))
-                .on_hover_text("Supprimer la dernière série")
+                .on_hover_text(t("Supprimer la dernière série"))
                 .clicked()
             {
                 c.series.pop();
@@ -603,16 +617,16 @@ impl DrawApp {
             Ok(()) => self.library = next,
             Err(e) => self.error = Some(e),
         }
-        self.status = format!("Modèle ouvert : {}", t.title);
+        self.status = i18n::render("Modèle ouvert : {0}", &[("0", t.title.to_string())]);
     }
     pub(super) fn library_dialogs(&mut self, ctx: &egui::Context) {
         if self.show_templates {
             egui::Modal::new("template_gallery".into()).show(ctx, |ui| {
                 ui.set_width((ctx.content_rect().width() - 100.).min(1120.));
                 ui.horizontal(|ui| {
-                    ui.heading("Insérer des modèles");
+                    ui.heading(t("Insérer des modèles"));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        if ui.button("Fermer").clicked() {
+                        if ui.button(t("Fermer")).clicked() {
                             self.show_templates = false;
                         }
                     });
@@ -620,7 +634,7 @@ impl DrawApp {
                 ui.add_space(12.);
                 ui.add(
                     egui::TextEdit::singleline(&mut self.template_search)
-                        .hint_text("Rechercher des diagrammes…")
+                        .hint_text(t("Rechercher des diagrammes…"))
                         .char_limit(150)
                         .desired_width(600.),
                 );
@@ -639,11 +653,14 @@ impl DrawApp {
                             "Entreprise",
                             "Éducation",
                         ] {
-                            ui.selectable_value(&mut self.template_filter, name.into(), name);
+                            ui.selectable_value(&mut self.template_filter, name.into(), t(name));
                             ui.add_space(6.);
                         }
                         ui.separator();
-                        if ui.button("Enregistrer ce document\ncomme modèle").clicked() {
+                        if ui
+                            .button(t("Enregistrer ce document\ncomme modèle"))
+                            .clicked()
+                        {
                             self.template_name = self.doc.title.clone();
                             self.save_template_open = true;
                             self.show_templates = false;
@@ -677,7 +694,7 @@ impl DrawApp {
                         .max_height((ctx.content_rect().height() - 240.).max(200.))
                         .show(ui, |ui| {
                             if items.is_empty() {
-                                ui.label("Aucun modèle dans cette catégorie.");
+                                ui.label(t("Aucun modèle dans cette catégorie."));
                             }
                             egui::Grid::new("template_cards")
                                 .num_columns(3)
@@ -703,9 +720,9 @@ impl DrawApp {
         if self.save_template_open {
             egui::Modal::new("save_template".into()).show(ctx, |ui| {
                 ui.set_width(420.);
-                ui.heading("Enregistrer un modèle personnel");
+                ui.heading(t("Enregistrer un modèle personnel"));
                 ui.add_space(12.);
-                ui.label("Nom");
+                ui.label(t("Nom"));
                 ui.add(
                     egui::TextEdit::singleline(&mut self.template_name)
                         .char_limit(100)
@@ -715,15 +732,15 @@ impl DrawApp {
                     .selected_text(&self.template_category)
                     .show_ui(ui, |ui| {
                         for name in ["Général", "Ingénierie", "IT", "Entreprise", "Éducation"] {
-                            ui.selectable_value(&mut self.template_category, name.into(), name);
+                            ui.selectable_value(&mut self.template_category, name.into(), t(name));
                         }
                     });
                 ui.add_space(16.);
                 ui.horizontal(|ui| {
-                    if ui.button("Annuler").clicked() {
+                    if ui.button(t("Annuler")).clicked() {
                         self.save_template_open = false;
                     }
-                    if ui.button("Enregistrer le modèle").clicked() {
+                    if ui.button(t("Enregistrer le modèle")).clicked() {
                         let mut next = self.library.clone();
                         match next
                             .add_template(&self.template_name, &self.template_category, &self.doc)
@@ -751,7 +768,7 @@ fn matches_search(text: &str, search: &str) -> bool {
 pub(super) fn symbol_tile(ui: &mut egui::Ui, kind: ShapeKind, active: bool) -> egui::Response {
     let (r, response) = ui.allocate_exact_size(vec2(48., 56.), Sense::click());
     response.widget_info(|| {
-        egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), kind.label())
+        egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), t(kind.label()))
     });
     ui.painter().rect_filled(
         r,
@@ -788,7 +805,7 @@ pub(super) fn symbol_tile(ui: &mut egui::Ui, kind: ShapeKind, active: bool) -> e
         ui.painter().text(
             r.center(),
             Align2::CENTER_CENTER,
-            "T",
+            t("T"),
             FontId::proportional(24.),
             stroke.color,
         );
@@ -810,7 +827,7 @@ pub(super) fn symbol_tile(ui: &mut egui::Ui, kind: ShapeKind, active: bool) -> e
     } else {
         paint_geometry(ui.painter(), kind, r, Color32::TRANSPARENT, stroke);
     }
-    response.on_hover_text(kind.label())
+    response.on_hover_text(t(kind.label()))
 }
 fn template_card(ui: &mut egui::Ui, t: &Template, width: f32) -> egui::Response {
     let (r, response) = ui.allocate_exact_size(vec2(width, width * 0.68 + 43.), Sense::click());

@@ -165,9 +165,12 @@ impl DrawApp {
                 .filter(|n| n.kind != ShapeKind::Text)
                 .all(|n| appearance_ui::node_corners(n).is_some());
         ui.label(
-            RichText::new(format!("{} objets", self.selected.len()))
-                .size(20.)
-                .strong(),
+            RichText::new(i18n::render(
+                "{0} objets",
+                &[("0", format!("{}", self.selected.len()))],
+            ))
+            .size(20.)
+            .strong(),
         );
         ui.add_space(6.);
         self.alignment_controls(ui);
@@ -202,10 +205,10 @@ impl DrawApp {
                     })
             });
             ui.label(
-                RichText::new(format!("{count} / {} · {}", self.selected.len(), if varied { "Styles variés" } else { "Même style" }))
+                RichText::new(format!("{count} / {} · {}", self.selected.len(), t(if varied { "Styles variés" } else { "Même style" })))
                     .size(12.)
                     .color(MUTED),
-            ).on_hover_text("Valeurs du premier objet compatible. Seuls les champs modifiés sont appliqués. Remplissage et ombre : formes. Ligne : formes, liens et tracés. Textes seuls et graphiques conservent leur apparence.");
+            ).on_hover_text(t("Valeurs du premier objet compatible. Seuls les champs modifiés sont appliqués. Remplissage et ombre : formes. Ligne : formes, liens et tracés. Textes seuls et graphiques conservent leur apparence."));
             if let Some(before) = sample {
                 let corners = all_corners
                     .then(|| appearance_ui::node_corners(&before))
@@ -220,7 +223,7 @@ impl DrawApp {
                     corners,
                     if edges + drawings > 0 { 0.5 } else { 0. },
                 );
-                let uniform = ui.button("Uniformiser cet onglet").on_hover_text("Reprendre tous les réglages affichés de cet onglet, y compris la couleur et l’épaisseur, pour les objets compatibles.").clicked();
+                let uniform = ui.button(t("Uniformiser cet onglet")).on_hover_text(t("Reprendre tous les réglages affichés de cet onglet, y compris la couleur et l’épaisseur, pour les objets compatibles.")).clicked();
                 self.apply_selection_style(&before, &after, replace, uniform);
             }
         }
@@ -230,18 +233,18 @@ impl DrawApp {
             .find_map(|id| self.doc.node(*id))
             .cloned()
         {
-            egui::CollapsingHeader::new("Typographie des formes").show(ui, |ui| {
+            egui::CollapsingHeader::new(t("Typographie des formes")).show(ui, |ui| {
                 let mut after = before.clone();
-                ui.label("Le contenu de chaque texte est conservé.");
+                ui.label(t("Le contenu de chaque texte est conservé."));
                 appearance_ui::color(ui, "Couleur du texte", &mut after.text_color);
                 appearance_ui::scalar(ui, "Taille du texte", &mut after.font_size, 8.0..=64.0, " px");
                 ui.horizontal(|ui| {
-                    ui.checkbox(&mut after.text_style.bold, "Gras");
-                    ui.checkbox(&mut after.text_style.italic, "Italique");
+                    ui.checkbox(&mut after.text_style.bold, t("Gras"));
+                    ui.checkbox(&mut after.text_style.italic, t("Italique"));
                 });
-                ui.checkbox(&mut after.text_style.underline, "Souligné");
-                ui.checkbox(&mut after.text_style.wrap, "Retour à la ligne automatique");
-                let uniform = ui.button("Uniformiser ces réglages").clicked();
+                ui.checkbox(&mut after.text_style.underline, t("Souligné"));
+                ui.checkbox(&mut after.text_style.wrap, t("Retour à la ligne automatique"));
+                let uniform = ui.button(t("Uniformiser ces réglages")).clicked();
                 for n in &mut self.doc.nodes {
                     if self.selected.contains(&n.id) {
                         changed_fields!(n, before, after, uniform; text_color, font_size);

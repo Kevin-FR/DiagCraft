@@ -34,7 +34,7 @@ pub(super) fn remember_width(ctx: &egui::Context, name: &str, rect: Rect, prefer
 
 pub(super) fn heading(ui: &mut egui::Ui, title: &str, open: &mut bool, right: bool) {
     ui.horizontal(|ui| {
-        ui.add(egui::Label::new(RichText::new(title).size(15.).strong()).truncate());
+        ui.add(egui::Label::new(RichText::new(t(title)).size(15.).strong()).truncate());
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             if panel_toggle(
                 ui,
@@ -62,7 +62,7 @@ pub(super) fn ribbon_toggle(ui: &mut egui::Ui, expanded: bool) -> egui::Response
     };
     let r = ui
         .add_sized([32., 30.], egui::Button::new(""))
-        .on_hover_text(label);
+        .on_hover_text(t(label));
     r.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), label));
     let c = r.rect.center();
     ui.painter().line_segment(
@@ -89,7 +89,7 @@ pub(super) fn panel_toggle(
 ) -> egui::Response {
     let response = ui
         .add_sized([32., 30.], egui::Button::new("").selected(open))
-        .on_hover_text(label);
+        .on_hover_text(t(label));
     response.widget_info(|| {
         egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), label)
     });

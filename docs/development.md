@@ -47,3 +47,9 @@ la bibliothèque personnelle : `target/release/diagcraft --screenshot capture.pn
 
 Le format `.draw` v7, l’API agents v1 et leurs migrations doivent rester testés.
 Les exemples utilisent des données de démonstration, sans documents personnels.
+
+Les catalogues sont contrôlés avec `python3 scripts/check-locales.py`. Les tests
+de packaging sont exécutables sur tous les systèmes avec
+`python3 -m unittest discover -s packaging -p 'test_*.py'`. La vérification réseau
+réelle reste explicite : `cargo test -p diagcraft github_live_download_is_verified
+-- --ignored`. Elle contacte GitHub et télécharge un paquet dans un dossier temporaire.

@@ -289,9 +289,12 @@ impl DrawApp {
                 let Some(size) = size else {
                     return;
                 };
-                format!(
-                    "{:.1} × {:.1} px · Maj : proportions · ⌥ : libre · Échap : annuler",
-                    size[0], size[1]
+                i18n::render(
+                    "{0} × {1} px · Maj : proportions · ⌥ : libre · Échap : annuler",
+                    &[
+                        ("0", format!("{:.1}", size[0])),
+                        ("1", format!("{:.1}", size[1])),
+                    ],
                 )
             }
             Some(Drag::Move { .. }) => {
@@ -302,14 +305,20 @@ impl DrawApp {
                     .reduce(Rect::union);
                 let coordinates = rect
                     .map(|r| format!("X {:.1} · Y {:.1} px", r.min.x, r.min.y))
-                    .unwrap_or_else(|| "Déplacer la sélection".into());
-                format!(
-                    "{}{coordinates} · ⌥ : libre · Échap : annuler",
-                    if self.move_guides.is_empty() {
-                        ""
-                    } else {
-                        "Aligné · "
-                    }
+                    .unwrap_or_else(|| t("Déplacer la sélection"));
+                i18n::render(
+                    "{0}{1} · ⌥ : libre · Échap : annuler",
+                    &[
+                        (
+                            "0",
+                            t(if self.move_guides.is_empty() {
+                                ""
+                            } else {
+                                "Aligné · "
+                            }),
+                        ),
+                        ("1", coordinates.to_string()),
+                    ],
                 )
             }
             Some(Drag::FreeConnector { .. }) => {
@@ -327,7 +336,7 @@ impl DrawApp {
             Color32::from_rgb(196, 65, 145)
         };
         let text = p.layout(
-            description,
+            t(description),
             FontId::proportional(12.),
             color,
             (self.canvas.width() - 48.).clamp(48., 620.),

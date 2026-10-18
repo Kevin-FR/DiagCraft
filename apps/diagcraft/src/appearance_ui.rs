@@ -149,13 +149,13 @@ fn choice<T: Copy + PartialEq>(
     choices: &[T],
     name: impl Fn(T) -> &'static str,
 ) {
-    ui.label(label);
+    ui.label(t(label));
     egui::ComboBox::from_id_salt(label)
         .width(ui.available_width() - 12.)
-        .selected_text(name(*value))
+        .selected_text(t(name(*value)))
         .show_ui(ui, |ui| {
             for v in choices {
-                ui.selectable_value(value, *v, name(*v));
+                ui.selectable_value(value, *v, t(name(*v)));
             }
         });
 }
@@ -166,7 +166,7 @@ pub(super) fn scalar(
     range: std::ops::RangeInclusive<f32>,
     suffix: &str,
 ) {
-    ui.label(label);
+    ui.label(t(label));
     ui.add(
         egui::Slider::new(value, range)
             .suffix(suffix)
@@ -176,7 +176,7 @@ pub(super) fn scalar(
 }
 pub(super) fn color(ui: &mut egui::Ui, label: &str, value: &mut document::Color) {
     ui.horizontal(|ui| {
-        ui.label(label);
+        ui.label(t(label));
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             ui.color_edit_button_srgb(value);
         });
@@ -251,13 +251,13 @@ pub(super) fn node_inspector(
     focus: &mut Option<u64>,
     capture_presets: bool,
 ) -> (bool, bool) {
-    ui.label(RichText::new(n.kind.label()).size(20.).strong());
+    ui.label(RichText::new(t(n.kind.label())).size(20.).strong());
     ui.add_space(10.);
     if n.kind != ShapeKind::Text {
         node_controls(ui, n, tab, cache, capture_presets);
     }
     ui.separator();
-    egui::CollapsingHeader::new("Texte et typographie")
+    egui::CollapsingHeader::new(t("Texte et typographie"))
         .id_salt(("text", n.id))
         .default_open(n.kind == ShapeKind::Text)
         .open((*focus == Some(n.id)).then_some(true))
@@ -274,15 +274,15 @@ pub(super) fn node_inspector(
                 edit.scroll_to_me(Some(Align::Center));
                 *focus = None;
             }
-            ui.checkbox(&mut n.text_style.wrap, "Retour à la ligne automatique");
+            ui.checkbox(&mut n.text_style.wrap, t("Retour à la ligne automatique"));
             color(ui, "Couleur du texte", &mut n.text_color);
             ui.add(
                 egui::Slider::new(&mut n.font_size, 8.0..=64.0)
                     .clamping(egui::SliderClamping::Edits)
-                    .text("Taille"),
+                    .text(t("Taille")),
             );
         });
-    egui::CollapsingHeader::new("Position et dimensions")
+    egui::CollapsingHeader::new(t("Position et dimensions"))
         .id_salt(("position", n.id))
         .show(ui, |ui| {
             egui::Grid::new("geometry")
@@ -291,7 +291,7 @@ pub(super) fn node_inspector(
                 .show(ui, |ui| {
                     for (i, label) in [(0, "X"), (1, "Y")] {
                         ui.horizontal(|ui| {
-                            ui.label(label);
+                            ui.label(t(label));
                             ui.add(
                                 egui::DragValue::new(&mut n.position[i])
                                     .clamp_existing_to_range(false)
@@ -303,7 +303,7 @@ pub(super) fn node_inspector(
                     ui.end_row();
                     for (i, label) in [(0, "L"), (1, "H")] {
                         ui.horizontal(|ui| {
-                            ui.label(label);
+                            ui.label(t(label));
                             ui.add(
                                 egui::DragValue::new(&mut n.size[i])
                                     .clamp_existing_to_range(false)
@@ -316,8 +316,8 @@ pub(super) fn node_inspector(
         });
     ui.add_space(8.);
     (
-        ui.button("Mettre au premier plan").clicked(),
-        ui.button("Mettre à l’arrière-plan").clicked(),
+        ui.button(t("Mettre au premier plan")).clicked(),
+        ui.button(t("Mettre à l’arrière-plan")).clicked(),
     )
 }
 pub(super) fn node_controls(
@@ -345,13 +345,13 @@ pub(super) fn style_tabs(ui: &mut egui::Ui, tab: &mut StyleTab, has_shapes: bool
         *tab = StyleTab::Line;
     }
     ui.horizontal(|ui| {
-        for (t, label) in [
+        for (candidate, label) in [
             (StyleTab::Fill, "Remplir"),
             (StyleTab::Line, "Ligne"),
             (StyleTab::Shadow, "Ombre"),
         ] {
-            ui.add_enabled_ui(has_shapes || t == StyleTab::Line, |ui| {
-                ui.selectable_value(tab, t, label);
+            ui.add_enabled_ui(has_shapes || candidate == StyleTab::Line, |ui| {
+                ui.selectable_value(tab, candidate, t(label));
             });
         }
     });
@@ -438,12 +438,12 @@ pub(super) fn style_body(
         ),
         StyleTab::Shadow => {
             let s = &mut n.appearance.shadow;
-            let menu = ui.menu_button("Préréglages d’ombre", |ui| {
+            let menu = ui.menu_button(t("Préréglages d’ombre"), |ui| {
                 egui::ScrollArea::vertical()
                     .max_height(400.)
                     .show(ui, |ui| {
                         ui.set_max_width(230.);
-                        if ui.button("Aucune ombre").clicked() {
+                        if ui.button(t("Aucune ombre")).clicked() {
                             s.kind = ShadowKind::None;
                             replace_effect = true;
                             ui.close();
@@ -453,7 +453,7 @@ pub(super) fn style_body(
                             ShadowKind::Inner,
                             ShadowKind::Perspective,
                         ] {
-                            ui.label(kind.label());
+                            ui.label(t(kind.label()));
                             egui::Grid::new(kind.label())
                                 .num_columns(3)
                                 .spacing(vec2(6., 6.))
@@ -524,7 +524,7 @@ pub(super) fn style_body(
         }
     }
     ui.add_space(12.);
-    if ui.small_button("Réinitialiser cet onglet").clicked() {
+    if ui.small_button(t("Réinitialiser cet onglet")).clicked() {
         replace_effect = true;
         match tab {
             StyleTab::Fill => n.appearance.fill = Default::default(),
@@ -548,6 +548,6 @@ pub(super) fn edge_controls(ui: &mut egui::Ui, e: &mut document::Connector) {
     ui.add_space(8.);
     field_label(ui, "FLÈCHES");
     contextual_toolbar::edge_style_controls(ui, e);
-    ui.add(egui::Slider::new(&mut e.appearance.start_scale, 0.5..=3.0).text("Taille départ"));
-    ui.add(egui::Slider::new(&mut e.appearance.end_scale, 0.5..=3.0).text("Taille arrivée"));
+    ui.add(egui::Slider::new(&mut e.appearance.start_scale, 0.5..=3.0).text(t("Taille départ")));
+    ui.add(egui::Slider::new(&mut e.appearance.end_scale, 0.5..=3.0).text(t("Taille arrivée")));
 }

@@ -61,7 +61,7 @@ def build(stage: Path, version: str) -> Path:
         dependencies = set(generated.strip().removeprefix("shlibs:Depends=").split(", "))
         if not any(item.startswith("libc6 ") for item in dependencies):
             raise RuntimeError("dpkg-shlibdeps did not produce the expected runtime dependencies.")
-        dependencies.update(("shared-mime-info", "hicolor-icon-theme", "libegl1", "libgl1", "libx11-6", "libx11-xcb1", "libxcursor1", "libxi6", "libxrandr2",
+        dependencies.update(("curl", "ca-certificates", "shared-mime-info", "hicolor-icon-theme", "libegl1", "libgl1", "libx11-6", "libx11-xcb1", "libxcursor1", "libxi6", "libxrandr2",
                              "libxkbcommon0", "libxkbcommon-x11-0", "libwayland-client0", "libwayland-cursor0", "libwayland-egl1"))
         payload = sorted(path for path in package.rglob("*") if path.is_file())
         for path in package.rglob("*"):

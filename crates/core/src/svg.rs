@@ -160,7 +160,7 @@ pub fn export(doc: &Document) -> Result<String, String> {
             );
             let _ = writeln!(
                 out,
-                "<text x=\"{}\" y=\"{}\" text-anchor=\"middle\" font-family=\"'Source Sans 3',Arial,sans-serif\" font-size=\"14\" fill=\"{color}\">{}</text>",
+                "<text x=\"{}\" y=\"{}\" text-anchor=\"middle\" font-family=\"'Source Sans 3','Noto Sans SC',Arial,sans-serif\" font-size=\"14\" fill=\"{color}\">{}</text>",
                 pos[0],
                 pos[1],
                 escape(&edge.label)
@@ -274,7 +274,7 @@ pub fn export(doc: &Document) -> Result<String, String> {
             if n.text_style.monospace {
                 "monospace"
             } else {
-                "'Source Sans 3',Arial,sans-serif"
+                "'Source Sans 3','Noto Sans SC',Arial,sans-serif"
             },
             n.font_size,
             hex(n.text_color),
@@ -342,7 +342,7 @@ pub fn export(doc: &Document) -> Result<String, String> {
                 } => {
                     let _ = writeln!(
                         out,
-                        "<text x=\"{}\" y=\"{}\" text-anchor=\"{}\" dominant-baseline=\"central\" font-family=\"'Source Sans 3',Arial,sans-serif\" font-size=\"{size}\" fill=\"{}\">{}</text>",
+                        "<text x=\"{}\" y=\"{}\" text-anchor=\"{}\" dominant-baseline=\"central\" font-family=\"'Source Sans 3','Noto Sans SC',Arial,sans-serif\" font-size=\"{size}\" fill=\"{}\">{}</text>",
                         position[0],
                         position[1],
                         match align {

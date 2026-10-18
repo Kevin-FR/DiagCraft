@@ -7,6 +7,10 @@ use std::io::Read;
 #[serde(default)]
 struct Preferences {
     version: u32,
+    language: Option<Language>,
+    update_check: bool,
+    update_experimental: bool,
+    last_update_check: u64,
     library: bool,
     inspector: bool,
     library_width: f32,
@@ -21,6 +25,10 @@ impl Default for Preferences {
     fn default() -> Self {
         Self {
             version: 1,
+            language: None,
+            update_check: false,
+            update_experimental: true,
+            last_update_check: 0,
             library: true,
             inspector: false,
             library_width: 256.,
@@ -36,6 +44,10 @@ impl Default for Preferences {
 impl DrawApp {
     fn interface_preferences(&self) -> Preferences {
         Preferences {
+            language: self.language,
+            update_check: self.settings.check_at_startup,
+            update_experimental: self.settings.experimental,
+            last_update_check: self.settings.last_check,
             library: self.show_library,
             inspector: self.show_inspector,
             library_width: self.library_width,
@@ -49,6 +61,11 @@ impl DrawApp {
     }
 
     fn apply_interface(&mut self, prefs: Preferences) {
+        self.settings.check_at_startup = prefs.update_check;
+        self.settings.experimental = prefs.update_experimental;
+        self.settings.last_check = prefs.last_update_check;
+        self.language = prefs.language;
+        i18n::activate(self.language.unwrap_or_else(Language::system));
         self.show_library = prefs.library;
         self.show_inspector = prefs.inspector;
         self.library_width = bounded(prefs.library_width, 240., 256.);
@@ -87,8 +104,9 @@ impl DrawApp {
             Err(error) => {
                 // Preserve an unreadable or newer file; an explicit reset re-enables saving.
                 self.interface_path = None;
-                self.status = format!(
-                    "Interface par défaut : {error}. Réinitialisez l’interface pour mémoriser les réglages."
+                self.status = i18n::render(
+                    "Interface par défaut : {0}. Réinitialisez l’interface pour mémoriser les réglages.",
+                    &[("0", error.to_string())],
                 );
             }
         }
@@ -107,7 +125,13 @@ impl DrawApp {
     }
 
     pub(super) fn reset_interface(&mut self, ctx: &egui::Context) {
-        self.apply_interface(Preferences::default());
+        self.apply_interface(Preferences {
+            language: self.language,
+            update_check: self.settings.check_at_startup,
+            update_experimental: self.settings.experimental,
+            last_update_check: self.settings.last_check,
+            ..Default::default()
+        });
         for name in ["symbol_library", "inspector"] {
             ctx.data_mut(|data| {
                 data.remove::<egui::containers::panel::PanelState>(egui::Id::new(name))

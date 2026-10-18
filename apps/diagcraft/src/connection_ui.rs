@@ -365,7 +365,7 @@ pub(super) fn paint_link_hint(
     text: &str,
     color: Color32,
 ) {
-    let galley = p.layout_no_wrap(text.into(), FontId::proportional(12.), color);
+    let galley = p.layout_no_wrap(t(text), FontId::proportional(12.), color);
     let size = galley.size() + vec2(16., 10.);
     let origin = pos2(
         (at.x + 18.).clamp(

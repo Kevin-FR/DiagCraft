@@ -14,7 +14,9 @@ criterion, avec des bibliothèques internes et plusieurs applications.
 | image, fonctionnalité PNG | Icône et captures de l’application ; aucun codec photo supplémentaire nécessaire. |
 | resvg/usvg et svg2pdf | Aperçus des styles et export PDF à partir des mêmes géométries SVG. |
 | pdf-writer | Assemblage du PDF multipage. |
-| sha2 / tempfile | Révisions, intégrité et écritures atomiques. |
+| sha2 / tempfile | Révisions, intégrité et écritures atomiques, y compris les téléchargements vérifiés. |
+| semver 1.0.28 | Comparaison des versions et filtrage des versions expérimentales. |
+| curl système | Requêtes HTTPS GitHub dans un processus annulable en arrière-plan ; aucune pile HTTP Rust ajoutée. |
 
 Les bibliothèques de traitement photo, codecs RAW, profils colorimétriques,
 compositeur GPU et plugins de PhotoCraft ne répondent pas au périmètre actuel.

@@ -16,6 +16,7 @@ use eframe::egui::{
     self, Align, Align2, Color32, CornerRadius, FontId, Key, Layout, Pos2, Rect, RichText, Sense,
     Shape, Stroke, StrokeKind, Vec2, pos2, vec2,
 };
+use i18n::{Language, t};
 use std::path::PathBuf;
 
 const INK: Color32 = Color32::from_rgb(35, 51, 65);
@@ -176,6 +177,8 @@ pub struct DrawApp {
     library_width: f32,
     inspector_width: f32,
     interface_path: Option<PathBuf>,
+    language: Option<Language>,
+    settings: settings_ui::Settings,
     symbol_search: String,
     clipboard: Option<Document>,
     tabs: Vec<Session>,
@@ -242,6 +245,10 @@ impl DrawApp {
             "avance" => RibbonTab::Advanced,
             _ => RibbonTab::Home,
         };
+        if name == "parametres" {
+            self.settings.open = true;
+            self.show_library = false;
+        }
         if matches!(name, "interface" | "ruban-inserer") {
             self.ribbon_expanded = Some(false);
             self.show_library = true;
@@ -467,6 +474,7 @@ impl DrawApp {
         let persist = screenshot.is_none();
         let mut app = Self::from_context(&cc.egui_ctx, doc, path, screenshot);
         if persist {
+            i18n::activate(app.language.unwrap_or_else(Language::system));
             app.interface_path =
                 library::default_path().map(|p| p.with_file_name("interface-v1.json"));
             app.restore_interface();
@@ -489,7 +497,12 @@ impl DrawApp {
             if let Some(path) = load_path {
                 match Library::load(&path) {
                     Ok(lib) => app.library = lib,
-                    Err(e) => app.error = Some(format!("Lecture de la bibliothèque : {e}")),
+                    Err(e) => {
+                        app.error = Some(i18n::render(
+                            "Lecture de la bibliothèque : {0}",
+                            &[("0", e.to_string())],
+                        ))
+                    }
                 }
             }
             if let Some(root) = gallery::default_root() {
@@ -504,8 +517,11 @@ impl DrawApp {
             if let Some(path) = app.path.clone()
                 && let Err(e) = app.gallery.record(&path, &app.doc)
             {
-                app.error = Some(format!("Galerie : {e}"));
+                app.error = Some(i18n::render("Galerie : {0}", &[("0", e.to_string())]));
             }
+        }
+        if persist {
+            app.maybe_check_updates();
         }
         app
     }
@@ -515,6 +531,7 @@ impl DrawApp {
         path: Option<PathBuf>,
         screenshot: Option<PathBuf>,
     ) -> Self {
+        i18n::activate(Language::French);
         ctx.set_theme(egui::Theme::Light);
         ctx.set_visuals(egui::Visuals::light());
         install_fonts(ctx);
@@ -590,6 +607,11 @@ impl DrawApp {
             library_width: 256.,
             inspector_width: 280.,
             interface_path: None,
+            language: None,
+            settings: settings_ui::Settings {
+                experimental: true,
+                ..Default::default()
+            },
             symbol_search: String::new(),
             clipboard: None,
             tabs: vec![],
@@ -647,6 +669,12 @@ impl DrawApp {
         };
         app.tabs.push(app.session());
         app
+    }
+    fn add_node(&mut self, kind: ShapeKind, center: Point) -> u64 {
+        let id = self.doc.add_node(kind, center);
+        let node = self.doc.node_mut(id).unwrap();
+        node.text = t(&node.text);
+        id
     }
     fn dirty(&self) -> bool {
         self.doc != self.saved
@@ -716,8 +744,8 @@ impl DrawApp {
     fn save(&mut self, save_as: bool) -> bool {
         let path = if save_as || self.path.is_none() {
             rfd::FileDialog::new()
-                .set_title("Enregistrer le diagramme")
-                .add_filter("Diagramme DiagCraft", &["draw"])
+                .set_title(t("Enregistrer le diagramme"))
+                .add_filter(t("Diagramme DiagCraft"), &["draw"])
                 .set_file_name(
                     self.path
                         .as_ref()
@@ -748,20 +776,26 @@ impl DrawApp {
                     .err()
                     .or(previous_error);
                 if let Some(e) = error {
-                    self.error = Some(format!("Document enregistré ; galerie indisponible : {e}"));
+                    self.error = Some(i18n::render(
+                        "Document enregistré ; galerie indisponible : {0}",
+                        &[("0", e.to_string())],
+                    ));
                 }
                 true
             }
             Err(e) => {
-                self.error = Some(format!("Impossible d’enregistrer : {e}"));
+                self.error = Some(i18n::render(
+                    "Impossible d’enregistrer : {0}",
+                    &[("0", e.to_string())],
+                ));
                 false
             }
         }
     }
     fn export(&mut self) {
         let Some(path) = rfd::FileDialog::new()
-            .set_title("Exporter en SVG")
-            .add_filter("Image vectorielle SVG", &["svg"])
+            .set_title(t("Exporter en SVG"))
+            .add_filter(t("Image vectorielle SVG"), &["svg"])
             .set_file_name("diagramme.svg")
             .save_file()
         else {
@@ -771,12 +805,20 @@ impl DrawApp {
             svg::export(&self.doc).and_then(|s| document::atomic_write(&path, s.as_bytes()));
         match result {
             Ok(()) => {
-                self.status = format!(
-                    "SVG exporté : {}",
-                    path.file_name().unwrap_or_default().to_string_lossy()
+                self.status = i18n::render(
+                    "SVG exporté : {0}",
+                    &[(
+                        "0",
+                        format!("{}", path.file_name().unwrap_or_default().to_string_lossy()),
+                    )],
                 )
             }
-            Err(e) => self.error = Some(format!("Impossible d’exporter : {e}")),
+            Err(e) => {
+                self.error = Some(i18n::render(
+                    "Impossible d’exporter : {0}",
+                    &[("0", e.to_string())],
+                ))
+            }
         }
     }
     fn request(&mut self, action: Pending) {
@@ -810,11 +852,18 @@ impl DrawApp {
                 self.request(Pending::Close);
             }
             Pending::CloseTab(index) => self.close_tab(index),
-            Pending::New => self.open_tab(Document::default(), None),
+            Pending::New => {
+                let document = Document {
+                    title: t("Sans titre"),
+                    page_name: i18n::render("Page {0}", &[("0", "1".into())]),
+                    ..Default::default()
+                };
+                self.open_tab(document, None);
+            }
             Pending::OpenDialog => {
                 if let Some(path) = rfd::FileDialog::new()
-                    .set_title("Ouvrir un diagramme DiagCraft")
-                    .add_filter("Diagramme DiagCraft", &["draw", "json"])
+                    .set_title(t("Ouvrir un diagramme DiagCraft"))
+                    .add_filter(t("Diagramme DiagCraft"), &["draw", "json"])
                     .pick_file()
                 {
                     self.execute(Pending::Open(path));
@@ -827,7 +876,12 @@ impl DrawApp {
                     }
                     self.open_tab(doc, Some(path));
                 }
-                Err(e) => self.error = Some(format!("Impossible d’ouvrir : {e}")),
+                Err(e) => {
+                    self.error = Some(i18n::render(
+                        "Impossible d’ouvrir : {0}",
+                        &[("0", e.to_string())],
+                    ))
+                }
             },
         }
     }
@@ -1098,54 +1152,54 @@ impl DrawApp {
             egui::ScrollArea::vertical().show(ui,|ui| {
                 if self.selected.len()==1 {
                     let id=self.selected[0];
-                    ui.horizontal(|ui|{ui.monospace(format!("page:{} / objet:{id}",self.doc.page_index));if ui.small_button("Copier").on_hover_text("Référence JSON pour un agent").clicked(){ctx.copy_text(serde_json::json!({"page":self.doc.page_index,"target":id}).to_string());}});ui.add_space(10.);
+                    ui.horizontal(|ui|{ui.monospace(i18n::render("page:{0} / objet:{1}", &[("0", format!("{}", self.doc.page_index)),("1", format!("{}", id))]));if ui.small_button(t("Copier")).on_hover_text(t("Référence JSON pour un agent")).clicked(){ctx.copy_text(serde_json::json!({"page":self.doc.page_index,"target":id}).to_string());}});ui.add_space(10.);
                     if let Some(n)=self.doc.node_mut(id) {
                         let (front,back)=appearance_ui::node_inspector(ui,n,&mut self.style_tab,&self.styled_cache,&mut self.focus_text,self.capture_shadow_presets);
                         if (front || back) && let Some(index)=self.doc.nodes.iter().position(|n|n.id==id) {let node=self.doc.nodes.remove(index);if front{self.doc.nodes.push(node);}else{self.doc.nodes.insert(0,node);}}
                     } else if self.doc.charts.iter().any(|c|c.id==id) { self.chart_inspector(ui,id);
                     } else if let Some(edge)=self.doc.connectors.iter_mut().find(|e|e.id==id) {
-                        ui.label(RichText::new("Connecteur").size(20.).strong());ui.add_space(18.);field_label(ui,"LIBELLÉ");
+                        ui.label(RichText::new(t("Connecteur")).size(20.).strong());ui.add_space(18.);field_label(ui,"LIBELLÉ");
                         let response=ui.add(egui::TextEdit::singleline(&mut edge.label).id(egui::Id::new(("edge_label",id))).desired_width(f32::INFINITY).char_limit(1000));if self.focus_text==Some(id){response.request_focus();self.focus_text=None;}
                         appearance_ui::edge_controls(ui,edge);
                         ui.add_space(18.);field_label(ui,"TRACÉ");
-                        ui.selectable_value(&mut edge.kind,ConnectorKind::Elbow,"À angle droit");
-                        ui.selectable_value(&mut edge.kind,ConnectorKind::Straight,"Ligne directe");
-                        ui.checkbox(&mut edge.arrow_start,"Flèche au départ");ui.checkbox(&mut edge.arrow,"Flèche à l’arrivée");
+                        ui.selectable_value(&mut edge.kind,ConnectorKind::Elbow,t("À angle droit"));
+                        ui.selectable_value(&mut edge.kind,ConnectorKind::Straight,t("Ligne directe"));
+                        ui.checkbox(&mut edge.arrow_start,t("Flèche au départ"));ui.checkbox(&mut edge.arrow,t("Flèche à l’arrivée"));
                         for (label,port) in [("Départ",&mut edge.from_port),("Arrivée",&mut edge.to_port)] {
-                            egui::ComboBox::from_id_salt(label).selected_text(format!("{label} : {}",port.label())).show_ui(ui,|ui|{for p in Port::ALL {ui.selectable_value(port,p,p.label());}});
+                            egui::ComboBox::from_id_salt(label).selected_text(format!("{label} : {}",port.label())).show_ui(ui,|ui|{for p in Port::ALL {ui.selectable_value(port,p,t(p.label()));}});
                         }
-                        ui.add(egui::Slider::new(&mut edge.label_t,0.0..=1.0).clamping(egui::SliderClamping::Edits).text("Position du texte"));
+                        ui.add(egui::Slider::new(&mut edge.label_t,0.0..=1.0).clamping(egui::SliderClamping::Edits).text(t("Position du texte")));
                         let mut remove=None;
                         for (i,p) in edge.waypoints.iter_mut().enumerate() { ui.horizontal(|ui|{ui.add(egui::DragValue::new(&mut p[0]).clamp_existing_to_range(false).range(-100_000.0..=100_000.0).prefix("X "));ui.add(egui::DragValue::new(&mut p[1]).clamp_existing_to_range(false).range(-100_000.0..=100_000.0).prefix("Y "));if ui.small_button("×").clicked(){remove=Some(i);}}); }
                         if let Some(i)=remove{edge.waypoints.remove(i);}
-                        if edge.waypoints.len()<16 && ui.button("Ajouter un point de passage").clicked(){edge.waypoints.push(self.doc.page_size.map(|v|v/2.));}
-                        for (label,p) in [("Départ libre",&mut edge.free_start),("Arrivée libre",&mut edge.free_end)] {if let Some(p)=p {ui.label(label);ui.horizontal(|ui|{for (a,axis) in [(0,"X "),(1,"Y ")] {ui.add(egui::DragValue::new(&mut p[a]).range(-100_000.0..=100_000.0).prefix(axis));}});}}
-                        ui.label("Glissez une extrémité sur une forme pour l’attacher, ou dans le vide pour la libérer.");
+                        if edge.waypoints.len()<16 && ui.button(t("Ajouter un point de passage")).clicked(){edge.waypoints.push(self.doc.page_size.map(|v|v/2.));}
+                        for (label,p) in [("Départ libre",&mut edge.free_start),("Arrivée libre",&mut edge.free_end)] {if let Some(p)=p {ui.label(t(label));ui.horizontal(|ui|{for (a,axis) in [(0,"X "),(1,"Y ")] {ui.add(egui::DragValue::new(&mut p[a]).range(-100_000.0..=100_000.0).prefix(axis));}});}}
+                        ui.label(t("Glissez une extrémité sur une forme pour l’attacher, ou dans le vide pour la libérer."));
 
                     } else if let Some(d)=self.doc.drawings.iter_mut().find(|d|d.id==id) {
-                        ui.label(RichText::new(if d.kind==DrawingKind::Bezier{"Courbe de Bézier"}else{"Trait"}).size(20.).strong());ui.add_space(18.);field_label(ui,"TRACÉ");
+                        ui.label(RichText::new(t(if d.kind==DrawingKind::Bezier{"Courbe de Bézier"}else{"Trait"})).size(20.).strong());ui.add_space(18.);field_label(ui,"TRACÉ");
                         appearance_ui::line_controls(ui,&mut d.appearance,&mut d.color,&mut d.width,None,None,0.5);
-                        ui.checkbox(&mut d.arrow,"Flèche à l’arrivée");
-                        ui.add(egui::Slider::new(&mut d.appearance.end_scale,0.5..=3.0).text("Taille de flèche"));
-                        if d.kind==DrawingKind::Bezier {ui.add(egui::Slider::new(&mut d.bend,-300.0..=300.0).clamping(egui::SliderClamping::Edits).text("Courbure"));}
-                        for (label,p) in [("Départ",&mut d.start),("Arrivée",&mut d.end)] {ui.label(label);ui.horizontal(|ui|{ui.add(egui::DragValue::new(&mut p[0]).clamp_existing_to_range(false).prefix("X ").range(-100_000.0..=100_000.0));ui.add(egui::DragValue::new(&mut p[1]).clamp_existing_to_range(false).prefix("Y ").range(-100_000.0..=100_000.0));});}
+                        ui.checkbox(&mut d.arrow,t("Flèche à l’arrivée"));
+                        ui.add(egui::Slider::new(&mut d.appearance.end_scale,0.5..=3.0).text(t("Taille de flèche")));
+                        if d.kind==DrawingKind::Bezier {ui.add(egui::Slider::new(&mut d.bend,-300.0..=300.0).clamping(egui::SliderClamping::Edits).text(t("Courbure")));}
+                        for (label,p) in [("Départ",&mut d.start),("Arrivée",&mut d.end)] {ui.label(t(label));ui.horizontal(|ui|{ui.add(egui::DragValue::new(&mut p[0]).clamp_existing_to_range(false).prefix("X ").range(-100_000.0..=100_000.0));ui.add(egui::DragValue::new(&mut p[1]).clamp_existing_to_range(false).prefix("Y ").range(-100_000.0..=100_000.0));});}
                     }
                 } else if self.selected.len()>1 {
                     self.selection_inspector(ui);
                 } else {
-                    ui.label(RichText::new("Votre document").size(20.).strong());
-                    ui.label(RichText::new("Les détails font la différence.").size(12.).color(MUTED));ui.add_space(22.);
+                    ui.label(RichText::new(t("Votre document")).size(20.).strong());
+                    ui.label(RichText::new(t("Les détails font la différence.")).size(12.).color(MUTED));ui.add_space(22.);
                     field_label(ui,"NOM DU DIAGRAMME");
                     ui.add(egui::TextEdit::singleline(&mut self.doc.title).desired_width(f32::INFINITY).char_limit(200));
                     ui.add_space(22.);field_label(ui,"PAGE");
                     ui.label(format!("{} · {:.0} × {:.0} px",self.doc.page_name,self.doc.page_size[0],self.doc.page_size[1]));
-                    if ui.button("Nom et dimensions de page…").clicked(){self.open_page_settings();}
-                    if ui.button("Gérer les pages…").clicked(){self.show_pages=true;}
+                    if ui.button(t("Nom et dimensions de page…")).clicked(){self.open_page_settings();}
+                    if ui.button(t("Gérer les pages…")).clicked(){self.show_pages=true;}
                     ui.add_space(18.);
-                    ui.label(RichText::new("À vous de jouer").strong().size(14.));
-                    for text in ["01   Choisissez une forme.","02   Cliquez sur la page.","03   Reliez vos idées.","04   Exportez votre diagramme."] {ui.add_space(8.);ui.label(RichText::new(text).size(12.).color(MUTED));}
+                    ui.label(RichText::new(t("À vous de jouer")).strong().size(14.));
+                    for text in ["01   Choisissez une forme.","02   Cliquez sur la page.","03   Reliez vos idées.","04   Exportez votre diagramme."] {ui.add_space(8.);ui.label(RichText::new(t(text)).size(12.).color(MUTED));}
                     ui.add_space(20.);
-                    ui.label(RichText::new("Sélectionnez un objet pour modifier son texte, ses couleurs et sa taille.").size(12.).color(MUTED));
+                    ui.label(RichText::new(t("Sélectionnez un objet pour modifier son texte, ses couleurs et sa taille.")).size(12.).color(MUTED));
                 }
             });
         });
@@ -1173,22 +1227,24 @@ impl DrawApp {
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new("•").size(9.).color(ACCENT));
-                    ui.label(RichText::new(&self.status).size(11.).color(MUTED));
+                    ui.label(RichText::new(t(&self.status)).size(11.).color(MUTED));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         ui.label(
-                            RichText::new(format!(
-                                "{} formes · {} liens · {} tracés · {} graphiques",
-                                self.doc.nodes.len(),
-                                self.doc.connectors.len(),
-                                self.doc.drawings.len(),
-                                self.doc.charts.len()
+                            RichText::new(i18n::render(
+                                "{0} formes · {1} liens · {2} tracés · {3} graphiques",
+                                &[
+                                    ("0", format!("{}", self.doc.nodes.len())),
+                                    ("1", format!("{}", self.doc.connectors.len())),
+                                    ("2", format!("{}", self.doc.drawings.len())),
+                                    ("3", format!("{}", self.doc.charts.len())),
+                                ],
                             ))
                             .size(11.)
                             .color(MUTED),
                         );
                         ui.separator();
                         ui.label(
-                            RichText::new("En local, simplement.")
+                            RichText::new(t("En local, simplement."))
                                 .size(11.)
                                 .color(MUTED),
                         );
@@ -1457,15 +1513,13 @@ impl DrawApp {
                 {
                     p.text(
                         page.center() - vec2(0., 14.),
-                        Align2::CENTER_CENTER,
-                        "Tout commence par une idée.",
+                        Align2::CENTER_CENTER,t("Tout commence par une idée."),
                         FontId::proportional(23.),
                         MUTED,
                     );
                     p.text(
                         page.center() + vec2(0., 22.),
-                        Align2::CENTER_CENTER,
-                        "Choisissez une forme à gauche, puis cliquez ici.",
+                        Align2::CENTER_CENTER,t("Choisissez une forme à gauche, puis cliquez ici."),
                         FontId::proportional(13.),
                         MUTED,
                     );
@@ -1480,7 +1534,7 @@ impl DrawApp {
                     }});
                 }
                 let hint = match self.tool {
-                    Tool::Shape(k) => format!("Cliquez pour ajouter : {}", k.label()),
+                    Tool::Shape(k) => i18n::render("Cliquez pour ajouter : {0}", &[("0", t(k.label()))]),
                     Tool::Connect => {
                         if self.connect_from.is_some() {
                             "Choisissez le bloc d’arrivée · glissez ou cliquez · Échap pour annuler"
@@ -1502,7 +1556,7 @@ impl DrawApp {
                 ui.painter().text(
                     rect.min + vec2(20., 19.),
                     Align2::LEFT_TOP,
-                    hint,
+                    t(hint),
                     FontId::proportional(11.),
                     MUTED,
                 );
@@ -1572,15 +1626,15 @@ impl DrawApp {
                                             (self.zoom * 100.).round() as i32
                                         ))
                                         .size(12.),
-                                    ).on_hover_text("Trackpad : deux doigts pour déplacer, pincer pour zoomer autour du pointeur. F pour recentrer la page.");
+                                    ).on_hover_text(t("Trackpad : deux doigts pour déplacer, pincer pour zoomer autour du pointeur. F pour recentrer la page."));
                                     if ui.button("+").clicked() {
                                         self.set_zoom(self.zoom * 1.2, rect.center());
                                     }
                                     ui.separator();
-                                    if ui.button("Ajuster").on_hover_text("F").clicked() {
+                                    if ui.button(t("Ajuster")).on_hover_text(t("F")).clicked() {
                                         self.fit_next = true;
                                     }
-                                    if !self.selected.is_empty() && ui.button("Sélection").on_hover_text("Zoom sur la sélection · Maj + F").clicked() {
+                                    if !self.selected.is_empty() && ui.button(t("Sélection")).on_hover_text(t("Zoom sur la sélection · Maj + F")).clicked() {
                                         self.fit_selection(ctx);
                                     }
                                 });
@@ -1623,7 +1677,7 @@ impl DrawApp {
                         self.error = Some("Limite de 10 000 objets atteinte.".into());
                         return;
                     }
-                    let id = self.doc.add_node(kind, world);
+                    let id = self.add_node(kind, world);
                     let page = self.doc.edit_bounds();
                     let n = self.doc.node_mut(id).unwrap();
                     if let Some(mut custom) = self.pending_symbol.take() {
@@ -2140,23 +2194,23 @@ impl DrawApp {
     fn dialogs(&mut self, ctx: &egui::Context) {
         if let Some(action) = self.pending.clone() {
             egui::Modal::new("unsaved".into()).show(ctx,|ui| {
-                ui.set_width(420.);ui.heading(format!("Conserver « {} » ?",self.doc.title));ui.add_space(10.);
-                ui.label("Ce diagramme contient des modifications qui n’ont pas encore été enregistrées.");ui.add_space(16.);
+                ui.set_width(420.);ui.heading(i18n::render("Conserver « {0} » ?", &[("0", self.doc.title.clone())]));ui.add_space(10.);
+                ui.label(t("Ce diagramme contient des modifications qui n’ont pas encore été enregistrées."));ui.add_space(16.);
                 ui.horizontal(|ui| {
-                    if ui.button("Annuler").clicked(){self.pending=None;}
-                    if ui.button("Ne pas enregistrer").clicked(){self.pending=None;self.execute(action.clone());}
-                    if ui.add(egui::Button::new(RichText::new("Enregistrer").color(Color32::WHITE)).fill(ACCENT)).clicked() && self.save(false) {self.pending=None;self.execute(action);}
+                    if ui.button(t("Annuler")).clicked(){self.pending=None;}
+                    if ui.button(t("Ne pas enregistrer")).clicked(){self.pending=None;self.execute(action.clone());}
+                    if ui.add(egui::Button::new(RichText::new(t("Enregistrer")).color(Color32::WHITE)).fill(ACCENT)).clicked() && self.save(false) {self.pending=None;self.execute(action);}
                 });
             });
         }
         if let Some(error) = self.error.clone() {
             egui::Modal::new("error".into()).show(ctx, |ui| {
                 ui.set_width(420.);
-                ui.heading("L’opération n’a pas abouti");
+                ui.heading(t("L’opération n’a pas abouti"));
                 ui.add_space(10.);
-                ui.label(error);
+                ui.label(t(error));
                 ui.add_space(12.);
-                if ui.button("Fermer").clicked() {
+                if ui.button(t("Fermer")).clicked() {
                     self.error = None;
                 }
             });
@@ -2167,6 +2221,13 @@ impl DrawApp {
 
 impl eframe::App for DrawApp {
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+        if let Some(job) = self.settings.job.take() {
+            job.cancel.store(true, std::sync::atomic::Ordering::Relaxed);
+            // Give the worker a bounded opportunity to kill/reap its curl child.
+            let _ = job
+                .receiver
+                .recv_timeout(std::time::Duration::from_millis(500));
+        }
         if let Err(error) = self.save_interface() {
             eprintln!("Préférences d’interface : {error}");
         }
@@ -2175,6 +2236,7 @@ impl eframe::App for DrawApp {
         visuals.panel_fill.to_normalized_gamma_f32()
     }
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.poll_updates(ctx);
         self.frame_count += 1;
         if let Some(path) = self.screenshot.clone() {
             if self.frame_count == 5 {
@@ -2226,6 +2288,7 @@ impl eframe::App for DrawApp {
             ctx,
             self.pending.is_none()
                 && self.error.is_none()
+                && !self.settings.open
                 && !self.show_help
                 && !self.command_palette.open
                 && !self.show_templates
@@ -2238,6 +2301,7 @@ impl eframe::App for DrawApp {
                 && self.agent_panel.is_none(),
         );
         self.finish_frame_edit(ctx, &before);
+        self.settings_dialog(ctx);
         self.command_dialog(ctx);
         self.library_dialogs(ctx);
         self.workspace_dialogs(ctx);
@@ -2297,10 +2361,20 @@ fn install_fonts(ctx: &egui::Context) {
         .get_mut(&egui::FontFamily::Proportional)
         .unwrap()
         .insert(0, "SourceSans3-Regular".into());
+    fonts.font_data.insert(
+        "NotoSansSC".into(),
+        egui::FontData::from_static(include_bytes!(
+            "../../../assets/fonts/NotoSansSC-Regular.otf"
+        ))
+        .into(),
+    );
+    for family in fonts.families.values_mut() {
+        family.push("NotoSansSC".into());
+    }
     ctx.set_fonts(fonts);
 }
 fn field_label(ui: &mut egui::Ui, label: &str) {
-    ui.label(RichText::new(label).size(10.).strong().color(MUTED));
+    ui.label(RichText::new(t(label)).size(10.).strong().color(MUTED));
     ui.add_space(4.);
 }
 fn swatch(ui: &mut egui::Ui, c: [u8; 3], active: bool) -> egui::Response {
@@ -2392,3 +2466,11 @@ mod gestures_ui;
 
 #[path = "commands_ui.rs"]
 mod commands_ui;
+
+#[path = "i18n.rs"]
+pub(crate) mod i18n;
+
+#[path = "settings_ui.rs"]
+mod settings_ui;
+#[path = "updates.rs"]
+mod updates;

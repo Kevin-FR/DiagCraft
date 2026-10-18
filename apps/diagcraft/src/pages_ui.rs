@@ -27,11 +27,13 @@ impl DrawApp {
             self.set_tool(Tool::Select);
             self.context_open = false;
             self.fit_next = true;
-            self.status = format!(
-                "{} · page {} sur {}",
-                self.doc.page_name,
-                index + 1,
-                self.doc.page_count()
+            self.status = i18n::render(
+                "{0} · page {1} sur {2}",
+                &[
+                    ("0", self.doc.page_name.to_string()),
+                    ("1", format!("{}", index + 1)),
+                    ("2", format!("{}", self.doc.page_count())),
+                ],
             );
         }
     }
@@ -105,12 +107,19 @@ impl DrawApp {
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     if ui
-                        .button(format!("Pages ({})", self.doc.page_count()))
+                        .button(i18n::render(
+                            "Pages ({0})",
+                            &[("0", self.doc.page_count().to_string())],
+                        ))
                         .clicked()
                     {
                         self.show_pages = true;
                     }
-                    if ui.button("+").on_hover_text("Ajouter une page").clicked() {
+                    if ui
+                        .button("+")
+                        .on_hover_text(t("Ajouter une page"))
+                        .clicked()
+                    {
                         action = Some(PageAction::Add(false));
                     }
                     let names = self.doc.page_names();
@@ -134,7 +143,7 @@ impl DrawApp {
                                 }
                             });
                         });
-                    if ui.button("Taille de page…").clicked() {
+                    if ui.button(t("Taille de page…")).clicked() {
                         action = Some(PageAction::Settings);
                     }
                 });
@@ -150,19 +159,21 @@ impl DrawApp {
                 let width = (ctx.content_rect().width() - 80.).min(1050.);
                 ui.set_width(width);
                 ui.horizontal(|ui| {
-                    ui.heading("Pages du document");
+                    ui.heading(t("Pages du document"));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        if ui.button("Fermer").clicked() {
+                        if ui.button(t("Fermer")).clicked() {
                             self.show_pages = false;
                         }
                     });
                 });
-                ui.label("Chaque page conserve ses formes, ses dimensions et son fond.");
+                ui.label(t(
+                    "Chaque page conserve ses formes, ses dimensions et son fond.",
+                ));
                 ui.horizontal(|ui| {
                     if ui
                         .add_enabled(
                             self.doc.page_count() < 100,
-                            egui::Button::new("Ajouter une page"),
+                            egui::Button::new(t("Ajouter une page")),
                         )
                         .clicked()
                     {
@@ -171,17 +182,20 @@ impl DrawApp {
                     if ui
                         .add_enabled(
                             self.doc.page_count() < 100,
-                            egui::Button::new("Dupliquer la page"),
+                            egui::Button::new(t("Dupliquer la page")),
                         )
                         .clicked()
                     {
                         action = Some(PageAction::Add(true));
                     }
-                    if ui.button("Nom et dimensions…").clicked() {
+                    if ui.button(t("Nom et dimensions…")).clicked() {
                         action = Some(PageAction::Settings);
                     }
                     if ui
-                        .add_enabled(self.doc.page_index > 0, egui::Button::new("Déplacer avant"))
+                        .add_enabled(
+                            self.doc.page_index > 0,
+                            egui::Button::new(t("Déplacer avant")),
+                        )
                         .clicked()
                     {
                         action = Some(PageAction::Move(self.doc.page_index - 1));
@@ -189,7 +203,7 @@ impl DrawApp {
                     if ui
                         .add_enabled(
                             self.doc.page_index + 1 < self.doc.page_count(),
-                            egui::Button::new("Déplacer après"),
+                            egui::Button::new(t("Déplacer après")),
                         )
                         .clicked()
                     {
@@ -198,9 +212,9 @@ impl DrawApp {
                     if ui
                         .add_enabled(
                             self.doc.page_count() > 1,
-                            egui::Button::new("Supprimer la page"),
+                            egui::Button::new(t("Supprimer la page")),
                         )
-                        .on_hover_text("Suppression annulable avec ⌘/Ctrl + Z")
+                        .on_hover_text(t("Suppression annulable avec ⌘/Ctrl + Z"))
                         .clicked()
                     {
                         action = Some(PageAction::Remove);
@@ -262,11 +276,11 @@ impl DrawApp {
                                                     unit.label()
                                                 ));
                                                 if ui
-                                                    .button(if selected {
+                                                    .button(t(if selected {
                                                         "Page active"
                                                     } else {
                                                         "Ouvrir"
-                                                    })
+                                                    }))
                                                     .clicked()
                                                 {
                                                     action = Some(PageAction::Switch(i));
@@ -292,26 +306,26 @@ impl DrawApp {
             let mut cancel = false;
             let mut fit = false;
             let modal=egui::Modal::new("page_dimensions".into()).show(ctx,|ui| {
-                ui.set_width(500.);ui.heading("Nom et dimensions de la page");ui.add_space(8.);
-                ui.label("Nom");ui.add(egui::TextEdit::singleline(&mut draft.name).char_limit(200).desired_width(f32::INFINITY));
-                egui::ComboBox::from_id_salt("paper_presets").selected_text("Formats de page").width(300.).show_ui(ui,|ui| {
-                    for p in pages::presets(){if ui.selectable_label(false,p.label).clicked(){draft.size=p.size.map(|v|draft.unit.from_px(v));}}
+                ui.set_width(500.);ui.heading(t("Nom et dimensions de la page"));ui.add_space(8.);
+                ui.label(t("Nom"));ui.add(egui::TextEdit::singleline(&mut draft.name).char_limit(200).desired_width(f32::INFINITY));
+                egui::ComboBox::from_id_salt("paper_presets").selected_text(t("Formats de page")).width(300.).show_ui(ui,|ui| {
+                    for p in pages::presets(){if ui.selectable_label(false,t(p.label)).clicked(){draft.size=p.size.map(|v|draft.unit.from_px(v));}}
                 });
                 let old=draft.unit;
-                ui.horizontal(|ui| {ui.label("Unité");egui::ComboBox::from_id_salt("paper_unit").selected_text(draft.unit.label()).show_ui(ui,|ui| {for unit in Unit::ALL {ui.selectable_value(&mut draft.unit,unit,unit.label());}});});
+                ui.horizontal(|ui| {ui.label(t("Unité"));egui::ComboBox::from_id_salt("paper_unit").selected_text(t(draft.unit.label())).show_ui(ui,|ui| {for unit in Unit::ALL {ui.selectable_value(&mut draft.unit,unit,t(unit.label()));}});});
                 if old!=draft.unit {draft.size=draft.size.map(|v|draft.unit.from_px(old.to_px(v)));}
-                ui.horizontal(|ui| {for (i,label) in [(0,"Largeur"),(1,"Hauteur")] {ui.label(label);ui.add(egui::DragValue::new(&mut draft.size[i]).speed(if draft.unit==Unit::Pixels {1.}else{0.1}).range(draft.unit.from_px(100.)..=draft.unit.from_px(100_000.)).suffix(format!(" {}",draft.unit.label())));}});
+                ui.horizontal(|ui| {for (i,label) in [(0,"Largeur"),(1,"Hauteur")] {ui.label(t(label));ui.add(egui::DragValue::new(&mut draft.size[i]).speed(if draft.unit==Unit::Pixels {1.}else{0.1}).range(draft.unit.from_px(100.)..=draft.unit.from_px(100_000.)).suffix(format!(" {}",draft.unit.label())));}});
                 ui.horizontal(|ui| {
-                    if ui.selectable_label(draft.size[0]<=draft.size[1],"Portrait").clicked() && draft.size[0]>draft.size[1]{draft.size.swap(0,1);}
-                    if ui.selectable_label(draft.size[0]>=draft.size[1],"Paysage").clicked() && draft.size[0]<draft.size[1]{draft.size.swap(0,1);}
+                    if ui.selectable_label(draft.size[0]<=draft.size[1],t("Portrait")).clicked() && draft.size[0]>draft.size[1]{draft.size.swap(0,1);}
+                    if ui.selectable_label(draft.size[0]>=draft.size[1],t("Paysage")).clicked() && draft.size[0]<draft.size[1]{draft.size.swap(0,1);}
                 });
-                ui.checkbox(&mut draft.auto,"Extension automatique vers la droite et le bas");
-                ui.label(RichText::new("Les objets gardent leur taille et leur position. Une page plus petite peut rogner le dessin dans les exports.").small().color(MUTED));
+                ui.checkbox(&mut draft.auto,t("Extension automatique vers la droite et le bas"));
+                ui.label(RichText::new(t("Les objets gardent leur taille et leur position. Une page plus petite peut rogner le dessin dans les exports.")).small().color(MUTED));
                 if let Some(e)=&draft.error {ui.colored_label(Color32::RED,e);}
                 ui.separator();ui.horizontal(|ui| {
-                    if ui.button("Ajuster au dessin").clicked(){fit=true;}
-                    if ui.button("Annuler").clicked(){cancel=true;}
-                    if ui.button("Appliquer").clicked(){apply=true;}
+                    if ui.button(t("Ajuster au dessin")).clicked(){fit=true;}
+                    if ui.button(t("Annuler")).clicked(){cancel=true;}
+                    if ui.button(t("Appliquer")).clicked(){apply=true;}
                 });
             });
             cancel |= modal.should_close();

@@ -1,5 +1,132 @@
 use super::*;
 
+#[test]
+fn language_changes_preserve_user_text_selection_and_undo_and_persist_separately() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rectangle, [300., 300.]);
+    app.doc.node_mut(id).unwrap().text = "Enregistrer {0} Grüße 中文".into();
+    app.commit();
+    app.selected = vec![id];
+    let before = app.doc.clone();
+    for language in Language::ALL {
+        app.set_language(Some(language));
+        assert_eq!(app.doc, before);
+        assert_eq!(app.selected, vec![id]);
+        assert!(app.settings.job.is_none());
+    }
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("interface-v1.json");
+    app.interface_path = Some(path.clone());
+    app.set_language(Some(Language::German));
+    app.settings.check_at_startup = true;
+    app.settings.experimental = false;
+    app.save_interface().unwrap();
+    let (_, mut reopened) = setup();
+    reopened.interface_path = Some(path.clone());
+    reopened.restore_interface();
+    assert_eq!(reopened.language, Some(Language::German));
+    assert!(reopened.settings.check_at_startup);
+    assert!(!reopened.settings.experimental);
+    app.reset_interface(&ctx);
+    assert_eq!(app.language, Some(Language::German));
+    assert!(app.settings.check_at_startup && !app.settings.experimental);
+    assert_eq!(app.doc, before);
+    app.undo();
+    assert_ne!(app.doc, before);
+    std::fs::write(&path, br#"{"version":1,"library":false}"#).unwrap();
+    reopened.restore_interface();
+    assert_eq!(reopened.language, None);
+    assert!(!reopened.settings.check_at_startup && !reopened.show_library);
+    i18n::activate(Language::French);
+}
+
+#[test]
+fn document_tab_titles_matching_translation_keys_are_displayed_verbatim() {
+    let (ctx, mut app) = setup();
+    app.doc.title = "Enregistrer".into();
+    app.stash_tab();
+    app.set_language(Some(Language::Chinese));
+    let output = ctx.run(
+        egui::RawInput {
+            screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1200., 760.))),
+            ..Default::default()
+        },
+        |ctx| app.header(ctx),
+    );
+    assert!(output.shapes.iter().any(|shape| matches!(&shape.shape,
+        egui::Shape::Text(text) if text.galley.job.text == "Enregistrer")));
+    assert_eq!(app.doc.title, "Enregistrer");
+    i18n::activate(Language::French);
+}
+
+#[test]
+fn command_search_uses_the_selected_language_and_settings_block_drawing_shortcuts() {
+    use commands_ui::{Command, results};
+    for (language, query, command) in [
+        (Language::English, "save as", Command::SaveAs),
+        (Language::German, "seitengroße", Command::PageSettings),
+        (Language::Spanish, "actualizaciones", Command::Updates),
+        (Language::Italian, "aggiornamenti", Command::Updates),
+        (Language::Portuguese, "atualizações", Command::Updates),
+        (Language::Chinese, "更新", Command::Updates),
+    ] {
+        i18n::activate(language);
+        assert!(
+            results(query).iter().any(|entry| entry.command == command),
+            "{query}"
+        );
+    }
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rectangle, [300., 300.]);
+    app.selected = vec![id];
+    app.commit();
+    let before = app.doc.clone();
+    app.settings.open = true;
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::Delete, egui::Modifiers::NONE)],
+        egui::Modifiers::NONE,
+    );
+    assert_eq!(app.doc, before);
+    assert!(app.command_dialog_blocked());
+}
+
+#[test]
+fn chinese_catalogue_and_all_seven_language_settings_render_with_bundled_fonts() {
+    let (ctx, mut app) = setup();
+    let font = FontId::proportional(14.);
+    ctx.fonts_mut(|fonts| {
+        for row in i18n::catalogue().values() {
+            for c in row["zh-Hans"].chars().filter(|c| c.is_alphabetic()) {
+                assert!(fonts.has_glyph(&font, c), "Missing glyph: {c}");
+            }
+        }
+        assert!(fonts.has_glyphs(&font, "Grüße Español Português 中文"));
+    });
+    let before = app.doc.clone();
+    for language in Language::ALL {
+        app.set_language(Some(language));
+        app.settings.open = true;
+        let output = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1200., 760.))),
+                ..Default::default()
+            },
+            |ctx| {
+                app.header(ctx);
+                app.sidebar(ctx);
+                app.canvas(ctx, false);
+                app.settings_dialog(ctx);
+            },
+        );
+        assert!(!output.shapes.is_empty());
+        assert_eq!(app.doc, before);
+        assert!(app.settings.job.is_none());
+    }
+    i18n::activate(Language::French);
+}
+
 fn command_frame(
     ctx: &egui::Context,
     app: &mut DrawApp,

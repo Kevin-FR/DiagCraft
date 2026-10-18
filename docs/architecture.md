@@ -28,7 +28,7 @@ ce catalogue et appellent les actions de l’application. Les saisies de texte e
 boîtes de dialogue gardent leurs touches ; une commande de dessin ne doit pas
 s’exécuter derrière une fenêtre modale.
 
-`interface_prefs.rs` conserve uniquement la disposition dans un JSON local borné,
+`interface_prefs.rs` conserve la disposition, la langue et les préférences de mise à jour dans un JSON local borné,
 avec écriture atomique. Les captures et tests n’accèdent pas aux préférences utilisateur.
 Les dimensions voulues restent distinctes des limites temporaires de fenêtre.
 Le moteur documentaire et son historique ne connaissent pas ces préférences.
@@ -40,3 +40,18 @@ applications, bibliothèques de moteur, documentation et packaging. DiagCraft
 retient ce principe avec trois packages adaptés à son périmètre. Le code de
 PhotoCraft et ses ressources n’ont pas été intégrés. Les choix de bibliothèques
 sont détaillés dans [dependencies.md](dependencies.md).
+
+## Langues et mises à jour
+
+`i18n.rs` et `assets/locales/messages.json` traduisent les libellés de l’interface.
+Les identifiants du moteur, l’API v1, le format v7 et les textes des documents
+ne passent pas par le catalogue. Les valeurs des modèles de message sont
+substituées après traduction, sans interpréter les accolades du texte utilisateur.
+Le choix de langue est propre au thread de l’interface.
+
+`updates.rs` filtre les releases du dépôt officiel avec SemVer et traite le
+réseau dans un thread annulable. Le curl système est lancé avec des arguments
+fixes, sans shell ni configuration curlrc. Les réponses, tailles et URL des assets
+sont bornées ; le SHA-256 est contrôlé avant remplacement atomique du téléchargement.
+`settings_ui.rs` présente les résultats sans installer ni exécuter de paquet.
+La recherche automatique est facultative et ne bloque pas le dessin.

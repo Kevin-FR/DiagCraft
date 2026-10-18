@@ -31,33 +31,33 @@ impl DrawApp {
             .find(|s| s.command == command)
             .unwrap();
         let reason = self.command_unavailable(command);
-        let response = ui.add_enabled(reason.is_none(), egui::Button::new(spec.label));
+        let response = ui.add_enabled(reason.is_none(), egui::Button::new(t(spec.label)));
         let clicked = response.clicked();
         if let Some(reason) = reason {
-            response.on_hover_text(reason);
+            response.on_hover_text(t(reason));
         }
         if clicked {
             self.run_command(command, ui.ctx());
         }
     }
     fn panels_menu(&mut self, ui: &mut egui::Ui) {
-        ui.menu_button("Volets et ruban", |ui| {
-            ui.checkbox(&mut self.show_library, "Bibliothèque de symboles");
-            ui.checkbox(&mut self.show_inspector, "Propriétés de la sélection");
+        ui.menu_button(t("Volets et ruban"), |ui| {
+            ui.checkbox(&mut self.show_library, t("Bibliothèque de symboles"));
+            ui.checkbox(&mut self.show_inspector, t("Propriétés de la sélection"));
             ui.checkbox(
                 &mut self.show_quick_toolbar,
-                "Barre de mise en forme flottante",
+                t("Barre de mise en forme flottante"),
             );
             ui.separator();
             let mut expanded = self.ribbon_is_expanded(ui.ctx());
-            if ui.checkbox(&mut expanded, "Ruban développé").changed() {
+            if ui.checkbox(&mut expanded, t("Ruban développé")).changed() {
                 self.ribbon_expanded = Some(expanded);
             }
-            if ui.button("Adapter le ruban à la fenêtre").clicked() {
+            if ui.button(t("Adapter le ruban à la fenêtre")).clicked() {
                 self.ribbon_expanded = None;
                 ui.close();
             }
-            if ui.button("Réinitialiser l’interface").clicked() {
+            if ui.button(t("Réinitialiser l’interface")).clicked() {
                 self.reset_interface(ui.ctx());
                 ui.close();
             }
@@ -79,7 +79,7 @@ impl DrawApp {
             RibbonTab::Home => {
                 for (tool, label) in [(Tool::Select, "Sélection · V"), (Tool::Pan, "Main · H")] {
                     if ui
-                        .add(egui::Button::new(label).selected(self.tool == tool))
+                        .add(egui::Button::new(t(label)).selected(self.tool == tool))
                         .clicked()
                     {
                         self.set_tool(tool);
@@ -89,7 +89,7 @@ impl DrawApp {
                 self.shape_menu(ui);
                 if ui
                     .add(
-                        egui::Button::new("Texte · T")
+                        egui::Button::new(t("Texte · T"))
                             .selected(self.tool == Tool::Shape(ShapeKind::Text)),
                     )
                     .clicked()
@@ -97,10 +97,10 @@ impl DrawApp {
                     self.set_tool(Tool::Shape(ShapeKind::Text));
                 }
                 if ui
-                    .add(egui::Button::new("Relier · C").selected(self.tool == Tool::Connect))
-                    .on_hover_text(
+                    .add(egui::Button::new(t("Relier · C")).selected(self.tool == Tool::Connect))
+                    .on_hover_text(t(
                         "Glissez entre deux blocs ou cliquez sur le départ puis l’arrivée.",
-                    )
+                    ))
                     .clicked()
                 {
                     if self.tool == Tool::Connect {
@@ -115,7 +115,7 @@ impl DrawApp {
                 });
                 self.command_button(ui, Command::Duplicate);
                 if ui
-                    .add(egui::Button::new("Propriétés").selected(self.show_inspector))
+                    .add(egui::Button::new(t("Propriétés")).selected(self.show_inspector))
                     .clicked()
                 {
                     self.show_inspector = !self.show_inspector;
@@ -126,14 +126,14 @@ impl DrawApp {
                 self.command_button(ui, Command::Text);
                 self.command_button(ui, Command::Connect);
                 ui.separator();
-                if ui.button("Tableau").clicked() {
+                if ui.button(t("Tableau")).clicked() {
                     self.insert_table();
                 }
-                if ui.button("Graphique").clicked() {
+                if ui.button(t("Graphique")).clicked() {
                     self.library_panel = LibraryPanel::Charts;
                     self.show_library = true;
                 }
-                ui.menu_button("Dessin libre", |ui| {
+                ui.menu_button(t("Dessin libre"), |ui| {
                     self.command_button(ui, Command::Line);
                     self.command_button(ui, Command::Bezier);
                 });
@@ -142,8 +142,8 @@ impl DrawApp {
                 self.command_button(ui, Command::Templates);
             }
             RibbonTab::Design => {
-                ui.menu_button("Thèmes", |ui| {
-                    ui.label("Appliquer au diagramme");
+                ui.menu_button(t("Thèmes"), |ui| {
+                    ui.label(t("Appliquer au diagramme"));
                     ui.horizontal(|ui| {
                         for i in 0..5 {
                             if theme_button(ui, i).clicked() {
@@ -153,17 +153,17 @@ impl DrawApp {
                         }
                     });
                 });
-                ui.label("Fond");
+                ui.label(t("Fond"));
                 ui.color_edit_button_srgb(&mut self.doc.page_style.background);
-                ui.checkbox(&mut self.grid, "Grille");
-                ui.checkbox(&mut self.margins, "Marges");
+                ui.checkbox(&mut self.grid, t("Grille"));
+                ui.checkbox(&mut self.margins, t("Marges"));
                 ui.separator();
                 self.page_menu(ui);
-                if ui.button("Orientation").clicked() {
+                if ui.button(t("Orientation")).clicked() {
                     self.doc.page_size.swap(0, 1);
                     self.fit_next = true;
                 }
-                if ui.button("Ajuster au dessin").clicked() {
+                if ui.button(t("Ajuster au dessin")).clicked() {
                     self.fit_drawing();
                 }
             }
@@ -171,27 +171,30 @@ impl DrawApp {
                 self.command_button(ui, Command::FitPage);
                 self.zoom_menu(ui);
                 ui.separator();
-                ui.checkbox(&mut self.grid, "Grille");
-                ui.checkbox(&mut self.rulers, "Règles");
-                ui.checkbox(&mut self.snap, "Magnétisme");
+                ui.checkbox(&mut self.grid, t("Grille"));
+                ui.checkbox(&mut self.rulers, t("Règles"));
+                ui.checkbox(&mut self.snap, t("Magnétisme"));
                 self.panels_menu(ui);
                 self.command_button(ui, Command::Pages);
             }
             RibbonTab::Symbols => {
-                ui.label("Rechercher");
+                ui.label(t("Rechercher"));
                 ui.add(
                     egui::TextEdit::singleline(&mut self.symbol_search)
-                        .hint_text("Rectangle, décision…")
+                        .hint_text(t("Rectangle, décision…"))
                         .desired_width(190.)
                         .char_limit(120),
                 );
-                if ui.button("Afficher les formes").clicked() {
+                if ui.button(t("Afficher les formes")).clicked() {
                     self.library_panel = LibraryPanel::Symbols;
                     self.show_library = true;
                 }
                 self.command_button(ui, Command::Symbols);
                 if ui
-                    .add_enabled(!self.symbol_search.is_empty(), egui::Button::new("Effacer"))
+                    .add_enabled(
+                        !self.symbol_search.is_empty(),
+                        egui::Button::new(t("Effacer")),
+                    )
                     .clicked()
                 {
                     self.symbol_search.clear();
@@ -274,7 +277,7 @@ impl DrawApp {
         p.text(
             outer.min + vec2(4., 5.),
             Align2::LEFT_TOP,
-            unit.label(),
+            t(unit.label()),
             FontId::proportional(9.),
             MUTED,
         );
@@ -308,7 +311,12 @@ impl DrawApp {
                     if let Some(logo) = &self.logo {
                         ui.image((logo.id(), vec2(30., 30.)));
                     }
-                    ui.label(RichText::new("DiagCraft").size(13.).strong().color(ACCENT));
+                    ui.label(
+                        RichText::new(t("DiagCraft"))
+                            .size(13.)
+                            .strong()
+                            .color(ACCENT),
+                    );
                     if panels_ui::panel_toggle(
                         ui,
                         self.show_library,
@@ -366,7 +374,7 @@ impl DrawApp {
                                                 }
                                                 if ui
                                                     .add(egui::Button::new("×").frame(false))
-                                                    .on_hover_text("Fermer ce document")
+                                                    .on_hover_text(t("Fermer ce document"))
                                                     .clicked()
                                                 {
                                                     close = Some(i);
@@ -378,7 +386,7 @@ impl DrawApp {
                         });
                     if ui
                         .button("+")
-                        .on_hover_text("Nouveau document · Ctrl/⌘ N")
+                        .on_hover_text(t("Nouveau document · Ctrl/⌘ N"))
                         .clicked()
                     {
                         self.request(Pending::New);
@@ -417,46 +425,56 @@ impl DrawApp {
             )
             .show(ctx, |ui| {
                 ui.horizontal_centered(|ui| {
-                    ui.menu_button(RichText::new("Fichier").size(14.), |ui| {
-                        if ui.button("Nouveau document").clicked() {
+                    ui.menu_button(RichText::new(t("Fichier")).size(14.), |ui| {
+                        if ui.button(t("Nouveau document")).clicked() {
                             ui.close();
                             self.request(Pending::New);
                         }
-                        if ui.button("Mes travaux enregistrés…").clicked() {
+                        if ui.button(t("Mes travaux enregistrés…")).clicked() {
                             self.open_gallery();
                             ui.close();
                         }
-                        if ui.button("Galerie de modèles…").clicked() {
+                        if ui.button(t("Galerie de modèles…")).clicked() {
                             self.show_templates = true;
                             ui.close();
                         }
-                        if ui.button("Enregistrer comme modèle…").clicked() {
+                        if ui.button(t("Enregistrer comme modèle…")).clicked() {
                             self.template_name = self.doc.title.clone();
                             self.save_template_open = true;
                             ui.close();
                         }
-                        if ui.button("Ouvrir…").clicked() {
+                        if ui.button(t("Ouvrir…")).clicked() {
                             ui.close();
                             self.request(Pending::OpenDialog);
                         }
-                        if ui.button("Enregistrer").clicked() {
+                        if ui.button(t("Enregistrer")).clicked() {
                             ui.close();
                             self.save(false);
                         }
-                        if ui.button("Enregistrer sous…").clicked() {
+                        if ui.button(t("Enregistrer sous…")).clicked() {
                             ui.close();
                             self.save(true);
                         }
-                        if ui.button("Exporter en SVG…").clicked() {
+                        if ui.button(t("Exporter en SVG…")).clicked() {
                             ui.close();
                             self.export();
                         }
-                        if ui.button("Exporter en PDF…").clicked() {
+                        if ui.button(t("Exporter en PDF…")).clicked() {
                             self.show_pdf_export = true;
                             ui.close();
                         }
                         ui.separator();
-                        if ui.button("Fermer le document").clicked() {
+                        if ui.button(t("Langue et paramètres…")).clicked() {
+                            self.settings.open = true;
+                            ui.close();
+                        }
+                        if ui.button(t("Vérifier les mises à jour…")).clicked() {
+                            self.settings.open = true;
+                            self.check_updates();
+                            ui.close();
+                        }
+                        ui.separator();
+                        if ui.button(t("Fermer le document")).clicked() {
                             ui.close();
                             self.request(Pending::CloseTab(self.active_tab));
                         }
@@ -465,7 +483,7 @@ impl DrawApp {
                     if quick(
                         ui,
                         Icon::Undo,
-                        "Annuler · Ctrl/⌘ Z",
+                        "Annuler la modification · Ctrl/⌘ Z",
                         self.history.can_undo() || self.property_edit,
                     )
                     .clicked()
@@ -490,19 +508,23 @@ impl DrawApp {
                     }
                     ui.separator();
                     if ui
-                        .button(RichText::new("Agents / IA").color(ACCENT))
+                        .button(RichText::new(t("Agents / IA")).color(ACCENT))
                         .clicked()
                     {
                         self.open_agent_panel();
                     }
                     if ui
-                        .button("Rechercher…")
-                        .on_hover_text(format!(
-                            "Rechercher une commande · {}",
-                            ctx.format_shortcut(&egui::KeyboardShortcut::new(
-                                egui::Modifiers::COMMAND,
-                                Key::K
-                            ))
+                        .button(t("Rechercher…"))
+                        .on_hover_text(i18n::render(
+                            "Rechercher une commande · {0}",
+                            &[(
+                                "0",
+                                ctx.format_shortcut(&egui::KeyboardShortcut::new(
+                                    egui::Modifiers::COMMAND,
+                                    Key::K,
+                                ))
+                                .to_string(),
+                            )],
                         ))
                         .clicked()
                     {
@@ -524,7 +546,7 @@ impl DrawApp {
                                     let selected = self.ribbon_tab == tab;
                                     let response = ui.add(
                                         egui::Button::new(
-                                            RichText::new(label)
+                                            RichText::new(t(label))
                                                 .size(14.)
                                                 .color(if selected { ACCENT } else { INK })
                                                 .strong(),
@@ -590,13 +612,13 @@ impl DrawApp {
         group(ui, 150., "Presse-papiers", |ui| {
             ui.horizontal(|ui| {
                 if ui
-                    .add_enabled(!self.selected.is_empty(), egui::Button::new("Couper"))
+                    .add_enabled(!self.selected.is_empty(), egui::Button::new(t("Couper")))
                     .clicked()
                 {
                     self.copy(ctx, true);
                 }
                 if ui
-                    .add_enabled(!self.selected.is_empty(), egui::Button::new("Copier"))
+                    .add_enabled(!self.selected.is_empty(), egui::Button::new(t("Copier")))
                     .clicked()
                 {
                     self.copy(ctx, false);
@@ -604,7 +626,7 @@ impl DrawApp {
             });
             ui.horizontal(|ui| {
                 if ui
-                    .add_enabled(self.clipboard.is_some(), egui::Button::new("Coller"))
+                    .add_enabled(self.clipboard.is_some(), egui::Button::new(t("Coller")))
                     .clicked()
                     && let Some(fragment) = self.clipboard.clone()
                 {
@@ -613,9 +635,9 @@ impl DrawApp {
                 if ui
                     .add_enabled(
                         self.selected.iter().any(|id| self.doc.node(*id).is_some()),
-                        egui::Button::new("Pinceau"),
+                        egui::Button::new(t("Pinceau")),
                     )
-                    .on_hover_text("Copier le style, puis cliquer sur une autre forme")
+                    .on_hover_text(t("Copier le style, puis cliquer sur une autre forme"))
                     .clicked()
                 {
                     self.edge_brush = None;
@@ -643,11 +665,11 @@ impl DrawApp {
                 let mut size = node.as_ref().map(|n| n.font_size).unwrap_or(18.);
                 ui.horizontal(|ui| {
                     egui::ComboBox::from_id_salt("font")
-                        .selected_text(if style.monospace {
+                        .selected_text(t(if style.monospace {
                             "Monospace"
                         } else {
                             "Source Sans 3"
-                        })
+                        }))
                         .width(146.)
                         .show_ui(ui, |ui| {
                             ui.selectable_value(&mut style.monospace, false, "Source Sans 3");
@@ -663,29 +685,32 @@ impl DrawApp {
                             }
                         }
                     }
-                    if ui.button("A+").clicked() {
+                    if ui.button(t("A+")).clicked() {
                         self.font_step(2.);
                     }
-                    if ui.button("A−").clicked() {
+                    if ui.button(t("A−")).clicked() {
                         self.font_step(-2.);
                     }
                 });
                 ui.horizontal(|ui| {
-                    ui.toggle_value(&mut style.bold, RichText::new("B").strong());
-                    ui.toggle_value(&mut style.italic, RichText::new("I").italics());
-                    ui.toggle_value(&mut style.underline, RichText::new("U").underline());
-                    ui.toggle_value(&mut style.strikethrough, RichText::new("S").strikethrough());
+                    ui.toggle_value(&mut style.bold, RichText::new(t("B")).strong());
+                    ui.toggle_value(&mut style.italic, RichText::new(t("I")).italics());
+                    ui.toggle_value(&mut style.underline, RichText::new(t("U")).underline());
+                    ui.toggle_value(
+                        &mut style.strikethrough,
+                        RichText::new(t("S")).strikethrough(),
+                    );
                     egui::ComboBox::from_id_salt("text_align")
-                        .selected_text(match style.align {
+                        .selected_text(t(match style.align {
                             TextAlign::Left => "Gauche",
                             TextAlign::Center => "Centré",
                             TextAlign::Right => "Droite",
-                        })
+                        }))
                         .width(74.)
                         .show_ui(ui, |ui| {
-                            ui.selectable_value(&mut style.align, TextAlign::Left, "Gauche");
-                            ui.selectable_value(&mut style.align, TextAlign::Center, "Centré");
-                            ui.selectable_value(&mut style.align, TextAlign::Right, "Droite");
+                            ui.selectable_value(&mut style.align, TextAlign::Left, t("Gauche"));
+                            ui.selectable_value(&mut style.align, TextAlign::Center, t("Centré"));
+                            ui.selectable_value(&mut style.align, TextAlign::Right, t("Droite"));
                         });
                     let mut color = node.as_ref().map(|n| n.text_color).unwrap_or([35, 51, 65]);
                     if ui.color_edit_button_srgb(&mut color).changed() {
@@ -703,12 +728,12 @@ impl DrawApp {
         });
         group(ui, 230., "Outils", |ui| {
             ui.horizontal(|ui| {
-                ui.menu_button("Outil Pointeur", |ui| {
-                    if ui.button("Sélectionner · V").clicked() {
+                ui.menu_button(t("Outil Pointeur"), |ui| {
+                    if ui.button(t("Sélectionner · V")).clicked() {
                         self.set_tool(Tool::Select);
                         ui.close();
                     }
-                    if ui.button("Déplacer la vue · H").clicked() {
+                    if ui.button(t("Déplacer la vue · H")).clicked() {
                         self.set_tool(Tool::Pan);
                         ui.close();
                     }
@@ -716,16 +741,16 @@ impl DrawApp {
                 self.shape_menu(ui);
             });
             ui.horizontal(|ui| {
-                if ui.button("T  Texte").clicked() {
+                if ui.button(format!("T  {}", t("Texte"))).clicked() {
                     self.set_tool(Tool::Shape(ShapeKind::Text));
                 }
-                if ui.selectable_label(self.tool==Tool::Connect,"Relier · C").on_hover_text("Relier deux blocs : glisser ou cliquer. Deux blocs sélectionnés sont reliés immédiatement.").clicked() {
+                if ui.selectable_label(self.tool==Tool::Connect,t("Relier · C")).on_hover_text(t("Relier deux blocs : glisser ou cliquer. Deux blocs sélectionnés sont reliés immédiatement.")).clicked() {
                     if self.tool==Tool::Connect {self.set_tool(Tool::Select);}else{self.activate_connect_tool();}
                 }
-                ui.menu_button("Tracé",|ui| {
-                    ui.label("Tracé des nouveaux liens");
-                    ui.selectable_value(&mut self.connector_kind,ConnectorKind::Elbow,"À angle droit");
-                    ui.selectable_value(&mut self.connector_kind,ConnectorKind::Straight,"Ligne directe");
+                ui.menu_button(t("Tracé"),|ui| {
+                    ui.label(t("Tracé des nouveaux liens"));
+                    ui.selectable_value(&mut self.connector_kind,ConnectorKind::Elbow,t("À angle droit"));
+                    ui.selectable_value(&mut self.connector_kind,ConnectorKind::Straight,t("Ligne directe"));
                 });
             });
         });
@@ -741,7 +766,7 @@ impl DrawApp {
                 let node = self.selected.iter().find_map(|id| self.doc.node(*id));
                 let mut fill = node.map(|n| n.fill).unwrap_or([255, 255, 255]);
                 let mut stroke = node.map(|n| n.stroke).unwrap_or([70, 86, 105]);
-                ui.label("Fond");
+                ui.label(t("Fond"));
                 if ui.color_edit_button_srgb(&mut fill).changed() {
                     for n in &mut self.doc.nodes {
                         if self.selected.contains(&n.id) {
@@ -749,7 +774,7 @@ impl DrawApp {
                         }
                     }
                 }
-                ui.label("Ligne");
+                ui.label(t("Ligne"));
                 if ui.color_edit_button_srgb(&mut stroke).changed() {
                     for n in &mut self.doc.nodes {
                         if self.selected.contains(&n.id) {
@@ -762,15 +787,15 @@ impl DrawApp {
         group(ui, 230., "Organiser", |ui| {
             ui.horizontal(|ui| {
                 self.align_menu(ui);
-                if ui.button("Dupliquer").clicked() {
+                if ui.button(t("Dupliquer")).clicked() {
                     self.duplicate();
                 }
             });
             ui.horizontal(|ui| {
-                if ui.button("Premier plan").clicked() {
+                if ui.button(t("Premier plan")).clicked() {
                     self.reorder(true);
                 }
-                if ui.button("Arrière-plan").clicked() {
+                if ui.button(t("Arrière-plan")).clicked() {
                     self.reorder(false);
                 }
             });
@@ -792,7 +817,7 @@ impl DrawApp {
                 if quick(ui, Icon::Table, "Insérer un tableau", true).clicked() {
                     self.insert_table();
                 }
-                ui.menu_button("Tableau", |ui| {
+                ui.menu_button(t("Tableau"), |ui| {
                     ui.add(
                         egui::DragValue::new(&mut self.table_rows)
                             .range(1..=8)
@@ -803,7 +828,7 @@ impl DrawApp {
                             .range(1..=6)
                             .prefix("Colonnes : "),
                     );
-                    if ui.button("Insérer un tableau éditable").clicked() {
+                    if ui.button(t("Insérer un tableau éditable")).clicked() {
                         self.insert_table();
                         ui.close();
                     }
@@ -856,18 +881,18 @@ impl DrawApp {
                 }
             });
             ui.label(
-                RichText::new("Appliquer un thème au diagramme")
+                RichText::new(t("Appliquer un thème au diagramme"))
                     .size(11.)
                     .color(MUTED),
             );
         });
         group(ui, 235., "Couleur de fond", |ui| {
             ui.horizontal(|ui| {
-                ui.label("Arrière-plan uni");
+                ui.label(t("Arrière-plan uni"));
                 ui.color_edit_button_srgb(&mut self.doc.page_style.background);
             });
-            ui.menu_button("Filigrane", |ui| {
-                ui.label("Texte du filigrane (vide pour retirer)");
+            ui.menu_button(t("Filigrane"), |ui| {
+                ui.label(t("Texte du filigrane (vide pour retirer)"));
                 ui.add(
                     egui::TextEdit::singleline(&mut self.doc.page_style.watermark).char_limit(1000),
                 );
@@ -878,8 +903,8 @@ impl DrawApp {
                 if quick(ui, Icon::Grid, "Afficher ou masquer la grille", true).clicked() {
                     self.grid = !self.grid;
                 }
-                ui.checkbox(&mut self.grid, "Grilles");
-                ui.checkbox(&mut self.margins, "Marges");
+                ui.checkbox(&mut self.grid, t("Grilles"));
+                ui.checkbox(&mut self.margins, t("Marges"));
             });
             ui.horizontal(|ui| {
                 ui.add(
@@ -897,10 +922,10 @@ impl DrawApp {
         });
         group(ui, 285., "Mise en page", |ui| {
             ui.horizontal(|ui| {
-                if ui.button("Ajuster au dessin").clicked() {
+                if ui.button(t("Ajuster au dessin")).clicked() {
                     self.fit_drawing();
                 }
-                if ui.button("Orientation").clicked() {
+                if ui.button(t("Orientation")).clicked() {
                     self.doc.page_size.swap(0, 1);
                     self.fit_next = true;
                 }
@@ -911,15 +936,15 @@ impl DrawApp {
     pub(super) fn view_ribbon(&mut self, ui: &mut egui::Ui) {
         group(ui, 300., "Affichage", |ui| {
             ui.horizontal(|ui| {
-                ui.checkbox(&mut self.rulers, "Règles");
-                ui.checkbox(&mut self.grid, "Grilles");
-                ui.checkbox(&mut self.margins, "Marges");
+                ui.checkbox(&mut self.rulers, t("Règles"));
+                ui.checkbox(&mut self.grid, t("Grilles"));
+                ui.checkbox(&mut self.margins, t("Marges"));
             });
             ui.horizontal(|ui| {
-                ui.checkbox(&mut self.page_breaks, "Repères de page");
-                ui.checkbox(&mut self.snap, "Magnétisme")
-                    .on_hover_text("⌥ pendant un déplacement pour placer librement.");
-                ui.menu_button("Grille…", |ui| {
+                ui.checkbox(&mut self.page_breaks, t("Repères de page"));
+                ui.checkbox(&mut self.snap, t("Magnétisme"))
+                    .on_hover_text(t("⌥ pendant un déplacement pour placer librement."));
+                ui.menu_button(t("Grille…"), |ui| {
                     ui.add_enabled(
                         self.snap,
                         egui::Checkbox::new(&mut self.smart_guides, "Repères d’alignement"),
@@ -927,16 +952,16 @@ impl DrawApp {
                     ui.selectable_value(
                         &mut self.doc.page_style.grid_style,
                         GridStyle::Dots,
-                        "Points",
+                        t("Points"),
                     );
                     ui.selectable_value(
                         &mut self.doc.page_style.grid_style,
                         GridStyle::Lines,
-                        "Lignes",
+                        t("Lignes"),
                     );
                     ui.checkbox(
                         &mut self.doc.page_style.export_grid,
-                        "Inclure la grille dans le SVG",
+                        t("Inclure la grille dans le SVG"),
                     );
                 });
             });
@@ -953,8 +978,8 @@ impl DrawApp {
                     self.fit_width();
                 }
                 if ui
-                    .add_enabled(!self.selected.is_empty(), egui::Button::new("Sélection"))
-                    .on_hover_text("Maj + F")
+                    .add_enabled(!self.selected.is_empty(), egui::Button::new(t("Sélection")))
+                    .on_hover_text(t("Maj + F"))
                     .clicked()
                 {
                     self.fit_selection(ui.ctx());
@@ -964,17 +989,17 @@ impl DrawApp {
         });
         group(ui, 230., "Paramètres de page", |ui| {
             self.page_menu(ui);
-            if ui.button("Ajuster au dessin").clicked() {
+            if ui.button(t("Ajuster au dessin")).clicked() {
                 self.fit_drawing();
             }
         });
     }
     pub(super) fn symbols_ribbon(&mut self, ui: &mut egui::Ui) {
         group(ui, 260., "Bibliothèque", |ui| {
-            ui.label("Rechercher dans les formes et le document");
+            ui.label(t("Rechercher dans les formes et le document"));
             ui.add(
                 egui::TextEdit::singleline(&mut self.symbol_search)
-                    .hint_text("Rectangle, décision…")
+                    .hint_text(t("Rectangle, décision…"))
                     .desired_width(235.),
             );
         });
@@ -999,20 +1024,20 @@ impl DrawApp {
             });
         });
         group(ui, 160., "Outils", |ui| {
-            if ui.button("Afficher la bibliothèque").clicked() {
+            if ui.button(t("Afficher la bibliothèque")).clicked() {
                 self.show_library = true;
             }
             ui.horizontal(|ui| {
                 if ui
-                    .button("Gérer…")
-                    .on_hover_text("Gérer les bibliothèques")
+                    .button(t("Gérer…"))
+                    .on_hover_text(t("Gérer les bibliothèques"))
                     .clicked()
                 {
                     self.open_symbol_manager();
                 }
                 if ui
-                    .button("Effacer")
-                    .on_hover_text("Effacer la recherche")
+                    .button(t("Effacer"))
+                    .on_hover_text(t("Effacer la recherche"))
                     .clicked()
                 {
                     self.symbol_search.clear();
@@ -1023,19 +1048,19 @@ impl DrawApp {
     pub(super) fn advanced_ribbon(&mut self, ui: &mut egui::Ui) {
         group(ui, 230., "Organisation", |ui| {
             self.align_menu(ui);
-            ui.menu_button("Répartir la sélection", |ui| {
-                if ui.button("Horizontalement").clicked() {
+            ui.menu_button(t("Répartir la sélection"), |ui| {
+                if ui.button(t("Horizontalement")).clicked() {
                     self.distribute(false);
                     ui.close();
                 }
-                if ui.button("Verticalement").clicked() {
+                if ui.button(t("Verticalement")).clicked() {
                     self.distribute(true);
                     ui.close();
                 }
             });
         });
         group(ui, 210., "Sélection", |ui| {
-            if ui.button("Sélectionner tous les objets").clicked() {
+            if ui.button(t("Sélectionner tous les objets")).clicked() {
                 self.selected = self
                     .doc
                     .nodes
@@ -1046,15 +1071,15 @@ impl DrawApp {
                     .chain(self.doc.connectors.iter().map(|c| c.id))
                     .collect();
             }
-            if ui.button("Supprimer la sélection").clicked() {
+            if ui.button(t("Supprimer la sélection")).clicked() {
                 self.delete();
             }
         });
         group(ui, 275., "Document", |ui| {
-            if ui.button("Travailler avec un agent…").clicked() {
+            if ui.button(t("Travailler avec un agent…")).clicked() {
                 self.open_agent_panel();
             }
-            if ui.button("Vérifier le document").clicked() {
+            if ui.button(t("Vérifier le document")).clicked() {
                 match self.doc.validate() {
                     Ok(()) => {
                         self.status = "Document vérifié : géométrie et références valides.".into()
@@ -1070,40 +1095,43 @@ impl DrawApp {
         });
     }
     pub(super) fn shape_menu(&mut self, ui: &mut egui::Ui) {
-        ui.menu_button("Forme", |ui| {
+        ui.menu_button(t("Forme"), |ui| {
             for kind in ShapeKind::ALL {
-                if ui.button(kind.label()).clicked() {
+                if ui.button(t(kind.label())).clicked() {
                     self.set_tool(Tool::Shape(kind));
                     ui.close();
                 }
             }
             ui.separator();
-            if ui.button("Outil Trait · L").clicked() {
+            if ui.button(t("Outil Trait · L")).clicked() {
                 self.set_tool(Tool::Line);
                 ui.close();
             }
-            if ui.button("Outil Bézier · B").clicked() {
+            if ui.button(t("Outil Bézier · B")).clicked() {
                 self.set_tool(Tool::Bezier);
                 ui.close();
             }
         });
     }
     pub(super) fn page_menu(&mut self, ui: &mut egui::Ui) {
-        ui.menu_button("Taille de page", |ui| {
-            ui.label(format!("Page active : {}", self.doc.page_name));
+        ui.menu_button(t("Taille de page"), |ui| {
+            ui.label(i18n::render(
+                "Page active : {0}",
+                &[("0", self.doc.page_name.to_string())],
+            ));
             for p in diagcraft::pages::presets() {
-                if ui.button(p.label).clicked() {
+                if ui.button(t(p.label)).clicked() {
                     self.doc.page_size = p.size;
                     self.fit_next = true;
                     ui.close();
                 }
             }
             ui.separator();
-            if ui.button("Nom, dimensions et unités…").clicked() {
+            if ui.button(t("Nom, dimensions et unités…")).clicked() {
                 self.open_page_settings();
                 ui.close();
             }
-            if ui.button("Gérer les pages…").clicked() {
+            if ui.button(t("Gérer les pages…")).clicked() {
                 self.show_pages = true;
                 ui.close();
             }
@@ -1188,12 +1216,13 @@ impl DrawApp {
         }
     }
     pub(super) fn align_menu(&mut self, ui: &mut egui::Ui) {
-        ui.menu_button("Aligner", |ui| {
+        ui.menu_button(t("Aligner"), |ui| {
             self.alignment_controls(ui);
             ui.separator();
-            ui.checkbox(&mut self.snap, "Magnétisme").on_hover_text(
-                "Grille et alignement pendant le déplacement. ⌥ pour placer librement.",
-            );
+            ui.checkbox(&mut self.snap, t("Magnétisme"))
+                .on_hover_text(t(
+                    "Grille et alignement pendant le déplacement. ⌥ pour placer librement.",
+                ));
             ui.add_enabled(
                 self.snap,
                 egui::Checkbox::new(&mut self.smart_guides, "Repères d’alignement"),
@@ -1229,7 +1258,7 @@ impl DrawApp {
         self.selected.clear();
         for row in 0..rows {
             for col in 0..cols {
-                let id = self.doc.add_node(ShapeKind::Rectangle, [0., 0.]);
+                let id = self.add_node(ShapeKind::Rectangle, [0., 0.]);
                 let n = self.doc.node_mut(id).unwrap();
                 n.position = [origin[0] + col as f32 * w, origin[1] + row as f32 * h];
                 n.size = [w, h];
@@ -1262,14 +1291,14 @@ impl DrawApp {
         let step = (self.doc.page_size[0] - 240.).max(100.) / 3.;
         let mut previous = None;
         for i in 0..4 {
-            let id = self.doc.add_node(
+            let id = self.add_node(
                 ShapeKind::Rounded,
                 [120. + i as f32 * step, self.doc.page_size[1] / 2.],
             );
             let n = self.doc.node_mut(id).unwrap();
             n.size = [160., 84.];
             n.position[0] += 30.;
-            n.text = format!("Étape {}", i + 1);
+            n.text = i18n::render("Étape {0}", &[("0", (i + 1).to_string())]);
             n.fill = theme(0)[i % 3];
             if let Some(from) = previous {
                 self.doc.connect(from, id, ConnectorKind::Straight);
@@ -1286,7 +1315,7 @@ impl DrawApp {
 fn group(ui: &mut egui::Ui, width: f32, label: &str, content: impl FnOnce(&mut egui::Ui)) {
     ui.allocate_ui_with_layout(vec2(width, 90.), Layout::top_down(Align::Center), |ui| {
         ui.allocate_ui_with_layout(vec2(width, 68.), Layout::top_down(Align::LEFT), content);
-        ui.label(RichText::new(label).size(11.).color(MUTED));
+        ui.label(RichText::new(t(label)).size(11.).color(MUTED));
     });
     ui.separator();
 }
@@ -1298,11 +1327,11 @@ fn quick(ui: &mut egui::Ui, icon: Icon, label: &str, enabled: bool) -> egui::Res
         icon,
         if enabled { INK } else { MUTED },
     );
-    response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, enabled, label));
-    response.on_hover_text(label)
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, enabled, t(label)));
+    response.on_hover_text(t(label))
 }
 fn tile(ui: &mut egui::Ui, icon: Icon, label: &str) -> egui::Response {
-    let response = ui.add(egui::Button::new(format!("     {label}")).min_size(vec2(82., 30.)));
+    let response = ui.add(egui::Button::new(format!("     {}", t(label))).min_size(vec2(82., 30.)));
     paint_icon(
         ui.painter(),
         Rect::from_center_size(response.rect.left_center() + vec2(15., 0.), vec2(17., 17.)),
@@ -1310,9 +1339,9 @@ fn tile(ui: &mut egui::Ui, icon: Icon, label: &str) -> egui::Response {
         if ui.is_enabled() { INK } else { MUTED },
     );
     response.widget_info(|| {
-        egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), label)
+        egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), t(label))
     });
-    response.on_hover_text(label)
+    response.on_hover_text(t(label))
 }
 fn theme(index: usize) -> [[u8; 3]; 3] {
     match index {
@@ -1340,7 +1369,10 @@ fn theme_button(ui: &mut egui::Ui, index: usize) -> egui::Response {
             rgb(c),
         );
     }
-    response.on_hover_text(format!("Thème {}", index + 1))
+    response.on_hover_text(i18n::render(
+        "Thème {0}",
+        &[("0", format!("{}", index + 1))],
+    ))
 }
 fn paint_icon(p: &egui::Painter, r: Rect, icon: Icon, color: Color32) {
     let s = Stroke::new(1.8, color);

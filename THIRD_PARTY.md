@@ -11,7 +11,7 @@ d’une expression SPDX sont conservés : autoriser MIT n’impose pas une optio
 copyleft lorsqu’une dépendance est proposée sous plusieurs licences.
 
 Principales dépendances : egui/eframe, serde/serde_json, rfd, image, tempfile,
-sha2, resvg/usvg, svg2pdf et pdf-writer. Leur rôle est décrit dans
+sha2, semver, resvg/usvg, svg2pdf et pdf-writer. Leur rôle est décrit dans
 [docs/dependencies.md](docs/dependencies.md).
 
 `packaging/licenses.py` construit l’inventaire de la cible depuis Cargo, collecte
@@ -34,6 +34,10 @@ Les notices de la bibliothèque standard Rust accompagnent les binaires.
 - **Hack Regular**, Chris Simpkins et contributeurs, via les ressources
   d’egui : notices MIT, Bitstream Vera et domaine public dans
   `assets/fonts/Hack-LICENSE.txt`, provenance dans `hack-provenance.json`.
+- **Noto Sans SC Regular**, projet Noto : chinois simplifié. Fichier OpenType
+  inchangé, licence SIL Open Font License 1.1 dans `assets/fonts/NotoSansSC-LICENSE.txt`.
+  Révision amont, source et SHA-256 dans `assets/fonts/provenance.json`. La police
+  accompagne l’interface et les exports PDF, sans téléchargement à l’exécution.
 - Les polices par défaut d’egui conservent leurs notices propres, dont OFL et
   Ubuntu Font Licence, dans l’inventaire de `epaint_default_fonts` des paquets.
 
