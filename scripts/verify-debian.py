@@ -28,7 +28,7 @@ with tempfile.TemporaryDirectory(prefix="diagcraft-deb-check-") as temporary:
         for member in payload:
             assert member.uid == member.gid == 0, member.name
             assert not member.issym() and not member.islnk(), member.name
-            assert member.name == "." or member.name.startswith("./usr/"), member.name
+            assert (member.name in (".", "./usr") and member.isdir()) or member.name.startswith("./usr/"), member.name
             assert member.mode == (0o755 if member.isdir() or member.name.startswith("./usr/bin/") else 0o644), member.name
     control = Path(temporary) / "control"
     subprocess.run(["dpkg-deb", "--control", str(PACKAGE), str(control)], check=True)
