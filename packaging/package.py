@@ -44,7 +44,7 @@ def main():
     (stage / "README.md").write_text(
         f"DiagCraft {version}\n\n" + (ROOT / "docs/installation.md").read_text(encoding="utf-8"),
         encoding="utf-8")
-    shutil.copytree(ROOT / "docs", stage / "docs", ignore=shutil.ignore_patterns("images"))
+    shutil.copytree(ROOT / "docs", stage / "docs")
     shutil.copytree(ROOT / "assets/fonts", stage / "Fonts")
     collect(target, stage / "Dependency-Licenses")
     sysroot = Path(subprocess.check_output(["rustc", "--print", "sysroot"], text=True, encoding="utf-8").strip())
