@@ -164,6 +164,8 @@ pub struct DrawApp {
     screenshot: Option<PathBuf>,
     frame_count: u32,
     show_help: bool,
+    command_palette: commands_ui::PaletteState,
+    help_state: commands_ui::HelpState,
     ribbon_tab: RibbonTab,
     ribbon_expanded: Option<bool>,
     rulers: bool,
@@ -357,6 +359,16 @@ impl DrawApp {
         self.open_tab(second, None);
         self.switch_tab(0);
         self.fit_next = true;
+        if name == "commandes" {
+            self.show_library = false;
+            self.show_inspector = false;
+            self.open_command_palette();
+            self.command_palette.query = "page".into();
+        }
+        if name == "raccourcis" {
+            self.show_help = true;
+            self.help_state = Default::default();
+        }
         if name == "agents" {
             self.capture_agents();
         }
@@ -366,6 +378,7 @@ impl DrawApp {
             self.show_quick_toolbar = false;
             self.selected.clear();
             self.show_help = name == "trackpad";
+            self.help_state.gestures = name == "trackpad";
         }
         if name == "proprietes" {
             self.show_library = false;
@@ -545,6 +558,8 @@ impl DrawApp {
             screenshot,
             frame_count: 0,
             show_help: false,
+            command_palette: Default::default(),
+            help_state: Default::default(),
             ribbon_tab: RibbonTab::Home,
             ribbon_expanded: None,
             rulers: true,
@@ -914,17 +929,7 @@ impl DrawApp {
         if self.drag_shortcuts(ctx) {
             return;
         }
-        if self.pending.is_some()
-            || self.error.is_some()
-            || self.show_templates
-            || self.save_template_open
-            || self.show_symbol_manager
-            || self.show_gallery
-            || self.show_pdf_export
-            || self.show_pages
-            || self.page_draft.is_some()
-            || self.agent_panel.is_some()
-        {
+        if self.command_palette.open || self.show_help || self.command_dialog_blocked() {
             return;
         }
         if self.context_open {
@@ -978,105 +983,15 @@ impl DrawApp {
             self.open_context(screen, false);
             return;
         }
-        let command = ctx.input(|i| i.modifiers.command);
-        if editing_text || (command && ctx.input(|i| i.key_pressed(Key::V))) {
+        if self.command_shortcut(ctx, editing_text) {
+            return;
+        }
+        if editing_text {
             self.paste_position = None;
+            return;
         }
         let shift = ctx.input(|i| i.modifiers.shift);
-        if command {
-            if ctx.input(|i| i.key_pressed(Key::S)) {
-                self.save(shift);
-            }
-            if ctx.input(|i| i.key_pressed(Key::O)) {
-                self.request(Pending::OpenDialog);
-            }
-            if ctx.input(|i| i.key_pressed(Key::N)) {
-                self.request(Pending::New);
-            }
-            if ctx.input(|i| i.key_pressed(Key::E)) {
-                if shift {
-                    self.show_pdf_export = true;
-                } else {
-                    self.export();
-                }
-            }
-            if editing_text {
-                return;
-            }
-            if ctx.input(|i| i.key_pressed(Key::Z)) {
-                if shift {
-                    self.redo();
-                } else {
-                    self.undo();
-                }
-            }
-            if ctx.input(|i| i.key_pressed(Key::Y)) {
-                self.redo();
-            }
-            if ctx.input(|i| i.key_pressed(Key::D)) {
-                self.duplicate();
-            }
-            if ctx.input(|i| i.key_pressed(Key::A)) {
-                self.selected = self
-                    .doc
-                    .nodes
-                    .iter()
-                    .map(|n| n.id)
-                    .chain(self.doc.drawings.iter().map(|d| d.id))
-                    .chain(self.doc.charts.iter().map(|c| c.id))
-                    .chain(self.doc.connectors.iter().map(|c| c.id))
-                    .collect();
-            }
-            if ctx.input(|i| i.key_pressed(Key::C)) {
-                self.copy(ctx, false);
-            }
-            if ctx.input(|i| i.key_pressed(Key::X)) {
-                self.copy(ctx, true);
-            }
-            if ctx.input(|i| i.key_pressed(Key::B)) {
-                self.change_text(|s| s.bold = !s.bold);
-            }
-            if ctx.input(|i| i.key_pressed(Key::I)) {
-                self.change_text(|s| s.italic = !s.italic);
-            }
-            if ctx.input(|i| i.key_pressed(Key::U)) {
-                self.change_text(|s| s.underline = !s.underline);
-            }
-        } else {
-            if editing_text {
-                return;
-            }
-            if ctx.input(|i| i.key_pressed(Key::Delete) || i.key_pressed(Key::Backspace)) {
-                self.delete();
-            }
-            if ctx.input(|i| i.key_pressed(Key::V)) {
-                self.set_tool(Tool::Select);
-            }
-            if ctx.input(|i| i.key_pressed(Key::R)) {
-                self.set_tool(Tool::Shape(ShapeKind::Rectangle));
-            }
-            if ctx.input(|i| i.key_pressed(Key::C)) {
-                self.activate_connect_tool();
-            }
-            if ctx.input(|i| i.key_pressed(Key::T)) {
-                self.set_tool(Tool::Shape(ShapeKind::Text));
-            }
-            if ctx.input(|i| i.key_pressed(Key::H)) {
-                self.set_tool(Tool::Pan);
-            }
-            if ctx.input(|i| i.key_pressed(Key::L)) {
-                self.set_tool(Tool::Line);
-            }
-            if ctx.input(|i| i.key_pressed(Key::B)) {
-                self.set_tool(Tool::Bezier);
-            }
-            if ctx.input(|i| i.key_pressed(Key::F)) {
-                if shift {
-                    self.fit_selection(ctx);
-                } else {
-                    self.fit_next = true;
-                }
-            }
+        if !ctx.input(|i| i.modifiers.command || i.modifiers.ctrl || i.modifiers.alt) {
             if ctx.input(|i| i.key_pressed(Key::Escape)) {
                 self.set_tool(Tool::Select);
                 self.format_brush = None;
@@ -2209,64 +2124,7 @@ impl DrawApp {
                 }
             });
         }
-        if self.show_help {
-            egui::Window::new("Quelques gestes pour créer")
-                .collapsible(false)
-                .resizable(false)
-                .default_width(620.)
-                .max_height((ctx.content_rect().height() - 160.).max(240.))
-                .vscroll(true)
-                .anchor(Align2::CENTER_CENTER, Vec2::ZERO)
-                .open(&mut self.show_help)
-                .show(ctx, |ui| {
-                    for (key, action) in [
-                        ("V", "Sélectionner et déplacer"),
-                        ("R / T", "Ajouter un rectangle / du texte"),
-                        ("L / B", "Dessiner un trait / une courbe de Bézier"),
-                        ("C", "Relier deux formes par deux clics"),
-                        ("H / Espace + glisser / bouton milieu", "Déplacer la vue"),
-                        ("Clic droit / Maj + F10", "Ouvrir le menu contextuel"),
-                        (
-                            "Trackpad : glisser à deux doigts",
-                            "Déplacer la feuille dans toutes les directions",
-                        ),
-                        ("Trackpad : pincer / écarter", "Zoomer autour du pointeur"),
-                        ("Ctrl/⌘ + molette", "Zoomer autour du pointeur"),
-                        ("F", "Ajuster la page à la fenêtre"),
-                        ("Glisser dans le vide", "Tracer un cadre de sélection"),
-                        (
-                            "Maj + glisser",
-                            "Ajouter les objets du cadre à la sélection",
-                        ),
-                        ("Maj + F", "Zoomer sur la sélection"),
-                        ("Maj + clic", "Sélectionner plusieurs objets"),
-                        (
-                            "Échap pendant un geste",
-                            "Annuler le geste en gardant les modifications précédentes",
-                        ),
-                        (
-                            "Maj + poignée",
-                            "Redimensionner en conservant les proportions",
-                        ),
-                        ("⌥ + glisser", "Placer ou redimensionner sans magnétisme"),
-                        ("Huit poignées", "Redimensionner depuis un côté ou un coin"),
-                        ("Flèches / Maj + flèches", "Déplacer de 1 / 10 pixels"),
-                        ("⌘/Ctrl C / X / V", "Copier / couper / coller"),
-                        ("⌘/Ctrl B / I / U", "Gras / italique / souligné"),
-                        ("⌘/Ctrl D", "Dupliquer la sélection"),
-                        ("Suppr / Retour arrière", "Supprimer la sélection"),
-                        ("⌘/Ctrl S / O / E", "Enregistrer / ouvrir / exporter"),
-                        ("⌘/Ctrl Z / Maj Z", "Annuler / rétablir"),
-                    ] {
-                        ui.horizontal(|ui| {
-                            ui.label(RichText::new(key).strong());
-                            ui.label(action);
-                        });
-                    }
-                    ui.add_space(12.);
-                    ui.label("Fichiers .draw : format JSON local et éditable. Export SVG et PDF.");
-                });
-        }
+        self.help_dialog(ctx);
     }
 }
 
@@ -2327,6 +2185,7 @@ impl eframe::App for DrawApp {
             self.pending.is_none()
                 && self.error.is_none()
                 && !self.show_help
+                && !self.command_palette.open
                 && !self.show_templates
                 && !self.save_template_open
                 && !self.show_symbol_manager
@@ -2337,6 +2196,7 @@ impl eframe::App for DrawApp {
                 && self.agent_panel.is_none(),
         );
         self.finish_frame_edit(ctx, &before);
+        self.command_dialog(ctx);
         self.library_dialogs(ctx);
         self.workspace_dialogs(ctx);
         self.pages_dialogs(ctx);
@@ -2484,3 +2344,6 @@ mod alignment_ui;
 
 #[path = "gestures_ui.rs"]
 mod gestures_ui;
+
+#[path = "commands_ui.rs"]
+mod commands_ui;

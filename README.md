@@ -19,7 +19,7 @@ Les applications et leurs empreintes SHA-256 sont sur la page des
 | Windows x86_64 | ZIP portable avec application et CLI |
 | Linux x86_64 | Archive `.tar.gz` avec application et CLI |
 
-La version **0.1.0** est une première version publique expérimentale. Le paquet
+La version **0.2.0** reste expérimentale et améliore la prise en main. Le paquet
 Mac est signé ad hoc et n’est pas notarié par Apple. Les paquets Windows ne
 sont pas signés avec un certificat éditeur. Voir [l’installation](docs/installation.md).
 
@@ -31,6 +31,7 @@ sont pas signés avec un certificat éditeur. Voir [l’installation](docs/insta
 - Remplissages, dégradés, motifs, contours, flèches et ombres.
 - Sélection multiple, alignement, espacement, repères, annulation des gestes et historique.
 - Navigation au trackpad, zoom sous le pointeur, ruban et volets compacts.
+- Palette de commandes avec ⌘K / Ctrl+K et aide clavier filtrable avec F1.
 - Fichiers `.draw` éditables, galerie locale avec versions, exports SVG et PDF.
 - CLI et serveur MCP locaux : inspection, validation et patches JSON atomiques.
 
@@ -40,6 +41,8 @@ sont migrés en mémoire à l’ouverture. La source reste intacte jusqu’à l�
 
 Aucun compte ni clé API n’est nécessaire pour dessiner. Le serveur MCP travaille
 dans un dossier local choisi ; l’application ne contacte pas de modèle IA.
+
+Voir [la recherche de commandes et les raccourcis](docs/commandes.md).
 
 ## Développer
 

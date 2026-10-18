@@ -1,0 +1,18 @@
+{
+  "screenshots": [
+    {
+      "file": "commands.png",
+      "sha256": "a7d94ab741659bd74deeb8a8d1c17048e2fac9079e2f7f6c12a975d3b2f4db10",
+      "source": "DiagCraft 0.2.0, document de démonstration du projet",
+      "command": "diagcraft --screenshot docs/images/commands.png commandes",
+      "license": "MIT"
+    },
+    {
+      "file": "shortcuts.png",
+      "sha256": "2ec97e223c24913a69c4d65e937ebc191f5746cda5ef375f732732934d0ecc16",
+      "source": "DiagCraft 0.2.0, document de démonstration du projet",
+      "command": "diagcraft --screenshot docs/images/shortcuts.png raccourcis",
+      "license": "MIT"
+    }
+  ]
+}

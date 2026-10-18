@@ -1,5 +1,273 @@
 use super::*;
 
+fn command_frame(
+    ctx: &egui::Context,
+    app: &mut DrawApp,
+    events: Vec<egui::Event>,
+    modifiers: egui::Modifiers,
+) -> egui::FullOutput {
+    ctx.run(
+        egui::RawInput {
+            screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1280., 760.))),
+            events,
+            modifiers,
+            ..Default::default()
+        },
+        |ctx| {
+            app.shortcuts(ctx);
+            app.canvas(ctx, !app.command_palette.open && !app.show_help);
+            app.command_dialog(ctx);
+            app.help_dialog(ctx);
+        },
+    )
+}
+
+fn command_key(key: Key, modifiers: egui::Modifiers) -> egui::Event {
+    egui::Event::Key {
+        key,
+        physical_key: None,
+        pressed: true,
+        repeat: false,
+        modifiers,
+    }
+}
+
+#[test]
+fn palette_search_understands_accents_aliases_and_multiple_words() {
+    use commands_ui::{Command, results};
+    assert_eq!(results("export pdf")[0].command, Command::ExportPdf);
+    assert_eq!(results("retablir")[0].command, Command::Redo);
+    assert_eq!(results("bezier")[0].command, Command::Bezier);
+    assert_eq!(results("chatgpt")[0].command, Command::Agents);
+    assert!(
+        results("page taille")
+            .iter()
+            .any(|s| s.command == Command::PageSettings)
+    );
+    assert!(results("commande inexistante").is_empty());
+    assert!(!results("").iter().any(|s| s.command == Command::Palette));
+}
+
+#[test]
+fn command_palette_consumes_typing_navigation_and_escape_without_editing_the_drawing() {
+    use commands_ui::Command;
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rectangle, [300., 300.]);
+    app.selected = vec![id];
+    app.commit();
+    let before = app.doc.clone();
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::K, egui::Modifiers::COMMAND)],
+        egui::Modifiers::COMMAND,
+    );
+    assert!(app.command_palette.open);
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![egui::Event::Text("page".into())],
+        egui::Modifiers::NONE,
+    );
+    assert_eq!(app.command_palette.query, "page");
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::ArrowDown, egui::Modifiers::NONE)],
+        egui::Modifiers::NONE,
+    );
+    assert_eq!(app.doc, before);
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::Escape, egui::Modifiers::NONE)],
+        egui::Modifiers::NONE,
+    );
+    assert!(!app.command_palette.open);
+    assert_eq!(app.doc, before);
+    assert_eq!(app.selected, vec![id]);
+    assert!(!ctx.wants_keyboard_input());
+    app.run_command(Command::Duplicate, &ctx);
+    assert_eq!(app.doc.nodes.len(), 2);
+    app.undo();
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn palette_executes_enter_once_and_blocks_commands_behind_other_dialogs() {
+    use commands_ui::Command;
+    let (ctx, mut app) = setup();
+    app.open_command_palette();
+    app.command_palette.query = "ajouter page".into();
+    command_frame(&ctx, &mut app, vec![], egui::Modifiers::NONE);
+    let before = app.doc.clone();
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::Enter, egui::Modifiers::NONE)],
+        egui::Modifiers::NONE,
+    );
+    assert!(!app.command_palette.open);
+    assert_eq!(app.doc.page_count(), 2);
+    app.undo();
+    assert_eq!(app.doc, before);
+    app.show_pdf_export = true;
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::K, egui::Modifiers::COMMAND)],
+        egui::Modifiers::COMMAND,
+    );
+    assert!(!app.command_palette.open);
+    app.show_pdf_export = false;
+    assert!(app.command_unavailable(Command::Duplicate).is_some());
+    app.open_command_palette();
+    app.command_palette.query = "dupliquer".into();
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::Enter, egui::Modifiers::NONE)],
+        egui::Modifiers::NONE,
+    );
+    assert!(app.command_palette.open);
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn help_is_modal_and_preserves_selection_until_escape() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rectangle, [300., 300.]);
+    app.selected = vec![id];
+    app.commit();
+    let before = app.doc.clone();
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::F1, egui::Modifiers::NONE)],
+        egui::Modifiers::NONE,
+    );
+    assert!(app.show_help);
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::Delete, egui::Modifiers::NONE)],
+        egui::Modifiers::NONE,
+    );
+    assert_eq!(app.doc, before);
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::Escape, egui::Modifiers::NONE)],
+        egui::Modifiers::NONE,
+    );
+    assert!(!app.show_help);
+    assert_eq!(app.selected, vec![id]);
+}
+
+#[test]
+fn keyboard_paste_is_not_lost_or_duplicated_when_native_text_arrives_with_the_shortcut() {
+    let (ctx, mut app) = setup();
+    frame(
+        &ctx,
+        &mut app,
+        vec![
+            command_key(Key::V, egui::Modifiers::COMMAND),
+            egui::Event::Paste("Une idée".into()),
+        ],
+        egui::Modifiers::COMMAND,
+    );
+    assert_eq!(app.doc.nodes.len(), 1);
+    assert_eq!(app.doc.nodes[0].text, "Une idée");
+    app.undo();
+    assert!(app.doc.nodes.is_empty());
+}
+
+#[test]
+fn command_zoom_keeps_the_document_point_under_the_center_fixed() {
+    let (ctx, mut app) = setup();
+    app.zoom = 0.5;
+    let center = app.canvas.center();
+    let before = app.world(center);
+    app.run_command(commands_ui::Command::ActualSize, &ctx);
+    assert_eq!(app.zoom, 1.);
+    assert_eq!(app.world(center), before);
+    assert!(!app.fit_next);
+    assert!(!app.history.can_undo());
+}
+
+#[test]
+fn command_palette_dismisses_when_a_higher_priority_dialog_arrives() {
+    let (ctx, mut app) = setup();
+    app.open_command_palette();
+    app.command_palette.query = "ajouter page".into();
+    app.pending = Some(Pending::Close);
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::Enter, egui::Modifiers::NONE)],
+        egui::Modifiers::NONE,
+    );
+    assert!(!app.command_palette.open);
+    assert_eq!(app.doc.page_count(), 1);
+    assert!(matches!(app.pending, Some(Pending::Close)));
+}
+
+#[test]
+fn palette_enter_activates_the_tab_focused_close_button_instead_of_the_selected_command() {
+    let (ctx, mut app) = setup();
+    app.open_command_palette();
+    app.command_palette.query = "ajouter page".into();
+    command_frame(&ctx, &mut app, vec![], egui::Modifiers::NONE);
+    command_frame(&ctx, &mut app, vec![], egui::Modifiers::NONE);
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::Tab, egui::Modifiers::SHIFT)],
+        egui::Modifiers::SHIFT,
+    );
+    command_frame(
+        &ctx,
+        &mut app,
+        vec![command_key(Key::Enter, egui::Modifiers::NONE)],
+        egui::Modifiers::NONE,
+    );
+    assert!(!app.command_palette.open);
+    assert_eq!(app.doc.page_count(), 1);
+}
+
+#[test]
+fn clicking_a_palette_result_executes_one_action_without_clicking_through() {
+    let (ctx, mut app) = setup();
+    app.set_tool(Tool::Shape(ShapeKind::Rectangle));
+    app.open_command_palette();
+    app.command_palette.query = "ajouter page".into();
+    command_frame(&ctx, &mut app, vec![], egui::Modifiers::NONE);
+    let out = command_frame(&ctx, &mut app, vec![], egui::Modifiers::NONE);
+    let point = ux_text(&out, "Ajouter une page\nDocument");
+    for pressed in [true, false] {
+        command_frame(
+            &ctx,
+            &mut app,
+            vec![
+                egui::Event::PointerMoved(point),
+                egui::Event::PointerButton {
+                    pos: point,
+                    button: egui::PointerButton::Primary,
+                    pressed,
+                    modifiers: egui::Modifiers::NONE,
+                },
+            ],
+            egui::Modifiers::NONE,
+        );
+    }
+    assert!(!app.command_palette.open);
+    assert_eq!(app.doc.page_count(), 2);
+    assert!(app.doc.nodes.is_empty());
+    app.undo();
+    assert_eq!(app.doc.page_count(), 1);
+    assert!(!app.history.can_undo());
+}
+
 fn setup() -> (egui::Context, DrawApp) {
     let ctx = egui::Context::default();
     let mut app = DrawApp::from_context(&ctx, Document::default(), None, None);

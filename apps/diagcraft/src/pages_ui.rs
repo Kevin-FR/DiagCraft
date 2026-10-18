@@ -89,6 +89,9 @@ impl DrawApp {
             }
         }
     }
+    pub(super) fn add_blank_page(&mut self) {
+        self.page_action(PageAction::Add(false));
+    }
     pub(super) fn pages_bar(&mut self, ctx: &egui::Context) {
         let mut action = None;
         egui::TopBottomPanel::bottom("pages_bar")

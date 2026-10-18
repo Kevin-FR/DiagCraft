@@ -358,6 +358,19 @@ impl DrawApp {
                     {
                         self.open_agent_panel();
                     }
+                    if ui
+                        .button("Rechercher…")
+                        .on_hover_text(format!(
+                            "Rechercher une commande · {}",
+                            ctx.format_shortcut(&egui::KeyboardShortcut::new(
+                                egui::Modifiers::COMMAND,
+                                Key::K
+                            ))
+                        ))
+                        .clicked()
+                    {
+                        self.open_command_palette();
+                    }
                     egui::ScrollArea::horizontal()
                         .id_salt("ribbon_tabs_scroll")
                         .max_width((ui.available_width() - 44.).max(140.))
@@ -947,7 +960,7 @@ impl DrawApp {
         });
         group(ui, 120., "Aide", |ui| {
             if tile(ui, Icon::Page, "Raccourcis").clicked() {
-                self.show_help = true;
+                self.run_command(commands_ui::Command::Help, ui.ctx());
             }
         });
     }

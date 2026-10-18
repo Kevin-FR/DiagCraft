@@ -1,7 +1,7 @@
 # Feuille de route
 
-Les cases cochées décrivent des fonctions présentes dans la première version
-publique. Les autres sont des travaux prévus, sans promesse de date.
+Les cases cochées décrivent des fonctions disponibles. Les autres sont des
+travaux prévus, sans promesse de date.
 
 ## 0.1 — première publication
 
@@ -17,7 +17,8 @@ publique. Les autres sont des travaux prévus, sans promesse de date.
 
 - [ ] Tests utilisateurs sur MacBook 13 pouces, clavier seul et lecteurs d’écran.
   Critère : parcours créer → relier → enregistrer → rouvrir → exporter sans blocage.
-- [ ] Tableau de raccourcis et recherche de commandes.
+- [x] Tableau de raccourcis et recherche de commandes (0.2.0) : palette ⌘K / Ctrl+K,
+  recherche sans accents, navigation clavier et aide filtrable avec F1.
 - [ ] Ajustement automatique du bloc au texte, avec rendu cohérent dans les exports.
 - [ ] Sauvegarde de récupération après fermeture anormale, sans écraser le dessin source.
 - [ ] Tests d’intégration CLI/MCP sur les trois systèmes et diagnostics plus lisibles.

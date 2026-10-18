@@ -3,6 +3,19 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.2.0 — commandes et aide clavier
+
+- Palette de commandes accessible depuis le bouton Rechercher ou ⌘K / Ctrl+K.
+- Recherche par mots, sans distinction d’accents ou de majuscules ; navigation
+  avec les flèches, Entrée, Tab et Échap.
+- Commandes indisponibles accompagnées d’une explication ; les actions utilisent
+  l’historique, les contrôles de sauvegarde et les exports existants.
+- Aide F1 filtrable, avec raccourcis adaptés au système et gestes souris/trackpad.
+- Protection des saisies et boîtes de dialogue, collage natif et annulation
+  des modifications en cours lors des raccourcis.
+
+Le format `.draw` reste v7 et l’API agents v1. Aucun ajout de dépendance.
+
 ## 0.1.0 — première version publique
 
 - Éditeur natif en français : formes, textes, graphiques, symboles et modèles.
