@@ -41,3 +41,12 @@ sur un bloc sélectionné ouvre la même saisie en sélectionnant son texte.
 termine ; **Échap** annule. **⌘S / Ctrl+S** valide puis enregistre.
 Les autres commandes du dessin attendent la fin de cette saisie.
 Voir [le contenu des blocs](contenu-blocs.md) pour les styles et la sélection.
+
+## Rechercher et placer au clavier
+
+**⌘F / Ctrl+F** retrouve les objets de la page par texte, type ou identifiant.
+Les flèches choisissent un résultat, **Entrée** le sélectionne, **Maj+Entrée**
+l’ajoute à la sélection et **F2** modifie directement son texte.
+**R / T**, puis **Entrée**, place un rectangle ou un texte dans la zone visible.
+Avec deux blocs sélectionnés, **C** crée leur lien.
+Voir [le parcours complet](recherche-objets.md).

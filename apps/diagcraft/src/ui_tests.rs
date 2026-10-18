@@ -6410,3 +6410,482 @@ fn inline_invalid_drafts_do_not_execute_an_outside_action_and_tab_changes_commit
     app.undo();
     assert_eq!(app.doc, before);
 }
+
+fn object_search_frame(
+    ctx: &egui::Context,
+    app: &mut DrawApp,
+    events: Vec<egui::Event>,
+    size: Vec2,
+) -> egui::FullOutput {
+    let mut replay = std::mem::take(&mut app.replay_input);
+    replay.extend(events);
+    let events = replay;
+    let modifiers = events
+        .iter()
+        .find_map(|e| {
+            if let egui::Event::Key { modifiers, .. } = e {
+                Some(*modifiers)
+            } else {
+                None
+            }
+        })
+        .unwrap_or_default();
+    ctx.run(
+        egui::RawInput {
+            screen_rect: Some(Rect::from_min_size(Pos2::ZERO, size)),
+            events,
+            modifiers,
+            ..Default::default()
+        },
+        |ctx| {
+            app.inline_outside_press(ctx);
+            app.shortcuts(ctx);
+            app.header(ctx);
+            app.footer(ctx);
+            app.pages_bar(ctx);
+            app.side_panels(ctx);
+            app.canvas(ctx, !app.object_search.open && !app.command_palette.open);
+            app.command_dialog(ctx);
+            app.object_search_dialog(ctx);
+            app.inline_text_toolbar(ctx);
+        },
+    )
+}
+fn object_key(
+    ctx: &egui::Context,
+    app: &mut DrawApp,
+    key: Key,
+    modifiers: egui::Modifiers,
+) -> egui::FullOutput {
+    object_search_frame(
+        ctx,
+        app,
+        vec![inline_key(key, modifiers)],
+        vec2(1200., 760.),
+    )
+}
+
+#[test]
+fn object_search_matches_original_text_accents_chinese_ids_and_object_types() {
+    use object_search_ui::Kind;
+    let (_, mut app) = setup();
+    let a = app.doc.add_node(ShapeKind::Rounded, [300., 200.]);
+    let b = app.doc.add_node(ShapeKind::Diamond, [700., 300.]);
+    app.doc.node_mut(a).unwrap().text = "À valider\n审批 中文".into();
+    let edge = app.doc.connect(a, b, ConnectorKind::Elbow).unwrap();
+    app.doc.connectors[0].label = "Retour confirmé".into();
+    let drawing = app
+        .doc
+        .add_drawing(DrawingKind::Line, [100., 100.], [220., 150.]);
+    let chart = app.doc.add_chart(ChartKind::Bars, [450., 400.]);
+    app.commit();
+    let before = app.doc.clone();
+    app.open_object_search();
+    for (query, id) in [
+        ("valider 中文", a),
+        ("RETOUR confirme", edge),
+        ("trait", drawing),
+        ("barres", chart),
+    ] {
+        app.object_search.query = query.into();
+        let found = app.object_search.matches();
+        assert_eq!(found.len(), 1, "{query}");
+        assert_eq!(app.object_search.entries[found[0]].id, id);
+    }
+    app.object_search.query = format!("#{b}");
+    assert_eq!(
+        app.object_search.entries[app.object_search.matches()[0]].id,
+        b
+    );
+    app.object_search.query.clear();
+    for (kind, count) in [
+        (Kind::All, 5),
+        (Kind::Nodes, 2),
+        (Kind::Links, 1),
+        (Kind::Drawings, 1),
+        (Kind::Charts, 1),
+    ] {
+        app.object_search.kind = kind;
+        assert_eq!(app.object_search.matches().len(), count);
+    }
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn object_search_keyboard_selects_reveals_and_edits_without_changing_drawing_history() {
+    let (ctx, mut app) = setup();
+    app.doc.page_size = [2400., 1600.];
+    let id = app.doc.add_node(ShapeKind::Rectangle, [1900., 1200.]);
+    app.doc.node_mut(id).unwrap().text = "Un bloc éloigné".into();
+    app.commit();
+    app.saved = app.doc.clone();
+    app.history = History::new(&app.doc);
+    let before = app.doc.clone();
+    object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    let zoom = app.zoom;
+    object_key(&ctx, &mut app, Key::F, egui::Modifiers::COMMAND);
+    assert!(app.object_search.open);
+    object_search_frame(
+        &ctx,
+        &mut app,
+        vec![egui::Event::Text("eloigne".into())],
+        vec2(1200., 760.),
+    );
+    object_key(&ctx, &mut app, Key::Enter, egui::Modifiers::NONE);
+    assert!(!app.object_search.open);
+    assert_eq!(app.selected, vec![id]);
+    assert_eq!(app.zoom, zoom);
+    assert!(
+        app.canvas
+            .shrink(35.)
+            .contains_rect(app.node_screen_rect(app.doc.node(id).unwrap()))
+    );
+    assert!(!app.history.can_undo());
+    assert!(!app.dirty());
+    assert_eq!(app.doc, before);
+    object_key(&ctx, &mut app, Key::F2, egui::Modifiers::NONE);
+    assert!(app.rich_editor.is_some());
+    object_search_frame(
+        &ctx,
+        &mut app,
+        vec![egui::Event::Text("Contenu modifié".into())],
+        vec2(1200., 760.),
+    );
+    object_key(&ctx, &mut app, Key::Enter, egui::Modifiers::COMMAND);
+    assert_eq!(app.doc.node(id).unwrap().text, "Contenu modifié");
+    app.undo();
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn object_search_adds_selection_in_order_then_c_connects_once_and_undo_restores() {
+    let (ctx, mut app) = setup();
+    let a = app.doc.add_node(ShapeKind::Rectangle, [300., 220.]);
+    let b = app.doc.add_node(ShapeKind::Rectangle, [700., 420.]);
+    app.doc.node_mut(a).unwrap().text = "Départ".into();
+    app.doc.node_mut(b).unwrap().text = "Arrivée".into();
+    app.commit();
+    let before = app.doc.clone();
+    object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    for (query, modifiers) in [
+        ("depart", egui::Modifiers::NONE),
+        ("arrivee", egui::Modifiers::SHIFT),
+    ] {
+        object_key(&ctx, &mut app, Key::F, egui::Modifiers::COMMAND);
+        object_search_frame(
+            &ctx,
+            &mut app,
+            vec![egui::Event::Text(query.into())],
+            vec2(1200., 760.),
+        );
+        object_key(&ctx, &mut app, Key::Enter, modifiers);
+    }
+    assert_eq!(app.selected, vec![a, b]);
+    object_key(&ctx, &mut app, Key::C, egui::Modifiers::NONE);
+    assert_eq!(app.doc.connectors.len(), 1);
+    assert_eq!(
+        (app.doc.connectors[0].from, app.doc.connectors[0].to),
+        (a, b)
+    );
+    app.undo();
+    assert_eq!(app.doc, before);
+    app.selected = vec![a];
+    app.open_object_search();
+    app.object_search.query = "depart".into();
+    object_key(&ctx, &mut app, Key::Enter, egui::Modifiers::SHIFT);
+    assert_eq!(
+        app.selected,
+        vec![a],
+        "Adding an already selected object must not toggle or duplicate it"
+    );
+}
+
+#[test]
+fn object_search_escape_and_empty_results_preserve_selection_view_and_document() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rectangle, [300., 250.]);
+    app.selected = vec![id];
+    app.commit();
+    let before = app.doc.clone();
+    object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    let view = (app.zoom, app.pan);
+    object_key(&ctx, &mut app, Key::F, egui::Modifiers::COMMAND);
+    object_search_frame(
+        &ctx,
+        &mut app,
+        vec![egui::Event::Text("introuvable".into())],
+        vec2(1200., 760.),
+    );
+    object_key(&ctx, &mut app, Key::Enter, egui::Modifiers::NONE);
+    assert!(app.object_search.open);
+    assert!(app.object_search.matches().is_empty());
+    object_key(&ctx, &mut app, Key::Delete, egui::Modifiers::NONE);
+    assert_eq!(app.doc, before);
+    object_key(&ctx, &mut app, Key::Escape, egui::Modifiers::NONE);
+    assert!(!app.object_search.open);
+    assert_eq!(app.selected, vec![id]);
+    assert_eq!((app.zoom, app.pan), view);
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn object_search_virtualized_rows_follow_keyboard_and_tab_keeps_button_activation() {
+    let (ctx, mut app) = setup();
+    for i in 0..60 {
+        let id = app
+            .doc
+            .add_node(ShapeKind::Rectangle, [100. + i as f32 * 20., 200.]);
+        app.doc.node_mut(id).unwrap().text = format!("Objet {i:02}");
+    }
+    app.commit();
+    app.open_object_search();
+    object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    for _ in 0..35 {
+        object_key(&ctx, &mut app, Key::ArrowDown, egui::Modifiers::NONE);
+    }
+    let out = object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    assert!(
+        out.shapes
+            .iter()
+            .any(|s| matches!(&s.shape,Shape::Text(t) if t.galley.job.text=="Objet 35"))
+    );
+    assert!(
+        out.shapes
+            .iter()
+            .filter(
+                |s| app.object_search.rect.unwrap().contains_rect(s.clip_rect)
+                    && matches!(&s.shape,Shape::Text(t) if t.galley.job.text.starts_with("Objet "))
+            )
+            .count()
+            < 20
+    );
+    assert_eq!(app.object_search.selected, 35);
+    // Tab leaves the query. Enter on a focused Close button must not choose a result.
+    object_key(&ctx, &mut app, Key::Tab, egui::Modifiers::SHIFT);
+    object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    assert_ne!(
+        ctx.memory(|m| m.focused()),
+        Some(egui::Id::new("object_query"))
+    );
+    ctx.memory_mut(|m| m.request_focus(app.object_search.close_id.unwrap()));
+    let old = app.selected.clone();
+    object_key(&ctx, &mut app, Key::Enter, egui::Modifiers::NONE);
+    assert_eq!(app.selected, old);
+}
+
+#[test]
+fn object_search_refreshes_stale_ids_and_closes_on_page_or_document_switch() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rectangle, [300., 250.]);
+    app.commit();
+    app.open_object_search();
+    object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    app.doc.node_mut(id).unwrap().text = "Nouveau contenu".into();
+    object_key(&ctx, &mut app, Key::Enter, egui::Modifiers::NONE);
+    assert!(app.object_search.open);
+    assert!(app.selected.is_empty());
+    assert_eq!(app.object_search.entries[0].label, "Nouveau contenu");
+    object_key(&ctx, &mut app, Key::Enter, egui::Modifiers::NONE);
+    assert_eq!(app.selected, vec![id]);
+    app.doc.add_page(false).unwrap();
+    app.switch_page(0);
+    app.open_object_search();
+    app.switch_page(1);
+    object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    assert!(!app.object_search.open);
+    app.open_object_search();
+    app.open_tab(Document::default(), None);
+    object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    assert!(!app.object_search.open);
+}
+
+#[test]
+fn keyboard_places_visible_shapes_without_overlap_then_edits_saves_and_reopens() {
+    let (ctx, mut app) = setup();
+    let before = app.doc.clone();
+    object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    for (key, text) in [(Key::R, "Premier bloc"), (Key::T, "Texte libre")] {
+        object_key(&ctx, &mut app, key, egui::Modifiers::NONE);
+        object_key(&ctx, &mut app, Key::Enter, egui::Modifiers::NONE);
+        assert!(app.rich_editor.is_some());
+        object_search_frame(
+            &ctx,
+            &mut app,
+            vec![egui::Event::Text(text.into())],
+            vec2(1200., 760.),
+        );
+        object_key(&ctx, &mut app, Key::Enter, egui::Modifiers::COMMAND);
+        assert_eq!(app.doc.nodes.last().unwrap().text, text);
+        assert!(
+            app.canvas
+                .contains_rect(app.node_screen_rect(app.doc.nodes.last().unwrap()))
+        );
+    }
+    assert_eq!(app.doc.nodes.len(), 2);
+    assert!(
+        !app.node_screen_rect(&app.doc.nodes[0])
+            .intersects(app.node_screen_rect(&app.doc.nodes[1]))
+    );
+    assert_eq!(app.doc.nodes[1].kind, ShapeKind::Text);
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("keyboard.draw");
+    app.path = Some(path.clone());
+    object_key(&ctx, &mut app, Key::S, egui::Modifiers::COMMAND);
+    assert_eq!(Document::load(&path).unwrap(), app.doc);
+    assert!(!app.dirty());
+    for _ in 0..4 {
+        app.undo();
+    }
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn keyboard_placement_clamps_off_page_view_and_preserves_custom_symbol_contents() {
+    let (ctx, mut app) = setup();
+    object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    app.pan = vec2(100_000., 100_000.);
+    let mut template = Document::default();
+    let id = template.add_node(ShapeKind::Rounded, [140., 100.]);
+    let mut symbol = template.node(id).unwrap().clone();
+    symbol.size = [180., 80.];
+    symbol.text = "Mon symbole".into();
+    symbol
+        .format_text(
+            0..3,
+            Some(&diagcraft::rich_text::InlineStyle {
+                bold: Some(true),
+                ..Default::default()
+            }),
+        )
+        .unwrap();
+    app.set_tool(Tool::Shape(symbol.kind));
+    app.pending_symbol = Some(symbol.clone());
+    object_key(&ctx, &mut app, Key::Enter, egui::Modifiers::NONE);
+    let node = &app.rich_editor.as_ref().unwrap().draft;
+    assert_eq!(node.text, symbol.text);
+    assert_eq!(node.text_runs, symbol.text_runs);
+    assert_eq!(node.size, symbol.size);
+    assert!(node.position.iter().all(|p| *p >= 0.));
+    assert!(
+        app.canvas
+            .shrink(35.)
+            .contains_rect(app.node_screen_rect(node))
+    );
+    object_key(&ctx, &mut app, Key::Escape, egui::Modifiers::NONE);
+    assert!(app.rich_editor.is_none());
+    assert_eq!(app.doc.nodes.len(), 1);
+}
+
+#[test]
+fn object_search_f2_keeps_immediate_typing_and_finish_after_the_modal_closes() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rectangle, [350., 300.]);
+    app.commit();
+    let before = app.doc.clone();
+    app.open_object_search();
+    object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    object_key(&ctx, &mut app, Key::F2, egui::Modifiers::NONE);
+    assert!(app.rich_editor.is_some());
+    assert!(!app.object_search.open);
+    object_search_frame(
+        &ctx,
+        &mut app,
+        vec![
+            egui::Event::Text("Premières lettres 中文".into()),
+            inline_key(Key::Enter, egui::Modifiers::COMMAND),
+        ],
+        vec2(1200., 760.),
+    );
+    object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    assert!(app.rich_editor.is_none());
+    assert_eq!(app.doc.node(id).unwrap().text, "Premières lettres 中文");
+    app.undo();
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn object_search_fits_small_windows_in_seven_languages_and_long_labels_keep_row_height() {
+    for language in Language::ALL {
+        let (ctx, mut app) = setup();
+        app.set_language(Some(language));
+        for _ in 0..10 {
+            let id = app.doc.add_node(ShapeKind::Rectangle, [400., 300.]);
+            app.doc.node_mut(id).unwrap().text = "Longue étiquette 中文 ".repeat(10);
+        }
+        app.commit();
+        let before = app.doc.clone();
+        app.open_object_search();
+        for size in [vec2(1200., 760.), vec2(980., 640.)] {
+            for _ in 0..3 {
+                object_search_frame(&ctx, &mut app, vec![], size);
+            }
+            assert!(
+                Rect::from_min_size(Pos2::ZERO, size)
+                    .shrink(4.)
+                    .contains_rect(app.object_search.rect.unwrap()),
+                "{} {:?} {:?}",
+                language.code(),
+                size,
+                app.object_search.rect
+            );
+            assert_eq!(app.doc, before);
+        }
+    }
+    i18n::activate(Language::French);
+}
+
+#[test]
+fn object_search_keeps_typing_batched_with_its_shortcut_or_opened_from_the_palette() {
+    for palette in [false, true] {
+        let (ctx, mut app) = setup();
+        app.doc.add_node(ShapeKind::Rectangle, [350., 300.]);
+        app.commit();
+        let before = app.doc.clone();
+        object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+        if palette {
+            object_key(&ctx, &mut app, Key::K, egui::Modifiers::COMMAND);
+            app.command_palette.query = "rechercher un objet".into();
+            object_key(&ctx, &mut app, Key::Enter, egui::Modifiers::NONE);
+            assert!(app.object_search.open);
+            object_search_frame(
+                &ctx,
+                &mut app,
+                vec![egui::Event::Text("中文 essai".into())],
+                vec2(1200., 760.),
+            );
+        } else {
+            object_search_frame(
+                &ctx,
+                &mut app,
+                vec![
+                    inline_key(Key::F, egui::Modifiers::COMMAND),
+                    egui::Event::Text("中文 essai".into()),
+                ],
+                vec2(1200., 760.),
+            );
+        }
+        object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+        assert_eq!(app.object_search.query, "中文 essai", "palette={palette}");
+        assert_eq!(app.doc, before);
+    }
+}
+
+#[test]
+fn command_palette_repeated_arrows_keep_query_focus_and_do_not_edit_the_canvas() {
+    let (ctx, mut app) = setup();
+    app.doc.add_node(ShapeKind::Rectangle, [350., 300.]);
+    app.commit();
+    let before = app.doc.clone();
+    app.open_command_palette();
+    for _ in 0..3 {
+        object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    }
+    for _ in 0..25 {
+        object_key(&ctx, &mut app, Key::ArrowDown, egui::Modifiers::NONE);
+        assert_eq!(
+            ctx.memory(|m| m.focused()),
+            Some(egui::Id::new("command_query"))
+        );
+    }
+    assert_eq!(app.doc, before);
+}

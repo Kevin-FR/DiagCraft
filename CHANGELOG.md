@@ -3,6 +3,21 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.7.0 — retrouver les objets et dessiner au clavier
+
+- Recherche temporaire des objets de la page avec ⌘F / Ctrl+F, Affichage ou la palette.
+- Texte complet, types, identifiants, accents ignorés, filtres et coordonnées X/Y.
+- Entrée sélectionne et rejoint l’objet ; Maj+Entrée l’ajoute à la sélection ; F2 édite son texte.
+- Liste virtualisée, étiquettes longues tronquées et libellés d’accessibilité avec type et ID.
+- Zoom conservé si l’objet tient dans la fenêtre, cadrage des grands objets, aucun changement du dessin.
+- R / T puis Entrée place une forme ou un texte dans un espace voisin libre et ouvre la saisie directe.
+- Styles des symboles conservés ; placement, texte et liens restent annulables.
+- Focus et premiers caractères préservés à la sortie de la recherche ; résultats périmés rafraîchis avant activation.
+- Douze nouveaux tests d’interface, seize messages dans les sept langues et guides multilingues.
+
+Le format `.draw` reste **v7**, l’API agents **v1**. Aucune dépendance ajoutée.
+La recherche porte sur la page active. Les tests utilisateurs et l’évaluation complète avec lecteurs d’écran restent prévus.
+
 ## 0.6.1 — édition du texte directement sur la feuille
 
 - Double-clic dans un bloc : curseur à l’endroit choisi, sans fenêtre supplémentaire.

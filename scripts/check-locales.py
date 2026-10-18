@@ -23,6 +23,9 @@ def check():
         if path.name in {"main.rs", "i18n.rs", "ui_tests.rs"}:
             continue
         source = path.read_text(encoding="utf-8").split("#[cfg(test)]")[0]
+        if path.name == "object_search_ui.rs":
+            for match in re.finditer(r'fn label\(self\).*?\{(.*?)\n    \}', source, re.S):
+                required.update(json.loads(literal) for literal in re.findall(LITERAL, match[1]))
         for match in re.finditer(r'(?:\bt|i18n::render)\(\s*(' + LITERAL + ')', source):
             required.add(json.loads(match[1]))
         if path.name == "commands_ui.rs":

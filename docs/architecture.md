@@ -108,3 +108,22 @@ Enregistrement, fermeture et raccourci de validation attendent le champ et sa
 barre. La révision est vérifiée avant validation, avec un seul changement dans
 l’historique documentaire. La récupération ne reçoit pas le brouillon.
 Les anciennes applications v7 ignorent les portions optionnelles.
+
+## Recherche et placement au clavier
+
+`object_search_ui.rs` indexe la page active à l’ouverture de la recherche : texte
+original, libellés localisés, types, IDs et positions. Les résultats sont filtrés
+sans accents et rendus avec `ScrollArea::show_rows` ; leurs deux lignes ont une
+hauteur fixe et leurs libellés AccessKit incluent le type et l’identifiant.
+Le snapshot vérifie la révision seulement à l’activation, sans sérialiser le
+document à chaque image. Un résultat périmé est rafraîchi avant toute action.
+Un changement de page ou d’onglet ferme la recherche. Sélection et caméra sont
+des états d’interface ; elles ne créent pas de modification documentaire.
+
+La commande contextuelle `PlaceShape` utilise Entrée uniquement avec l’outil
+Forme actif ; le même raccourci conserve l’édition d’un bloc déjà sélectionné
+avec l’outil Sélection. Le placement cherche un espace voisin libre dans la
+vue puis sur la page, conserve le symbole en attente et ouvre la saisie directe.
+La création et le texte gardent leurs annulations distinctes. Après fermeture
+d’une modale, une demande de focus refusée est réessayée ; les événements de
+saisie non traités sont rejoués avant la validation du texte.

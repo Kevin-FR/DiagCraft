@@ -8044,5 +8044,149 @@
     "it": "Scrivi nel blocco · Invio: nuova riga",
     "pt": "Escreva no bloco · Enter: nova linha",
     "zh-Hans": "在块内编辑 · Enter：换行"
+  },
+  "Ajouter à la sélection": {
+    "fr": "Ajouter à la sélection",
+    "en": "Add to selection",
+    "de": "Zur Auswahl hinzufügen",
+    "es": "Añadir a la selección",
+    "it": "Aggiungi alla selezione",
+    "pt": "Adicionar à seleção",
+    "zh-Hans": "添加到选择"
+  },
+  "Aucun objet trouvé sur cette page.": {
+    "fr": "Aucun objet trouvé sur cette page.",
+    "en": "No objects found on this page.",
+    "de": "Keine Objekte auf dieser Seite gefunden.",
+    "es": "No se encontraron objetos en esta página.",
+    "it": "Nessun oggetto trovato in questa pagina.",
+    "pt": "Nenhum objeto encontrado nesta página.",
+    "zh-Hans": "此页面未找到对象。"
+  },
+  "Essayez un autre texte, un type ou un identifiant.": {
+    "fr": "Essayez un autre texte, un type ou un identifiant.",
+    "en": "Try different text, a type or an ID.",
+    "de": "Versuchen Sie anderen Text, einen Typ oder eine ID.",
+    "es": "Prueba otro texto, un tipo o un identificador.",
+    "it": "Prova un altro testo, un tipo o un identificatore.",
+    "pt": "Experimenta outro texto, um tipo ou um identificador.",
+    "zh-Hans": "请尝试其他文字、类型或标识符。"
+  },
+  "Objets trouvés : {0}": {
+    "fr": "Objets trouvés : {0}",
+    "en": "Objects found: {0}",
+    "de": "Gefundene Objekte: {0}",
+    "es": "Objetos encontrados: {0}",
+    "it": "Oggetti trovati: {0}",
+    "pt": "Objetos encontrados: {0}",
+    "zh-Hans": "找到的对象：{0}"
+  },
+  "Rechercher un objet": {
+    "fr": "Rechercher un objet",
+    "en": "Find an object",
+    "de": "Objekt suchen",
+    "es": "Buscar un objeto",
+    "it": "Cerca un oggetto",
+    "pt": "Procurar um objeto",
+    "zh-Hans": "查找对象"
+  },
+  "Rechercher un objet…": {
+    "fr": "Rechercher un objet…",
+    "en": "Find an object…",
+    "de": "Objekt suchen…",
+    "es": "Buscar un objeto…",
+    "it": "Cerca un oggetto…",
+    "pt": "Procurar um objeto…",
+    "zh-Hans": "查找对象…"
+  },
+  "Texte, type ou #identifiant…": {
+    "fr": "Texte, type ou #identifiant…",
+    "en": "Text, type or #ID…",
+    "de": "Text, Typ oder #ID…",
+    "es": "Texto, tipo o #identificador…",
+    "it": "Testo, tipo o #identificatore…",
+    "pt": "Texto, tipo ou #identificador…",
+    "zh-Hans": "文字、类型或 #标识符…"
+  },
+  "↑ ↓ Choisir · Entrée Sélectionner · Maj+Entrée Ajouter · F2 Texte": {
+    "fr": "↑ ↓ Choisir · Entrée Sélectionner · Maj+Entrée Ajouter · F2 Texte",
+    "en": "↑ ↓ Choose · Enter Select · Shift+Enter Add · F2 Text",
+    "de": "↑ ↓ Auswählen · Enter Wählen · Umschalt+Enter Hinzufügen · F2 Text",
+    "es": "↑ ↓ Elegir · Intro Seleccionar · Mayús+Intro Añadir · F2 Texto",
+    "it": "↑ ↓ Scegli · Invio Seleziona · Maiusc+Invio Aggiungi · F2 Testo",
+    "pt": "↑ ↓ Escolher · Enter Selecionar · Shift+Enter Adicionar · F2 Texto",
+    "zh-Hans": "↑ ↓ 选择 · Enter 选中 · Shift+Enter 添加 · F2 文字"
+  },
+  "Formes et textes": {
+    "fr": "Formes et textes",
+    "en": "Shapes and text",
+    "de": "Formen und Texte",
+    "es": "Formas y textos",
+    "it": "Forme e testi",
+    "pt": "Formas e textos",
+    "zh-Hans": "形状和文字"
+  },
+  "Traits et courbes": {
+    "fr": "Traits et courbes",
+    "en": "Lines and curves",
+    "de": "Linien und Kurven",
+    "es": "Líneas y curvas",
+    "it": "Linee e curve",
+    "pt": "Linhas e curvas",
+    "zh-Hans": "线条和曲线"
+  },
+  "Choisissez d’abord une forme à insérer": {
+    "fr": "Choisissez d’abord une forme à insérer",
+    "en": "Choose a shape to insert first",
+    "de": "Wählen Sie zuerst eine Form zum Einfügen",
+    "es": "Elige primero una forma para insertar",
+    "it": "Scegli prima una forma da inserire",
+    "pt": "Escolhe primeiro uma forma para inserir",
+    "zh-Hans": "请先选择要插入的形状"
+  },
+  "Recherche": {
+    "fr": "Recherche",
+    "en": "Search",
+    "de": "Suche",
+    "es": "Búsqueda",
+    "it": "Ricerca",
+    "pt": "Pesquisa",
+    "zh-Hans": "搜索"
+  },
+  "Placer la forme dans la vue": {
+    "fr": "Placer la forme dans la vue",
+    "en": "Place shape in view",
+    "de": "Form in der Ansicht platzieren",
+    "es": "Colocar forma en la vista",
+    "it": "Inserisci forma nella vista",
+    "pt": "Colocar forma na vista",
+    "zh-Hans": "在视图中放置形状"
+  },
+  "Cliquez pour ajouter : {0} · Entrée pour insérer dans la vue": {
+    "fr": "Cliquez pour ajouter : {0} · Entrée pour insérer dans la vue",
+    "en": "Click to add: {0} · Enter to place in view",
+    "de": "Zum Hinzufügen klicken: {0} · Enter zum Einfügen in die Ansicht",
+    "es": "Haz clic para añadir: {0} · Intro para colocar en la vista",
+    "it": "Fai clic per aggiungere: {0} · Invio per inserire nella vista",
+    "pt": "Clica para adicionar: {0} · Enter para colocar na vista",
+    "zh-Hans": "点击添加：{0} · Enter 在视图中放置"
+  },
+  "Tous": {
+    "fr": "Tous",
+    "en": "All",
+    "de": "Alle",
+    "es": "Todos",
+    "it": "Tutti",
+    "pt": "Todos",
+    "zh-Hans": "全部"
+  },
+  "Connecteurs": {
+    "fr": "Connecteurs",
+    "en": "Connectors",
+    "de": "Verbindungen",
+    "es": "Conectores",
+    "it": "Connettori",
+    "pt": "Conectores",
+    "zh-Hans": "连接线"
   }
 }

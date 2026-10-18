@@ -29,6 +29,8 @@ pub(super) enum Command {
     Underline,
     FitText,
     EditText,
+    FindObject,
+    PlaceShape,
     Select,
     Rectangle,
     Text,
@@ -125,6 +127,8 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
         "fit text auto size hauteur largeur ajustement dimension"
     ),
     command!(Select, "Outil Sélection", "Outils", "pointeur déplacer select", Modifiers::NONE => V),
+    command!(FindObject, "Rechercher un objet…", "Affichage", "trouver texte bloc connecteur identifiant search find object", Modifiers::COMMAND => F),
+    command!(PlaceShape, "Placer la forme dans la vue", "Outils", "insérer créer clavier rectangle texte center", Modifiers::NONE => Enter),
     command!(Rectangle, "Outil Rectangle", "Outils", "bloc forme rectangle", Modifiers::NONE => R),
     command!(EditText, "Modifier le texte", "Texte", "édition bloc contenu inline", Modifiers::NONE => F2, Modifiers::NONE => Enter),
     command!(Text, "Outil Texte", "Outils", "ajouter écrire text", Modifiers::NONE => T),
@@ -310,6 +314,7 @@ impl DrawApp {
             || self.page_draft.is_some()
             || self.agent_panel.is_some()
             || self.rich_editor.is_some()
+            || self.object_search.open
     }
 
     pub(super) fn open_command_palette(&mut self) {
@@ -334,6 +339,12 @@ impl DrawApp {
     pub(super) fn command_unavailable(&self, command: Command) -> Option<&'static str> {
         use Command::*;
         match command {
+            PlaceShape if !matches!(self.tool, Tool::Shape(_)) => {
+                Some("Choisissez d’abord une forme à insérer")
+            }
+            PlaceShape if self.doc.object_count() >= 10_000 => {
+                Some("Limite de 10 000 objets atteinte.")
+            }
             EditText if self.selected.len() != 1 || self.doc.node(self.selected[0]).is_none() => {
                 Some("Sélectionnez une forme ou un texte")
             }
@@ -414,6 +425,8 @@ impl DrawApp {
             Underline => self.change_text(|s| s.underline = !s.underline),
             FitText => self.fit_selection_text(),
             EditText => self.open_node_text(self.selected[0]),
+            FindObject => self.open_object_search(),
+            PlaceShape => self.place_shape_in_view(ctx),
             Select => self.set_tool(Tool::Select),
             Rectangle => self.set_tool(Tool::Shape(ShapeKind::Rectangle)),
             Text => self.set_tool(Tool::Shape(ShapeKind::Text)),
@@ -452,10 +465,16 @@ impl DrawApp {
 
     pub(super) fn command_shortcut(&mut self, ctx: &egui::Context, editing: bool) -> bool {
         for spec in COMMANDS {
+            if spec.command == Command::PlaceShape
+                && self.command_unavailable(spec.command).is_some()
+            {
+                continue;
+            }
             if editing
                 && !matches!(
                     spec.command,
                     Command::Palette
+                        | Command::FindObject
                         | Command::Help
                         | Command::New
                         | Command::Open
@@ -506,6 +525,9 @@ impl DrawApp {
         let up = search_focused && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::ArrowUp));
         let down =
             search_focused && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::ArrowDown));
+        if up || down {
+            ctx.memory_mut(|m| m.move_focus(egui::FocusDirection::None));
+        }
         let enter = search_focused && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Enter));
         let mut chosen = None;
         let mut close = false;

@@ -518,6 +518,7 @@ impl DrawApp {
             editor.click = ui.input(|i| i.pointer.interact_pos());
             editor.focus = true;
         }
+        let focus_requested = editor.focus;
         if editor.focus {
             let galley = inline_galley(ui, &preview, content_rect.width().max(24.), zoom);
             if let Some(click) = editor.click.take() {
@@ -582,6 +583,28 @@ impl DrawApp {
                     .show(ui);
                 if let Some(range) = output.cursor_range {
                     editor.selection = range;
+                } else if focus_requested {
+                    // A dismissed modal can own input for one final frame.
+                    // Retry focus and replay unhandled typing so entering text
+                    // immediately after a search never drops its first letters.
+                    editor.focus = true;
+                    self.replay_input.extend(ui.input(|i| {
+                        i.events
+                            .iter()
+                            .filter(|event| {
+                                matches!(
+                                    event,
+                                    egui::Event::Text(_)
+                                        | egui::Event::Paste(_)
+                                        | egui::Event::Cut
+                                        | egui::Event::Ime(_)
+                                        | egui::Event::Key { .. }
+                                )
+                            })
+                            .cloned()
+                            .collect::<Vec<_>>()
+                    }));
+                    ui.ctx().request_repaint();
                 }
                 if output.response.changed() {
                     match editor.draft.set_text(buffer.clone()) {
@@ -596,6 +619,10 @@ impl DrawApp {
     }
 
     fn finalize_inline_frame(&mut self, ctx: &egui::Context) {
+        if self.rich_editor.as_ref().is_some_and(|editor| editor.focus) {
+            ctx.request_repaint();
+            return;
+        }
         let finish = self
             .rich_editor
             .as_mut()

@@ -21,13 +21,14 @@ Le applicazioni e le relative somme di controllo SHA-256 sono disponibili nella
 | Windows x86_64 | ZIP portatile con applicazione e CLI |
 | Linux x86_64 | Pacchetto `.deb` per amd64 o archivio `.tar.gz`, con applicazione e CLI |
 
-**0.6.1 è sperimentale** e aggiunge la modifica del testo direttamente sulla tela.
+**0.7.0 è sperimentale** e aggiunge la ricerca di oggetti e il posizionamento tramite tastiera.
 Il pacchetto Mac ha una firma ad hoc e non è stato autenticato da Apple tramite
 notarizzazione. I pacchetti Windows non sono firmati con un certificato dell’editore.
 Consulta la [guida all’installazione](../installation.md).
 
 ## Funzionalità
 
+- Cerca oggetti nella pagina per testo, tipo o identificatore; inserisci, modifica e collega blocchi tramite tastiera.
 - Modifica il testo direttamente nei blocchi: doppio clic o F2/Invio, selezione delle parole e barra di formattazione mobile. Un clic all’esterno conferma; Escape annulla.
 - Interfaccia in inglese, francese, tedesco, spagnolo, italiano, portoghese e cinese semplificato.
 - Controllo facoltativo degli aggiornamenti su GitHub, download verificati con SHA-256 e installazione manuale.
@@ -60,6 +61,7 @@ Le guide dettagliate sono attualmente in francese:
 [adattamento del testo](../ajustement-texte.md) e [gestione delle versioni](../versioning.md).
 
 [contenuto dei blocchi](../contenu-blocs.md) (FR).
+[ricerca di oggetti e uso della tastiera](../recherche-objets.md) (FR).
 
 ## Sviluppo
 

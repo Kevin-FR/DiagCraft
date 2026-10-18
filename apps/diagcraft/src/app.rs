@@ -169,6 +169,7 @@ pub struct DrawApp {
     frame_count: u32,
     show_help: bool,
     command_palette: commands_ui::PaletteState,
+    object_search: object_search_ui::Search,
     help_state: commands_ui::HelpState,
     ribbon_tab: RibbonTab,
     ribbon_expanded: Option<bool>,
@@ -479,6 +480,12 @@ impl DrawApp {
         if name == "ajuster-texte" {
             self.prepare_text_fit_capture();
         }
+        if name == "recherche-objets" {
+            self.show_library = false;
+            self.show_inspector = false;
+            self.ribbon_expanded = Some(false);
+            self.open_object_search();
+        }
     }
     fn prepare_rich_text_capture(&mut self, editor: bool) {
         let mut doc = Document {
@@ -708,6 +715,7 @@ impl DrawApp {
             frame_count: 0,
             show_help: false,
             command_palette: Default::default(),
+            object_search: Default::default(),
             help_state: Default::default(),
             ribbon_tab: RibbonTab::Home,
             ribbon_expanded: None,
@@ -1699,7 +1707,7 @@ impl DrawApp {
                     }});
                 }
                 let hint = match self.tool {
-                    Tool::Shape(k) => i18n::render("Cliquez pour ajouter : {0}", &[("0", t(k.label()))]),
+                    Tool::Shape(k) => i18n::render("Cliquez pour ajouter : {0} · Entrée pour insérer dans la vue", &[("0", t(k.label()))]),
                     Tool::Connect => {
                         if self.connect_from.is_some() {
                             "Choisissez le bloc d’arrivée · glissez ou cliquez · Échap pour annuler"
@@ -2478,6 +2486,7 @@ impl eframe::App for DrawApp {
                 && !self.recovery.open
                 && !self.show_help
                 && !self.command_palette.open
+                && !self.object_search.open
                 && !self.show_templates
                 && !self.save_template_open
                 && !self.show_symbol_manager
@@ -2493,6 +2502,7 @@ impl eframe::App for DrawApp {
         self.tick_recovery(ctx);
         self.settings_dialog(ctx);
         self.command_dialog(ctx);
+        self.object_search_dialog(ctx);
         self.library_dialogs(ctx);
         self.workspace_dialogs(ctx);
         self.pages_dialogs(ctx);
@@ -2680,5 +2690,7 @@ mod recovery;
 #[path = "recovery_ui.rs"]
 mod recovery_ui;
 
+#[path = "object_search_ui.rs"]
+mod object_search_ui;
 #[path = "rich_text_ui.rs"]
 mod rich_text_ui;

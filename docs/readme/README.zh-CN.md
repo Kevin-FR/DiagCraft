@@ -19,12 +19,13 @@
 | Windows x86_64 | 包含应用和 CLI 的便携式 ZIP |
 | Linux x86_64 | 包含应用和 CLI 的 amd64 `.deb` 软件包或 `.tar.gz` 压缩包 |
 
-**0.6.1 为实验版本**，新增画布内直接编辑文字。Mac 安装包使用临时签名（ad hoc），
+**0.7.0 为实验版本**，新增对象查找和键盘放置功能。Mac 安装包使用临时签名（ad hoc），
 尚未通过 Apple 公证。Windows 安装包未使用发布者证书签名。
 请参阅[安装指南](../installation.md)。
 
 ## 功能
 
+- 按文字、类型或标识符查找页面对象，并使用键盘放置、编辑和连接块。
 - 直接在块内编辑文字：双击或按 F2/Enter，选择文字后使用浮动格式工具栏。点击块外完成编辑；Escape 取消。
 - 界面支持英语、法语、德语、西班牙语、意大利语、葡萄牙语和简体中文。
 - 可选的 GitHub 更新检查、SHA-256 下载校验以及手动安装。
@@ -52,6 +53,7 @@ Mac 安装包仅包含 `arm64` 代码，使用 macOS 系统库：**无需 Rosett
 [功能区与侧栏](../interface.md)、[绘图恢复](../recuperation.md)、[文本适应](../ajustement-texte.md)和[版本管理](../versioning.md)。
 
 [块内容](../contenu-blocs.md) (FR).
+[对象查找与键盘操作](../recherche-objets.md)（法语）。
 
 ## 开发
 

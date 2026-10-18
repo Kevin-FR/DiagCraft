@@ -168,6 +168,7 @@ impl DrawApp {
                 }
             }
             RibbonTab::View => {
+                self.command_button(ui, Command::FindObject);
                 self.command_button(ui, Command::FitPage);
                 self.zoom_menu(ui);
                 ui.separator();
@@ -938,6 +939,9 @@ impl DrawApp {
         });
     }
     pub(super) fn view_ribbon(&mut self, ui: &mut egui::Ui) {
+        group(ui, 190., "Recherche", |ui| {
+            self.command_button(ui, commands_ui::Command::FindObject);
+        });
         group(ui, 300., "Affichage", |ui| {
             ui.horizontal(|ui| {
                 ui.checkbox(&mut self.rulers, t("Règles"));
@@ -1107,6 +1111,7 @@ impl DrawApp {
                 }
             }
             ui.separator();
+            self.command_button(ui, commands_ui::Command::PlaceShape);
             if ui.button(t("Outil Trait · L")).clicked() {
                 self.set_tool(Tool::Line);
                 ui.close();

@@ -21,12 +21,13 @@ As aplicações e as respetivas somas de verificação SHA-256 estão disponíve
 | Windows x86_64 | ZIP portátil com a aplicação e a CLI |
 | Linux x86_64 | Pacote `.deb` para amd64 ou arquivo `.tar.gz`, com a aplicação e a CLI |
 
-**A versão 0.6.1 é experimental** e acrescenta edição de texto diretamente na tela. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
+**A versão 0.7.0 é experimental** e acrescenta pesquisa de objetos e colocação pelo teclado. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
 Os pacotes Windows não estão assinados com um certificado de editor.
 Consulte o [guia de instalação](../installation.md).
 
 ## Funcionalidades
 
+- Procura objetos da página por texto, tipo ou identificador; coloca, edita e liga blocos pelo teclado.
 - Edita texto diretamente nos blocos: duplo clique ou F2/Enter, seleção de palavras e barra flutuante de formatação. Clica fora para concluir; Escape cancela.
 - Interface em inglês, francês, alemão, espanhol, italiano, português e chinês simplificado.
 - Verificação opcional de atualizações no GitHub, transferências verificadas por SHA-256 e instalação manual.
@@ -59,6 +60,7 @@ Os guias detalhados estão atualmente em francês:
 [ajuste do texto](../ajustement-texte.md) e [gestão de versões](../versioning.md).
 
 [conteúdo dos blocos](../contenu-blocs.md) (FR).
+[pesquisa de objetos e utilização do teclado](../recherche-objets.md) (FR).
 
 ## Desenvolvimento
 

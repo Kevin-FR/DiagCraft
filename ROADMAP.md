@@ -15,6 +15,8 @@ travaux prévus, sans promesse de date.
 
 ## Prochaine étape — stabilité et prise en main
 
+- [x] Recherche des objets de la page par texte, type et ID, sélection additive et navigation vers les objets hors écran (0.7.0).
+- [x] Parcours de création, saisie et connexion de blocs au clavier, avec placement dans la vue et focus de saisie préservé (0.7.0).
 - [ ] Tests utilisateurs sur MacBook 13 pouces, clavier seul et lecteurs d’écran.
   Critère : parcours créer → relier → enregistrer → rouvrir → exporter sans blocage.
 - [x] Tableau de raccourcis et recherche de commandes (0.2.0) : palette ⌘K / Ctrl+K,

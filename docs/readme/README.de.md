@@ -21,12 +21,13 @@ Die Anwendungen und ihre SHA-256-Prüfsummen stehen auf der
 | Windows x86_64 | Portables ZIP mit Anwendung und CLI |
 | Linux x86_64 | `.deb`-Paket für amd64 oder `.tar.gz`-Archiv mit Anwendung und CLI |
 
-**0.6.1 ist experimentell** und ergänzt die direkte Textbearbeitung auf der Zeichenfläche. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
+**0.7.0 ist experimentell** und ergänzt die Objektsuche und das Platzieren per Tastatur. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
 Die Windows-Pakete sind nicht mit einem Herausgeberzertifikat signiert.
 Siehe die [Installationsanleitung](../installation.md).
 
 ## Funktionen
 
+- Seitenobjekte nach Text, Typ oder ID suchen; Blöcke per Tastatur platzieren, bearbeiten und verbinden.
 - Text direkt in Blöcken bearbeiten: Doppelklick oder F2/Enter, Wörter auswählen und die schwebende Formatierungsleiste verwenden. Ein Klick außerhalb übernimmt die Änderungen; Escape verwirft sie.
 - Oberfläche auf Englisch, Französisch, Deutsch, Spanisch, Italienisch, Portugiesisch und vereinfachtem Chinesisch.
 - Optionale GitHub-Updateprüfung, Downloads mit SHA-256-Prüfung und manuelle Installation.
@@ -59,6 +60,7 @@ Die ausführlichen Anleitungen sind derzeit auf Französisch:
 [Textanpassung](../ajustement-texte.md) und [Versionierung](../versioning.md).
 
 [Blockinhalt](../contenu-blocs.md) (FR).
+[Objektsuche und Tastaturbedienung](../recherche-objets.md) (FR).
 
 ## Entwicklung
 

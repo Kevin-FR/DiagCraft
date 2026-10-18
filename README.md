@@ -21,13 +21,14 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.6.1 is experimental** and adds direct text editing on the canvas.
+**0.7.0 is experimental** and adds object search and keyboard placement.
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).
 
 ## Features
 
+- Find page objects by text, type or ID; place, edit and connect blocks with the keyboard.
 - Edit text directly inside blocks: double-click or F2/Enter, select words and use the floating formatting toolbar. Click outside to finish; Escape cancels.
 - Interface in English, French, German, Spanish, Italian, Portuguese and Simplified Chinese.
 - Optional GitHub update checks, SHA-256-verified downloads and manual installation.
@@ -61,6 +62,7 @@ Detailed guides are currently in French:
 and [versioning](docs/versioning.md).
 
 [block content](docs/contenu-blocs.md) (FR).
+[find objects and work with the keyboard](docs/recherche-objets.md) (FR).
 
 ## Development
 

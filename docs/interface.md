@@ -39,6 +39,14 @@ La recherche ignore les accents et accepte plusieurs mots. Elle recherche aussi
 dans les bibliothèques masquées, sans modifier la liste de celles que vous avez
 choisies. Effacer la recherche retrouve les bibliothèques et leur état replié.
 
+## Retrouver les objets du dessin
+
+**Affichage → Rechercher un objet…** ou **⌘F / Ctrl+F** ouvre une liste temporaire
+des objets de la page active. La recherche par texte, type ou ID permet de
+sélectionner un objet hors écran et de le rejoindre sans agrandir les volets.
+**Maj+Entrée** ajoute un résultat à la sélection et **F2** ouvre son texte dans
+le bloc. Voir [la recherche et le clavier](recherche-objets.md).
+
 ## Références de conception
 
 La revue de [PDFCraft au commit d8b2705](https://github.com/storytold/pdfcraft/tree/d8b27058252da24a08df8ff06c23418ac4fb97a1)
