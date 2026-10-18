@@ -782,6 +782,15 @@
     "pt": "Nenhum",
     "zh-Hans": "无"
   },
+  "Aucun dessin à récupérer.": {
+    "fr": "Aucun dessin à récupérer.",
+    "en": "No drawings to recover.",
+    "de": "Keine Zeichnungen zum Wiederherstellen.",
+    "es": "No hay dibujos que recuperar.",
+    "it": "Nessun disegno da recuperare.",
+    "pt": "Não há desenhos para recuperar.",
+    "zh-Hans": "没有可恢复的绘图。"
+  },
   "Aucun modèle dans cette catégorie.": {
     "fr": "Aucun modèle dans cette catégorie.",
     "en": "No templates in this category.",
@@ -1628,6 +1637,24 @@
     "pt": "Contorno em gradiente",
     "zh-Hans": "渐变轮廓"
   },
+  "Copie automatique toutes les 10 secondes, après les gestes terminés. Elle ne remplace pas Enregistrer.": {
+    "fr": "Copie automatique toutes les 10 secondes, après les gestes terminés. Elle ne remplace pas Enregistrer.",
+    "en": "Automatic copy every 10 seconds after gestures finish. This does not replace Save.",
+    "de": "Automatische Kopie alle 10 Sekunden nach abgeschlossenen Gesten. Sie ersetzt nicht das Speichern.",
+    "es": "Copia automática cada 10 segundos al terminar los gestos. No sustituye a Guardar.",
+    "it": "Copia automatica ogni 10 secondi al termine dei gesti. Non sostituisce Salva.",
+    "pt": "Cópia automática a cada 10 segundos após concluir os gestos. Não substitui Guardar.",
+    "zh-Hans": "每 10 秒在操作完成后自动创建副本。自动副本不能替代保存。"
+  },
+  "Copie illisible ou issue d’une version plus récente. Elle est conservée.": {
+    "fr": "Copie illisible ou issue d’une version plus récente. Elle est conservée.",
+    "en": "This copy is unreadable or from a newer version. It has been preserved.",
+    "de": "Diese Kopie ist unlesbar oder stammt aus einer neueren Version. Sie bleibt erhalten.",
+    "es": "Esta copia no se puede leer o procede de una versión más reciente. Se conserva.",
+    "it": "Questa copia è illeggibile o proviene da una versione più recente. Viene conservata.",
+    "pt": "Esta cópia é ilegível ou de uma versão mais recente. Foi preservada.",
+    "zh-Hans": "此副本无法读取或来自更新版本。副本已保留。"
+  },
   "Copier": {
     "fr": "Copier",
     "en": "Copy",
@@ -1663,6 +1690,15 @@
     "it": "Copia stile, poi fai clic su un’altra forma",
     "pt": "Copie o estilo e clique em outra forma",
     "zh-Hans": "复制样式，然后点击另一个形状"
+  },
+  "Copies déjà ouvertes": {
+    "fr": "Copies déjà ouvertes",
+    "en": "Copies already opened",
+    "de": "Kopien bereits geöffnet",
+    "es": "Copias ya abiertas",
+    "it": "Copie già aperte",
+    "pt": "Cópias já abertas",
+    "zh-Hans": "副本已打开"
   },
   "Corps de texte": {
     "fr": "Corps de texte",
@@ -1871,6 +1907,24 @@
     "pt": "Peça ao agente um patch API 1 com a revisão deste contexto. O catálogo e esquema estão abaixo.",
     "zh-Hans": "请智能体基于此上下文版本生成 API 1 补丁。目录与架构可在下方获取。"
   },
+  "Dernière copie : il y a {0} min": {
+    "fr": "Dernière copie : il y a {0} min",
+    "en": "Last copy: {0} min ago",
+    "de": "Letzte Kopie: vor {0} Min.",
+    "es": "Última copia: hace {0} min",
+    "it": "Ultima copia: {0} min fa",
+    "pt": "Última cópia: há {0} min",
+    "zh-Hans": "上次副本：{0} 分钟前"
+  },
+  "Dernière copie : moins d’une minute": {
+    "fr": "Dernière copie : moins d’une minute",
+    "en": "Last copy: less than a minute ago",
+    "de": "Letzte Kopie: vor weniger als einer Minute",
+    "es": "Última copia: hace menos de un minuto",
+    "it": "Ultima copia: meno di un minuto fa",
+    "pt": "Última cópia: há menos de um minuto",
+    "zh-Hans": "上次副本：不到一分钟前"
+  },
   "Dernière version": {
     "fr": "Dernière version",
     "en": "Latest version",
@@ -1879,6 +1933,15 @@
     "it": "Ultima versione",
     "pt": "Última versão",
     "zh-Hans": "最新版本"
+  },
+  "Des copies locales peuvent être disponibles après une fermeture inattendue. Les fichiers d’origine restent inchangés.": {
+    "fr": "Des copies locales peuvent être disponibles après une fermeture inattendue. Les fichiers d’origine restent inchangés.",
+    "en": "Local copies may be available after an unexpected shutdown. Original files remain unchanged.",
+    "de": "Nach einem unerwarteten Beenden können lokale Kopien verfügbar sein. Die Originaldateien bleiben unverändert.",
+    "es": "Puede haber copias locales disponibles tras un cierre inesperado. Los archivos originales no se modifican.",
+    "it": "Dopo una chiusura imprevista potrebbero essere disponibili copie locali. I file originali rimangono invariati.",
+    "pt": "Poderão existir cópias locais após um encerramento inesperado. Os ficheiros originais permanecem inalterados.",
+    "zh-Hans": "意外关闭后可能有本地副本可供恢复。原始文件保持不变。"
   },
   "Dessin libre": {
     "fr": "Dessin libre",
@@ -1897,6 +1960,24 @@
     "it": "Disegna tracciato · Esc: annulla",
     "pt": "Desenhar traçado · Esc: cancelar",
     "zh-Hans": "绘制路径 · Esc：取消"
+  },
+  "Dessins récupérés dans de nouveaux onglets. Enregistrez les copies à l’emplacement de votre choix.": {
+    "fr": "Dessins récupérés dans de nouveaux onglets. Enregistrez les copies à l’emplacement de votre choix.",
+    "en": "Drawings recovered in new tabs. Save the copies to your chosen location.",
+    "de": "Zeichnungen in neuen Tabs wiederhergestellt. Speichern Sie die Kopien am gewünschten Ort.",
+    "es": "Dibujos recuperados en nuevas pestañas. Guarda las copias donde prefieras.",
+    "it": "Disegni recuperati in nuove schede. Salva le copie nella posizione desiderata.",
+    "pt": "Desenhos recuperados em novos separadores. Guarde as cópias no local pretendido.",
+    "zh-Hans": "绘图已恢复到新标签页。请将副本保存到所需位置。"
+  },
+  "Dessins à récupérer : {0}": {
+    "fr": "Dessins à récupérer : {0}",
+    "en": "Drawings to recover: {0}",
+    "de": "Wiederherzustellende Zeichnungen: {0}",
+    "es": "Dibujos que recuperar: {0}",
+    "it": "Disegni da recuperare: {0}",
+    "pt": "Desenhos para recuperar: {0}",
+    "zh-Hans": "可恢复的绘图：{0}"
   },
   "Deux doigts sur le trackpad": {
     "fr": "Deux doigts sur le trackpad",
@@ -2311,6 +2392,15 @@
     "it": "Scollega",
     "pt": "Desconectar",
     "zh-Hans": "断开"
+  },
+  "Détails": {
+    "fr": "Détails",
+    "en": "Details",
+    "de": "Details",
+    "es": "Detalles",
+    "it": "Dettagli",
+    "pt": "Detalhes",
+    "zh-Hans": "详情"
   },
   "Développer le ruban": {
     "fr": "Développer le ruban",
@@ -3716,6 +3806,15 @@
     "pt": "Itálico",
     "zh-Hans": "斜体"
   },
+  "Jamais enregistré": {
+    "fr": "Jamais enregistré",
+    "en": "Never saved",
+    "de": "Noch nie gespeichert",
+    "es": "Nunca guardado",
+    "it": "Mai salvato",
+    "pt": "Nunca guardado",
+    "zh-Hans": "从未保存"
+  },
   "Jonctions": {
     "fr": "Jonctions",
     "en": "Joins",
@@ -3733,6 +3832,15 @@
     "it": "ETICHETTA",
     "pt": "RÓTULO",
     "zh-Hans": "标签"
+  },
+  "La copie de récupération n’a pas pu être mise à jour. Enregistrez votre travail.": {
+    "fr": "La copie de récupération n’a pas pu être mise à jour. Enregistrez votre travail.",
+    "en": "The recovery copy could not be updated. Save your work.",
+    "de": "Die Wiederherstellungskopie konnte nicht aktualisiert werden. Speichern Sie Ihre Arbeit.",
+    "es": "No se ha podido actualizar la copia de recuperación. Guarda tu trabajo.",
+    "it": "Impossibile aggiornare la copia di recupero. Salva il tuo lavoro.",
+    "pt": "Não foi possível atualizar a cópia de recuperação. Guarde o seu trabalho.",
+    "zh-Hans": "无法更新恢复副本。请保存您的工作。"
   },
   "La langue change immédiatement. Les textes de vos dessins sont conservés.": {
     "fr": "La langue change immédiatement. Les textes de vos dessins sont conservés.",
@@ -5174,6 +5282,15 @@
     "pt": "Plano",
     "zh-Hans": "平头"
   },
+  "Plus tard": {
+    "fr": "Plus tard",
+    "en": "Later",
+    "de": "Später",
+    "es": "Más tarde",
+    "it": "Più tardi",
+    "pt": "Mais tarde",
+    "zh-Hans": "稍后"
+  },
   "Pointillés": {
     "fr": "Pointillés",
     "en": "Dotted",
@@ -5804,6 +5921,51 @@
     "pt": "Recentes",
     "zh-Hans": "最近"
   },
+  "Récupération automatique indisponible. Consultez Récupérer des dessins dans le menu Fichier.": {
+    "fr": "Récupération automatique indisponible. Consultez Récupérer des dessins dans le menu Fichier.",
+    "en": "Automatic recovery unavailable. See Recover drawings in the File menu.",
+    "de": "Automatische Wiederherstellung nicht verfügbar. Wählen Sie Zeichnungen wiederherstellen im Menü Datei.",
+    "es": "Recuperación automática no disponible. Consulta Recuperar dibujos en el menú Archivo.",
+    "it": "Recupero automatico non disponibile. Consulta Recupera disegni nel menu File.",
+    "pt": "Recuperação automática indisponível. Consulte Recuperar desenhos no menu Ficheiro.",
+    "zh-Hans": "自动恢复不可用。请查看文件菜单中的恢复绘图。"
+  },
+  "Récupération indisponible : {0}": {
+    "fr": "Récupération indisponible : {0}",
+    "en": "Recovery unavailable: {0}",
+    "de": "Wiederherstellung nicht verfügbar: {0}",
+    "es": "Recuperación no disponible: {0}",
+    "it": "Recupero non disponibile: {0}",
+    "pt": "Recuperação indisponível: {0}",
+    "zh-Hans": "无法恢复：{0}"
+  },
+  "Récupérer cette session": {
+    "fr": "Récupérer cette session",
+    "en": "Recover this session",
+    "de": "Diese Sitzung wiederherstellen",
+    "es": "Recuperar esta sesión",
+    "it": "Recupera questa sessione",
+    "pt": "Recuperar esta sessão",
+    "zh-Hans": "恢复此会话"
+  },
+  "Récupérer des dessins": {
+    "fr": "Récupérer des dessins",
+    "en": "Recover drawings",
+    "de": "Zeichnungen wiederherstellen",
+    "es": "Recuperar dibujos",
+    "it": "Recupera disegni",
+    "pt": "Recuperar desenhos",
+    "zh-Hans": "恢复绘图"
+  },
+  "Récupérer des dessins…": {
+    "fr": "Récupérer des dessins…",
+    "en": "Recover drawings…",
+    "de": "Zeichnungen wiederherstellen…",
+    "es": "Recuperar dibujos…",
+    "it": "Recupera disegni…",
+    "pt": "Recuperar desenhos…",
+    "zh-Hans": "恢复绘图…"
+  },
   "Récupérer une copie": {
     "fr": "Récupérer une copie",
     "en": "Recover a copy",
@@ -6092,6 +6254,15 @@
     "pt": "Excluir este ponto",
     "zh-Hans": "删除此路径点"
   },
+  "Supprimer définitivement ces copies de récupération ?": {
+    "fr": "Supprimer définitivement ces copies de récupération ?",
+    "en": "Permanently delete these recovery copies?",
+    "de": "Diese Wiederherstellungskopien endgültig löschen?",
+    "es": "¿Eliminar permanentemente estas copias de recuperación?",
+    "it": "Eliminare definitivamente queste copie di recupero?",
+    "pt": "Eliminar permanentemente estas cópias de recuperação?",
+    "zh-Hans": "永久删除这些恢复副本？"
+  },
   "Supprimer la dernière catégorie": {
     "fr": "Supprimer la dernière catégorie",
     "en": "Delete last category",
@@ -6127,6 +6298,24 @@
     "it": "Elimina selezione",
     "pt": "Excluir seleção",
     "zh-Hans": "删除所选对象"
+  },
+  "Supprimer les copies": {
+    "fr": "Supprimer les copies",
+    "en": "Delete copies",
+    "de": "Kopien löschen",
+    "es": "Eliminar copias",
+    "it": "Elimina copie",
+    "pt": "Eliminar cópias",
+    "zh-Hans": "删除副本"
+  },
+  "Supprimer…": {
+    "fr": "Supprimer…",
+    "en": "Delete…",
+    "de": "Löschen…",
+    "es": "Eliminar…",
+    "it": "Elimina…",
+    "pt": "Eliminar…",
+    "zh-Hans": "删除…"
   },
   "Symbole ajouté à votre bibliothèque": {
     "fr": "Symbole ajouté à votre bibliothèque",

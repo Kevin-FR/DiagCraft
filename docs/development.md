@@ -1,6 +1,7 @@
 # Développement
 
 Rust 1.94.1 est fixé dans rust-toolchain.toml. Python 3.11+ sert au packaging.
+La version Rust minimale déclarée est 1.89, pour les verrous de fichiers natifs.
 
 ```sh
 cargo run --locked -p diagcraft

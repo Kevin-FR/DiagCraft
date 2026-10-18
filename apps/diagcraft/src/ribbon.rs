@@ -366,7 +366,7 @@ impl DrawApp {
                                                 {
                                                     switch = Some(i);
                                                 }
-                                                if tab.doc != tab.saved {
+                                                if tab.recovered || tab.doc != tab.saved {
                                                     ui.label(
                                                         RichText::new("•")
                                                             .color(Color32::from_rgb(245, 83, 83)),
@@ -432,6 +432,10 @@ impl DrawApp {
                         }
                         if ui.button(t("Mes travaux enregistrés…")).clicked() {
                             self.open_gallery();
+                            ui.close();
+                        }
+                        if ui.button(t("Récupérer des dessins…")).clicked() {
+                            self.recovery.open = true;
                             ui.close();
                         }
                         if ui.button(t("Galerie de modèles…")).clicked() {

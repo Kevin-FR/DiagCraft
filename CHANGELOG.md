@@ -3,6 +3,19 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.4.0 — récupération des dessins après une fermeture inattendue
+
+- Copie locale atomique des onglets modifiés toutes les 10 secondes, hors gestes en cours.
+- Récupération des documents jamais enregistrés et des dessins multipages dans de nouveaux onglets.
+- Fichiers source préservés ; chaque copie récupérée demande un nouvel emplacement à l’enregistrement.
+- Verrous système par instance, transfert confirmé avant suppression d’une ancienne copie.
+- Dialogue de récupération traduit dans les sept langues, accessible depuis Fichier et la palette.
+- Copies illisibles conservées, suppression explicite avec confirmation et action Plus tard.
+- Tests de processus arrêté brutalement, concurrence, intégrité, gestes et confirmations d’enregistrement.
+
+Le format `.draw` reste v7, l’API agents v1. Aucune dépendance ajoutée.
+Rust minimum 1.89 pour les verrous de fichiers de la bibliothèque standard ; outil de compilation fixé à 1.94.1.
+
 ## 0.3.0 — sept langues et mises à jour GitHub
 
 - Choix immédiat de langue, préférence système et mémorisation locale indépendante des dessins.

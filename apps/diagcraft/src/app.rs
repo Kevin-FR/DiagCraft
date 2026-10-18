@@ -121,6 +121,7 @@ enum RibbonTab {
 
 #[derive(Clone)]
 struct Session {
+    recovered: bool,
     doc: Document,
     saved: Document,
     path: Option<PathBuf>,
@@ -138,6 +139,8 @@ struct Session {
 }
 
 pub struct DrawApp {
+    recovered: bool,
+    recovery: recovery_ui::Recovery,
     doc: Document,
     saved: Document,
     history: History,
@@ -237,6 +240,9 @@ pub struct DrawApp {
 
 impl DrawApp {
     pub fn capture_tab(&mut self, name: &str) {
+        if name == "recuperation" {
+            self.prepare_recovery_capture();
+        }
         self.ribbon_tab = match name {
             "inserer" | "ruban-inserer" => RibbonTab::Insert,
             "conception" => RibbonTab::Design,
@@ -521,6 +527,7 @@ impl DrawApp {
             }
         }
         if persist {
+            app.initialize_recovery();
             app.maybe_check_updates();
         }
         app
@@ -568,6 +575,8 @@ impl DrawApp {
         }
         ctx.set_style(style);
         let mut app = Self {
+            recovered: false,
+            recovery: Default::default(),
             saved: doc.clone(),
             history: History::new(&doc),
             doc,
@@ -677,7 +686,7 @@ impl DrawApp {
         id
     }
     fn dirty(&self) -> bool {
-        self.doc != self.saved
+        self.recovered || self.doc != self.saved
     }
     fn commit(&mut self) {
         if self.drag_snapshot.take().is_some() {
@@ -769,6 +778,8 @@ impl DrawApp {
             Ok(()) => {
                 self.path = Some(path.clone());
                 self.saved = self.doc.clone();
+                self.recovered = false;
+                self.recovery.force = true;
                 self.status = "Diagramme enregistré sur cet ordinateur".into();
                 let error = self
                     .gallery
@@ -827,7 +838,11 @@ impl DrawApp {
         match action {
             Pending::Close => {
                 self.stash_tab();
-                if let Some(index) = self.tabs.iter().position(|t| t.doc != t.saved) {
+                if let Some(index) = self
+                    .tabs
+                    .iter()
+                    .position(|t| t.recovered || t.doc != t.saved)
+                {
                     self.switch_tab(index);
                     self.pending = Some(Pending::Close);
                 } else {
@@ -849,6 +864,7 @@ impl DrawApp {
         match action {
             Pending::Close => {
                 self.doc = self.saved.clone();
+                self.recovered = false;
                 self.request(Pending::Close);
             }
             Pending::CloseTab(index) => self.close_tab(index),
@@ -891,6 +907,7 @@ impl DrawApp {
         self.context_open = false;
         self.paste_position = None;
         self.focus_text = None;
+        self.recovered = false;
         self.saved = doc.clone();
         self.history = History::new(&doc);
         self.doc = doc;
@@ -903,6 +920,7 @@ impl DrawApp {
     }
     fn session(&self) -> Session {
         Session {
+            recovered: self.recovered,
             doc: self.doc.clone(),
             saved: self.saved.clone(),
             path: self.path.clone(),
@@ -929,6 +947,7 @@ impl DrawApp {
         self.commit();
         self.stash_tab();
         let s = self.tabs[index].clone();
+        self.recovered = s.recovered;
         self.doc = s.doc;
         self.saved = s.saved;
         self.path = s.path;
@@ -974,6 +993,7 @@ impl DrawApp {
         self.commit();
         self.stash_tab();
         self.tabs.remove(index);
+        self.recovery.force = true;
         if self.tabs.is_empty() {
             self.replace(Document::default(), None);
             self.tabs.push(self.session());
@@ -983,6 +1003,7 @@ impl DrawApp {
         let target = index.min(self.tabs.len() - 1);
         self.active_tab = usize::MAX;
         let s = self.tabs[target].clone();
+        self.recovered = s.recovered;
         self.doc = s.doc;
         self.saved = s.saved;
         self.path = s.path;
@@ -2221,6 +2242,9 @@ impl DrawApp {
 
 impl eframe::App for DrawApp {
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+        if self.allow_close {
+            self.clean_recovery();
+        }
         if let Some(job) = self.settings.job.take() {
             job.cancel.store(true, std::sync::atomic::Ordering::Relaxed);
             // Give the worker a bounded opportunity to kill/reap its curl child.
@@ -2289,6 +2313,7 @@ impl eframe::App for DrawApp {
             self.pending.is_none()
                 && self.error.is_none()
                 && !self.settings.open
+                && !self.recovery.open
                 && !self.show_help
                 && !self.command_palette.open
                 && !self.show_templates
@@ -2301,6 +2326,8 @@ impl eframe::App for DrawApp {
                 && self.agent_panel.is_none(),
         );
         self.finish_frame_edit(ctx, &before);
+        self.recovery_dialog(ctx);
+        self.tick_recovery(ctx);
         self.settings_dialog(ctx);
         self.command_dialog(ctx);
         self.library_dialogs(ctx);
@@ -2474,3 +2501,8 @@ pub(crate) mod i18n;
 mod settings_ui;
 #[path = "updates.rs"]
 mod updates;
+
+#[path = "recovery.rs"]
+mod recovery;
+#[path = "recovery_ui.rs"]
+mod recovery_ui;

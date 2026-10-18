@@ -55,3 +55,18 @@ fixes, sans shell ni configuration curlrc. Les réponses, tailles et URL des ass
 sont bornées ; le SHA-256 est contrôlé avant remplacement atomique du téléchargement.
 `settings_ui.rs` présente les résultats sans installer ni exécuter de paquet.
 La recherche automatique est facultative et ne bloque pas le dessin.
+
+## Récupération
+
+`recovery.rs` conserve une copie canonique des documents modifiés dans une
+enveloppe locale v1 distincte du format `.draw` v7. Un worker borné écrit un seul
+checkpoint atomique par instance ; les documents validés et terminés sont transmis
+par `recovery_ui.rs` toutes les dix secondes. Les onglets récupérés restent marqués
+non enregistrés indépendamment de leur historique et n’ont pas de chemin source.
+
+Un verrou exclusif `std::fs::File::try_lock` protège chaque session, y compris
+les sessions anciennes proposées à la récupération. Sa libération par le système
+permet de reconnaître un processus arrêté sans heuristique de PID. Le numéro
+de checkpoint confirme le transfert avant suppression de la copie ancienne.
+Une fermeture acceptée nettoie la session courante ; les copies non ouvertes
+restent disponibles. Les tests et captures utilisent seulement des dossiers temporaires.

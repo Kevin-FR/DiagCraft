@@ -15,6 +15,7 @@ pub(super) enum Command {
     ExportSvg,
     ExportPdf,
     Gallery,
+    Recovery,
     Undo,
     Redo,
     Copy,
@@ -96,6 +97,12 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
         "Mes travaux enregistrés…",
         "Fichier",
         "galerie historique versions"
+    ),
+    command!(
+        Recovery,
+        "Récupérer des dessins…",
+        "Fichier",
+        "recovery crash récupération sauvegarde secours"
     ),
     command!(Close, "Fermer le document", "Fichier", "onglet close"),
     command!(Undo, "Annuler la modification", "Édition", "undo revenir", Modifiers::COMMAND => Z),
@@ -282,6 +289,7 @@ fn shortcut_text(ctx: &egui::Context, spec: &CommandSpec) -> String {
 impl DrawApp {
     pub(super) fn command_dialog_blocked(&self) -> bool {
         self.settings.open
+            || self.recovery.open
             || self.pending.is_some()
             || self.error.is_some()
             || self.show_templates
@@ -343,6 +351,7 @@ impl DrawApp {
         use context_menu::Action;
         match command {
             Settings => self.settings.open = true,
+            Recovery => self.recovery.open = true,
             Updates => {
                 self.settings.open = true;
                 self.check_updates();
