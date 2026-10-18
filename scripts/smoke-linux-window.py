@@ -63,7 +63,7 @@ def main():
                    XDG_CONFIG_HOME=str(runtime / "config"),
                    XDG_DATA_HOME=str(runtime / "data"),
                    XDG_CACHE_HOME=str(runtime / "cache"),
-                   XDG_SESSION_TYPE="wayland")
+                   XDG_SESSION_TYPE="wayland", LIBGL_ALWAYS_SOFTWARE="1")
         # Isolate this deterministic light desktop from an inherited portal.
         env.pop("DBUS_SESSION_BUS_ADDRESS", None)
         env.pop("WAYLAND_DISPLAY", None)
@@ -71,7 +71,9 @@ def main():
                 args.output / "wayland.log").open("w") as app_log:
             try:
                 weston = subprocess.Popen([
-                    "weston", "--backend=x11-backend.so", "--use-pixman",
+                    # Weston 9's pixman renderer exits when composing these
+                    # alpha shadows. Exercise the GL path with software Mesa.
+                    "weston", "--backend=x11-backend.so",
                     "--width=1600", "--height=1100", "--idle-time=0",
                     "--socket=wayland-diagcraft-test"],
                     env=env, stdout=compositor_log, stderr=subprocess.STDOUT)
