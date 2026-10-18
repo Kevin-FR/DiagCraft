@@ -23,6 +23,8 @@ travaux prévus, sans promesse de date.
   locales et recherche dans les bibliothèques masquées (0.2.1).
 - [x] Ajustement automatique du bloc au texte, avec rendu cohérent dans les exports (0.5.0).
   Mesure des polices embarquées, retours à la ligne partagés, commande de sélection et option automatique.
+- [x] Saisie directement dans les blocs, curseur au double-clic et barre flottante compacte (0.6.1).
+  Validation au clic extérieur, F2/Entrée, annulation, sauvegarde et composition Unicode préservée.
 - [x] Sauvegarde de récupération après fermeture anormale, sans écraser le dessin source (0.4.0).
   Copie locale des onglets modifiés, reprise dans de nouveaux onglets et verrous entre instances.
 - [ ] Tests d’intégration CLI/MCP sur les trois systèmes et diagnostics plus lisibles.

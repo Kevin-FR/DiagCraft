@@ -32,3 +32,12 @@ ouverte bloque les commandes du dessin qui se trouve derrière elle.
 Les commandes de modification suivent le même historique que les boutons de
 l’éditeur. Le zoom, les volets et la recherche ne modifient pas le document.
 Fermer un document modifié propose toujours de conserver le travail.
+
+## Texte dans les blocs
+
+Double-cliquer dans un bloc place le curseur sur la feuille. **F2** ou **Entrée**
+sur un bloc sélectionné ouvre la même saisie en sélectionnant son texte.
+**Entrée** ajoute ensuite une ligne. Un clic à l’extérieur ou **⌘Entrée / Ctrl+Entrée**
+termine ; **Échap** annule. **⌘S / Ctrl+S** valide puis enregistre.
+Les autres commandes du dessin attendent la fin de cette saisie.
+Voir [le contenu des blocs](contenu-blocs.md) pour les styles et la sélection.

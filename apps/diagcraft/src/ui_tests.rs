@@ -288,6 +288,7 @@ fn command_frame(
             ..Default::default()
         },
         |ctx| {
+            app.inline_outside_press(ctx);
             app.shortcuts(ctx);
             app.canvas(ctx, !app.command_palette.open && !app.show_help);
             app.command_dialog(ctx);
@@ -611,6 +612,10 @@ fn canvas_creates_connects_moves_and_undoes_one_drag() {
     app.set_tool(Tool::Shape(ShapeKind::Diamond));
     click(&ctx, &mut app, pos2(650., 330.));
     assert_eq!(app.doc.nodes.len(), 2);
+    assert!(
+        app.rich_editor.is_none(),
+        "Rapid creation must not start text editing"
+    );
     let (first, second) = (app.doc.nodes[0].id, app.doc.nodes[1].id);
     app.set_tool(Tool::Connect);
     // Let the selection toolbar disappear, as it does in the tool button frame.
@@ -2325,6 +2330,7 @@ fn full_connection_frame(
             ..Default::default()
         },
         |ctx| {
+            app.inline_outside_press(ctx);
             app.shortcuts(ctx);
             let before = app.doc.clone();
             app.header(ctx);
@@ -2447,6 +2453,7 @@ fn panel_frame(
             ..Default::default()
         },
         |ctx| {
+            app.inline_outside_press(ctx);
             app.shortcuts(ctx);
             let before = app.doc.clone();
             app.header(ctx);
@@ -2455,7 +2462,7 @@ fn panel_frame(
             app.side_panels(ctx);
             app.canvas(ctx, app.rich_editor.is_none());
             app.finish_frame_edit(ctx, &before);
-            app.rich_text_dialog(ctx);
+            app.inline_text_toolbar(ctx);
         },
     )
 }
@@ -5097,6 +5104,7 @@ fn focus_loss_cancels_a_geometry_drag_without_leaving_a_stuck_operation() {
             ..Default::default()
         },
         |ctx| {
+            app.inline_outside_press(ctx);
             app.shortcuts(ctx);
             let before = app.doc.clone();
             app.canvas(ctx, true);
@@ -5750,9 +5758,10 @@ fn rich_editor_frame(ctx: &egui::Context, app: &mut DrawApp, key: Option<(Key, e
             ..Default::default()
         },
         |ctx| {
+            app.inline_outside_press(ctx);
             app.shortcuts(ctx);
             app.canvas(ctx, false);
-            app.rich_text_dialog(ctx);
+            app.inline_text_toolbar(ctx);
         },
     );
 }
@@ -5898,4 +5907,506 @@ fn native_rich_text_paints_distinct_fonts_colors_and_decorations_inside_one_bloc
     let _ = ctx.run(egui::RawInput::default(), |ctx| {
         egui::CentralPanel::default().show(ctx, |ui| app.paint_node(ui.painter(), &n));
     });
+}
+
+fn inline_frame(
+    ctx: &egui::Context,
+    app: &mut DrawApp,
+    events: Vec<egui::Event>,
+) -> egui::FullOutput {
+    let mut replay = std::mem::take(&mut app.replay_input);
+    replay.extend(events);
+    let events = replay;
+    let modifiers = events
+        .iter()
+        .find_map(|e| {
+            if let egui::Event::Key { modifiers, .. } = e {
+                Some(*modifiers)
+            } else {
+                None
+            }
+        })
+        .unwrap_or_default();
+    ctx.run(
+        egui::RawInput {
+            screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1200., 800.))),
+            events,
+            modifiers,
+            ..Default::default()
+        },
+        |ctx| {
+            app.inline_outside_press(ctx);
+            app.shortcuts(ctx);
+            app.canvas(ctx, true);
+            app.inline_text_toolbar(ctx);
+        },
+    )
+}
+fn inline_key(key: Key, modifiers: egui::Modifiers) -> egui::Event {
+    egui::Event::Key {
+        key,
+        physical_key: Some(key),
+        pressed: true,
+        repeat: false,
+        modifiers,
+    }
+}
+fn inline_text_shape(out: &egui::FullOutput, text: &str) -> egui::epaint::TextShape {
+    out.shapes
+        .iter()
+        .find_map(|s| {
+            if let Shape::Text(t) = &s.shape {
+                (t.galley.job.text == text).then(|| t.clone())
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| panic!("Missing inline text: {text}"))
+}
+fn inline_pointer(
+    ctx: &egui::Context,
+    app: &mut DrawApp,
+    p: Pos2,
+    pressed: bool,
+) -> egui::FullOutput {
+    inline_frame(
+        ctx,
+        app,
+        vec![
+            egui::Event::PointerMoved(p),
+            egui::Event::PointerButton {
+                pos: p,
+                button: egui::PointerButton::Primary,
+                pressed,
+                modifiers: egui::Modifiers::NONE,
+            },
+        ],
+    )
+}
+
+#[test]
+fn inline_double_click_requires_two_clicks_on_the_same_existing_block() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rectangle, [350., 300.]);
+    let other = app.doc.add_node(ShapeKind::Rectangle, [850., 550.]);
+    app.commit();
+    inline_frame(&ctx, &mut app, vec![]);
+    let at = app.screen(app.doc.node(id).unwrap().center());
+    let target = app.screen(app.doc.node(other).unwrap().center());
+    inline_pointer(&ctx, &mut app, at, true);
+    inline_pointer(&ctx, &mut app, at, false);
+    inline_pointer(&ctx, &mut app, target, true);
+    inline_pointer(&ctx, &mut app, target, false);
+    assert!(
+        app.rich_editor.is_none(),
+        "Rapid clicks on different blocks are selection only"
+    );
+    for _ in 0..25 {
+        inline_frame(&ctx, &mut app, vec![]);
+    }
+    for _ in 0..2 {
+        inline_pointer(&ctx, &mut app, at, true);
+        inline_pointer(&ctx, &mut app, at, false);
+    }
+    assert_eq!(app.rich_editor.as_ref().unwrap().draft.id, id);
+}
+
+#[test]
+fn inline_editor_stays_in_the_block_at_each_zoom_and_alignment_without_a_modal() {
+    for zoom in [0.5, 1., 2.] {
+        for align in [TextAlign::Left, TextAlign::Center, TextAlign::Right] {
+            let (ctx, mut app) = setup();
+            app.zoom = zoom;
+            let id = app.doc.add_node(ShapeKind::Rounded, [300., 200.]);
+            let n = app.doc.node_mut(id).unwrap();
+            n.text = "One line\n中文 Café".into();
+            n.text_style.align = align;
+            n.size = [320., 140.];
+            n.format_text(
+                9..11,
+                Some(&diagcraft::rich_text::InlineStyle {
+                    bold: Some(true),
+                    ..Default::default()
+                }),
+            )
+            .unwrap();
+            app.commit();
+            let before = app.doc.clone();
+            app.open_node_text(id);
+            let mut out = inline_frame(&ctx, &mut app, vec![]);
+            for _ in 0..2 {
+                out = inline_frame(&ctx, &mut app, vec![]);
+            }
+            let shape = inline_text_shape(&out, &app.doc.node(id).unwrap().text);
+            let editor = app.rich_editor.as_ref().unwrap();
+            let bounds = shape.galley.rect.translate(shape.pos.to_vec2());
+            assert!(
+                editor.content_rect.expand(2.).contains_rect(bounds),
+                "{zoom:?} {align:?}: {bounds:?} vs {:?}",
+                editor.content_rect
+            );
+            let expected = match align {
+                TextAlign::Left => editor.content_rect.left(),
+                TextAlign::Center => editor.content_rect.center().x,
+                TextAlign::Right => editor.content_rect.right(),
+            };
+            let actual = match align {
+                TextAlign::Left => bounds.left(),
+                TextAlign::Center => bounds.center().x,
+                TextAlign::Right => bounds.right(),
+            };
+            assert!((expected - actual).abs() < 2.);
+            assert!((bounds.center().y - editor.content_rect.center().y).abs() < 2.);
+            assert_eq!(shape.galley.rect.min.x, 0.);
+            assert!(
+                shape
+                    .galley
+                    .job
+                    .sections
+                    .iter()
+                    .any(|s| (s.format.font_id.size - 18. * zoom).abs() < 0.01)
+            );
+            assert!(app.canvas.shrink(7.).contains_rect(editor.toolbar_rect));
+            assert!(!out.shapes.iter().any(
+                |s| matches!(&s.shape,Shape::Text(t) if t.galley.job.text=="Contenu du bloc")
+            ));
+            assert_eq!(app.doc, before);
+        }
+    }
+}
+
+#[test]
+fn inline_click_places_a_unicode_caret_and_outside_click_commits_then_selects_the_next_block() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rounded, [300., 250.]);
+    let other = app.doc.add_node(ShapeKind::Rectangle, [800., 450.]);
+    let n = app.doc.node_mut(id).unwrap();
+    n.text = "alpha 中文 café beta".into();
+    n.size = [400., 100.];
+    n.text_style.align = TextAlign::Left;
+    app.commit();
+    app.selected = vec![id];
+    let before = app.doc.clone();
+    app.history = History::new(&before);
+    app.open_node_text(id);
+    inline_frame(&ctx, &mut app, vec![]);
+    let out = inline_frame(&ctx, &mut app, vec![]);
+    let shape = inline_text_shape(&out, &before.node(id).unwrap().text);
+    let at = shape.pos
+        + shape
+            .galley
+            .pos_from_cursor(egui::text::CCursor::new(6))
+            .center()
+            .to_vec2();
+    app.finish_inline_text(&ctx, true);
+    app.open_node_text_at(id, Some(at));
+    inline_frame(&ctx, &mut app, vec![]);
+    inline_frame(&ctx, &mut app, vec![egui::Event::Text("绘".into())]);
+    assert_eq!(
+        app.rich_editor.as_ref().unwrap().draft.text,
+        "alpha 绘中文 café beta"
+    );
+    assert_eq!(app.doc, before);
+    let target = app.screen(app.doc.node(other).unwrap().center());
+    inline_pointer(&ctx, &mut app, target, true);
+    inline_pointer(&ctx, &mut app, target, false);
+    assert!(app.rich_editor.is_none());
+    assert_eq!(app.selected, vec![other]);
+    assert_eq!(app.doc.node(id).unwrap().text, "alpha 绘中文 café beta");
+    app.undo();
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn inline_drag_selects_words_and_toolbar_clicks_preserve_the_selection_and_position() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rounded, [350., 320.]);
+    let n = app.doc.node_mut(id).unwrap();
+    n.text = "alpha 中文 café beta".into();
+    n.size = [420., 120.];
+    app.commit();
+    app.selected = vec![id];
+    let before = app.doc.clone();
+    app.open_node_text(id);
+    inline_frame(&ctx, &mut app, vec![]);
+    let out = inline_frame(&ctx, &mut app, vec![]);
+    let shape = inline_text_shape(&out, &before.node(id).unwrap().text);
+    let at = |i| {
+        shape.pos
+            + shape
+                .galley
+                .pos_from_cursor(egui::text::CCursor::new(i))
+                .center()
+                .to_vec2()
+    };
+    inline_pointer(&ctx, &mut app, at(6), true);
+    inline_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(at(8))]);
+    let out = inline_pointer(&ctx, &mut app, at(8), false);
+    let range = egui::TextEdit::load_state(&ctx, egui::Id::new("rich_text_input"))
+        .unwrap()
+        .cursor
+        .char_range()
+        .unwrap()
+        .as_sorted_char_range();
+    assert_eq!(
+        range,
+        6..8,
+        "The pointer drag must select exactly the Chinese word"
+    );
+    let bold = out
+        .shapes
+        .iter()
+        .find_map(|s| {
+            if let Shape::Text(t) = &s.shape {
+                (t.galley.job.text == "B").then_some(t.pos + t.galley.rect.center().to_vec2())
+            } else {
+                None
+            }
+        })
+        .unwrap();
+
+    inline_pointer(&ctx, &mut app, bold, true);
+    inline_pointer(&ctx, &mut app, bold, false);
+    inline_frame(&ctx, &mut app, vec![]);
+    let n = &app.rich_editor.as_ref().unwrap().draft;
+    assert!(
+        n.resolved_style_at(6).text_style.bold && n.resolved_style_at(7).text_style.bold,
+        "runs: {:?}",
+        n.text_runs
+    );
+    assert!(!n.resolved_style_at(0).text_style.bold && !n.resolved_style_at(9).text_style.bold);
+    assert_eq!(n.position, before.node(id).unwrap().position);
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn inline_keyboard_entry_newline_finish_cancel_and_save_obey_text_editing_rules() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rectangle, [350., 300.]);
+    app.selected = vec![id];
+    app.commit();
+    let before = app.doc.clone();
+    inline_frame(
+        &ctx,
+        &mut app,
+        vec![inline_key(Key::F2, egui::Modifiers::NONE)],
+    );
+    assert!(app.rich_editor.is_some());
+    inline_frame(&ctx, &mut app, vec![egui::Event::Text("New label".into())]);
+    inline_frame(
+        &ctx,
+        &mut app,
+        vec![inline_key(Key::Enter, egui::Modifiers::NONE)],
+    );
+    assert!(app.rich_editor.as_ref().unwrap().draft.text.contains('\n'));
+    inline_frame(
+        &ctx,
+        &mut app,
+        vec![inline_key(Key::Escape, egui::Modifiers::NONE)],
+    );
+    assert_eq!(app.doc, before);
+    inline_frame(
+        &ctx,
+        &mut app,
+        vec![inline_key(Key::Enter, egui::Modifiers::NONE)],
+    );
+    inline_frame(
+        &ctx,
+        &mut app,
+        vec![egui::Event::Text("Saved directly".into())],
+    );
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("inline.draw");
+    before.save(&path).unwrap();
+    app.path = Some(path.clone());
+    inline_frame(
+        &ctx,
+        &mut app,
+        vec![inline_key(Key::S, egui::Modifiers::COMMAND)],
+    );
+    assert!(app.rich_editor.is_none());
+    assert!(!app.dirty());
+    assert_eq!(
+        Document::load(&path).unwrap().node(id).unwrap().text,
+        "Saved directly"
+    );
+    app.undo();
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn inline_finishing_in_the_same_frame_as_typing_keeps_the_last_characters() {
+    for action in [
+        "outside", "done", "keyboard", "save", "ime", "close", "drop",
+    ] {
+        let (ctx, mut app) = setup();
+        let id = app.doc.add_node(ShapeKind::Rectangle, [350., 300.]);
+        let other = app.doc.add_node(ShapeKind::Rectangle, [850., 550.]);
+        app.selected = vec![id];
+        app.commit();
+        let before = app.doc.clone();
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("inline.draw");
+        before.save(&path).unwrap();
+        app.path = Some(path.clone());
+        app.open_node_text(id);
+        inline_frame(&ctx, &mut app, vec![]);
+        let out = inline_frame(&ctx, &mut app, vec![]);
+        let mut events = vec![egui::Event::Text("Last characters 中文".into())];
+        if action == "ime" {
+            inline_frame(
+                &ctx,
+                &mut app,
+                vec![
+                    egui::Event::Text(String::new()),
+                    egui::Event::Ime(egui::ImeEvent::Enabled),
+                    egui::Event::Ime(egui::ImeEvent::Preedit("中文".into())),
+                ],
+            );
+            events = vec![egui::Event::Ime(egui::ImeEvent::Commit("中文".into()))];
+        }
+        let mut pointer = None;
+        match action {
+            "keyboard" => events.push(inline_key(Key::Enter, egui::Modifiers::COMMAND)),
+            "save" => events.push(inline_key(Key::S, egui::Modifiers::COMMAND)),
+            "close" => app.defer_inline_close(),
+            "drop" => app.inline_open(path.clone()),
+            _ => {
+                let p = if action == "done" {
+                    let shape = inline_text_shape(&out, "Terminer");
+                    shape.pos + shape.galley.rect.center().to_vec2()
+                } else {
+                    app.screen(app.doc.node(other).unwrap().center())
+                };
+                events.extend([
+                    egui::Event::PointerMoved(p),
+                    egui::Event::PointerButton {
+                        pos: p,
+                        button: egui::PointerButton::Primary,
+                        pressed: true,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ]);
+                pointer = Some(p);
+            }
+        }
+        inline_frame(&ctx, &mut app, events);
+        if let Some(p) = pointer {
+            inline_pointer(&ctx, &mut app, p, false);
+            inline_frame(&ctx, &mut app, vec![]);
+        }
+        assert!(app.rich_editor.is_none(), "{action}");
+        if action == "drop" {
+            assert_eq!(app.tabs.len(), 2);
+            app.switch_tab(0);
+        }
+        let expected = if action == "ime" {
+            "中文"
+        } else {
+            "Last characters 中文"
+        };
+        assert_eq!(app.doc.node(id).unwrap().text, expected, "{action}");
+        if action == "save" {
+            assert_eq!(
+                Document::load(&path).unwrap().node(id).unwrap().text,
+                expected
+            );
+            assert!(!app.dirty());
+        } else if action == "outside" || action == "ime" {
+            assert_eq!(app.selected, vec![other]);
+        } else if action == "close" {
+            assert!(app.pending.is_some());
+        }
+        app.undo();
+        assert_eq!(app.doc, before, "{action}");
+    }
+}
+
+#[test]
+fn inline_trackpad_navigation_keeps_the_draft_and_preview_connectors_follow_auto_fit() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rounded, [350., 300.]);
+    let other = app.doc.add_node(ShapeKind::Rectangle, [750., 550.]);
+    let edge = app.doc.connect(id, other, ConnectorKind::Elbow).unwrap();
+    app.doc.node_mut(id).unwrap().text_style.auto_fit = true;
+    app.doc.node_mut(id).unwrap().text_style.wrap = true;
+    app.commit();
+    let before = app.doc.clone();
+    app.open_node_text(id);
+    inline_frame(&ctx, &mut app, vec![]);
+    inline_frame(
+        &ctx,
+        &mut app,
+        vec![egui::Event::Text("A long label 中文 français ".repeat(8))],
+    );
+    let preview = app.inline_preview_document().unwrap();
+    assert!(preview.node(id).unwrap().size[1] > before.node(id).unwrap().size[1]);
+    assert_ne!(
+        preview.route(preview.connectors.iter().find(|e| e.id == edge).unwrap()),
+        before.route(&before.connectors[0])
+    );
+    let old_pan = app.pan;
+    let at = app.canvas.left_bottom() + vec2(30., -30.);
+    inline_frame(
+        &ctx,
+        &mut app,
+        vec![
+            egui::Event::PointerMoved(at),
+            egui::Event::MouseWheel {
+                unit: egui::MouseWheelUnit::Point,
+                delta: vec2(25., 35.),
+                modifiers: egui::Modifiers::NONE,
+            },
+        ],
+    );
+    assert_eq!(app.pan, old_pan + vec2(25., 35.));
+    let zoom = app.zoom;
+    let at = app.rich_editor.as_ref().unwrap().content_rect.center();
+    inline_frame(
+        &ctx,
+        &mut app,
+        vec![egui::Event::PointerMoved(at), egui::Event::Zoom(1.25)],
+    );
+    assert!((app.zoom - zoom * 1.25).abs() < 0.001);
+    assert!(app.rich_editor.is_some());
+    assert_eq!(app.doc, before);
+    app.finish_inline_text(&ctx, false);
+    assert_eq!(app.doc.nodes, preview.nodes);
+    assert_eq!(app.doc.connectors, before.connectors);
+    app.undo();
+    assert_eq!(app.doc, before);
+}
+
+#[test]
+fn inline_invalid_drafts_do_not_execute_an_outside_action_and_tab_changes_commit_valid_text() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rectangle, [350., 300.]);
+    app.commit();
+    app.selected = vec![id];
+    let before = app.doc.clone();
+    app.open_node_text(id);
+    inline_frame(&ctx, &mut app, vec![]);
+    app.rich_editor.as_mut().unwrap().draft.font_size = 201.;
+    let at = app.canvas.right_bottom() - vec2(30., 30.);
+    inline_pointer(&ctx, &mut app, at, true);
+    inline_pointer(&ctx, &mut app, at, false);
+    assert!(app.rich_editor.is_some());
+    assert_eq!(app.doc, before);
+    assert_eq!(app.selected, vec![id]);
+    app.finish_inline_text(&ctx, true);
+    app.open_tab(Document::default(), None);
+    app.switch_tab(0);
+    app.open_node_text(id);
+    app.rich_editor
+        .as_mut()
+        .unwrap()
+        .draft
+        .set_text("Kept when switching tabs".into())
+        .unwrap();
+    app.switch_tab(1);
+    assert!(app.rich_editor.is_none());
+    app.switch_tab(0);
+    assert_eq!(app.doc.node(id).unwrap().text, "Kept when switching tabs");
+    app.undo();
+    assert_eq!(app.doc, before);
 }

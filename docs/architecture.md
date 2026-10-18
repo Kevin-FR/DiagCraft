@@ -95,7 +95,16 @@ L’insertion et la suppression préservent les portions extérieures et reconst
 les frontières après édition. Le calcul de lignes utilise les styles résolus ;
 le canevas et SVG consomment les mêmes portions par ligne.
 
-`rich_text_ui.rs` conserve un brouillon local et un historique borné. Le dialogue
-bloque les commandes du dessin, vérifie la révision avant application et enregistre
-un seul changement dans l’historique documentaire. La récupération ne reçoit
-pas le brouillon. Les anciennes applications v7 ignorent les portions optionnelles.
+`rich_text_ui.rs` conserve un brouillon local et un historique borné. Un TextEdit
+est placé dans la zone de contenu du bloc sur le canevas ; la barre flottante
+reste dans les limites de la feuille. Le texte source n’est jamais réécrit pour
+simuler les retours visuels. Le Galley normalise les positions des lignes alignées
+pour préserver les indices de curseur Unicode, la sélection et la composition IME.
+L’aperçu inclut la géométrie ajustée et ses connecteurs sans modifier le document.
+Les commandes du dessin restent bloquées pendant la saisie, mais la navigation
+au trackpad reste disponible. Un événement de texte suivi d’un clic dans la même
+image est traité avant le clic, rejoué à l’image suivante via raw_input_hook.
+Enregistrement, fermeture et raccourci de validation attendent le champ et sa
+barre. La révision est vérifiée avant validation, avec un seul changement dans
+l’historique documentaire. La récupération ne reçoit pas le brouillon.
+Les anciennes applications v7 ignorent les portions optionnelles.

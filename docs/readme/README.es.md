@@ -21,14 +21,14 @@ Las aplicaciones y sus sumas de comprobación SHA-256 están en la
 | Windows x86_64 | ZIP portátil con la aplicación y la CLI |
 | Linux x86_64 | Paquete `.deb` para amd64 o archivo `.tar.gz`, con la aplicación y la CLI |
 
-**0.6.0 es experimental** y añade texto enriquecido dentro de los bloques.
+**0.6.1 es experimental** y añade edición de texto directamente en el lienzo.
 El paquete para Mac tiene firma ad hoc y no ha sido notarizado por Apple.
 Los paquetes de Windows no están firmados con un certificado de editor.
 Consulta la [guía de instalación](../installation.md).
 
 ## Funciones
 
-- Texto enriquecido en los bloques: selección de palabras, estilos, tamaños y colores, con Aplicar/Cancelar.
+- Edita texto directamente en los bloques: doble clic o F2/Intro, selección de palabras y barra flotante de formato. Haz clic fuera para terminar; Escape cancela.
 - Interfaz en inglés, francés, alemán, español, italiano, portugués y chino simplificado.
 - Comprobaciones opcionales de actualizaciones en GitHub, descargas verificadas mediante SHA-256 e instalación manual.
 - Formas, textos, gráficos, ocho bibliotecas de símbolos y nueve plantillas.

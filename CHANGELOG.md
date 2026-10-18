@@ -3,6 +3,21 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.6.1 — édition du texte directement sur la feuille
+
+- Double-clic dans un bloc : curseur à l’endroit choisi, sans fenêtre supplémentaire.
+- F2 ou Entrée sur un bloc : sélectionner le texte pour le remplacer rapidement.
+- Petite barre flottante : gras, italique, souligné, taille, couleur et menu Plus.
+- Validation au clic extérieur, bouton Terminer ou ⌘/Ctrl+Entrée ; Échap annule le brouillon.
+- Saisie conservée avant l’enregistrement, le changement d’onglet, l’ouverture ou la fermeture.
+- Derniers caractères préservés si saisie, composition IME et validation arrivent dans la même image.
+- Sélection Unicode, alignement, zoom, défilement du texte et navigation trackpad.
+- Aperçu des connecteurs pendant l’ajustement automatique ; une seule annulation documentaire.
+- Huit nouveaux tests d’interface, cinq messages dans les sept langues et documentation multilingue.
+
+Le format `.draw` reste **v7**, l’API agents **v1**. Aucune dépendance ajoutée.
+Les limites de compatibilité des styles par portions introduits en 0.6.0 restent inchangées.
+
 ## 0.6.0 — mise en forme du contenu des blocs
 
 - Éditeur accessible par double-clic, menu contextuel ou propriétés, sans agrandir les volets.

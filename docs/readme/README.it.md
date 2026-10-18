@@ -21,14 +21,14 @@ Le applicazioni e le relative somme di controllo SHA-256 sono disponibili nella
 | Windows x86_64 | ZIP portatile con applicazione e CLI |
 | Linux x86_64 | Pacchetto `.deb` per amd64 o archivio `.tar.gz`, con applicazione e CLI |
 
-**0.6.0 è sperimentale** e aggiunge testo formattato nei blocchi.
+**0.6.1 è sperimentale** e aggiunge la modifica del testo direttamente sulla tela.
 Il pacchetto Mac ha una firma ad hoc e non è stato autenticato da Apple tramite
 notarizzazione. I pacchetti Windows non sono firmati con un certificato dell’editore.
 Consulta la [guida all’installazione](../installation.md).
 
 ## Funzionalità
 
-- Testo formattato nei blocchi: selezione di parole, stili, dimensioni e colori diversi, con Applica/Annulla.
+- Modifica il testo direttamente nei blocchi: doppio clic o F2/Invio, selezione delle parole e barra di formattazione mobile. Un clic all’esterno conferma; Escape annulla.
 - Interfaccia in inglese, francese, tedesco, spagnolo, italiano, portoghese e cinese semplificato.
 - Controllo facoltativo degli aggiornamenti su GitHub, download verificati con SHA-256 e installazione manuale.
 - Forme, testi, grafici, otto librerie di simboli e nove modelli.

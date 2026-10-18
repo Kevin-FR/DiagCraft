@@ -12,6 +12,11 @@ impl DrawApp {
         {
             return;
         }
+        let over_text = anchor.is_some_and(|p| {
+            self.rich_editor
+                .as_ref()
+                .is_some_and(|e| e.content_rect.contains(p))
+        });
         let events = ui.input(|i| i.events.clone());
         let options = ui.ctx().options(|o| o.input_options);
         let anchor = anchor.unwrap_or(self.canvas.center());
@@ -23,7 +28,10 @@ impl DrawApp {
                     unit,
                     mut delta,
                     modifiers,
-                } if delta.is_finite() && delta != Vec2::ZERO => {
+                } if delta.is_finite()
+                    && delta != Vec2::ZERO
+                    && (!over_text || modifiers.command || modifiers.ctrl) =>
+                {
                     delta = match unit {
                         egui::MouseWheelUnit::Point => delta,
                         egui::MouseWheelUnit::Line => delta * options.line_scroll_speed,

@@ -21,14 +21,14 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.6.0 is experimental** and adds rich text formatting inside blocks.
+**0.6.1 is experimental** and adds direct text editing on the canvas.
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).
 
 ## Features
 
-- Rich text inside blocks: word selection, mixed styles, sizes and colors, with Apply/Cancel.
+- Edit text directly inside blocks: double-click or F2/Enter, select words and use the floating formatting toolbar. Click outside to finish; Escape cancels.
 - Interface in English, French, German, Spanish, Italian, Portuguese and Simplified Chinese.
 - Optional GitHub update checks, SHA-256-verified downloads and manual installation.
 - Shapes, text, charts, eight symbol libraries and nine templates.

@@ -4,17 +4,26 @@ Depuis DiagCraft 0.6.0, un bloc peut contenir plusieurs styles de texte : gras,
 italique, souligné, barré, police monospace, tailles et couleurs différentes.
 Le texte reste éditable ; aucun balisage HTML n’est interprété.
 
-## Ouvrir l’éditeur
+## Écrire directement dans le bloc
 
-Double-cliquer sur un bloc, choisir **Modifier le texte** dans son menu contextuel,
-ou **Mise en forme du contenu…** dans **Propriétés → Texte et typographie**.
-L’éditeur s’ouvre sans agrandir le volet de propriétés.
+Depuis **0.6.1**, double-cliquer place le curseur à l’endroit choisi dans le bloc,
+sur la feuille, sans fenêtre supplémentaire. On peut aussi sélectionner un bloc
+puis appuyer sur **F2** ou **Entrée**, choisir **Modifier le texte** dans le menu
+contextuel ou **Mise en forme du contenu…** dans les propriétés. Ces commandes
+sélectionnent tout le texte pour le remplacer rapidement.
 
 ![Éditeur du contenu](images/rich-text-editor.png)
 
 1. Sélectionner un mot ou une portion de texte avec la souris ou le clavier.
-2. Utiliser **B**, **I**, **U**, **S**, **Aa**, la taille ou la couleur.
-3. Choisir **Appliquer**, ou **Annuler** pour conserver le bloc original.
+2. Utiliser **B**, **I**, **U**, la taille ou la couleur dans la petite barre flottante.
+3. Cliquer à l’extérieur du bloc ou choisir **Terminer**. **Annuler** conserve le bloc original.
+
+**Plus** donne accès au texte barré, à la police monospace, à l’alignement, au
+retour automatique, à l’ajustement de la forme et à l’historique de saisie.
+La barre reste dans la feuille même près de ses bords. Un clic sur un autre bloc
+valide la saisie puis sélectionne ce bloc. Le zoom conserve la taille relative
+du texte et la position du curseur ; le trackpad déplace la feuille hors de la
+zone de saisie et fait défiler un long texte dans le bloc.
 
 **Tout sélectionner** permet de modifier l’ensemble du texte. Les boutons de
 style sont désactivés sans sélection ; le texte saisi hérite du style au point
@@ -23,7 +32,7 @@ paragraphes. L’alignement et le retour automatique concernent tout le bloc.
 **Effacer la mise en forme** rétablit, pour la sélection, le style de base du bloc.
 
 L’aperçu sur la feuille suit le brouillon ; le document et sa copie de récupération
-restent inchangés tant que l’on n’a pas appliqué. Les positions, identifiants et
+restent inchangés tant que l’on n’a pas terminé. Les positions, identifiants et
 connecteurs restent conservés. Si l’ajustement automatique est activé, la forme
 s’adapte aussi aux tailles de police choisies.
 
@@ -33,9 +42,13 @@ s’adapte aussi aux tailles de police choisies.
 
 - **⌘B / Ctrl+B**, **⌘I / Ctrl+I**, **⌘U / Ctrl+U** : gras, italique, souligné sur la sélection.
 - **⌘Z / Ctrl+Z** et **⌘⇧Z / Ctrl+Maj+Z** : annuler/rétablir dans l’éditeur, texte et styles ensemble.
-- **⌘Entrée / Ctrl+Entrée** : appliquer. **Échap** : annuler le brouillon.
+- **⌘Entrée / Ctrl+Entrée** : terminer. **Échap** : annuler le brouillon.
+- **⌘S / Ctrl+S** : terminer puis enregistrer ; avec Maj, enregistrer sous.
 
-Après application, une seule annulation du dessin restaure le contenu précédent.
+Après validation, une seule annulation du dessin restaure le contenu précédent.
+Changer d’onglet ou fermer l’application valide d’abord la saisie, avant les
+confirmations habituelles d’enregistrement. Le dernier caractère est conservé
+même si un clic ou un raccourci arrive dans la même image.
 Le champ de texte du volet reste également éditable et préserve les styles des
 parties inchangées. Le presse-papiers texte du système insère du texte brut ; la
 copie de blocs dans DiagCraft conserve leurs styles.

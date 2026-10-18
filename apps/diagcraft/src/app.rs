@@ -207,6 +207,8 @@ pub struct DrawApp {
     paste_position: Option<Point>,
     focus_text: Option<u64>,
     rich_editor: Option<rich_text_ui::Editor>,
+    text_click: Option<(u64, Pos2, f64)>,
+    replay_input: Vec<egui::Event>,
     capture_menu: Option<String>,
     show_symbol_manager: bool,
     visible_draft: Vec<String>,
@@ -747,6 +749,8 @@ impl DrawApp {
             paste_position: None,
             focus_text: None,
             rich_editor: None,
+            text_click: None,
+            replay_input: vec![],
             capture_menu: None,
             show_symbol_manager: false,
             visible_draft: vec![],
@@ -820,6 +824,7 @@ impl DrawApp {
         }
     }
     fn set_tool(&mut self, tool: Tool) {
+        self.text_click = None;
         self.tool = tool;
         self.pending_symbol = None;
         self.clear_connection();
@@ -865,6 +870,9 @@ impl DrawApp {
         }
     }
     fn save(&mut self, save_as: bool) -> bool {
+        if !self.commit_inline_if_needed() {
+            return false;
+        }
         let path = if save_as || self.path.is_none() {
             rfd::FileDialog::new()
                 .set_title(t("Enregistrer le diagramme"))
@@ -947,6 +955,9 @@ impl DrawApp {
         }
     }
     fn request(&mut self, action: Pending) {
+        if !self.commit_inline_if_needed() {
+            return;
+        }
         self.context_open = false;
         self.commit();
         match action {
@@ -1058,6 +1069,9 @@ impl DrawApp {
         if index >= self.tabs.len() || index == self.active_tab {
             return;
         }
+        if !self.commit_inline_if_needed() {
+            return;
+        }
         self.commit();
         self.stash_tab();
         let s = self.tabs[index].clone();
@@ -1085,6 +1099,9 @@ impl DrawApp {
         self.fit_next = s.fit_next;
     }
     fn open_tab(&mut self, doc: Document, path: Option<PathBuf>) {
+        if !self.commit_inline_if_needed() {
+            return;
+        }
         if let Some(ref path) = path
             && let Some(index) = self.tabs.iter().position(|t| t.path.as_ref() == Some(path))
         {
@@ -1098,6 +1115,9 @@ impl DrawApp {
         self.active_tab = self.tabs.len() - 1;
     }
     fn close_tab(&mut self, index: usize) {
+        if !self.commit_inline_if_needed() {
+            return;
+        }
         self.context_open = false;
         self.paste_position = None;
         self.focus_text = None;
@@ -1138,6 +1158,12 @@ impl DrawApp {
         self.fit_next = s.fit_next;
     }
     fn shortcuts(&mut self, ctx: &egui::Context) {
+        if self.rich_editor.is_some() {
+            self.inline_text_shortcuts(ctx);
+            if self.rich_editor.is_some() {
+                return;
+            }
+        }
         if self.drag_shortcuts(ctx) {
             return;
         }
@@ -1443,8 +1469,11 @@ impl DrawApp {
                     self.selected=self.marquee_hits([70.,70.],[750.,530.]);
                     self.drag=Some(Drag::Marquee {start:[70.,70.],current:[750.,530.],initial:vec![],additive:false});
                 }
-                if interactive && !self.context_open && !self.capture_marquee && !self.capture_alignment {
+                if interactive && self.rich_editor.is_none() && !self.context_open && !self.capture_marquee && !self.capture_alignment {
                     self.canvas_input(ui, &response);
+                } else if self.rich_editor.is_some() {
+                    let pos = ui.input(|i|i.pointer.hover_pos());
+                    self.canvas_navigation(ui,ui.rect_contains_pointer(rect),pos);
                 }
                 if self.drag.is_none() { self.drag_snapshot = None; }
                 if !matches!(self.drag, Some(Drag::Move { .. })) { self.move_guides.clear(); }
@@ -1562,9 +1591,10 @@ impl DrawApp {
                         }
                     }
                 }
-                for edge in &self.doc.connectors {
-                    let pts: Vec<_> = self
-                        .doc
+                let preview = self.inline_preview_document();
+                let rendered = preview.as_ref().unwrap_or(&self.doc);
+                for edge in &rendered.connectors {
+                    let pts: Vec<_> = rendered
                         .route(edge)
                         .into_iter()
                         .map(|v| self.screen(v))
@@ -1578,7 +1608,7 @@ impl DrawApp {
                         color = color.gamma_multiply(0.25);
                     }
                     if !edge.appearance.is_default() {
-                        self.styled_cache.borrow_mut().edge(&p,edge,&self.doc.route(edge),self.canvas.min+self.pan,self.zoom,self.doc.page_style.background);
+                        self.styled_cache.borrow_mut().edge(&p,edge,&rendered.route(edge),self.canvas.min+self.pan,self.zoom,self.doc.page_style.background);
                     } else {
                     paint_pattern(
                         &p,
@@ -1611,7 +1641,7 @@ impl DrawApp {
                     }
                     }
                     if !edge.label.is_empty() && pts.len() >= 2 {
-                        let pos = self.screen(self.doc.edge_label_point(edge));
+                        let pos = self.screen(rendered.edge_label_point(edge));
                         let galley = p.layout_no_wrap(
                             edge.label.clone(),
                             FontId::proportional(14. * self.zoom),
@@ -1622,13 +1652,7 @@ impl DrawApp {
                         p.galley(text_rect.min, galley, color);
                     }
                 }
-                for node in &self.doc.nodes {
-                    if let Some(editor) = &self.rich_editor && editor.draft.id == node.id {
-                        let mut preview = editor.draft.clone();
-                        if preview.text_style.auto_fit { let _ = preview.fit_to_text(); }
-                        self.paint_node(&p, &preview);
-                    } else { self.paint_node(&p, node); }
-                }
+                for node in &rendered.nodes { self.paint_node(&p,node); }
                 for chart in &self.doc.charts {
                     let r = Rect::from_min_size(
                         self.screen(chart.position),
@@ -1639,7 +1663,7 @@ impl DrawApp {
                         paint_selection(&p, r, self.selected.len() == 1 && !matches!(self.drag, Some(Drag::Marquee { .. })));
                     }
                 }
-                if !matches!(self.drag, Some(Drag::Marquee { .. })) {
+                if self.rich_editor.is_none() && !matches!(self.drag, Some(Drag::Marquee { .. })) {
                     self.paint_connector_handles(&p);
                     self.paint_connection_buttons(&p);
                 }
@@ -1665,7 +1689,7 @@ impl DrawApp {
                         MUTED,
                     );
                 }
-                if response.hovered() || self.drag.is_some() {
+                if self.rich_editor.is_none() && (response.hovered() || self.drag.is_some()) {
                     ctx.set_cursor_icon(if self.drag.is_some() {
                         self.manipulation_cursor(ui.input(|i| i.pointer.hover_pos()))
                     } else { match self.tool {
@@ -1701,7 +1725,7 @@ impl DrawApp {
                     FontId::proportional(11.),
                     MUTED,
                 );
-                if interactive {
+                if interactive && self.rich_editor.is_none() {
                     if let Some(name) = self.capture_menu.take() {
                         let point = match name.as_str() {
                             "contexte-connecteur" => {
@@ -1744,6 +1768,7 @@ impl DrawApp {
                         self.quick_toolbar(ctx);
                     }
                 }
+                self.inline_text(ui);
                 egui::Area::new("zoom_controls".into())
                     .order(egui::Order::Foreground)
                     .default_size(vec2(340., 40.))
@@ -2184,6 +2209,9 @@ impl DrawApp {
             }
             return;
         }
+        let text_click = response.clicked()
+            && self.tool == Tool::Select
+            && matches!(self.drag, Some(Drag::Move { .. }));
         if self.drag.is_some() && ui.input(|i| i.pointer.any_released()) {
             if let Some(Drag::Endpoint { id, start, point }) = self.drag {
                 if !over {
@@ -2223,15 +2251,25 @@ impl DrawApp {
             self.drag = None;
             self.commit();
         }
-        if response.double_clicked()
-            && self.tool == Tool::Select
-            && let Some(pos) = pos
-            && let Some(id) = self
-                .doc
-                .hit_node(self.world(pos))
-                .filter(|id| self.selected.contains(id))
-        {
-            self.open_node_text(id);
+        if response.clicked() {
+            let previous = self.text_click.take();
+            if text_click
+                && let Some(pos) = pos
+                && let Some(id) = self
+                    .doc
+                    .hit_node(self.world(pos))
+                    .filter(|id| self.selected.contains(id))
+            {
+                let time = ui.input(|i| i.time);
+                let delay = ui.ctx().options(|o| o.input_options.max_double_click_delay);
+                if previous.is_some_and(|(last_id, last_pos, last_time)| {
+                    last_id == id && last_pos.distance(pos) <= 6. && time - last_time < delay
+                }) {
+                    self.open_node_text_at(id, Some(pos));
+                } else {
+                    self.text_click = Some((id, pos, time));
+                }
+            }
         }
     }
     fn paint_node(&self, p: &egui::Painter, n: &Node) {
@@ -2282,29 +2320,43 @@ impl DrawApp {
                 kind => paint_geometry(p, kind, r, fill, stroke),
             }
         }
-        let text = n.text_layout();
-        let (text_origin, text_size) = diagcraft::text_layout::area(n);
-        let job = rich_text_ui::document_job(n, self.zoom, false);
-        let galley = p.layout_job(job);
-        let x = match n.text_style.align {
-            TextAlign::Left => self.screen(text_origin).x,
-            TextAlign::Center => r.center().x - galley.size().x / 2.,
-            TextAlign::Right => {
-                self.screen([text_origin[0] + text_size[0], 0.]).x - galley.size().x
+        let editing = self
+            .rich_editor
+            .as_ref()
+            .is_some_and(|editor| editor.draft.id == n.id);
+        if !editing {
+            let text = n.text_layout();
+            let (text_origin, text_size) = diagcraft::text_layout::area(n);
+            let job = rich_text_ui::document_job(n, self.zoom, false);
+            let galley = p.layout_job(job);
+            let x = match n.text_style.align {
+                TextAlign::Left => self.screen(text_origin).x,
+                TextAlign::Center => r.center().x - galley.size().x / 2.,
+                TextAlign::Right => {
+                    self.screen([text_origin[0] + text_size[0], 0.]).x - galley.size().x
+                }
+            };
+            let pos = pos2(x, r.center().y - galley.size().y / 2.) - galley.rect.min.to_vec2();
+            if text
+                .runs
+                .iter()
+                .flatten()
+                .any(|run| run.style.text_style.monospace && run.style.text_style.bold)
+            {
+                let bold = p.layout_job(rich_text_ui::document_job(n, self.zoom, true));
+                p.galley(pos + vec2(self.zoom * 0.6, 0.), bold, rgb(n.text_color));
             }
-        };
-        let pos = pos2(x, r.center().y - galley.size().y / 2.) - galley.rect.min.to_vec2();
-        if text
-            .runs
-            .iter()
-            .flatten()
-            .any(|run| run.style.text_style.monospace && run.style.text_style.bold)
-        {
-            let bold = p.layout_job(rich_text_ui::document_job(n, self.zoom, true));
-            p.galley(pos + vec2(self.zoom * 0.6, 0.), bold, rgb(n.text_color));
+            p.galley(pos, galley, rgb(n.text_color));
         }
-        p.galley(pos, galley, rgb(n.text_color));
-        if self.selected.contains(&n.id) && self.tool != Tool::Connect {
+        if editing {
+            p.rect_stroke(
+                r.expand(2.),
+                3,
+                Stroke::new(1.5, ACCENT),
+                StrokeKind::Outside,
+            );
+        }
+        if !editing && self.selected.contains(&n.id) && self.tool != Tool::Connect {
             paint_selection(
                 p,
                 r,
@@ -2341,6 +2393,11 @@ impl DrawApp {
 }
 
 impl eframe::App for DrawApp {
+    fn raw_input_hook(&mut self, _ctx: &egui::Context, input: &mut egui::RawInput) {
+        let mut replay = std::mem::take(&mut self.replay_input);
+        replay.append(&mut input.events);
+        input.events = replay;
+    }
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
         if self.allow_close {
             self.clean_recovery();
@@ -2393,7 +2450,7 @@ impl eframe::App for DrawApp {
         if ctx.input(|i| i.viewport().close_requested()) && !self.allow_close {
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
             if self.rich_editor.is_some() {
-                self.status = "Appliquez ou annulez le contenu du bloc avant de fermer.".into();
+                self.defer_inline_close();
             } else {
                 self.request(Pending::Close);
             }
@@ -2402,10 +2459,10 @@ impl eframe::App for DrawApp {
             ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             return;
         }
+        self.inline_outside_press(ctx);
         if let Some(path) = ctx.input(|i| i.raw.dropped_files.first().and_then(|f| f.path.clone()))
-            && self.rich_editor.is_none()
         {
-            self.request(Pending::Open(path));
+            self.inline_open(path);
         }
         self.shortcuts(ctx);
         let before = self.doc.clone();
@@ -2440,7 +2497,7 @@ impl eframe::App for DrawApp {
         self.workspace_dialogs(ctx);
         self.pages_dialogs(ctx);
         self.agent_dialog(ctx);
-        self.rich_text_dialog(ctx);
+        self.inline_text_toolbar(ctx);
         self.dialogs(ctx);
         ctx.send_viewport_cmd(egui::ViewportCommand::Title(format!(
             "{}{} — DiagCraft",

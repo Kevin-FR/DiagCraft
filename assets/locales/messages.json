@@ -7999,5 +7999,50 @@
     "it": "Seleziona le parole per formattarle. Invio aggiunge una riga.",
     "pt": "Selecione palavras para alterar a formatação. Enter adiciona uma linha.",
     "zh-Hans": "选择文字以修改格式。按 Enter 添加新行。"
+  },
+  "Cliquer en dehors du bloc ou ⌘Entrée / Ctrl+Entrée pour terminer.": {
+    "fr": "Cliquer en dehors du bloc ou ⌘Entrée / Ctrl+Entrée pour terminer.",
+    "en": "Click outside the block or press ⌘Enter / Ctrl+Enter to finish.",
+    "de": "Zum Abschließen außerhalb des Blocks klicken oder ⌘Eingabe / Strg+Eingabe drücken.",
+    "es": "Haz clic fuera del bloque o pulsa ⌘Intro / Ctrl+Intro para terminar.",
+    "it": "Fai clic fuori dal blocco o premi ⌘Invio / Ctrl+Invio per terminare.",
+    "pt": "Clique fora do bloco ou pressione ⌘Enter / Ctrl+Enter para concluir.",
+    "zh-Hans": "点击块外部或按 ⌘Enter / Ctrl+Enter 完成。"
+  },
+  "Plus": {
+    "fr": "Plus",
+    "en": "More",
+    "de": "Mehr",
+    "es": "Más",
+    "it": "Altro",
+    "pt": "Mais",
+    "zh-Hans": "更多"
+  },
+  "Terminer": {
+    "fr": "Terminer",
+    "en": "Done",
+    "de": "Fertig",
+    "es": "Terminar",
+    "it": "Fine",
+    "pt": "Concluir",
+    "zh-Hans": "完成"
+  },
+  "Échap : annuler la saisie": {
+    "fr": "Échap : annuler la saisie",
+    "en": "Escape: cancel editing",
+    "de": "Esc: Bearbeitung abbrechen",
+    "es": "Esc: cancelar la edición",
+    "it": "Esc: annulla la modifica",
+    "pt": "Esc: cancelar a edição",
+    "zh-Hans": "Esc：取消编辑"
+  },
+  "Écrire dans le bloc · Entrée : nouvelle ligne": {
+    "fr": "Écrire dans le bloc · Entrée : nouvelle ligne",
+    "en": "Edit in the block · Enter: new line",
+    "de": "Im Block schreiben · Eingabe: neue Zeile",
+    "es": "Escribe en el bloque · Intro: nueva línea",
+    "it": "Scrivi nel blocco · Invio: nuova riga",
+    "pt": "Escreva no bloco · Enter: nova linha",
+    "zh-Hans": "在块内编辑 · Enter：换行"
   }
 }

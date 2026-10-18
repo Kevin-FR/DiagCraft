@@ -28,6 +28,7 @@ pub(super) enum Command {
     Italic,
     Underline,
     FitText,
+    EditText,
     Select,
     Rectangle,
     Text,
@@ -125,6 +126,7 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
     ),
     command!(Select, "Outil Sélection", "Outils", "pointeur déplacer select", Modifiers::NONE => V),
     command!(Rectangle, "Outil Rectangle", "Outils", "bloc forme rectangle", Modifiers::NONE => R),
+    command!(EditText, "Modifier le texte", "Texte", "édition bloc contenu inline", Modifiers::NONE => F2, Modifiers::NONE => Enter),
     command!(Text, "Outil Texte", "Outils", "ajouter écrire text", Modifiers::NONE => T),
     command!(Connect, "Relier des blocs", "Outils", "connecteur lien flèche connect", Modifiers::NONE => C),
     command!(Pan, "Outil Main", "Outils", "déplacer vue pan", Modifiers::NONE => H),
@@ -332,6 +334,9 @@ impl DrawApp {
     pub(super) fn command_unavailable(&self, command: Command) -> Option<&'static str> {
         use Command::*;
         match command {
+            EditText if self.selected.len() != 1 || self.doc.node(self.selected[0]).is_none() => {
+                Some("Sélectionnez une forme ou un texte")
+            }
             Undo if !self.history.can_undo() && !self.property_edit => {
                 Some("Aucune modification à annuler")
             }
@@ -408,6 +413,7 @@ impl DrawApp {
             Italic => self.change_text(|s| s.italic = !s.italic),
             Underline => self.change_text(|s| s.underline = !s.underline),
             FitText => self.fit_selection_text(),
+            EditText => self.open_node_text(self.selected[0]),
             Select => self.set_tool(Tool::Select),
             Rectangle => self.set_tool(Tool::Shape(ShapeKind::Rectangle)),
             Text => self.set_tool(Tool::Shape(ShapeKind::Text)),
