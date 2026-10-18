@@ -206,6 +206,7 @@ pub struct DrawApp {
     show_quick_toolbar: bool,
     paste_position: Option<Point>,
     focus_text: Option<u64>,
+    rich_editor: Option<rich_text_ui::Editor>,
     capture_menu: Option<String>,
     show_symbol_manager: bool,
     visible_draft: Vec<String>,
@@ -470,8 +471,71 @@ impl DrawApp {
             self.show_quick_toolbar = false;
             self.capture_link_preview = name == "lier-apercu";
         }
+        if matches!(name, "contenu-bloc" | "editeur-texte") {
+            self.prepare_rich_text_capture(name == "editeur-texte");
+        }
         if name == "ajuster-texte" {
             self.prepare_text_fit_capture();
+        }
+    }
+    fn prepare_rich_text_capture(&mut self, editor: bool) {
+        let mut doc = Document {
+            title: "Un bloc, plusieurs styles".into(),
+            page_size: [1000., 650.],
+            ..Default::default()
+        };
+        let title = doc.add_node(ShapeKind::Text, [500., 90.]);
+        let node = doc.node_mut(title).unwrap();
+        node.text = "Votre contenu, mot par mot".into();
+        node.size = [800., 60.];
+        node.position = [100., 60.];
+        node.font_size = 28.;
+        node.text_style.bold = true;
+        let id = doc.add_node(ShapeKind::Rounded, [420., 310.]);
+        let node = doc.node_mut(id).unwrap();
+        node.size = [360., 180.];
+        node.position = [240., 220.];
+        node.text = "test Le BLOC\n\nSuperbe".into();
+        node.font_size = 24.;
+        node.fill = [255, 255, 255];
+        node.stroke = [35, 51, 65];
+        node.text_style.wrap = true;
+        node.format_text(
+            5..7,
+            Some(&diagcraft::rich_text::InlineStyle {
+                bold: Some(true),
+                ..Default::default()
+            }),
+        )
+        .unwrap();
+        node.format_text(
+            14..21,
+            Some(&diagcraft::rich_text::InlineStyle {
+                italic: Some(true),
+                underline: Some(true),
+                font_size: Some(28.),
+                ..Default::default()
+            }),
+        )
+        .unwrap();
+        node.format_text(
+            19..21,
+            Some(&diagcraft::rich_text::InlineStyle {
+                bold: Some(true),
+                ..Default::default()
+            }),
+        )
+        .unwrap();
+        self.replace(doc, None);
+        self.selected = vec![id];
+        self.show_library = false;
+        self.show_inspector = !editor;
+        self.show_quick_toolbar = false;
+        self.ribbon_expanded = Some(false);
+        self.focus_text = (!editor).then_some(id);
+        self.fit_next = true;
+        if editor {
+            self.open_node_text(id);
         }
     }
     fn prepare_text_fit_capture(&mut self) {
@@ -682,6 +746,7 @@ impl DrawApp {
             show_quick_toolbar: true,
             paste_position: None,
             focus_text: None,
+            rich_editor: None,
             capture_menu: None,
             show_symbol_manager: false,
             visible_draft: vec![],
@@ -1224,8 +1289,9 @@ impl DrawApp {
                     let id=self.selected[0];
                     ui.horizontal(|ui|{ui.monospace(i18n::render("page:{0} / objet:{1}", &[("0", format!("{}", self.doc.page_index)),("1", format!("{}", id))]));if ui.small_button(t("Copier")).on_hover_text(t("Référence JSON pour un agent")).clicked(){ctx.copy_text(serde_json::json!({"page":self.doc.page_index,"target":id}).to_string());}});ui.add_space(10.);
                     if let Some(n)=self.doc.node_mut(id) {
-                        let (front,back,fit_text)=appearance_ui::node_inspector(ui,n,&mut self.style_tab,&self.styled_cache,&mut self.focus_text,self.capture_shadow_presets);
+                        let (front,back,fit_text,edit_content)=appearance_ui::node_inspector(ui,n,&mut self.style_tab,&self.styled_cache,&mut self.focus_text,self.capture_shadow_presets);
                         if fit_text { self.fit_selection_text(); }
+                        if edit_content { self.open_node_text(id); }
                         if (front || back) && let Some(index)=self.doc.nodes.iter().position(|n|n.id==id) {let node=self.doc.nodes.remove(index);if front{self.doc.nodes.push(node);}else{self.doc.nodes.insert(0,node);}}
                     } else if self.doc.charts.iter().any(|c|c.id==id) { self.chart_inspector(ui,id);
                     } else if let Some(edge)=self.doc.connectors.iter_mut().find(|e|e.id==id) {
@@ -1557,7 +1623,11 @@ impl DrawApp {
                     }
                 }
                 for node in &self.doc.nodes {
-                    self.paint_node(&p, node);
+                    if let Some(editor) = &self.rich_editor && editor.draft.id == node.id {
+                        let mut preview = editor.draft.clone();
+                        if preview.text_style.auto_fit { let _ = preview.fit_to_text(); }
+                        self.paint_node(&p, &preview);
+                    } else { self.paint_node(&p, node); }
                 }
                 for chart in &self.doc.charts {
                     let r = Rect::from_min_size(
@@ -2161,9 +2231,7 @@ impl DrawApp {
                 .hit_node(self.world(pos))
                 .filter(|id| self.selected.contains(id))
         {
-            self.show_inspector = true;
-            self.focus_text = Some(id);
-            self.status = "Modifier le texte · refermez les propriétés avec × pour retrouver toute la largeur.".into();
+            self.open_node_text(id);
         }
     }
     fn paint_node(&self, p: &egui::Painter, n: &Node) {
@@ -2216,34 +2284,7 @@ impl DrawApp {
         }
         let text = n.text_layout();
         let (text_origin, text_size) = diagcraft::text_layout::area(n);
-        let family = if n.text_style.monospace {
-            egui::FontFamily::Name("DiagCraftMono".into())
-        } else {
-            egui::FontFamily::Name(font_name(&n.text_style).into())
-        };
-        let format = egui::TextFormat {
-            font_id: FontId::new(n.font_size * self.zoom, family),
-            line_height: Some(text.line_height * self.zoom),
-            color: rgb(n.text_color),
-            italics: n.text_style.monospace && n.text_style.italic,
-            underline: if n.text_style.underline {
-                Stroke::new(self.zoom.max(1.), rgb(n.text_color))
-            } else {
-                Stroke::NONE
-            },
-            strikethrough: if n.text_style.strikethrough {
-                Stroke::new(self.zoom.max(1.), rgb(n.text_color))
-            } else {
-                Stroke::NONE
-            },
-            ..Default::default()
-        };
-        let mut job = egui::text::LayoutJob::simple_format(text.text(), format);
-        job.halign = match n.text_style.align {
-            TextAlign::Left => Align::LEFT,
-            TextAlign::Center => Align::Center,
-            TextAlign::Right => Align::RIGHT,
-        };
+        let job = rich_text_ui::document_job(n, self.zoom, false);
         let galley = p.layout_job(job);
         let x = match n.text_style.align {
             TextAlign::Left => self.screen(text_origin).x,
@@ -2253,12 +2294,14 @@ impl DrawApp {
             }
         };
         let pos = pos2(x, r.center().y - galley.size().y / 2.) - galley.rect.min.to_vec2();
-        if n.text_style.monospace && n.text_style.bold {
-            p.galley(
-                pos + vec2(self.zoom * 0.6, 0.),
-                galley.clone(),
-                rgb(n.text_color),
-            );
+        if text
+            .runs
+            .iter()
+            .flatten()
+            .any(|run| run.style.text_style.monospace && run.style.text_style.bold)
+        {
+            let bold = p.layout_job(rich_text_ui::document_job(n, self.zoom, true));
+            p.galley(pos + vec2(self.zoom * 0.6, 0.), bold, rgb(n.text_color));
         }
         p.galley(pos, galley, rgb(n.text_color));
         if self.selected.contains(&n.id) && self.tool != Tool::Connect {
@@ -2349,13 +2392,18 @@ impl eframe::App for DrawApp {
         }
         if ctx.input(|i| i.viewport().close_requested()) && !self.allow_close {
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
-            self.request(Pending::Close);
+            if self.rich_editor.is_some() {
+                self.status = "Appliquez ou annulez le contenu du bloc avant de fermer.".into();
+            } else {
+                self.request(Pending::Close);
+            }
         }
         if self.allow_close {
             ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             return;
         }
         if let Some(path) = ctx.input(|i| i.raw.dropped_files.first().and_then(|f| f.path.clone()))
+            && self.rich_editor.is_none()
         {
             self.request(Pending::Open(path));
         }
@@ -2380,7 +2428,8 @@ impl eframe::App for DrawApp {
                 && !self.show_pdf_export
                 && !self.show_pages
                 && self.page_draft.is_none()
-                && self.agent_panel.is_none(),
+                && self.agent_panel.is_none()
+                && self.rich_editor.is_none(),
         );
         self.finish_frame_edit(ctx, &before);
         self.recovery_dialog(ctx);
@@ -2391,6 +2440,7 @@ impl eframe::App for DrawApp {
         self.workspace_dialogs(ctx);
         self.pages_dialogs(ctx);
         self.agent_dialog(ctx);
+        self.rich_text_dialog(ctx);
         self.dialogs(ctx);
         ctx.send_viewport_cmd(egui::ViewportCommand::Title(format!(
             "{}{} — DiagCraft",
@@ -2572,3 +2622,6 @@ mod updates;
 mod recovery;
 #[path = "recovery_ui.rs"]
 mod recovery_ui;
+
+#[path = "rich_text_ui.rs"]
+mod rich_text_ui;

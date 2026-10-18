@@ -262,7 +262,10 @@ pub fn export(doc: &Document) -> Result<String, String> {
             TextAlign::Center => ("middle", c[0]),
             TextAlign::Right => ("end", text_origin[0] + text_size[0]),
         };
-        let decoration = match (n.text_style.underline, n.text_style.strikethrough) {
+        let decoration = match (
+            n.text_runs.is_empty() && n.text_style.underline,
+            n.text_runs.is_empty() && n.text_style.strikethrough,
+        ) {
             (true, true) => "underline line-through",
             (true, false) => "underline",
             (false, true) => "line-through",
@@ -288,11 +291,45 @@ pub fn export(doc: &Document) -> Result<String, String> {
         for (i, line) in text.lines.iter().enumerate() {
             let _ = write!(
                 out,
-                "<tspan x=\"{}\" y=\"{}\">{}</tspan>",
+                "<tspan x=\"{}\" y=\"{}\">",
                 text_x,
-                start + i as f32 * text.line_height,
-                escape(line)
+                start + i as f32 * text.line_height
             );
+            if n.text_runs.is_empty() {
+                out.push_str(&escape(line));
+            } else {
+                for run in &text.runs[i] {
+                    let style = &run.style;
+                    let decoration =
+                        match (style.text_style.underline, style.text_style.strikethrough) {
+                            (true, true) => "underline line-through",
+                            (true, false) => "underline",
+                            (false, true) => "line-through",
+                            _ => "none",
+                        };
+                    let family = if style.text_style.monospace {
+                        "'Hack','Noto Sans SC',monospace"
+                    } else {
+                        "'Source Sans 3','Noto Sans SC',Arial,sans-serif"
+                    };
+                    let _ = write!(
+                        out,
+                        "<tspan font-family=\"{}\" font-size=\"{}\" fill=\"{}\" font-weight=\"{}\" font-style=\"{}\" text-decoration=\"{}\">{}</tspan>",
+                        family,
+                        style.font_size,
+                        hex(style.color),
+                        if style.text_style.bold { "700" } else { "400" },
+                        if style.text_style.italic {
+                            "italic"
+                        } else {
+                            "normal"
+                        },
+                        decoration,
+                        escape(&run.text)
+                    );
+                }
+            }
+            out.push_str("</tspan>");
         }
         out.push_str("</text>\n");
     }

@@ -296,6 +296,8 @@ pub struct Node {
     pub position: Point,
     pub size: Point,
     pub text: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub text_runs: Vec<crate::rich_text::TextRun>,
     pub fill: Color,
     pub stroke: Color,
     pub text_color: Color,
@@ -589,6 +591,7 @@ impl Document {
             stroke_width: 1.5,
             font_size: 18.,
             text_style: TextStyle::default(),
+            text_runs: vec![],
             appearance: Default::default(),
         });
         id
@@ -1006,6 +1009,7 @@ impl Document {
         let mut ids = HashSet::new();
         for n in &self.nodes {
             n.appearance.validate()?;
+            n.validate_text_runs()?;
             if n.id == 0 || n.id == u64::MAX || !ids.insert(n.id) {
                 return Err("Identifiant de forme invalide ou dupliqué.".into());
             }

@@ -85,3 +85,17 @@ uniquement aux nœuds modifiés, avant validation et calcul de la révision rés
 Une sélection est ajustée atomiquement. Les positions et IDs sont conservés ; les
 routes de connecteurs suivent leurs formes par le mécanisme existant. Un redimensionnement
 manuel désactive l’option dans le même geste annulable. Le moteur ne connaît pas egui.
+
+## Contenu enrichi des blocs
+
+`rich_text.rs` conserve le texte brut et des portions optionnelles `text_runs`,
+indexées en scalaires Unicode, ordonnées et sans chevauchement. Les frontières
+respectent les graphèmes ; les styles omis héritent de la typographie du nœud.
+L’insertion et la suppression préservent les portions extérieures et reconstruisent
+les frontières après édition. Le calcul de lignes utilise les styles résolus ;
+le canevas et SVG consomment les mêmes portions par ligne.
+
+`rich_text_ui.rs` conserve un brouillon local et un historique borné. Le dialogue
+bloque les commandes du dessin, vérifie la révision avant application et enregistre
+un seul changement dans l’historique documentaire. La récupération ne reçoit
+pas le brouillon. Les anciennes applications v7 ignorent les portions optionnelles.

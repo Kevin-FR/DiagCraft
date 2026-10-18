@@ -41,6 +41,7 @@ pub struct NodeChanges {
     pub position: Option<Point>,
     pub size: Option<Point>,
     pub text: Option<String>,
+    pub text_runs: Option<Vec<crate::rich_text::TextRun>>,
     pub fill: Option<Color>,
     pub stroke: Option<Color>,
     pub text_color: Option<Color>,
@@ -367,14 +368,22 @@ fn endpoint(
     }
 }
 macro_rules! apply_fields { ($dst:expr,$src:expr,$($field:ident),+ $(,)?) => { $(if let Some(value)=&$src.$field {$dst.$field=value.clone();})+ }; }
-fn node_changes(n: &mut Node, c: &NodeChanges) {
+fn node_changes(n: &mut Node, c: &NodeChanges) -> Result<(), String> {
+    if let Some(text) = &c.text {
+        if c.text_runs.is_some() {
+            n.text = text.clone();
+        } else {
+            n.set_text(text.clone())?;
+        }
+    }
+
     apply_fields!(
         n,
         c,
         kind,
         position,
         size,
-        text,
+        text_runs,
         fill,
         stroke,
         text_color,
@@ -383,6 +392,7 @@ fn node_changes(n: &mut Node, c: &NodeChanges) {
         text_style,
         appearance
     );
+    Ok(())
 }
 fn chart_changes(c: &mut crate::chart::Chart, v: &ChartChanges) {
     apply_fields!(
@@ -528,7 +538,7 @@ fn execute(
             n.position = *position;
             n.size = *size;
             n.text = text.clone();
-            node_changes(n, style);
+            node_changes(n, style)?;
             if n.text_style.auto_fit {
                 n.fit_to_text()?;
             }
@@ -540,7 +550,7 @@ fn execute(
         } => {
             let id = resolve(target, doc.page_index, aliases)?;
             let node = doc.node_mut(id).ok_or("Nœud introuvable.")?;
-            node_changes(node, changes);
+            node_changes(node, changes)?;
             if node.text_style.auto_fit {
                 node.fit_to_text()?;
             }

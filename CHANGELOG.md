@@ -3,6 +3,24 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.6.0 — mise en forme du contenu des blocs
+
+- Éditeur accessible par double-clic, menu contextuel ou propriétés, sans agrandir les volets.
+- Sélection de mots : gras, italique, souligné, barré, monospace, taille et couleur.
+- Sauts de ligne, paragraphes vides, alignement et ajustement automatique.
+- Aperçu sur la feuille, Appliquer/Annuler, historique local du texte et des styles.
+- Une seule annulation du dessin après application ; identifiants, positions et connecteurs conservés.
+- Styles conservés lors des insertions, suppressions, copies de blocs et enregistrements multipages.
+- SVG avec portions éditables, PDF avec texte et polices embarquées, sans interpréter de HTML.
+- API agents : champ `text_runs`, plages Unicode validées et remplacement atomique.
+- Neuf nouveaux messages traduits dans les sept langues ; README et guide mis à jour.
+
+Le format `.draw` reste **v7**, l’API agents **v1**. Aucune dépendance ajoutée.
+Les anciens dessins gardent leur style. Les anciennes applications lisent le texte
+brut et ignorent les styles par portions ; les réenregistrer avec elles perd ces styles.
+Les polices du lecteur influencent l’apparence d’un SVG.
+
+
 ## 0.5.0 — ajustement des formes au texte
 
 - Commande d’ajustement depuis les propriétés, le menu contextuel et la palette, y compris en sélection multiple.

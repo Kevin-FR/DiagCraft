@@ -36,6 +36,9 @@ travaux prévus, sans promesse de date.
 
 ## Diagrammes plus riches
 
+- [x] Texte enrichi par portions dans les blocs (0.6.0) : sélection de mots, tailles et couleurs,
+  édition annulable, exports vectoriels et contrat agents Unicode.
+
 - [ ] Groupes persistants, verrouillage, couches et rotation.
 - [ ] Routage évitant les obstacles, avec stabilité pendant le déplacement des blocs.
 - [ ] Import d’images, cadrage et export PNG avec dimensions explicites.

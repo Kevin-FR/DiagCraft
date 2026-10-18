@@ -1,5 +1,6 @@
 //! Shared line breaks, font metrics and fitting, independent of the GUI and zoom.
 use crate::document::{Document, Node, Point, ShapeKind, TextStyle};
+use crate::rich_text::ResolvedStyle;
 use std::sync::OnceLock;
 use ttf_parser::{Face, GlyphId};
 use unicode_segmentation::UnicodeSegmentation;
@@ -84,7 +85,14 @@ pub fn area(node: &Node) -> (Point, Point) {
 }
 
 #[derive(Clone, Debug)]
+pub struct StyledText {
+    pub text: String,
+    pub style: ResolvedStyle,
+}
+
+#[derive(Clone, Debug)]
 pub struct Layout {
+    pub runs: Vec<Vec<StyledText>>,
     pub lines: Vec<String>,
     pub width: f32,
     pub height: f32,
@@ -102,84 +110,130 @@ impl Layout {
     }
 }
 
-fn break_paragraph(
-    paragraph: &str,
-    max_width: f32,
-    style: &TextStyle,
-    size: f32,
-    lines: &mut Vec<String>,
-) {
-    let units: Vec<_> = paragraph
+#[derive(Clone)]
+struct Unit {
+    text: String,
+    style: ResolvedStyle,
+    width: f32,
+}
+
+fn units(node: &Node) -> Vec<Unit> {
+    let mut index = 0;
+    node.text
         .graphemes(true)
-        .map(|s| (s, advance(style, s, size)))
-        .collect();
-    if units.is_empty() {
-        lines.push(String::new());
-        return;
-    }
+        .map(|g| {
+            let mut style = node.resolved_style_at(index);
+            style.font_size = if style.font_size.is_finite() {
+                style.font_size.clamp(6., 200.)
+            } else {
+                18.
+            };
+            index += g.chars().count();
+            let text = match g {
+                "\r\n" | "\r" => "\n",
+                "\t" => "    ",
+                _ => g,
+            }
+            .to_owned();
+            let width = advance(&style.text_style, &text, style.font_size);
+            Unit { text, style, width }
+        })
+        .collect()
+}
+
+fn break_paragraph(units: &[Unit], max_width: f32, wrap: bool, output: &mut Vec<Vec<StyledText>>) {
+    let mut ranges = vec![];
     let (mut start, mut at, mut width, mut word_break) = (0, 0, 0., None);
     while at < units.len() {
-        if at > start && width + units[at].1 > max_width {
+        if wrap && at > start && width + units[at].width > max_width {
             let end = word_break.filter(|end| *end > start).unwrap_or(at);
-            lines.push(units[start..end].iter().map(|unit| unit.0).collect());
+            ranges.push(start..end);
             start = end;
             at = end;
             width = 0.;
             word_break = None;
         } else {
-            width += units[at].1;
-            if matches!(units[at].0, " " | "\u{3000}" | "\u{200b}") {
+            width += units[at].width;
+            if matches!(
+                units[at].text.as_str(),
+                " " | "    " | "\u{3000}" | "\u{200b}"
+            ) {
                 word_break = Some(at + 1);
             }
             at += 1;
         }
     }
-    lines.push(units[start..].iter().map(|unit| unit.0).collect());
+    ranges.push(start..units.len());
+    for range in ranges {
+        let mut runs: Vec<StyledText> = vec![];
+        for unit in &units[range] {
+            if let Some(last) = runs.last_mut().filter(|r| r.style == unit.style) {
+                last.text.push_str(&unit.text);
+            } else {
+                runs.push(StyledText {
+                    text: unit.text.clone(),
+                    style: unit.style.clone(),
+                });
+            }
+        }
+        output.push(runs);
+    }
 }
 
 pub fn layout(node: &Node) -> Layout {
-    let size = if node.font_size.is_finite() {
-        node.font_size.clamp(6., 200.)
+    let units = units(node);
+    let base = node.resolved_style_at(0);
+    let styles: Vec<_> = if units.is_empty() {
+        vec![(&base, "")]
     } else {
-        18.
+        units.iter().map(|u| (&u.style, u.text.as_str())).collect()
     };
-    let display = node
-        .text
-        .replace("\r\n", "\n")
-        .replace('\r', "\n")
-        .replace('\t', "    ");
-    let mut ascent = 0_f32;
-    let mut descent = 0_f32;
-    let mut line_height = size * 1.25;
-    for font in std::iter::once(primary(&node.text_style))
-        .chain(display.chars().map(|ch| glyph(&node.text_style, ch).0))
-    {
-        let face = &faces()[font];
-        let scale = size / f32::from(face.units_per_em());
-        ascent = ascent.max(f32::from(face.ascender()) * scale);
-        descent = descent.min(f32::from(face.descender()) * scale);
-        line_height = line_height.max(f32::from(face.height() + face.line_gap()) * scale);
-    }
-    line_height = line_height.max(ascent - descent).ceil();
-    let mut lines = vec![];
-    // Slack covers rounding and small kerning/italic differences between renderers.
-    let limit = (area(node).1[0] - size * 0.1 - 2.).max(1.);
-    for paragraph in display.split('\n') {
-        if node.text_style.wrap {
-            break_paragraph(paragraph, limit, &node.text_style, size, &mut lines);
+    let mut max_size = 6_f32;
+    let (mut ascent, mut descent, mut line_height) = (0_f32, 0_f32, 0_f32);
+    for (style, text) in styles {
+        let size = if style.font_size.is_finite() {
+            style.font_size.clamp(6., 200.)
         } else {
-            lines.push(paragraph.into());
+            18.
+        };
+        max_size = max_size.max(size);
+        line_height = line_height.max(size * 1.25);
+        // Also consider the CJK fallback actually used by this run.
+        for font in [primary(&style.text_style)]
+            .into_iter()
+            .chain(text.chars().map(|ch| glyph(&style.text_style, ch).0))
+        {
+            let face = &faces()[font];
+            let scale = size / f32::from(face.units_per_em());
+            ascent = ascent.max(f32::from(face.ascender()) * scale);
+            descent = descent.min(f32::from(face.descender()) * scale);
+            line_height = line_height.max(f32::from(face.height() + face.line_gap()) * scale);
         }
     }
-    let width = lines
+    line_height = line_height.max(ascent - descent).ceil();
+    let limit = (area(node).1[0] - max_size * 0.1 - 2.).max(1.);
+    let mut runs = vec![];
+    for paragraph in units.split(|u| u.text == "\n") {
+        break_paragraph(paragraph, limit, node.text_style.wrap, &mut runs);
+    }
+    let lines = runs
         .iter()
-        .map(|line| advance(&node.text_style, line, size))
+        .map(|line| line.iter().map(|r| r.text.as_str()).collect())
+        .collect::<Vec<String>>();
+    let width = runs
+        .iter()
+        .map(|line| {
+            line.iter()
+                .map(|r| advance(&r.style.text_style, &r.text, r.style.font_size))
+                .sum::<f32>()
+        })
         .fold(0_f32, f32::max)
-        + size * 0.1
+        + max_size * 0.1
         + 2.;
     Layout {
         height: lines.len() as f32 * line_height,
         lines,
+        runs,
         width,
         line_height,
         ascent,
@@ -205,16 +259,18 @@ impl Node {
         {
             return Err("Style ou géométrie invalide pour l’ajustement au texte.".into());
         }
+        self.validate_text_runs()?;
         let fraction = region(self.kind);
         let mut probe = self.clone();
         if self.text_style.wrap {
-            let widest = self
-                .text
-                .graphemes(true)
-                .map(|g| advance(&self.text_style, g, self.font_size))
-                .fold(0_f32, f32::max);
+            let units = units(self);
+            let widest = units.iter().map(|u| u.width).fold(0_f32, f32::max);
+            let max_size = units
+                .iter()
+                .map(|u| u.style.font_size)
+                .fold(self.font_size, f32::max);
             probe.size[0] = self.size[0]
-                .max(((widest + self.font_size * 0.1 + 3. + 2. * PADDING) / fraction[0]).ceil());
+                .max(((widest + max_size * 0.1 + 3. + 2. * PADDING) / fraction[0]).ceil());
         }
         let text = layout(&probe);
         let width = if self.text_style.wrap {

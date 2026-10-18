@@ -7918,5 +7918,86 @@
     "it": "Tieni ⌥ durante lo spostamento per posizionare liberamente.",
     "pt": "Segure ⌥ ao mover para posicionar livremente.",
     "zh-Hans": "移动时按住 ⌥ 可自由放置。"
+  },
+  "Alignement": {
+    "fr": "Alignement",
+    "en": "Alignment",
+    "de": "Ausrichtung",
+    "es": "Alineación",
+    "it": "Allineamento",
+    "pt": "Alinhamento",
+    "zh-Hans": "对齐"
+  },
+  "Appliquer · ⌘Entrée / Ctrl+Entrée": {
+    "fr": "Appliquer · ⌘Entrée / Ctrl+Entrée",
+    "en": "Apply · ⌘Enter / Ctrl+Enter",
+    "de": "Anwenden · ⌘Eingabe / Strg+Eingabe",
+    "es": "Aplicar · ⌘Intro / Ctrl+Intro",
+    "it": "Applica · ⌘Invio / Ctrl+Invio",
+    "pt": "Aplicar · ⌘Enter / Ctrl+Enter",
+    "zh-Hans": "应用 · ⌘Enter / Ctrl+Enter"
+  },
+  "Appliquez ou annulez le contenu du bloc avant de fermer.": {
+    "fr": "Appliquez ou annulez le contenu du bloc avant de fermer.",
+    "en": "Apply or cancel the block content before closing.",
+    "de": "Den Blockinhalt vor dem Schließen anwenden oder verwerfen.",
+    "es": "Aplica o cancela el contenido del bloque antes de cerrar.",
+    "it": "Applica o annulla il contenuto del blocco prima di chiudere.",
+    "pt": "Aplique ou cancele o conteúdo do bloco antes de fechar.",
+    "zh-Hans": "关闭前请应用或取消块内容的更改。"
+  },
+  "Centrer": {
+    "fr": "Centrer",
+    "en": "Center",
+    "de": "Zentrieren",
+    "es": "Centrar",
+    "it": "Centra",
+    "pt": "Centrar",
+    "zh-Hans": "居中"
+  },
+  "Contenu du bloc": {
+    "fr": "Contenu du bloc",
+    "en": "Block content",
+    "de": "Blockinhalt",
+    "es": "Contenido del bloque",
+    "it": "Contenuto del blocco",
+    "pt": "Conteúdo do bloco",
+    "zh-Hans": "块内容"
+  },
+  "Contenu du bloc mis à jour": {
+    "fr": "Contenu du bloc mis à jour",
+    "en": "Block content updated",
+    "de": "Blockinhalt aktualisiert",
+    "es": "Contenido del bloque actualizado",
+    "it": "Contenuto del blocco aggiornato",
+    "pt": "Conteúdo do bloco atualizado",
+    "zh-Hans": "块内容已更新"
+  },
+  "Effacer la mise en forme": {
+    "fr": "Effacer la mise en forme",
+    "en": "Clear formatting",
+    "de": "Formatierung entfernen",
+    "es": "Borrar formato",
+    "it": "Cancella formattazione",
+    "pt": "Limpar formatação",
+    "zh-Hans": "清除格式"
+  },
+  "Mise en forme du contenu…": {
+    "fr": "Mise en forme du contenu…",
+    "en": "Format content…",
+    "de": "Inhalt formatieren…",
+    "es": "Dar formato al contenido…",
+    "it": "Formatta contenuto…",
+    "pt": "Formatar conteúdo…",
+    "zh-Hans": "设置内容格式…"
+  },
+  "Sélectionnez des mots pour modifier leur mise en forme. Entrée ajoute une ligne.": {
+    "fr": "Sélectionnez des mots pour modifier leur mise en forme. Entrée ajoute une ligne.",
+    "en": "Select words to change their formatting. Enter adds a line.",
+    "de": "Wörter auswählen, um sie zu formatieren. Eingabe fügt eine Zeile hinzu.",
+    "es": "Selecciona palabras para cambiar su formato. Intro añade una línea.",
+    "it": "Seleziona le parole per formattarle. Invio aggiunge una riga.",
+    "pt": "Selecione palavras para alterar a formatação. Enter adiciona uma linha.",
+    "zh-Hans": "选择文字以修改格式。按 Enter 添加新行。"
   }
 }

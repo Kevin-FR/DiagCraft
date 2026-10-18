@@ -307,6 +307,7 @@ impl DrawApp {
             || self.show_pages
             || self.page_draft.is_some()
             || self.agent_panel.is_some()
+            || self.rich_editor.is_some()
     }
 
     pub(super) fn open_command_palette(&mut self) {

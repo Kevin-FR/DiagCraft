@@ -19,12 +19,13 @@
 | Windows x86_64 | 包含应用和 CLI 的便携式 ZIP |
 | Linux x86_64 | 包含应用和 CLI 的 amd64 `.deb` 软件包或 `.tar.gz` 压缩包 |
 
-**0.5.0 为实验版本**，新增自动根据文本调整形状尺寸的功能。Mac 安装包使用临时签名（ad hoc），
+**0.6.0 为实验版本**，新增块内富文本格式。Mac 安装包使用临时签名（ad hoc），
 尚未通过 Apple 公证。Windows 安装包未使用发布者证书签名。
 请参阅[安装指南](../installation.md)。
 
 ## 功能
 
+- 块内富文本：选择文字，混合样式、字号和颜色，并可应用或取消。
 - 界面支持英语、法语、德语、西班牙语、意大利语、葡萄牙语和简体中文。
 - 可选的 GitHub 更新检查、SHA-256 下载校验以及手动安装。
 - 形状、文本、图表、八个符号库和九个模板。
@@ -49,6 +50,8 @@ Mac 安装包仅包含 `arm64` 代码，使用 macOS 系统库：**无需 Rosett
 
 详细指南目前为法语：[语言与更新](../langues-et-mises-a-jour.md)、[命令](../commandes.md)、
 [功能区与侧栏](../interface.md)、[绘图恢复](../recuperation.md)、[文本适应](../ajustement-texte.md)和[版本管理](../versioning.md)。
+
+[块内容](../contenu-blocs.md) (FR).
 
 ## 开发
 

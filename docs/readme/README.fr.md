@@ -21,12 +21,13 @@ Les applications et leurs empreintes SHA-256 sont sur la page des
 | Windows x86_64 | ZIP portable avec application et CLI |
 | Linux x86_64 | Paquet `.deb` amd64 ou archive `.tar.gz`, application et CLI |
 
-La version **0.5.0** reste expérimentale et ajoute l’ajustement automatique des formes au texte. Le paquet
+La version **0.6.0** reste expérimentale et ajoute le texte enrichi dans les blocs. Le paquet
 Mac est signé ad hoc et n’est pas notarié par Apple. Les paquets Windows ne
 sont pas signés avec un certificat éditeur. Voir [l’installation](../installation.md).
 
 ## Fonctions disponibles
 
+- Texte enrichi dans les blocs : sélection de mots, styles, tailles et couleurs, avec Appliquer/Annuler.
 - Interface anglais, français, allemand, espagnol, italien, portugais et chinois simplifié.
 - Mises à jour GitHub facultatives, téléchargement vérifié SHA-256 et installation manuelle.
 - Formes, textes, graphiques, huit bibliothèques de symboles et neuf modèles.
@@ -56,6 +57,8 @@ Voir [langues et mises à jour](../langues-et-mises-a-jour.md).
 Voir [la recherche de commandes](../commandes.md), [le ruban et les volets](../interface.md)
 et [les règles de version](../versioning.md).
 Voir aussi [la récupération des dessins](../recuperation.md) et [l’ajustement du texte](../ajustement-texte.md).
+
+[contenu des blocs](../contenu-blocs.md) (FR).
 
 ## Développer
 

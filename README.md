@@ -21,13 +21,14 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.5.0 is experimental** and adds automatic text fitting.
+**0.6.0 is experimental** and adds rich text formatting inside blocks.
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).
 
 ## Features
 
+- Rich text inside blocks: word selection, mixed styles, sizes and colors, with Apply/Cancel.
 - Interface in English, French, German, Spanish, Italian, Portuguese and Simplified Chinese.
 - Optional GitHub update checks, SHA-256-verified downloads and manual installation.
 - Shapes, text, charts, eight symbol libraries and nine templates.
@@ -58,6 +59,8 @@ Detailed guides are currently in French:
 [commands](docs/commandes.md), [ribbon and panels](docs/interface.md),
 [drawing recovery](docs/recuperation.md), [text fitting](docs/ajustement-texte.md)
 and [versioning](docs/versioning.md).
+
+[block content](docs/contenu-blocs.md) (FR).
 
 ## Development
 

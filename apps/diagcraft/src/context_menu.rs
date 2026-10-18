@@ -506,8 +506,12 @@ impl DrawApp {
                     && (self.doc.node(id).is_some()
                         || self.doc.connectors.iter().any(|e| e.id == id))
                 {
-                    self.focus_text = Some(id);
-                    self.show_inspector = true;
+                    if self.doc.node(id).is_some() {
+                        self.open_node_text(id);
+                    } else {
+                        self.focus_text = Some(id);
+                        self.show_inspector = true;
+                    }
                 } else if self.selected.is_empty() && self.doc.object_count() < 10_000 {
                     let id = self.add_node(ShapeKind::Text, self.context_position);
                     self.selected = vec![id];

@@ -2453,8 +2453,9 @@ fn panel_frame(
             app.footer(ctx);
             app.pages_bar(ctx);
             app.side_panels(ctx);
-            app.canvas(ctx, true);
+            app.canvas(ctx, app.rich_editor.is_none());
             app.finish_frame_edit(ctx, &before);
+            app.rich_text_dialog(ctx);
         },
     )
 }
@@ -2523,10 +2524,14 @@ fn default_window_hides_document_properties_and_simple_selection_keeps_them_hidd
     assert!(!app.show_inspector);
     panel_click(&ctx, &mut app, size, p);
     assert!(
-        app.show_inspector,
-        "double-click is an explicit request to edit text"
+        app.rich_editor.is_some(),
+        "double-click opens the content editor"
     );
-    assert_eq!(app.focus_text, Some(id));
+    assert!(
+        !app.show_inspector,
+        "editing leaves the canvas width unchanged"
+    );
+    assert_eq!(app.rich_editor.as_ref().unwrap().draft.id, id);
 }
 #[test]
 fn header_icons_collapse_and_reopen_panels_without_modifying_the_drawing() {
@@ -2592,7 +2597,7 @@ fn compact_rail_keeps_all_five_icons_and_symbols_reopens_in_one_click() {
     assert!(!app.show_inspector);
 }
 #[test]
-fn inspector_close_button_returns_space_and_explicit_text_edit_can_reopen_it() {
+fn inspector_close_button_returns_space_and_text_edit_opens_without_reopening_it() {
     let (ctx, mut app, id) = panel_setup();
     let size = vec2(1280., 800.);
     app.show_inspector = true;
@@ -2614,8 +2619,8 @@ fn inspector_close_button_returns_space_and_explicit_text_edit_can_reopen_it() {
     assert!(!app.show_inspector);
     app.selected = vec![id];
     app.perform_action(context_menu::Action::Text, &ctx);
-    assert!(app.show_inspector);
-    assert_eq!(app.focus_text, Some(id));
+    assert!(!app.show_inspector);
+    assert_eq!(app.rich_editor.as_ref().unwrap().draft.id, id);
 }
 #[test]
 fn compact_panels_fit_small_windows_and_restore_at_larger_sizes() {
@@ -3066,6 +3071,16 @@ fn appearance_tabs_do_not_modify_document_and_text_edit_still_focuses() {
         size,
         vec![egui::Event::Text("Texte saisi".into())],
     );
+    assert!(
+        app.rich_editor
+            .as_ref()
+            .unwrap()
+            .draft
+            .text
+            .contains("Texte saisi")
+    );
+    assert_eq!(app.doc, before);
+    app.apply_node_text().unwrap();
     assert!(app.doc.node(id).unwrap().text.contains("Texte saisi"));
 }
 #[test]
@@ -5710,4 +5725,177 @@ fn searching_hidden_symbol_libraries_does_not_change_enabled_libraries_or_the_do
     let out = stable_panel(&ctx, &mut app, size);
     ux_text(&out, "Aucun symbole trouvé. Essayez un autre mot.");
     ux_text(&out, "+ Bibliothèques de symboles…");
+}
+
+fn rich_editor_frame(ctx: &egui::Context, app: &mut DrawApp, key: Option<(Key, egui::Modifiers)>) {
+    let (events, modifiers) = key
+        .map(|(key, modifiers)| {
+            (
+                vec![egui::Event::Key {
+                    key,
+                    physical_key: Some(key),
+                    pressed: true,
+                    repeat: false,
+                    modifiers,
+                }],
+                modifiers,
+            )
+        })
+        .unwrap_or_default();
+    let _ = ctx.run(
+        egui::RawInput {
+            screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1200., 800.))),
+            events,
+            modifiers,
+            ..Default::default()
+        },
+        |ctx| {
+            app.shortcuts(ctx);
+            app.canvas(ctx, false);
+            app.rich_text_dialog(ctx);
+        },
+    );
+}
+
+#[test]
+fn rich_editor_shortcuts_format_selection_cancel_and_keep_document_history_untouched() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rounded, [350., 250.]);
+    app.doc.node_mut(id).unwrap().text = "Superbe 中文".into();
+    app.commit();
+    app.saved = app.doc.clone();
+    app.history = History::new(&app.doc);
+    let original = app.doc.clone();
+    app.open_node_text(id);
+    rich_editor_frame(&ctx, &mut app, None);
+    rich_editor_frame(&ctx, &mut app, Some((Key::B, egui::Modifiers::COMMAND)));
+    assert!(
+        app.rich_editor
+            .as_ref()
+            .unwrap()
+            .draft
+            .resolved_style_at(0)
+            .text_style
+            .bold
+    );
+    assert_eq!(app.doc, original);
+    rich_editor_frame(&ctx, &mut app, Some((Key::Z, egui::Modifiers::COMMAND)));
+    assert!(app.rich_editor.as_ref().unwrap().draft.text_runs.is_empty());
+    rich_editor_frame(
+        &ctx,
+        &mut app,
+        Some((Key::Z, egui::Modifiers::COMMAND | egui::Modifiers::SHIFT)),
+    );
+    assert!(
+        app.rich_editor
+            .as_ref()
+            .unwrap()
+            .draft
+            .resolved_style_at(0)
+            .text_style
+            .bold
+    );
+    let id = egui::Id::new("rich_text_input");
+    let mut state = egui::TextEdit::load_state(&ctx, id).unwrap();
+    state
+        .cursor
+        .set_char_range(Some(egui::text::CCursorRange::two(
+            egui::text::CCursor::new(8),
+            egui::text::CCursor::new(10),
+        )));
+    state.store(&ctx, id);
+    rich_editor_frame(&ctx, &mut app, None);
+    rich_editor_frame(&ctx, &mut app, Some((Key::I, egui::Modifiers::COMMAND)));
+    let n = &app.rich_editor.as_ref().unwrap().draft;
+    assert!(n.resolved_style_at(8).text_style.italic && n.resolved_style_at(9).text_style.italic);
+    assert!(!n.resolved_style_at(0).text_style.italic);
+    rich_editor_frame(&ctx, &mut app, Some((Key::Escape, egui::Modifiers::NONE)));
+    assert!(app.rich_editor.is_none());
+    assert_eq!(app.doc, original);
+    assert!(!app.dirty() && !app.history.can_undo());
+}
+
+#[test]
+fn rich_editor_applies_as_one_undo_keeps_links_and_rejects_stale_drafts() {
+    let (_, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rounded, [350., 250.]);
+    let target = app.doc.add_node(ShapeKind::Rectangle, [700., 250.]);
+    app.doc.connect(id, target, ConnectorKind::Elbow).unwrap();
+    app.commit();
+    let original = app.doc.clone();
+    app.open_node_text(id);
+    let n = &mut app.rich_editor.as_mut().unwrap().draft;
+    n.set_text("test Le BLOC\n\nSuperbe 中文".into()).unwrap();
+    n.format_text(
+        5..7,
+        Some(&diagcraft::rich_text::InlineStyle {
+            bold: Some(true),
+            ..Default::default()
+        }),
+    )
+    .unwrap();
+    n.text_style.auto_fit = true;
+    n.text_style.wrap = true;
+    app.apply_node_text().unwrap();
+    assert!(app.rich_editor.is_none());
+    assert_eq!(app.doc.connectors, original.connectors);
+    assert_eq!(
+        app.doc.node(id).unwrap().position,
+        original.node(id).unwrap().position
+    );
+    let edited = app.doc.clone();
+    app.undo();
+    assert_eq!(app.doc, original);
+    app.redo();
+    assert_eq!(app.doc, edited);
+    app.open_node_text(id);
+    app.doc.title = "external edit".into();
+    let current = app.doc.clone();
+    assert!(app.apply_node_text().is_err());
+    assert_eq!(app.doc, current);
+    assert!(app.rich_editor.is_some());
+}
+
+#[test]
+fn native_rich_text_paints_distinct_fonts_colors_and_decorations_inside_one_block() {
+    let (ctx, mut app) = setup();
+    let id = app.doc.add_node(ShapeKind::Rounded, [350., 250.]);
+    let n = app.doc.node_mut(id).unwrap();
+    n.text = "test Le BLOC\n\nSuperbe 中文".into();
+    n.format_text(
+        5..7,
+        Some(&diagcraft::rich_text::InlineStyle {
+            bold: Some(true),
+            ..Default::default()
+        }),
+    )
+    .unwrap();
+    n.format_text(
+        14..21,
+        Some(&diagcraft::rich_text::InlineStyle {
+            italic: Some(true),
+            underline: Some(true),
+            font_size: Some(28.),
+            color: Some([170, 30, 60]),
+            ..Default::default()
+        }),
+    )
+    .unwrap();
+    n.text_style.auto_fit = true;
+    n.text_style.wrap = true;
+    app.commit();
+    let n = app.doc.node(id).unwrap().clone();
+    let job = rich_text_ui::document_job(&n, 1., false);
+    assert_eq!(job.text, n.display_text());
+    assert!(
+        job.sections
+            .iter()
+            .any(|s| s.format.font_id.family == egui::FontFamily::Name("SourceSans3-Bold".into()))
+    );
+    assert!(job.sections.iter().any(|s| s.format.font_id.size == 28.
+        && s.format.color == rgb([170, 30, 60])
+        && s.format.underline != Stroke::NONE));
+    let _ = ctx.run(egui::RawInput::default(), |ctx| {
+        egui::CentralPanel::default().show(ctx, |ui| app.paint_node(ui.painter(), &n));
+    });
 }

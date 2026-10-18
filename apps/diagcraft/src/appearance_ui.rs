@@ -250,8 +250,9 @@ pub(super) fn node_inspector(
     cache: &SharedCache,
     focus: &mut Option<u64>,
     capture_presets: bool,
-) -> (bool, bool, bool) {
+) -> (bool, bool, bool, bool) {
     let mut fit_text = false;
+    let mut edit_content = false;
     ui.label(RichText::new(t(n.kind.label())).size(20.).strong());
     ui.add_space(10.);
     if n.kind != ShapeKind::Text {
@@ -263,13 +264,9 @@ pub(super) fn node_inspector(
         .default_open(n.kind == ShapeKind::Text)
         .open((*focus == Some(n.id)).then_some(true))
         .show(ui, |ui| {
-            let edit = ui.add(
-                egui::TextEdit::multiline(&mut n.text)
-                    .id_salt(("node_text", n.id))
-                    .desired_width(f32::INFINITY)
-                    .desired_rows(3)
-                    .char_limit(4000),
-            );
+            edit_content = ui.button(t("Mise en forme du contenu…")).clicked();
+            let id = ui.make_persistent_id(("node_text", n.id));
+            let edit = super::rich_text_ui::text_input(ui, n, id, 3).response;
             if *focus == Some(n.id) {
                 edit.request_focus();
                 edit.scroll_to_me(Some(Align::Center));
@@ -345,6 +342,7 @@ pub(super) fn node_inspector(
         ui.button(t("Mettre au premier plan")).clicked(),
         ui.button(t("Mettre à l’arrière-plan")).clicked(),
         fit_text,
+        edit_content,
     )
 }
 pub(super) fn node_controls(

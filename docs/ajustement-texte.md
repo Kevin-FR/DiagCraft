@@ -54,3 +54,6 @@ Le document reste au format **v7**, l’API agents en **v1**. Les anciennes appl
 peuvent lire les dimensions enregistrées mais ignorent l’option automatique.
 L’ajustement refuse un texte nécessitant une dimension supérieure à 20 000 px :
 réduire son contenu, sa taille de police ou le répartir entre plusieurs blocs.
+
+Depuis 0.6.0, le calcul prend aussi en compte les tailles et styles des portions
+de texte. Voir [le contenu des blocs](contenu-blocs.md).

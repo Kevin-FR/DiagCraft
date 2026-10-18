@@ -903,6 +903,13 @@
               "type": "null"
             }
           ]
+        },
+        "text_runs": {
+          "type": "array",
+          "maxItems": 1024,
+          "items": {
+            "$ref": "#/$defs/textRun"
+          }
         }
       },
       "required": []
@@ -1368,6 +1375,56 @@
           "$ref": "#/$defs/appearanceShadow"
         }
       }
+    },
+    "textRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65536
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536
+        },
+        "style": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bold": {
+              "type": "boolean"
+            },
+            "italic": {
+              "type": "boolean"
+            },
+            "underline": {
+              "type": "boolean"
+            },
+            "strikethrough": {
+              "type": "boolean"
+            },
+            "monospace": {
+              "type": "boolean"
+            },
+            "font_size": {
+              "type": "number",
+              "minimum": 6,
+              "maximum": 200
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            }
+          }
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "style"
+      ]
     }
   }
 }

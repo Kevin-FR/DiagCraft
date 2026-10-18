@@ -82,6 +82,34 @@ agrandir la page ou utiliser `fit_page` avant l’export.
 }
 ```
 
+## Portions de texte dans un bloc
+
+`text_runs` est une liste facultative de `{start,end,style}` sur le nœud. Les index
+comptent les scalaires Unicode du texte original, avec `end` exclu : jamais des
+octets UTF-8 ni des unités UTF-16. Les limites doivent aussi être des frontières
+de graphèmes (accent combiné et emoji restent ensemble). Les plages sont triées
+et sans chevauchement, maximum 1 024 ; le texte reste limité à 65 536 octets.
+
+Chaque style peut définir `bold`, `italic`, `underline`, `strikethrough`, `monospace`
+(booléens), `font_size` (6 à 200 px), `color` ([R,G,B]). Un champ omis hérite du
+style du bloc ; `false` désactive explicitement un attribut. Le schéma rejette
+les champs inconnus. `text_runs: []` efface les portions. Fournir la liste remplace
+les portions entières ; fournir seulement `text` les adapte à la modification
+en préservant les parties inchangées et en héritant du style au point d’insertion.
+L’inspection renvoie les portions enregistrées et la disposition calculée.
+
+Pour `test Le BLOC\n\nSuperbe` :
+
+```json
+{"text_runs":[{"start":5,"end":7,"style":{"bold":true}},
+              {"start":14,"end":21,"style":{"italic":true,"underline":true}}]}
+```
+
+Il s’agit de `changes` dans `update_node`, ou de `style` dans `add_node`.
+Le texte ne contient pas de balisage interprété. Une plage invalide ou une
+révision obsolète rejette tout le lot. Les anciens lecteurs v7 ignorent les
+portions et ne peuvent pas les conserver au réenregistrement.
+
 ## Apparence des objets
 
 `update_node.changes.appearance` (ou `add_node.style.appearance`) remplace le
