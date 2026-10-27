@@ -28,6 +28,8 @@ def check():
                 required.update(json.loads(literal) for literal in re.findall(LITERAL, match[1]))
         for match in re.finditer(r'(?:\bt|i18n::render)\(\s*(' + LITERAL + ')', source):
             required.add(json.loads(match[1]))
+        for match in re.finditer(r'\bt\(\s*if[^\{]+\{\s*(' + LITERAL + r')\s*\}\s*else\s*\{\s*(' + LITERAL + r')\s*\}\s*\)', source):
+            required.update(value for i in (1, 2) if (value := json.loads(match[i])).strip())
         if path.name == "commands_ui.rs":
             for match in re.finditer(r'command!\(\s*\w+,\s*(' + LITERAL + r'),\s*(' + LITERAL + ')', source):
                 required.update(json.loads(match[i]) for i in (1, 2))

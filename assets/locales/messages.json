@@ -8863,5 +8863,14 @@
     "it": "1 oggetto",
     "pt": "1 objeto",
     "zh-Hans": "1 个对象"
+  },
+  "Objets groupés": {
+    "fr": "Objets groupés",
+    "en": "Grouped objects",
+    "de": "Gruppierte Objekte",
+    "es": "Objetos agrupados",
+    "it": "Oggetti raggruppati",
+    "pt": "Objetos agrupados",
+    "zh-Hans": "已组合对象"
   }
 }
