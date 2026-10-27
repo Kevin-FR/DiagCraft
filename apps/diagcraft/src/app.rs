@@ -946,7 +946,12 @@ impl DrawApp {
         match self.doc.duplicate_objects(&self.selected, [24., 24.]) {
             Ok(ids) => {
                 self.selected = ids;
+                // Duplicates keep their source layers, including the base layer,
+                // regardless of the target selected for newly drawn objects.
+                let drawing_layer = std::mem::replace(&mut self.drawing_layer, 0);
                 self.commit();
+                self.drawing_layer = drawing_layer;
+                self.normalize_selection();
             }
             Err(e) => self.error = Some(e),
         }

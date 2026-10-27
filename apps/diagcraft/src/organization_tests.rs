@@ -469,3 +469,25 @@ fn alignment_buttons_fit_a_narrow_inspector_in_every_language() {
     }
     i18n::activate(Language::French);
 }
+
+#[test]
+fn duplicate_on_base_layer_ignores_the_current_drawing_target() {
+    let (_, mut app, ids) = organization_setup();
+    let layer = app.doc.create_layer("New drawings".into()).unwrap();
+    app.doc.group_objects(&ids).unwrap();
+    app.commit();
+    app.drawing_layer = layer;
+    app.selected = vec![ids[0]];
+    let before = app.doc.clone();
+    app.duplicate();
+    assert_ne!(app.doc, before);
+    assert_eq!(app.doc.organization.layers, before.organization.layers);
+    assert_eq!(app.drawing_layer, layer);
+    assert!(
+        app.selected
+            .iter()
+            .all(|id| !ids.contains(id) && app.doc.object_layer(*id) == 0)
+    );
+    app.undo();
+    assert_eq!(app.doc, before);
+}
