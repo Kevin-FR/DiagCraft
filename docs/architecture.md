@@ -154,3 +154,29 @@ de document ; `finish_frame_edit` et la récupération ignorent le brouillon act
 Échap restaure le snapshot sans ajouter d’historique. Après interruption, les
 répétitions sont ignorées jusqu’au relâchement. Les commandes de la palette
 utilisent le même chemin, avec validation immédiate si aucune flèche n’est maintenue.
+
+## Organisation des objets
+
+`organization.rs` conserve des métadonnées facultatives propres à chaque page :
+calques ordonnés, groupes plats et états des objets indexés par leurs IDs existants.
+Les identifiants de groupe et de calque ont des espaces distincts de ceux des objets.
+Le calque de base 0 reste implicite, visible et déverrouillé. Un groupe ne traverse
+pas les calques. La sérialisation canonique v7 omet le champ quand il est vide.
+
+Un `OrganizationView` calculé par page fournit les ensembles de visibilité,
+verrouillage et sélection. Il n’est jamais sérialisé ; les chemins de rendu,
+d’export et d’inspection le réutilisent pour éviter les recherches linéaires par
+objet. L’ordre des calques prime sur le type des objets. Un connecteur attaché
+à une forme masquée reste enregistré mais n’est pas affiché ou exporté.
+
+`organization_ui.rs` centralise les commandes, l’affectation des nouveaux objets
+et les contrôles de calques. Le choix du calque de dessin et les brouillons de
+noms sont des états d’interface, distincts du document. Les commandes d’édition
+vérifient la protection et la validation de transition empêche une écriture directe
+oubliée d’altérer un objet protégé. L’historique, la galerie et la récupération
+continuent à stocker le document canonique complet.
+
+Les patches API 1 utilisent des alias de calque distincts des alias d’objets.
+Chaque opération vérifie ses protections ; un déverrouillage explicite peut
+précéder une modification dans un même lot atomique. Les anciens lecteurs v7
+ignorent l’organisation et ne la préservent pas au réenregistrement.

@@ -36,18 +36,14 @@ impl DrawApp {
         self.quick_link_port = None;
         if select_target {
             let point = self.world(screen);
-            let hit = self
-                .doc
-                .hit_chart(point)
-                .or_else(|| self.doc.hit_node(point))
-                .or_else(|| self.doc.hit_connector(point, 7. / self.zoom))
-                .or_else(|| self.doc.hit_drawing(point, 7. / self.zoom));
+            let hit = self.organized_hit(point);
             match hit {
                 Some(id) if !self.selected.contains(&id) => self.selected = vec![id],
                 None => self.selected.clear(),
                 _ => {}
             }
         }
+        self.normalize_selection();
         self.context_position = self.world(screen);
         self.context_screen = screen;
         self.context_open = true;
@@ -135,101 +131,106 @@ impl DrawApp {
             .size(16.),
         );
         if let Some(id) = id {
-            action = self.quick_formats(ui, id);
+            ui.add_enabled_ui(self.selection_editable(), |ui| {
+                action = self.quick_formats(ui, id);
+            });
         }
-        if node.is_some() {
-            ui.separator();
-            if menu_item(ui, "Modifier le texte…", None, true) {
-                action = Some(Action::Text);
+        ui.add_enabled_ui(self.selection_editable(), |ui| {
+            if node.is_some() {
+                ui.separator();
+                if menu_item(ui, "Modifier le texte…", None, true) {
+                    action = Some(Action::Text);
+                }
+                if menu_item(ui, "Ajuster la forme au texte", None, true) {
+                    action = Some(Action::FitText);
+                }
+                ui.menu_button(t("Remplacer la forme"), |ui| {
+                    if let Some(kind) = shape_picker(ui) {
+                        action = Some(Action::Replace(kind));
+                        ui.close();
+                    }
+                });
+                ui.menu_button(t("Ajouter une forme liée"), |ui| {
+                    for (port, label) in [
+                        (Port::Right, "À droite"),
+                        (Port::Bottom, "En dessous"),
+                        (Port::Left, "À gauche"),
+                        (Port::Top, "Au-dessus"),
+                    ] {
+                        ui.menu_button(t(label), |ui| {
+                            if let Some(kind) = shape_picker(ui) {
+                                action = Some(Action::Linked(kind, port));
+                                ui.close();
+                            }
+                        });
+                    }
+                });
+                if menu_item(ui, "Ajouter à ma bibliothèque", None, true) {
+                    action = Some(Action::Library);
+                }
             }
-            if menu_item(ui, "Ajuster la forme au texte", None, true) {
+            if node.is_none()
+                && self.selected.iter().any(|id| self.doc.node(*id).is_some())
+                && menu_item(ui, "Ajuster les formes au texte", None, true)
+            {
                 action = Some(Action::FitText);
             }
-            ui.menu_button(t("Remplacer la forme"), |ui| {
-                if let Some(kind) = shape_picker(ui) {
-                    action = Some(Action::Replace(kind));
-                    ui.close();
+            if let Some(e) = &edge {
+                ui.separator();
+                if menu_item(ui, "Libérer le départ", None, e.from != 0) {
+                    action = Some(Action::Detach(true));
                 }
-            });
-            ui.menu_button(t("Ajouter une forme liée"), |ui| {
-                for (port, label) in [
-                    (Port::Right, "À droite"),
-                    (Port::Bottom, "En dessous"),
-                    (Port::Left, "À gauche"),
-                    (Port::Top, "Au-dessus"),
-                ] {
-                    ui.menu_button(t(label), |ui| {
-                        if let Some(kind) = shape_picker(ui) {
-                            action = Some(Action::Linked(kind, port));
-                            ui.close();
-                        }
-                    });
+                if menu_item(ui, "Libérer l’arrivée", None, e.to != 0) {
+                    action = Some(Action::Detach(false));
                 }
-            });
-            if menu_item(ui, "Ajouter à ma bibliothèque", None, true) {
-                action = Some(Action::Library);
-            }
-        }
-        if node.is_none()
-            && self.selected.iter().any(|id| self.doc.node(*id).is_some())
-            && menu_item(ui, "Ajuster les formes au texte", None, true)
-        {
-            action = Some(Action::FitText);
-        }
-        if let Some(e) = &edge {
-            ui.separator();
-            if menu_item(ui, "Libérer le départ", None, e.from != 0) {
-                action = Some(Action::Detach(true));
-            }
-            if menu_item(ui, "Libérer l’arrivée", None, e.to != 0) {
-                action = Some(Action::Detach(false));
-            }
-            let automatic = e.waypoints.is_empty();
-            if menu_item(
-                ui,
-                if automatic {
-                    "Passer en routage manuel"
-                } else {
-                    "Rétablir le routage automatique"
-                },
-                None,
-                e.kind == ConnectorKind::Elbow,
-            ) {
-                action = Some(Action::Automatic(!automatic));
-            }
-            if menu_item(
-                ui,
-                "Ajouter un point de passage ici",
-                None,
-                e.kind == ConnectorKind::Elbow && e.waypoints.len() < 16,
-            ) {
-                action = Some(Action::AddPoint);
-            }
-            if let Some(index) = e
-                .waypoints
-                .iter()
-                .position(|p| self.screen(*p).distance(self.context_screen) <= 12.)
-                && menu_item(ui, "Supprimer ce point de passage", None, true)
-            {
-                action = Some(Action::RemovePoint(index));
-            }
-            ui.menu_button(t("Insérer une forme sur le connecteur"), |ui| {
-                if let Some(kind) = shape_picker(ui) {
-                    action = Some(Action::Insert(kind));
-                    ui.close();
+                let automatic = e.waypoints.is_empty();
+                if menu_item(
+                    ui,
+                    if automatic {
+                        "Passer en routage manuel"
+                    } else {
+                        "Rétablir le routage automatique"
+                    },
+                    None,
+                    e.kind == ConnectorKind::Elbow,
+                ) {
+                    action = Some(Action::Automatic(!automatic));
                 }
-            });
-            ui.label(
-                RichText::new(t(if automatic {
-                    "Le tracé automatique suit les formes."
-                } else {
-                    "Glissez les losanges bleus pour modifier le tracé."
-                }))
-                .size(11.)
-                .color(MUTED),
-            );
-        }
+                if menu_item(
+                    ui,
+                    "Ajouter un point de passage ici",
+                    None,
+                    e.kind == ConnectorKind::Elbow && e.waypoints.len() < 16,
+                ) {
+                    action = Some(Action::AddPoint);
+                }
+                if let Some(index) = e
+                    .waypoints
+                    .iter()
+                    .position(|p| self.screen(*p).distance(self.context_screen) <= 12.)
+                    && menu_item(ui, "Supprimer ce point de passage", None, true)
+                {
+                    action = Some(Action::RemovePoint(index));
+                }
+                ui.menu_button(t("Insérer une forme sur le connecteur"), |ui| {
+                    if let Some(kind) = shape_picker(ui) {
+                        action = Some(Action::Insert(kind));
+                        ui.close();
+                    }
+                });
+                ui.label(
+                    RichText::new(t(if automatic {
+                        "Le tracé automatique suit les formes."
+                    } else {
+                        "Glissez les losanges bleus pour modifier le tracé."
+                    }))
+                    .size(11.)
+                    .color(MUTED),
+                );
+            }
+        });
         ui.separator();
+        self.organization_menu(ui);
         if menu_item(
             ui,
             "Annuler la modification",
@@ -248,14 +249,24 @@ impl DrawApp {
         }
         let copyable = !self.selected.is_empty();
         for (label, shortcut, enabled, a) in [
-            ("Couper", Some("Ctrl/⌘ X"), copyable, Action::Cut),
+            (
+                "Couper",
+                Some("Ctrl/⌘ X"),
+                self.selection_editable(),
+                Action::Cut,
+            ),
             ("Copier", Some("Ctrl/⌘ C"), copyable, Action::Copy),
             ("Coller ici", Some("Ctrl/⌘ V"), true, Action::Paste),
-            ("Dupliquer", Some("Ctrl/⌘ D"), copyable, Action::Duplicate),
+            (
+                "Dupliquer",
+                Some("Ctrl/⌘ D"),
+                self.selection_duplicable(),
+                Action::Duplicate,
+            ),
             (
                 "Supprimer",
                 Some("Suppr"),
-                !self.selected.is_empty(),
+                self.selection_editable(),
                 Action::Delete,
             ),
         ] {
@@ -265,7 +276,8 @@ impl DrawApp {
         }
         if !self.selected.is_empty() {
             ui.separator();
-            let orderable = self.selected.iter().all(|id| self.doc.node(*id).is_some());
+            let orderable = self.selection_editable()
+                && self.selected.iter().all(|id| self.doc.node(*id).is_some());
             if menu_item(ui, "Mettre au premier plan", None, orderable) {
                 action = Some(Action::Front);
             }
@@ -429,6 +441,28 @@ impl DrawApp {
         action
     }
     pub(super) fn perform_action(&mut self, action: Action, ctx: &egui::Context) {
+        self.normalize_selection();
+        if matches!(
+            action,
+            Action::Cut
+                | Action::Delete
+                | Action::Front
+                | Action::Back
+                | Action::FitText
+                | Action::Replace(_)
+                | Action::Linked(_, _)
+                | Action::Insert(_)
+                | Action::Automatic(_)
+                | Action::AddPoint
+                | Action::RemovePoint(_)
+                | Action::SwapArrows
+                | Action::Detach(_)
+                | Action::NodeStyle(_)
+        ) && !self.selection_editable()
+        {
+            self.status = "La sélection est verrouillée".into();
+            return;
+        }
         self.context_open = false;
         self.quick_link_port = None;
         let id = self.selected.first().copied();
@@ -491,17 +525,19 @@ impl DrawApp {
             Action::Export => self.export(),
             Action::ExportPdf => self.show_pdf_export = true,
             Action::SelectAll => {
+                let view = self.doc.organization_view();
                 self.selected = self
                     .doc
-                    .nodes
-                    .iter()
-                    .map(|n| n.id)
-                    .chain(self.doc.charts.iter().map(|c| c.id))
-                    .chain(self.doc.drawings.iter().map(|d| d.id))
-                    .chain(self.doc.connectors.iter().map(|e| e.id))
-                    .collect()
+                    .object_ids()
+                    .into_iter()
+                    .filter(|id| view.is_object_visible(*id))
+                    .collect();
             }
             Action::Text => {
+                if !self.selected.is_empty() && !self.selection_editable() {
+                    self.status = "La sélection est verrouillée".into();
+                    return;
+                }
                 if let Some(id) = id
                     && (self.doc.node(id).is_some()
                         || self.doc.connectors.iter().any(|e| e.id == id))
@@ -627,7 +663,7 @@ impl DrawApp {
         rect.is_finite().then_some(rect)
     }
     pub(super) fn paint_connector_handles(&self, p: &egui::Painter) {
-        if self.selected.len() != 1 {
+        if self.selected.len() != 1 || !self.selection_editable() {
             return;
         }
         let Some(e) = self

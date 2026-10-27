@@ -242,10 +242,18 @@ pub struct DrawApp {
     keyboard_move_cancelled: bool,
     move_guides: Vec<alignment_ui::Guide>,
     capture_alignment: bool,
+    show_layers: bool,
+    drawing_layer: u64,
+    organization_page: usize,
+    layer_names: std::collections::BTreeMap<u64, String>,
 }
 
 impl DrawApp {
     pub fn capture_tab(&mut self, name: &str) {
+        if name == "organisation" {
+            self.prepare_organization_capture();
+            return;
+        }
         if name == "recuperation" {
             self.prepare_recovery_capture();
         }
@@ -700,6 +708,7 @@ impl DrawApp {
             style.animation_time = 0.;
         }
         ctx.set_style(style);
+        let organization_page = doc.page_index;
         let mut app = Self {
             recovered: false,
             recovery: Default::default(),
@@ -807,6 +816,10 @@ impl DrawApp {
             keyboard_move_cancelled: false,
             move_guides: vec![],
             capture_alignment: false,
+            show_layers: false,
+            drawing_layer: 0,
+            organization_page,
+            layer_names: Default::default(),
         };
         app.tabs.push(app.session());
         app
@@ -821,6 +834,19 @@ impl DrawApp {
         self.recovered || self.doc != self.saved
     }
     fn commit(&mut self) {
+        let before = self.history.current().clone();
+        self.assign_new_objects(&before);
+        if let Err(error) = before.check_locked_changes(&self.doc) {
+            self.doc = before;
+            self.drag = None;
+            self.drag_snapshot = None;
+            self.keyboard_move = None;
+            self.move_guides.clear();
+            self.property_edit = false;
+            self.normalize_selection();
+            self.status = error;
+            return;
+        }
         let keyboard_move = self.keyboard_move.take();
         if self.drag_snapshot.take().is_some() {
             self.drag = None;
@@ -830,6 +856,14 @@ impl DrawApp {
             self.status = error;
         }
         self.doc.grow_page_to_content();
+        if let Err(error) = before.check_locked_changes(&self.doc) {
+            self.doc = before;
+            self.normalize_selection();
+            self.property_edit = false;
+            self.status = error;
+            return;
+        }
+        self.normalize_selection();
         self.history.record(&self.doc);
         self.property_edit = false;
         if let Some(movement) = keyboard_move {
@@ -851,6 +885,10 @@ impl DrawApp {
         }
     }
     fn fit_selection_text(&mut self) {
+        if !self.selection_editable() {
+            self.status = "La sélection est verrouillée".into();
+            return;
+        }
         match self.doc.fit_nodes_to_text(&self.selected) {
             Ok(_) => {
                 self.commit();
@@ -890,14 +928,22 @@ impl DrawApp {
         }
     }
     fn delete(&mut self) {
-        self.doc.remove(&self.selected);
+        self.normalize_selection();
+        if !self.selection_editable() {
+            self.status = "La sélection est verrouillée".into();
+            return;
+        }
+        if let Err(error) = self.doc.try_remove(&self.selected) {
+            self.status = error;
+            return;
+        }
         self.selected.clear();
         self.clear_connection();
         self.commit();
     }
     fn duplicate(&mut self) {
-        let fragment = self.doc.selection(&self.selected);
-        match self.doc.paste(&fragment, [24., 24.]) {
+        self.normalize_selection();
+        match self.doc.duplicate_objects(&self.selected, [24., 24.]) {
             Ok(ids) => {
                 self.selected = ids;
                 self.commit();
@@ -1074,6 +1120,7 @@ impl DrawApp {
         self.saved = doc.clone();
         self.history = History::new(&doc);
         self.doc = doc;
+        self.reset_organization_view();
         self.path = path;
         self.selected.clear();
         self.set_tool(Tool::Select);
@@ -1115,6 +1162,7 @@ impl DrawApp {
         let s = self.tabs[index].clone();
         self.recovered = s.recovered;
         self.doc = s.doc;
+        self.reset_organization_view();
         self.saved = s.saved;
         self.path = s.path;
         self.history = s.history;
@@ -1177,6 +1225,7 @@ impl DrawApp {
         let s = self.tabs[target].clone();
         self.recovered = s.recovered;
         self.doc = s.doc;
+        self.reset_organization_view();
         self.saved = s.saved;
         self.path = s.path;
         self.history = s.history;
@@ -1297,6 +1346,9 @@ impl DrawApp {
             ui.spacing_mut().item_spacing.y=6.;ui.spacing_mut().interact_size.y=30.;ui.spacing_mut().button_padding.y=5.;
             panels_ui::heading(ui, if self.selected.is_empty() { "Document" } else { "Propriétés" }, Some(&mut self.show_inspector));
             egui::ScrollArea::vertical().id_salt("inspector_scroll").auto_shrink([false, false]).show(ui,|ui| {
+                self.organization_inspector(ui);
+                let editable = self.selected.is_empty() || self.selection_editable();
+                ui.add_enabled_ui(editable, |ui| {
                 if self.selected.len()==1 {
                     let id=self.selected[0];
                     ui.horizontal(|ui|{ui.monospace(i18n::render("page:{0} / objet:{1}", &[("0", format!("{}", self.doc.page_index)),("1", format!("{}", id))]));if ui.small_button(t("Copier")).on_hover_text(t("Référence JSON pour un agent")).clicked(){ctx.copy_text(serde_json::json!({"page":self.doc.page_index,"target":id}).to_string());}});ui.add_space(10.);
@@ -1345,6 +1397,7 @@ impl DrawApp {
                     ui.add_space(12.);ui.separator();
                     ui.label(RichText::new(t("Sélectionnez un objet pour modifier son texte, ses couleurs et sa taille.")).size(12.).color(MUTED));
                 }
+                });
             });
         });
         panels_ui::remember_width(
@@ -1547,7 +1600,19 @@ impl DrawApp {
                         Color32::from_black_alpha(20),
                     );
                 }
-                for d in &self.doc.drawings {
+                let preview = self.inline_preview_document();
+                let rendered = preview.as_ref().unwrap_or(&self.doc);
+                let organization = rendered.organization_view();
+                let mut paths = std::collections::BTreeMap::<u64, Vec<_>>::new();
+                let mut edges = std::collections::BTreeMap::<u64, Vec<_>>::new();
+                let mut nodes = std::collections::BTreeMap::<u64, Vec<_>>::new();
+                let mut charts = std::collections::BTreeMap::<u64, Vec<_>>::new();
+                for drawing in &self.doc.drawings { if organization.is_object_visible(drawing.id) { paths.entry(organization.object_layer(drawing.id)).or_default().push(drawing); } }
+                for edge in &rendered.connectors { if organization.is_object_visible(edge.id) { edges.entry(organization.object_layer(edge.id)).or_default().push(edge); } }
+                for node in &rendered.nodes { if organization.is_object_visible(node.id) { nodes.entry(organization.object_layer(node.id)).or_default().push(node); } }
+                for chart in &self.doc.charts { if organization.is_object_visible(chart.id) { charts.entry(organization.object_layer(chart.id)).or_default().push(chart); } }
+                for layer in rendered.layer_ids() {
+                for d in paths.get(&layer).into_iter().flatten() {
                     let points: Vec<_> = d.points().into_iter().map(|v| self.screen(v)).collect();
                     let color = if self.selected.contains(&d.id) {
                         ACCENT
@@ -1572,9 +1637,7 @@ impl DrawApp {
                         }
                     }
                 }
-                let preview = self.inline_preview_document();
-                let rendered = preview.as_ref().unwrap_or(&self.doc);
-                for edge in &rendered.connectors {
+                for edge in edges.get(&layer).into_iter().flatten() {
                     let pts: Vec<_> = rendered
                         .route(edge)
                         .into_iter()
@@ -1633,17 +1696,19 @@ impl DrawApp {
                         p.galley(text_rect.min, galley, color);
                     }
                 }
-                for node in &rendered.nodes { self.paint_node(&p,node); }
-                for chart in &self.doc.charts {
+                for node in nodes.get(&layer).into_iter().flatten() { self.paint_node(&p,node); }
+                for chart in charts.get(&layer).into_iter().flatten() {
                     let r = Rect::from_min_size(
                         self.screen(chart.position),
                         vec2(chart.size[0], chart.size[1]) * self.zoom,
                     );
                     paint_chart(&p, chart, r);
                     if self.selected.contains(&chart.id) {
-                        paint_selection(&p, r, self.selected.len() == 1 && !matches!(self.drag, Some(Drag::Marquee { .. })));
+                        paint_selection(&p, r, self.selected.len() == 1 && self.selection_editable() && !matches!(self.drag, Some(Drag::Marquee { .. })));
                     }
                 }
+                }
+                self.paint_group_selection(&p);
                 if self.rich_editor.is_none() && !matches!(self.drag, Some(Drag::Marquee { .. })) {
                     self.paint_connector_handles(&p);
                     self.paint_connection_buttons(&p);
@@ -1882,6 +1947,7 @@ impl DrawApp {
                     }
                 }
                 Tool::Select => {
+                    let top_hit = self.organized_hit(world);
                     if let Some((id, port)) = self.connection_handle_at(pos) {
                         self.begin_connection(id, port, None, Some(pos));
                         return;
@@ -1890,7 +1956,7 @@ impl DrawApp {
                     let endpoint = self
                         .selected
                         .first()
-                        .filter(|_| self.selected.len() == 1)
+                        .filter(|_| self.selected.len() == 1 && self.selection_editable())
                         .and_then(|id| self.doc.connectors.iter().find(|e| e.id == *id))
                         .and_then(|e| {
                             let r = self.doc.route(e);
@@ -1903,7 +1969,7 @@ impl DrawApp {
                     let segment = self
                         .selected
                         .first()
-                        .filter(|_| self.selected.len() == 1)
+                        .filter(|_| self.selected.len() == 1 && self.selection_editable())
                         .and_then(|id| {
                             self.segment_handles(*id)
                                 .into_iter()
@@ -1913,7 +1979,7 @@ impl DrawApp {
                     let waypoint = self
                         .selected
                         .first()
-                        .filter(|_| self.selected.len() == 1)
+                        .filter(|_| self.selected.len() == 1 && self.selection_editable())
                         .and_then(|id| {
                             self.doc
                                 .connectors
@@ -1966,10 +2032,18 @@ impl DrawApp {
                             origin,
                             handle,
                         });
-                    } else if let Some(id) = self.doc.hit_chart(world) {
+                    } else if let Some(id) =
+                        self.doc.hit_chart(world).filter(|id| Some(*id) == top_hit)
+                    {
                         self.select_for_drag(id, world, ui.input(|i| i.modifiers.shift));
-                    } else if let Some(id) = self.doc.hit_node(world) {
-                        if let Some(source) = self.format_brush.take() {
+                    } else if let Some(id) =
+                        self.doc.hit_node(world).filter(|id| Some(*id) == top_hit)
+                    {
+                        if let Some(source) = self
+                            .format_brush
+                            .take()
+                            .filter(|_| !self.doc.is_object_locked(id))
+                        {
                             if let Some(n) = self.doc.node_mut(id) {
                                 n.fill = source.fill;
                                 n.stroke = source.stroke;
@@ -1982,8 +2056,16 @@ impl DrawApp {
                             self.commit();
                         }
                         self.select_for_drag(id, world, ui.input(|i| i.modifiers.shift));
-                    } else if let Some(id) = self.doc.hit_connector(world, 7. / self.zoom) {
-                        if let Some(source) = self.edge_brush.take() {
+                    } else if let Some(id) = self
+                        .doc
+                        .hit_connector(world, 7. / self.zoom)
+                        .filter(|id| Some(*id) == top_hit)
+                    {
+                        if let Some(source) = self
+                            .edge_brush
+                            .take()
+                            .filter(|_| !self.doc.is_object_locked(id))
+                        {
                             let target =
                                 self.doc.connectors.iter_mut().find(|e| e.id == id).unwrap();
                             target.color = source.color;
@@ -1997,7 +2079,10 @@ impl DrawApp {
                             self.commit();
                         }
                         self.select_for_drag(id, world, ui.input(|i| i.modifiers.shift));
-                        if self.selected.len() == 1 && self.selected.contains(&id) {
+                        if self.selected.len() == 1
+                            && self.selected.contains(&id)
+                            && self.selection_editable()
+                        {
                             let e = self.doc.connectors.iter().find(|e| e.id == id).unwrap();
                             self.drag = if e.from == 0 || e.to == 0 {
                                 Some(Drag::FreeConnector {
@@ -2009,7 +2094,11 @@ impl DrawApp {
                                 None
                             };
                         }
-                    } else if let Some(id) = self.doc.hit_drawing(world, 7. / self.zoom) {
+                    } else if let Some(id) = self
+                        .doc
+                        .hit_drawing(world, 7. / self.zoom)
+                        .filter(|id| Some(*id) == top_hit)
+                    {
                         self.select_for_drag(id, world, ui.input(|i| i.modifiers.shift));
                     } else {
                         self.drag = Some(Drag::Marquee {
@@ -2236,10 +2325,9 @@ impl DrawApp {
             let previous = self.text_click.take();
             if text_click
                 && let Some(pos) = pos
-                && let Some(id) = self
-                    .doc
-                    .hit_node(self.world(pos))
-                    .filter(|id| self.selected.contains(id))
+                && let Some(id) = self.doc.hit_node(self.world(pos)).filter(|id| {
+                    self.selected.contains(id) && self.organized_hit(self.world(pos)) == Some(*id)
+                })
             {
                 let time = ui.input(|i| i.time);
                 let delay = ui.ctx().options(|o| o.input_options.max_double_click_delay);
@@ -2341,7 +2429,9 @@ impl DrawApp {
             paint_selection(
                 p,
                 r,
-                self.selected.len() == 1 && !matches!(self.drag, Some(Drag::Marquee { .. })),
+                self.selected.len() == 1
+                    && self.selection_editable()
+                    && !matches!(self.drag, Some(Drag::Marquee { .. })),
             );
         }
     }
@@ -2445,6 +2535,7 @@ impl eframe::App for DrawApp {
         {
             self.inline_open(path);
         }
+        self.normalize_selection();
         self.shortcuts(ctx);
         let before = self.doc.clone();
         self.header(ctx);
@@ -2466,6 +2557,7 @@ impl eframe::App for DrawApp {
                 && !self.show_gallery
                 && !self.show_pdf_export
                 && !self.show_pages
+                && !self.show_layers
                 && self.page_draft.is_none()
                 && self.agent_panel.is_none()
                 && self.rich_editor.is_none(),
@@ -2479,6 +2571,7 @@ impl eframe::App for DrawApp {
         self.library_dialogs(ctx);
         self.workspace_dialogs(ctx);
         self.pages_dialogs(ctx);
+        self.layers_dialog(ctx);
         self.agent_dialog(ctx);
         self.inline_text_toolbar(ctx);
         self.dialogs(ctx);
@@ -2669,3 +2762,10 @@ mod recovery_ui;
 mod object_search_ui;
 #[path = "rich_text_ui.rs"]
 mod rich_text_ui;
+
+#[path = "organization_ui.rs"]
+mod organization_ui;
+
+#[cfg(test)]
+#[path = "organization_tests.rs"]
+mod organization_tests;

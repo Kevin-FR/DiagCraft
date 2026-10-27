@@ -23,6 +23,7 @@ pub fn hex(c: Color) -> String {
 /// Export vector geometry using the same computed routes as the native canvas.
 pub fn export(doc: &Document) -> Result<String, String> {
     doc.validate()?;
+    let organization = doc.organization_view();
     let mut out = format!(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{}\" height=\"{}\" viewBox=\"0 0 {} {}\" role=\"img\">\n<title>{}</title>\n<rect width=\"100%\" height=\"100%\" fill=\"{}\"/>\n",
         doc.page_size[0],
@@ -56,7 +57,22 @@ pub fn export(doc: &Document) -> Result<String, String> {
             escape(&doc.page_style.watermark)
         );
     }
-    for drawing in &doc.drawings {
+    for layer in doc.layer_ids() {
+        render_layer(doc, &organization, layer, &mut out);
+    }
+    out.push_str("</svg>\n");
+    Ok(out)
+}
+
+fn render_layer(
+    doc: &Document,
+    organization: &crate::organization::OrganizationView,
+    layer: u64,
+    out: &mut String,
+) {
+    for drawing in doc.drawings.iter().filter(|d| {
+        organization.object_layer(d.id) == layer && organization.is_object_visible(d.id)
+    }) {
         let [a, b, c, d] = drawing.controls();
         let color = hex(drawing.color);
         let path = match drawing.kind {
@@ -102,7 +118,9 @@ pub fn export(doc: &Document) -> Result<String, String> {
             }
         }
     }
-    for edge in &doc.connectors {
+    for edge in doc.connectors.iter().filter(|e| {
+        organization.object_layer(e.id) == layer && organization.is_object_visible(e.id)
+    }) {
         let points = doc.route(edge);
         let color = hex(edge.color);
         let coords = points
@@ -129,7 +147,7 @@ pub fn export(doc: &Document) -> Result<String, String> {
             );
             if edge.arrow {
                 styled_arrowhead(
-                    &mut out,
+                    out,
                     &points,
                     &color,
                     edge.width,
@@ -140,7 +158,7 @@ pub fn export(doc: &Document) -> Result<String, String> {
             if edge.arrow_start {
                 let reverse: Vec<_> = points.iter().rev().copied().collect();
                 styled_arrowhead(
-                    &mut out,
+                    out,
                     &reverse,
                     &color,
                     edge.width,
@@ -167,7 +185,9 @@ pub fn export(doc: &Document) -> Result<String, String> {
             );
         }
     }
-    for n in &doc.nodes {
+    for n in doc.nodes.iter().filter(|n| {
+        organization.object_layer(n.id) == layer && organization.is_object_visible(n.id)
+    }) {
         let [x, y] = n.position;
         let [w, h] = n.size;
         let c = n.center();
@@ -333,7 +353,9 @@ pub fn export(doc: &Document) -> Result<String, String> {
         }
         out.push_str("</text>\n");
     }
-    for chart in &doc.charts {
+    for chart in doc.charts.iter().filter(|c| {
+        organization.object_layer(c.id) == layer && organization.is_object_visible(c.id)
+    }) {
         let _ = writeln!(
             out,
             "<g transform=\"translate({} {})\">",
@@ -418,8 +440,6 @@ pub fn export(doc: &Document) -> Result<String, String> {
         }
         out.push_str("</g>\n");
     }
-    out.push_str("</svg>\n");
-    Ok(out)
 }
 
 fn styled_arrowhead(

@@ -21,12 +21,13 @@ Les applications et leurs empreintes SHA-256 sont sur la page des
 | Windows x86_64 | ZIP portable avec application et CLI |
 | Linux x86_64 | Paquet `.deb` amd64 ou archive `.tar.gz`, application et CLI |
 
-La version **0.7.3** reste expérimentale et corrige le cadre sombre de la fenêtre sous Ubuntu/Wayland. Le paquet
+La version **0.8.0** reste expérimentale et ajoute les groupes persistants, le verrouillage et les calques visibles ou masqués. Le paquet
 Mac est signé ad hoc et n’est pas notarié par Apple. Les paquets Windows ne
 sont pas signés avec un certificat éditeur. Voir [l’installation](../installation.md).
 
 ## Fonctions disponibles
 
+- Groupes persistants, verrouillage des objets et calques par page, avec visibilité commune sur la feuille et dans les exports SVG/PDF.
 - Flèches : 1 px ; Maj : 10 px. Maintenir une touche crée un seul déplacement annulable, sans déformer la sélection.
 - Une seule icône par volet, alignée sous le ruban et accessible quand le volet est fermé.
 - Recherche des objets par texte, type ou identifiant ; création, édition et connexion de blocs au clavier.
@@ -44,6 +45,10 @@ sont pas signés avec un certificat éditeur. Voir [l’installation](../install
 - Ajustement automatique des formes au texte, avec calcul partagé par le canevas et les exports SVG/PDF.
 - Copies automatiques locales et récupération des dessins après un plantage, sans écraser les originaux.
 - CLI et serveur MCP locaux : inspection, validation et patches JSON atomiques.
+
+L’organisation est enregistrée dans des métadonnées v7 facultatives. Les anciennes applications affichent les objets masqués et perdent groupes, calques et verrouillages au réenregistrement.
+
+[Groupes et calques](../organisation.md) (FR).
 
 Le format de document **v7** et l’API agents **v1** ont leurs propres numéros,
 indépendants de la version de l’application. Les fichiers des formats v1 à v6

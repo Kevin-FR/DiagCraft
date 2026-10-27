@@ -294,11 +294,21 @@ impl Node {
 impl Document {
     /// Fit compatible nodes atomically; position, connectors and selection IDs stay intact.
     pub fn fit_nodes_to_text(&mut self, ids: &[u64]) -> Result<usize, String> {
+        let organization = self.organization_view();
         let sizes = self
             .nodes
             .iter()
             .filter(|n| ids.contains(&n.id))
-            .map(|n| Ok((n.id, n.fitted_text_size()?)))
+            .map(|n| {
+                let size = n.fitted_text_size()?;
+                if size != n.size && !organization.can_edit_object(n.id) {
+                    return Err(
+                        "Déverrouillez les objets et affichez leur calque avant de les modifier."
+                            .into(),
+                    );
+                }
+                Ok((n.id, size))
+            })
             .collect::<Result<Vec<_>, String>>()?;
         let changed = sizes
             .iter()
@@ -311,10 +321,11 @@ impl Document {
     }
 
     pub fn fit_automatic_text(&mut self) -> Result<usize, String> {
+        let organization = self.organization_view();
         let ids = self
             .nodes
             .iter()
-            .filter(|n| n.text_style.auto_fit)
+            .filter(|n| n.text_style.auto_fit && organization.can_edit_object(n.id))
             .map(|n| n.id)
             .collect::<Vec<_>>();
         self.fit_nodes_to_text(&ids)

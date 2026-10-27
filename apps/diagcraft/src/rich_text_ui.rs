@@ -265,6 +265,10 @@ impl DrawApp {
         if self.rich_editor.is_some() {
             return;
         }
+        if !self.doc.can_edit_object(id) {
+            self.status = "La sélection est verrouillée".into();
+            return;
+        }
         self.commit();
         if let Some(draft) = self.doc.node(id).cloned() {
             let count = draft.text.chars().count();
@@ -299,6 +303,9 @@ impl DrawApp {
             || editor.revision != diagcraft::agent::revision(&self.doc)
         {
             return Err("Le document a changé. Fermez l’éditeur puis rouvrez le bloc.".into());
+        }
+        if !self.doc.can_edit_object(editor.draft.id) {
+            return Err(t("La sélection est verrouillée"));
         }
         let mut draft = editor.draft.clone();
         draft.validate_text_runs()?;

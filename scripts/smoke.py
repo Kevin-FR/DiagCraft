@@ -62,7 +62,50 @@ def main():
             "draw_catalog", "draw_inspect", "draw_validate", "draw_apply"}
         assert not replies[2]["result"]["isError"]
         assert (tmp / "mcp.draw").read_bytes() == (tmp / "cli.draw").read_bytes()
-    print(f"CLI/MCP smoke passed: {count} format fixtures, SVG/PDF, dry run and identical CLI/MCP patches.")
+
+        # Exercise organization through the actual executable and MCP transport,
+        # including one-batch layer aliases and a failed protected modification.
+        ids = [node["id"] for node in context["pages"][0]["nodes"][:2]]
+        assert len(ids) == 2
+        organized = {"api_version": 1, "expected_revision": context["revision"], "operations": [
+            {"op": "update_node", "page": 0, "target": ids[0],
+             "changes": {"text": "Organization smoke fixture"}},
+            {"op": "add_layer", "page": 0, "alias": "details", "name": "Details"},
+            {"op": "move_objects_to_layer", "page": 0, "targets": ids, "layer": "details"},
+            {"op": "group_objects", "page": 0, "targets": ids},
+            {"op": "set_objects_locked", "page": 0, "targets": [ids[0]], "locked": True},
+            {"op": "update_layer", "page": 0, "layer": "details", "visible": False},
+        ]}
+        (tmp / "organization.json").write_text(json.dumps(organized))
+        run("--agent", "apply", source, tmp / "organization.json", tmp / "organized.draw", cwd=tmp)
+        run("--agent", "validate", tmp / "organized.draw", cwd=tmp)
+        organized_context = json.loads(run("--agent", "inspect", tmp / "organized.draw", cwd=tmp))
+        organization = organized_context["pages"][0]["organization"]
+        assert len(organization["groups"]) == 1
+        assert not organization["layers"][0]["visible"]
+        assert all(organization["objects"][str(id)]["locked"] for id in ids)
+        run("--export", tmp / "organized.draw", tmp / "hidden.svg", cwd=tmp)
+        assert "Organization smoke fixture" not in (tmp / "hidden.svg").read_text(encoding="utf-8")
+        organization_requests = json.loads(json.dumps(requests))
+        organization_requests[-1]["params"]["arguments"].update(patch=organized, output="organized-mcp.draw")
+        organized_mcp = subprocess.run([str(binary), "--mcp", str(tmp)], cwd=tmp, text=True, encoding="utf-8",
+                                      input="".join(json.dumps(r) + "\n" for r in organization_requests),
+                                      capture_output=True, check=True)
+        assert not organized_mcp.stderr
+        assert not json.loads(organized_mcp.stdout.splitlines()[-1])["result"]["isError"]
+        assert (tmp / "organized-mcp.draw").read_bytes() == (tmp / "organized.draw").read_bytes()
+        before = (tmp / "organized.draw").read_bytes()
+        blocked = {"api_version": 1, "expected_revision": organized_context["revision"], "operations": [
+            {"op": "set_title", "title": "Must not persist"},
+            {"op": "update_node", "page": 0, "target": ids[0], "changes": {"text": "Blocked"}},
+        ]}
+        (tmp / "blocked.json").write_text(json.dumps(blocked))
+        rejected = subprocess.run([str(binary), "--agent", "apply", str(tmp / "organized.draw"),
+                                   str(tmp / "blocked.json"), str(tmp / "blocked.draw")],
+                                  cwd=tmp, text=True, encoding="utf-8", capture_output=True)
+        assert rejected.returncode != 0 and not (tmp / "blocked.draw").exists()
+        assert (tmp / "organized.draw").read_bytes() == before
+    print(f"CLI/MCP smoke passed: {count} format fixtures, SVG/PDF, dry run, identical patches and protected organization.")
 
 
 if __name__ == "__main__":

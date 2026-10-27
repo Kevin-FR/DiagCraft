@@ -25,7 +25,7 @@ impl DrawApp {
             ctx.content_rect().height() >= 850. && ctx.content_rect().width() >= 1350.
         })
     }
-    fn command_button(&mut self, ui: &mut egui::Ui, command: commands_ui::Command) {
+    pub(super) fn command_button(&mut self, ui: &mut egui::Ui, command: commands_ui::Command) {
         let spec = commands_ui::COMMANDS
             .iter()
             .find(|s| s.command == command)
@@ -110,9 +110,10 @@ impl DrawApp {
                     }
                 }
                 ui.separator();
-                ui.add_enabled_ui(!self.selected.is_empty(), |ui| {
+                ui.add_enabled_ui(self.selection_editable(), |ui| {
                     self.align_menu(ui);
                 });
+                self.organization_menu(ui);
                 self.command_button(ui, Command::Duplicate);
                 if ui
                     .add(egui::Button::new(t("Propriétés")).selected(self.show_inspector))
@@ -177,6 +178,7 @@ impl DrawApp {
                 ui.checkbox(&mut self.snap, t("Magnétisme"));
                 self.panels_menu(ui);
                 self.command_button(ui, Command::Pages);
+                self.command_button(ui, Command::Layers);
             }
             RibbonTab::Symbols => {
                 ui.label(t("Rechercher"));
@@ -202,9 +204,10 @@ impl DrawApp {
                 }
             }
             RibbonTab::Advanced => {
-                ui.add_enabled_ui(!self.selected.is_empty(), |ui| {
+                ui.add_enabled_ui(self.selection_editable(), |ui| {
                     self.align_menu(ui);
                 });
+                self.organization_menu(ui);
                 self.command_button(ui, Command::SelectAll);
                 self.command_button(ui, Command::Validate);
                 self.command_button(ui, Command::Agents);
@@ -632,7 +635,7 @@ impl DrawApp {
                 .iter()
                 .find_map(|id| self.doc.node(*id))
                 .cloned();
-            ui.add_enabled_ui(node.is_some(), |ui| {
+            ui.add_enabled_ui(node.is_some() && self.selection_editable(), |ui| {
                 let mut style = node
                     .as_ref()
                     .map(|n| n.text_style.clone())
@@ -731,38 +734,40 @@ impl DrawApp {
             });
         });
         group(ui, 215., "Styles", |ui| {
-            ui.horizontal(|ui| {
-                for i in 0..5 {
-                    if theme_button(ui, i).clicked() {
-                        self.apply_theme(i, false);
-                    }
-                }
-            });
-            ui.horizontal(|ui| {
-                let node = self.selected.iter().find_map(|id| self.doc.node(*id));
-                let mut fill = node.map(|n| n.fill).unwrap_or([255, 255, 255]);
-                let mut stroke = node.map(|n| n.stroke).unwrap_or([70, 86, 105]);
-                ui.label(t("Fond"));
-                if ui.color_edit_button_srgb(&mut fill).changed() {
-                    for n in &mut self.doc.nodes {
-                        if self.selected.contains(&n.id) {
-                            n.fill = fill;
+            ui.add_enabled_ui(self.selection_editable(), |ui| {
+                ui.horizontal(|ui| {
+                    for i in 0..5 {
+                        if theme_button(ui, i).clicked() {
+                            self.apply_theme(i, false);
                         }
                     }
-                }
-                ui.label(t("Ligne"));
-                if ui.color_edit_button_srgb(&mut stroke).changed() {
-                    for n in &mut self.doc.nodes {
-                        if self.selected.contains(&n.id) {
-                            n.stroke = stroke;
+                });
+                ui.horizontal(|ui| {
+                    let node = self.selected.iter().find_map(|id| self.doc.node(*id));
+                    let mut fill = node.map(|n| n.fill).unwrap_or([255, 255, 255]);
+                    let mut stroke = node.map(|n| n.stroke).unwrap_or([70, 86, 105]);
+                    ui.label(t("Fond"));
+                    if ui.color_edit_button_srgb(&mut fill).changed() {
+                        for n in &mut self.doc.nodes {
+                            if self.selected.contains(&n.id) {
+                                n.fill = fill;
+                            }
                         }
                     }
-                }
+                    ui.label(t("Ligne"));
+                    if ui.color_edit_button_srgb(&mut stroke).changed() {
+                        for n in &mut self.doc.nodes {
+                            if self.selected.contains(&n.id) {
+                                n.stroke = stroke;
+                            }
+                        }
+                    }
+                });
             });
         });
         group(ui, 230., "Organiser", |ui| {
             ui.horizontal(|ui| {
-                self.align_menu(ui);
+                self.organization_menu(ui);
                 if ui.button(t("Dupliquer")).clicked() {
                     self.duplicate();
                 }
@@ -1026,7 +1031,10 @@ impl DrawApp {
     }
     pub(super) fn advanced_ribbon(&mut self, ui: &mut egui::Ui) {
         group(ui, 230., "Organisation", |ui| {
-            self.align_menu(ui);
+            ui.horizontal(|ui| {
+                self.organization_menu(ui);
+                self.align_menu(ui);
+            });
             ui.menu_button(t("Répartir la sélection"), |ui| {
                 if ui.button(t("Horizontalement")).clicked() {
                     self.distribute(false);
@@ -1040,14 +1048,12 @@ impl DrawApp {
         });
         group(ui, 210., "Sélection", |ui| {
             if ui.button(t("Sélectionner tous les objets")).clicked() {
+                let view = self.doc.organization_view();
                 self.selected = self
                     .doc
-                    .nodes
-                    .iter()
-                    .map(|n| n.id)
-                    .chain(self.doc.drawings.iter().map(|d| d.id))
-                    .chain(self.doc.charts.iter().map(|c| c.id))
-                    .chain(self.doc.connectors.iter().map(|c| c.id))
+                    .object_ids()
+                    .into_iter()
+                    .filter(|id| view.is_object_visible(*id))
                     .collect();
             }
             if ui.button(t("Supprimer la sélection")).clicked() {
@@ -1118,6 +1124,10 @@ impl DrawApp {
         });
     }
     pub(super) fn change_text(&mut self, change: impl Fn(&mut TextStyle)) {
+        if !self.selection_editable() {
+            self.status = "La sélection est verrouillée".into();
+            return;
+        }
         for n in &mut self.doc.nodes {
             if self.selected.contains(&n.id) {
                 change(&mut n.text_style);
@@ -1126,6 +1136,9 @@ impl DrawApp {
         self.commit();
     }
     pub(super) fn font_step(&mut self, step: f32) {
+        if !self.selection_editable() {
+            return;
+        }
         for n in &mut self.doc.nodes {
             if self.selected.contains(&n.id) {
                 n.font_size = (n.font_size + step).clamp(6., 200.);
@@ -1133,6 +1146,11 @@ impl DrawApp {
         }
     }
     pub(super) fn copy(&mut self, ctx: &egui::Context, cut: bool) {
+        self.normalize_selection();
+        if cut && !self.selection_editable() {
+            self.status = "La sélection est verrouillée".into();
+            return;
+        }
         let fragment = self.doc.selection(&self.selected);
         if fragment.object_count() == 0 {
             return;
@@ -1164,21 +1182,26 @@ impl DrawApp {
     }
     pub(super) fn apply_theme(&mut self, index: usize, all: bool) {
         let colors = theme(index);
+        let editable = self.doc.editable_object_ids();
         for (i, n) in self.doc.nodes.iter_mut().enumerate() {
-            if all || self.selected.contains(&n.id) {
+            if editable.contains(&n.id) && (all || self.selected.contains(&n.id)) {
                 n.fill = colors[i % colors.len()];
                 n.stroke = colors[i % colors.len()].map(|v| v.saturating_sub(65));
                 n.text_color = [35, 51, 65];
             }
         }
         for c in &mut self.doc.connectors {
-            if all {
+            if all && editable.contains(&c.id) {
                 c.color = [102, 118, 138];
             }
         }
         self.status = "Style appliqué au diagramme".into();
     }
     pub(super) fn reorder(&mut self, front: bool) {
+        if !self.selection_editable() {
+            self.status = "La sélection est verrouillée".into();
+            return;
+        }
         let mut selected = vec![];
         self.doc.nodes.retain(|n| {
             if self.selected.contains(&n.id) {

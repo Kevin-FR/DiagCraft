@@ -60,14 +60,20 @@ impl DrawApp {
     pub(super) fn connection_target(&self, pos: Pos2) -> Option<LinkTarget> {
         let world = self.world(pos);
         // Actual shape hits take precedence over another shape's nearby handles.
-        let direct = self.doc.hit_node(world);
-        let nodes = self
+        let top = self.organized_hit(world);
+        if top.is_some_and(|id| self.doc.node(id).is_none()) {
+            return None;
+        }
+        let direct = top;
+        let view = self.doc.organization_view();
+        let mut nodes = self
             .doc
             .nodes
             .iter()
-            .rev()
-            .filter(|n| direct.is_none_or(|id| id == n.id));
-        for n in nodes {
+            .filter(|n| view.is_object_visible(n.id) && direct.is_none_or(|id| id == n.id))
+            .collect::<Vec<_>>();
+        nodes.sort_by_key(|n| view.layer_order(view.object_layer(n.id)));
+        for n in nodes.into_iter().rev() {
             let rect = self.node_screen_rect(n);
             let explicit = connection_buttons(rect)
                 .into_iter()
@@ -107,7 +113,10 @@ impl DrawApp {
             self.hover_link_node = None;
             return;
         };
-        if let Some(id) = self.doc.hit_node(self.world(pos)) {
+        if let Some(id) = self
+            .organized_hit(self.world(pos))
+            .filter(|id| self.doc.node(*id).is_some())
+        {
             self.hover_link_node = Some(id);
         } else if !self
             .hover_link_node
@@ -130,9 +139,10 @@ impl DrawApp {
     }
     pub(super) fn connection_handle_node(&self) -> Option<&Node> {
         self.hover_link_node
+            .filter(|id| self.doc.is_object_visible(*id))
             .and_then(|id| self.doc.node(id))
             .or_else(|| {
-                (self.selected.len() == 1)
+                (self.selected.len() == 1 && self.doc.is_object_visible(self.selected[0]))
                     .then(|| self.doc.node(self.selected[0]))
                     .flatten()
             })

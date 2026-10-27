@@ -8,6 +8,9 @@ pub struct History {
     cursor: usize,
 }
 impl History {
+    pub fn current(&self) -> &Document {
+        self.states[self.cursor].as_ref()
+    }
     pub fn new(doc: &Document) -> Self {
         Self {
             states: vec![Arc::new(doc.clone())],

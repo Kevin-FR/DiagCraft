@@ -479,6 +479,8 @@ pub struct Document {
     pub page_style: PageStyle,
     #[serde(default)]
     pub charts: Vec<crate::chart::Chart>,
+    #[serde(default)]
+    pub organization: crate::organization::Organization,
 }
 
 fn default_page_name() -> String {
@@ -499,6 +501,7 @@ impl Default for Document {
             drawings: vec![],
             page_style: PageStyle::default(),
             charts: vec![],
+            organization: Default::default(),
         }
     }
 }
@@ -531,16 +534,24 @@ impl Document {
         id
     }
     pub fn hit_chart(&self, p: Point) -> Option<u64> {
+        let organization = self.organization_view();
         self.charts
             .iter()
-            .rev()
-            .find(|c| {
-                p[0] >= c.position[0]
+            .enumerate()
+            .filter(|(_, c)| {
+                organization.is_object_visible(c.id)
+                    && p[0] >= c.position[0]
                     && p[0] <= c.position[0] + c.size[0]
                     && p[1] >= c.position[1]
                     && p[1] <= c.position[1] + c.size[1]
             })
-            .map(|c| c.id)
+            .max_by_key(|(index, c)| {
+                (
+                    organization.layer_order(organization.object_layer(c.id)),
+                    *index,
+                )
+            })
+            .map(|(_, c)| c.id)
     }
     pub fn next_id(&self) -> u64 {
         let ids: HashSet<_> = self
@@ -634,22 +645,56 @@ impl Document {
         self.nodes.iter_mut().find(|n| n.id == id)
     }
     pub fn hit_node(&self, p: Point) -> Option<u64> {
+        let organization = self.organization_view();
         self.nodes
             .iter()
-            .rev()
-            .find(|n| n.contains(p))
-            .map(|n| n.id)
+            .enumerate()
+            .filter(|(_, n)| organization.is_object_visible(n.id) && n.contains(p))
+            .max_by_key(|(index, n)| {
+                (
+                    organization.layer_order(organization.object_layer(n.id)),
+                    *index,
+                )
+            })
+            .map(|(_, n)| n.id)
     }
     pub fn remove(&mut self, ids: &[u64]) {
-        self.nodes.retain(|n| !ids.contains(&n.id));
-        self.connectors
+        let existing: HashSet<_> = self.object_ids().into_iter().collect();
+        let ids: Vec<_> = ids
+            .iter()
+            .copied()
+            .filter(|id| existing.contains(id))
+            .collect();
+        if !ids.is_empty() {
+            let _ = self.try_remove(&ids);
+        }
+    }
+    pub fn try_remove(&mut self, ids: &[u64]) -> Result<(), String> {
+        self.validate()?;
+        let ids: HashSet<_> = self.requested_ids(ids, true)?.into_iter().collect();
+        let mut next = self.clone();
+        next.nodes.retain(|n| !ids.contains(&n.id));
+        next.connectors
             .retain(|c| !ids.contains(&c.id) && !ids.contains(&c.from) && !ids.contains(&c.to));
-        self.drawings.retain(|d| !ids.contains(&d.id));
-        self.charts.retain(|c| !ids.contains(&c.id));
+        next.drawings.retain(|d| !ids.contains(&d.id));
+        next.charts.retain(|c| !ids.contains(&c.id));
+        next.prune_organization();
+        self.check_locked_changes(&next)?;
+        next.validate()?;
+        *self = next;
+        Ok(())
     }
     pub fn duplicate_nodes(&mut self, ids: &[u64]) -> Vec<u64> {
-        let fragment = self.selection(ids);
-        self.paste(&fragment, [24., 24.]).unwrap_or_default()
+        let existing: HashSet<_> = self.object_ids().into_iter().collect();
+        let ids: Vec<_> = ids
+            .iter()
+            .copied()
+            .filter(|id| existing.contains(id))
+            .collect();
+        if ids.is_empty() {
+            return vec![];
+        }
+        self.duplicate_objects(&ids, [24., 24.]).unwrap_or_default()
     }
     pub fn add_drawing(&mut self, kind: DrawingKind, start: Point, end: Point) -> u64 {
         let id = self.next_id();
@@ -667,18 +712,27 @@ impl Document {
         id
     }
     pub fn hit_drawing(&self, p: Point, tolerance: f32) -> Option<u64> {
+        let organization = self.organization_view();
         self.drawings
             .iter()
-            .rev()
-            .find(|d| {
-                d.points()
-                    .windows(2)
-                    .any(|s| segment_distance(p, s[0], s[1]) <= tolerance)
+            .enumerate()
+            .filter(|(_, d)| {
+                organization.is_object_visible(d.id)
+                    && d.points()
+                        .windows(2)
+                        .any(|s| segment_distance(p, s[0], s[1]) <= tolerance)
             })
-            .map(|d| d.id)
+            .max_by_key(|(index, d)| {
+                (
+                    organization.layer_order(organization.object_layer(d.id)),
+                    *index,
+                )
+            })
+            .map(|(_, d)| d.id)
     }
     pub fn selection(&self, ids: &[u64]) -> Self {
-        Self {
+        let ids: HashSet<_> = self.expand_groups(ids).into_iter().collect();
+        let mut fragment = Self {
             nodes: self
                 .nodes
                 .iter()
@@ -724,9 +778,38 @@ impl Document {
                 .cloned()
                 .collect(),
             ..Self::default()
+        };
+        fragment.organization =
+            self.selected_organization(&fragment.object_ids().into_iter().collect());
+        fragment
+    }
+    pub fn duplicate_objects(&mut self, ids: &[u64], offset: Point) -> Result<Vec<u64>, String> {
+        let ids = self.requested_ids(ids, false)?;
+        let view = self.organization_view();
+        if ids.iter().any(|id| {
+            !view.is_object_visible(*id)
+                || self
+                    .organization
+                    .layers
+                    .iter()
+                    .any(|l| l.id == self.object_layer(*id) && l.locked)
+        }) {
+            return Err(
+                "Déverrouillez les objets et affichez leur calque avant de les modifier.".into(),
+            );
         }
+        let fragment = self.selection(&ids);
+        self.paste_with_layers(&fragment, offset, true)
     }
     pub fn paste(&mut self, fragment: &Self, offset: Point) -> Result<Vec<u64>, String> {
+        self.paste_with_layers(fragment, offset, false)
+    }
+    fn paste_with_layers(
+        &mut self,
+        fragment: &Self,
+        offset: Point,
+        reuse_layers: bool,
+    ) -> Result<Vec<u64>, String> {
         fragment.validate()?;
         if fragment.page_count() != 1 {
             return Err("Copiez les objets d’une seule page.".into());
@@ -751,7 +834,9 @@ impl Document {
             target.nodes.push(n);
         }
         for mut e in fragment.connectors.clone() {
+            let old = e.id;
             e.id = target.next_id();
+            map.insert(old, e.id);
             if e.from != 0 {
                 e.from = map[&e.from];
             }
@@ -774,7 +859,9 @@ impl Document {
             target.connectors.push(e);
         }
         for mut d in fragment.drawings.clone() {
+            let old = d.id;
             d.id = target.next_id();
+            map.insert(old, d.id);
             selected.push(d.id);
             for p in [&mut d.start, &mut d.end] {
                 for (a, v) in offset.iter().enumerate() {
@@ -784,19 +871,23 @@ impl Document {
             target.drawings.push(d);
         }
         for mut c in fragment.charts.clone() {
+            let old = c.id;
             c.id = target.next_id();
+            map.insert(old, c.id);
             selected.push(c.id);
             for (a, v) in offset.iter().enumerate() {
                 c.position[a] += v;
             }
             target.charts.push(c);
         }
+        target.paste_organization(fragment, &map, reuse_layers)?;
         target.validate()?;
         *self = target;
         Ok(selected)
     }
     pub fn fit_page_to_drawing(&mut self) -> Result<(), String> {
         self.validate()?;
+        let before = self.clone();
         if self.nodes.is_empty()
             && self.drawings.is_empty()
             && self.charts.is_empty()
@@ -877,6 +968,10 @@ impl Document {
                 }
             }
         }
+        if let Err(error) = before.check_locked_changes(self) {
+            *self = before;
+            return Err(error);
+        }
         Ok(())
     }
     pub fn route(&self, edge: &Connector) -> Vec<Point> {
@@ -934,15 +1029,24 @@ impl Document {
         }
     }
     pub fn hit_connector(&self, p: Point, tolerance: f32) -> Option<u64> {
+        let organization = self.organization_view();
         self.connectors
             .iter()
-            .rev()
-            .find(|c| {
-                self.route(c)
-                    .windows(2)
-                    .any(|s| segment_distance(p, s[0], s[1]) <= tolerance)
+            .enumerate()
+            .filter(|(_, c)| {
+                organization.is_object_visible(c.id)
+                    && self
+                        .route(c)
+                        .windows(2)
+                        .any(|s| segment_distance(p, s[0], s[1]) <= tolerance)
             })
-            .map(|c| c.id)
+            .max_by_key(|(index, c)| {
+                (
+                    organization.layer_order(organization.object_layer(c.id)),
+                    *index,
+                )
+            })
+            .map(|(_, c)| c.id)
     }
     pub fn edge_label_point(&self, edge: &Connector) -> Point {
         let route = self.route(edge);
@@ -1083,6 +1187,7 @@ impl Document {
                 return Err("Points de connecteur invalides.".into());
             }
         }
+        self.validate_organization()?;
         Ok(())
     }
     pub fn upgrade_legacy(&mut self) {

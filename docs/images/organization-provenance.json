@@ -1,0 +1,9 @@
+[
+  {
+    "file": "docs/images/organization.png",
+    "sha256": "e33f60f380799c93d77dc9b82f0c7a366b6200e661a79f77d931e22642beca4d",
+    "source": "Native DiagCraft 0.8.0 capture using its own synthetic grouped diagram and layer manager; no external application artwork.",
+    "license": "MIT",
+    "command": "diagcraft --language fr --screenshot docs/images/organization.png organisation"
+  }
+]

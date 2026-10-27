@@ -29,14 +29,20 @@ impl DrawApp {
     }
     pub(super) fn apply_agent_patch(&mut self, text: &str) -> Result<(), String> {
         // Recompute against the current in-memory document, including unsaved edits.
+        self.commit();
         let patch = agent::parse_patch(text)?;
         let preview = agent::preview(&self.doc, &patch)?;
-        self.commit();
         self.doc = preview.document;
         self.selected.clear();
         self.drag = None;
         self.set_tool(Tool::Select);
-        self.commit();
+        // preview() has validated every operation against this exact revision,
+        // including an explicit unlock followed by an edit in the same batch.
+        // Record that verified result directly; a before/after lock guard would
+        // incorrectly reject the already authorized intermediate unlock.
+        self.normalize_selection();
+        self.history.record(&self.doc);
+        self.property_edit = false;
         self.fit_next = true;
         self.status = i18n::render(
             "Agent : {0} opérations appliquées · ⌘ Z pour annuler.",

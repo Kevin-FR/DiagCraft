@@ -60,6 +60,7 @@ impl DrawApp {
     }
 
     fn placement_objects(&self) -> impl Iterator<Item = (u64, Rect)> + '_ {
+        let view = self.doc.organization_view();
         self.doc
             .nodes
             .iter()
@@ -70,6 +71,7 @@ impl DrawApp {
                     .iter()
                     .map(|c| (c.id, bounds(c.position, c.size))),
             )
+            .filter(move |(id, _)| view.is_object_visible(*id))
     }
 
     pub(super) fn placement_selection(&self) -> Vec<(u64, Rect)> {
@@ -217,7 +219,11 @@ impl DrawApp {
     }
 
     pub(super) fn alignment_controls(&mut self, ui: &mut egui::Ui) {
-        let count = self.placement_selection().len();
+        let count = if self.selection_editable() {
+            self.alignment_units().len()
+        } else {
+            0
+        };
         ui.label(RichText::new(t("Aligner et répartir")).strong());
         let button_width = ((ui.available_width() - 8.) / 3.).max(48.);
         egui::Grid::new("alignment_controls")
@@ -236,12 +242,14 @@ impl DrawApp {
                 .enumerate()
                 {
                     if ui
-                        .add_enabled(
-                            count >= 2,
-                            egui::Button::new(RichText::new(t(label)).size(12.))
-                                .min_size(vec2(button_width, 28.)),
-                        )
-                        .on_hover_text(hint)
+                        .add_enabled_ui(count >= 2, |ui| {
+                            ui.add_sized(
+                                vec2(button_width, 28.),
+                                egui::Button::new(RichText::new(t(label)).size(12.)).truncate(),
+                            )
+                        })
+                        .inner
+                        .on_hover_text(t(hint))
                         .clicked()
                     {
                         self.align_selected(axis, anchor);
@@ -252,31 +260,137 @@ impl DrawApp {
                 }
             });
         ui.horizontal(|ui| {
+            let width = (ui.available_width() - ui.spacing().item_spacing.x) / 2.;
             for (label, vertical) in [("Espacer H", false), ("Espacer V", true)] {
-                if ui.add_enabled(count >= 3, egui::Button::new(t(label))).on_hover_text(t("Espaces égaux entre les objets ; le premier et le dernier restent en place. Au moins trois formes, textes ou graphiques.")).clicked() { self.distribute(vertical); }
+                if ui.add_enabled_ui(count >= 3, |ui| ui.add_sized(vec2(width, 28.), egui::Button::new(t(label)).truncate())).inner.on_hover_text(t("Espaces égaux entre les objets ; le premier et le dernier restent en place. Au moins trois formes, textes ou graphiques.")).clicked() { self.distribute(vertical); }
             }
         });
         ui.label(RichText::new(i18n::render("{0} formes, textes ou graphiques", &[("0", format!("{}", count))])).size(12.).color(MUTED))
             .on_hover_text(t("Les liens et tracés libres ne sont pas déplacés par ces commandes. Les liens attachés suivent leurs blocs."));
     }
 
-    fn set_placement_axis(&mut self, id: u64, axis: usize, position: f32) {
-        if let Some(n) = self.doc.node_mut(id) {
-            n.position[axis] = position;
-        } else if let Some(c) = self.doc.charts.iter_mut().find(|c| c.id == id) {
-            c.position[axis] = position;
+    // Persistent groups are a single placement unit, preserving all offsets.
+    fn alignment_units(&self) -> Vec<(Vec<u64>, Rect)> {
+        let selected: std::collections::HashSet<_> = self.selected.iter().copied().collect();
+        let mut units = Vec::new();
+        let mut membership = std::collections::HashMap::new();
+        for group in &self.doc.organization.groups {
+            if group.members.iter().all(|id| selected.contains(id)) {
+                let index = units.len();
+                units.push((group.members.clone(), Rect::NOTHING));
+                for id in &group.members {
+                    membership.insert(*id, index);
+                }
+            }
+        }
+        for (id, rect) in self
+            .placement_objects()
+            .filter(|(id, _)| selected.contains(id))
+        {
+            if let Some(index) = membership.get(&id) {
+                units[*index].1 = units[*index].1.union(rect);
+            } else {
+                units.push((vec![id], rect));
+            }
+        }
+        for drawing in &self.doc.drawings {
+            if let Some(index) = membership.get(&drawing.id) {
+                for p in drawing.points() {
+                    units[*index].1.extend_with(pos2(p[0], p[1]));
+                }
+            }
+        }
+        for edge in &self.doc.connectors {
+            if let Some(index) = membership.get(&edge.id) {
+                for p in self.doc.route(edge) {
+                    units[*index].1.extend_with(pos2(p[0], p[1]));
+                }
+            }
+        }
+        units.retain(|(_, bounds)| bounds.is_finite());
+        units
+    }
+
+    fn translate_alignment_unit(&mut self, ids: &[u64], axis: usize, delta: f32) {
+        let ids: std::collections::HashSet<_> = ids.iter().copied().collect();
+        let mut low = -200_000_f32;
+        let mut high = 200_000_f32;
+        let mut include = |coordinate: f32| {
+            low = low.max(-100_000. - coordinate);
+            high = high.min(100_000. - coordinate);
+        };
+        for node in &self.doc.nodes {
+            if ids.contains(&node.id) {
+                include(node.position[axis]);
+            }
+        }
+        for chart in &self.doc.charts {
+            if ids.contains(&chart.id) {
+                include(chart.position[axis]);
+            }
+        }
+        for drawing in &self.doc.drawings {
+            if ids.contains(&drawing.id) {
+                include(drawing.start[axis]);
+                include(drawing.end[axis]);
+            }
+        }
+        for edge in &self.doc.connectors {
+            if ids.contains(&edge.id) {
+                for p in edge
+                    .free_start
+                    .iter()
+                    .chain(edge.free_end.iter())
+                    .chain(edge.waypoints.iter())
+                {
+                    include(p[axis]);
+                }
+            }
+        }
+        let delta = delta.clamp(low, high);
+        for node in &mut self.doc.nodes {
+            if ids.contains(&node.id) {
+                node.position[axis] += delta;
+            }
+        }
+        for chart in &mut self.doc.charts {
+            if ids.contains(&chart.id) {
+                chart.position[axis] += delta;
+            }
+        }
+        for drawing in &mut self.doc.drawings {
+            if ids.contains(&drawing.id) {
+                drawing.start[axis] += delta;
+                drawing.end[axis] += delta;
+            }
+        }
+        for edge in &mut self.doc.connectors {
+            if ids.contains(&edge.id) {
+                for p in edge
+                    .free_start
+                    .iter_mut()
+                    .chain(edge.free_end.iter_mut())
+                    .chain(edge.waypoints.iter_mut())
+                {
+                    p[axis] += delta;
+                }
+            }
         }
     }
 
     pub(super) fn align_selected(&mut self, axis: usize, anchor: f32) {
-        let objects = self.placement_selection();
+        self.normalize_selection();
+        if !self.selection_editable() {
+            return;
+        }
+        let objects = self.alignment_units();
         if objects.len() < 2 {
             return;
         }
         let group = objects.iter().map(|(_, r)| *r).reduce(Rect::union).unwrap();
         let target = group.min[axis] + group.size()[axis] * anchor;
         for (id, r) in &objects {
-            self.set_placement_axis(*id, axis, target - r.size()[axis] * anchor);
+            self.translate_alignment_unit(id, axis, target - r.size()[axis] * anchor - r.min[axis]);
         }
         self.commit();
         self.status = i18n::render(
@@ -286,8 +400,12 @@ impl DrawApp {
     }
 
     pub(super) fn distribute(&mut self, vertical: bool) {
+        self.normalize_selection();
+        if !self.selection_editable() {
+            return;
+        }
         let axis = usize::from(vertical);
-        let mut objects = self.placement_selection();
+        let mut objects = self.alignment_units();
         if objects.len() < 3 {
             return;
         }
@@ -298,7 +416,7 @@ impl DrawApp {
         let mut at = objects[0].1.min[axis];
         // Keep both outer objects exactly fixed (no accumulated rounding drift).
         for (id, r) in objects.iter().take(objects.len() - 1) {
-            self.set_placement_axis(*id, axis, at);
+            self.translate_alignment_unit(id, axis, at - r.min[axis]);
             at += r.size()[axis] + gap;
         }
         self.commit();

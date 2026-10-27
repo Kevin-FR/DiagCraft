@@ -21,13 +21,14 @@ Las aplicaciones y sus sumas de comprobación SHA-256 están en la
 | Windows x86_64 | ZIP portátil con la aplicación y la CLI |
 | Linux x86_64 | Paquete `.deb` para amd64 o archivo `.tar.gz`, con la aplicación y la CLI |
 
-**0.7.3 es experimental** y corrige el marco oscuro de la ventana en Ubuntu/Wayland.
+**0.8.0 es experimental** e incorpora grupos persistentes, bloqueo de objetos y capas visibles u ocultas.
 El paquete para Mac tiene firma ad hoc y no ha sido notarizado por Apple.
 Los paquetes de Windows no están firmados con un certificado de editor.
 Consulta la [guía de instalación](../installation.md).
 
 ## Funciones
 
+- Grupos persistentes, bloqueo de objetos y capas por página, con visibilidad compartida en el lienzo y las exportaciones SVG/PDF.
 - Flechas: 1 px; Mayús: 10 px. Mantener una tecla crea un solo movimiento cancelable sin deformar la selección.
 - Un único botón por panel, alineado bajo la cinta y accesible cuando el panel está cerrado.
 - Busca objetos de la página por texto, tipo o identificador; coloca, edita y conecta bloques con el teclado.
@@ -45,6 +46,10 @@ Consulta la [guía de instalación](../installation.md).
 - Ajuste automático de las formas al texto, con medición de fuentes y disposición compartida entre la interfaz, SVG y PDF.
 - Copias locales automáticas para recuperarse de un fallo, sin sobrescribir los originales.
 - CLI y servidor MCP locales: inspección, validación y parches JSON atómicos.
+
+La organización se guarda en metadatos v7 opcionales. Las aplicaciones anteriores muestran los objetos ocultos y descartan grupos, capas y bloqueos al guardar.
+
+[Grupos y capas](../organisation.md) (FR).
 
 El formato de documento **v7** y la API para agentes **v1** tienen sus propios
 números de versión, independientes de la aplicación. Los archivos de los formatos

@@ -21,13 +21,14 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.7.3 is experimental** and fixes the dark fallback window frame on Ubuntu/Wayland.
+**0.8.0 is experimental** and adds persistent groups, object locking and visible/hidden layers.
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).
 
 ## Features
 
+- Persistent groups, object and layer locks, and page-local layers with shared canvas/SVG/PDF visibility.
 - Arrow keys move by 1 px, Shift by 10 px; a held key makes one cancellable move and keeps selected objects together.
 - One panel toggle per side, aligned below the ribbon and available when panels are collapsed.
 - Find page objects by text, type or ID; place, edit and connect blocks with the keyboard.
@@ -45,6 +46,10 @@ packages are not signed with a publisher certificate. See the
 - Automatic text fitting with font measurements and shared canvas/SVG/PDF layout.
 - Automatic local recovery copies after a crash, without overwriting original files.
 - Local CLI and MCP server: inspection, validation and atomic JSON patches.
+
+Organization is saved in optional v7 metadata. Earlier applications display hidden objects and discard groups, layers and locks when saving.
+
+[organization guide](docs/organisation.md).
 
 The **v7** document format and **v1** agent API have their own version numbers,
 independent of the application. Files in formats v1–v6 are migrated in memory

@@ -3,6 +3,21 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.8.0 — groupes, verrouillage et calques
+
+- Groupes persistants par page : sélection, déplacement et duplication collectifs, regroupement et dissociation.
+- Verrouillage des objets et des calques ; contrôles d’édition et garde de transition contre les modifications accidentelles.
+- Gestionnaire compact de calques : création, nom, ordre, visibilité, verrouillage et affectation des objets.
+- Ordre global des calques partagé entre types d’objets ; visibilité commune sur la feuille, en SVG et en PDF, y compris les liens attachés aux formes masquées.
+- Métadonnées facultatives v7 conservées en multipage, dans les copies, l’historique et la récupération ; duplication sur le même calque sans créer de calques supplémentaires.
+- API agents : huit opérations, alias de calques distincts, inspection et protections atomiques ; tests CLI/MCP dans la CI des trois systèmes.
+- Commandes et messages dans les sept langues ; guide, README, capture et architecture mis à jour.
+- Roadmap organisée en jalons GitHub 0.8.0, 0.9.0, 0.10.0, 0.11.0 et préparation 1.0.0 avec critères d’acceptation.
+
+Le format `.draw` reste **v7**, l’API agents **v1**. Aucune dépendance ajoutée.
+Les anciennes applications ignorent l’organisation et la perdent au réenregistrement.
+Les groupes restent plats ; rotation et redimensionnement collectif ne sont pas inclus.
+
 ## 0.7.3 — fenêtre Ubuntu / Wayland
 
 - Remplacement du cadre de secours sombre sans titre par les décorations Wayland Adwaita.

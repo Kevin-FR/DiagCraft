@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     if matches!(args.first().map(String::as_str), Some("--help" | "-h")) {
         println!(
-            "DiagCraft\n  diagcraft [--language en|fr|de|es|it|pt|zh-Hans] [document.draw]\n  diagcraft --agent catalog|inspect FILE|validate FILE|apply FILE PATCH OUTPUT [--dry-run]\n  diagcraft --mcp DOSSIER\n  diagcraft [document.draw]\n  diagcraft --export document.draw diagramme.svg\n  diagcraft --export-pdf document.draw diagramme.pdf [dessin|a4-paysage|a4-portrait|lettre]\n  diagcraft --pages-demo dossier.draw\n  diagcraft --symbols-demo symboles.draw\n  diagcraft --styles-demo styles.draw\n  diagcraft --demo exemple.draw\n  diagcraft --template support exemple.draw\n  diagcraft --charts-demo graphiques.draw\n  diagcraft --screenshot capture.png [accueil|inserer|conception|affichage|symboles|avance|graphiques|modeles|support|contexte-forme|contexte-connecteur|contexte-page|barre-contextuelle|barre-connecteur|compact|trackpad|proprietes|remplissage|contours|ombres|ombres-prereglages|selection-multiple|selection-contours|selection-ombres|selection-cadre|ruban-compact|alignement|reperes|redimensionnement|pages|tailles-pages|connecteurs-libres|lier-blocs|lier-apercu|connexions-rapides|bibliotheques|travaux|versions|nouveaux-symboles|commandes|raccourcis|interface|ruban-inserer|parametres|recuperation|ajuster-texte|contenu-bloc|editeur-texte|recherche-objets|volets|volets-fermes|placement-clavier]\n"
+            "DiagCraft\n  diagcraft [--language en|fr|de|es|it|pt|zh-Hans] [document.draw]\n  diagcraft --agent catalog|inspect FILE|validate FILE|apply FILE PATCH OUTPUT [--dry-run]\n  diagcraft --mcp DOSSIER\n  diagcraft [document.draw]\n  diagcraft --export document.draw diagramme.svg\n  diagcraft --export-pdf document.draw diagramme.pdf [dessin|a4-paysage|a4-portrait|lettre]\n  diagcraft --pages-demo dossier.draw\n  diagcraft --symbols-demo symboles.draw\n  diagcraft --styles-demo styles.draw\n  diagcraft --demo exemple.draw\n  diagcraft --template support exemple.draw\n  diagcraft --charts-demo graphiques.draw\n  diagcraft --screenshot capture.png [accueil|inserer|conception|affichage|symboles|avance|graphiques|modeles|support|contexte-forme|contexte-connecteur|contexte-page|barre-contextuelle|barre-connecteur|compact|trackpad|proprietes|remplissage|contours|ombres|ombres-prereglages|selection-multiple|selection-contours|selection-ombres|selection-cadre|ruban-compact|alignement|reperes|redimensionnement|pages|tailles-pages|connecteurs-libres|lier-blocs|lier-apercu|connexions-rapides|bibliotheques|travaux|versions|nouveaux-symboles|commandes|raccourcis|interface|ruban-inserer|parametres|recuperation|ajuster-texte|contenu-bloc|editeur-texte|recherche-objets|volets|volets-fermes|placement-clavier|organisation]\n"
         );
         return Ok(());
     }
@@ -96,6 +96,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "volets",
             "volets-fermes",
             "placement-clavier",
+            "organisation",
         ]
         .contains(&name.as_str())
     {
@@ -137,6 +138,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             | "volets"
                             | "volets-fermes"
                             | "placement-clavier"
+                            | "organisation"
                     )
                 }) {
                     [1280., 800.]

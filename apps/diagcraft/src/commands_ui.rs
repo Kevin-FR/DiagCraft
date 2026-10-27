@@ -22,6 +22,11 @@ pub(super) enum Command {
     Cut,
     Paste,
     Duplicate,
+    Group,
+    Ungroup,
+    Lock,
+    Unlock,
+    Layers,
     Delete,
     SelectAll,
     NudgeLeft,
@@ -119,6 +124,16 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
     command!(Cut, "Couper", "Édition", "cut presse papiers", Modifiers::COMMAND => X),
     command!(Paste, "Coller", "Édition", "paste presse papiers", Modifiers::COMMAND => V),
     command!(Duplicate, "Dupliquer la sélection", "Édition", "copie duplicate", Modifiers::COMMAND => D),
+    command!(Group, "Grouper la sélection", "Organisation", "groupe group ensemble", Modifiers::COMMAND => G),
+    command!(Ungroup, "Dissocier le groupe", "Organisation", "dégrouper ungroup dissocier", Modifiers::COMMAND.plus(Modifiers::SHIFT) => G),
+    command!(Lock, "Verrouiller la sélection", "Organisation", "lock protéger figer", Modifiers::COMMAND => L),
+    command!(Unlock, "Déverrouiller la sélection", "Organisation", "unlock libérer", Modifiers::COMMAND.plus(Modifiers::SHIFT) => L),
+    command!(
+        Layers,
+        "Gérer les calques…",
+        "Organisation",
+        "layers calque visible masquer ordre"
+    ),
     command!(Delete, "Supprimer la sélection", "Édition", "effacer delete", Modifiers::NONE => Delete, Modifiers::NONE => Backspace),
     command!(SelectAll, "Tout sélectionner", "Édition", "tous objets select all", Modifiers::COMMAND => A),
     command!(NudgeLeft, "Déplacer la sélection à gauche", "Placement", "position clavier déplacer précision nudge left", Modifiers::NONE => ArrowLeft, Modifiers::SHIFT => ArrowLeft),
@@ -319,6 +334,7 @@ impl DrawApp {
             || self.show_gallery
             || self.show_pdf_export
             || self.show_pages
+            || self.show_layers
             || self.page_draft.is_some()
             || self.agent_panel.is_some()
             || self.rich_editor.is_some()
@@ -346,7 +362,48 @@ impl DrawApp {
 
     pub(super) fn command_unavailable(&self, command: Command) -> Option<&'static str> {
         use Command::*;
+        if matches!(
+            command,
+            Cut | Delete
+                | NudgeLeft
+                | NudgeRight
+                | NudgeUp
+                | NudgeDown
+                | Bold
+                | Italic
+                | Underline
+                | FitText
+                | EditText
+                | Group
+                | Ungroup
+        ) && !self.selected.is_empty()
+            && !self.selection_editable()
+        {
+            return Some("La sélection est verrouillée");
+        }
         match command {
+            Duplicate if !self.selected.is_empty() && !self.selection_duplicable() => {
+                Some("Affichez et déverrouillez le calque avant de dupliquer")
+            }
+            Group
+                if self.selected.len() < 2
+                    || self.selected.iter().any(|id| {
+                        self.doc.object_layer(*id) != self.doc.object_layer(self.selected[0])
+                    }) =>
+            {
+                Some("Sélectionnez au moins deux objets modifiables du même calque")
+            }
+            Ungroup
+                if !self
+                    .doc
+                    .organization
+                    .groups
+                    .iter()
+                    .any(|g| g.members.iter().any(|id| self.selected.contains(id))) =>
+            {
+                Some("Sélectionnez un groupe")
+            }
+            Lock | Unlock if self.selected.is_empty() => Some("Sélectionnez au moins un objet"),
             PlaceShape if !matches!(self.tool, Tool::Shape(_)) => {
                 Some("Choisissez d’abord une forme à insérer")
             }
@@ -363,9 +420,7 @@ impl DrawApp {
                 Some("Aucune modification à annuler")
             }
             Redo if !self.history.can_redo() => Some("Aucune modification à rétablir"),
-            NudgeLeft | NudgeRight | NudgeUp | NudgeDown
-                if !self.selected.iter().any(|id| self.keyboard_movable(*id)) =>
-            {
+            NudgeLeft | NudgeRight | NudgeUp | NudgeDown if !self.selection_has_movable() => {
                 Some("Sélectionnez une forme, un graphique, un tracé ou un lien libre")
             }
             Copy | Cut | Duplicate | Delete | FitSelection if self.selected.is_empty() => {
@@ -426,6 +481,11 @@ impl DrawApp {
             Copy => self.perform_action(Action::Copy, ctx),
             Cut => self.perform_action(Action::Cut, ctx),
             Duplicate => self.perform_action(Action::Duplicate, ctx),
+            Group => self.group_selection(),
+            Ungroup => self.ungroup_selection(),
+            Lock => self.set_selection_locked(true),
+            Unlock => self.set_selection_locked(false),
+            Layers => self.open_layers(),
             Delete => self.perform_action(Action::Delete, ctx),
             SelectAll => self.perform_action(Action::SelectAll, ctx),
             NudgeLeft | NudgeRight | NudgeUp | NudgeDown => {

@@ -192,7 +192,10 @@ impl DrawApp {
     }
 
     pub(super) fn resize_handle_at(&self, pos: Pos2) -> Option<(u64, Point, Point, [i8; 2])> {
-        let id = *self.selected.first().filter(|_| self.selected.len() == 1)?;
+        let id = *self
+            .selected
+            .first()
+            .filter(|_| self.selected.len() == 1 && self.selection_editable())?;
         let (origin, size) = self
             .doc
             .node(id)
@@ -238,7 +241,7 @@ impl DrawApp {
         if let Some(e) = self
             .selected
             .first()
-            .filter(|_| self.selected.len() == 1)
+            .filter(|_| self.selected.len() == 1 && self.selection_editable())
             .and_then(|id| self.doc.connectors.iter().find(|e| e.id == *id))
         {
             let route = self.doc.route(e);
@@ -260,6 +263,12 @@ impl DrawApp {
             }
         }
         let world = self.world(pos);
+        if self
+            .organized_hit(world)
+            .is_some_and(|id| self.doc.is_object_locked(id))
+        {
+            return egui::CursorIcon::NotAllowed;
+        }
         if self.doc.hit_node(world).is_some()
             || self.doc.hit_chart(world).is_some()
             || self.doc.hit_drawing(world, 7. / self.zoom).is_some()

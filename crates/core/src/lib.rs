@@ -3,6 +3,7 @@ pub mod document;
 pub mod geometry;
 pub mod history;
 pub mod library;
+pub mod organization;
 pub mod svg;
 pub mod templates;
 

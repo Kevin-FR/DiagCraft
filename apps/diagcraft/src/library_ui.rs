@@ -548,17 +548,22 @@ impl DrawApp {
         });
     }
     pub(super) fn select_for_drag(&mut self, id: u64, start: Point, shift: bool) {
+        let group = self.doc.expand_groups(&[id]);
         if shift {
             if self.selected.contains(&id) {
-                self.selected.retain(|v| *v != id);
+                self.selected.retain(|v| !group.contains(v));
             } else {
-                self.selected.push(id);
+                self.selected.extend(group);
             }
         } else if !self.selected.contains(&id) {
-            self.selected = vec![id];
+            self.selected = group;
         }
-        if !self.selected.contains(&id) {
+        self.normalize_selection();
+        if !self.selected.contains(&id) || !self.selection_editable() {
             self.drag = None;
+            if self.selected.contains(&id) {
+                self.status = "La sélection est verrouillée".into();
+            }
             return;
         }
         self.begin_edit_drag();

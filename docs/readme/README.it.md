@@ -21,13 +21,14 @@ Le applicazioni e le relative somme di controllo SHA-256 sono disponibili nella
 | Windows x86_64 | ZIP portatile con applicazione e CLI |
 | Linux x86_64 | Pacchetto `.deb` per amd64 o archivio `.tar.gz`, con applicazione e CLI |
 
-**0.7.3 è sperimentale** e corregge la cornice scura della finestra su Ubuntu/Wayland.
+**0.8.0 è sperimentale** e aggiunge gruppi persistenti, blocco degli oggetti e livelli visibili o nascosti.
 Il pacchetto Mac ha una firma ad hoc e non è stato autenticato da Apple tramite
 notarizzazione. I pacchetti Windows non sono firmati con un certificato dell’editore.
 Consulta la [guida all’installazione](../installation.md).
 
 ## Funzionalità
 
+- Gruppi persistenti, blocco degli oggetti e livelli per pagina, con visibilità condivisa tra area di disegno ed esportazioni SVG/PDF.
 - Frecce: 1 px; Maiusc: 10 px. Tenere premuto un tasto crea un unico spostamento annullabile senza deformare la selezione.
 - Un solo pulsante per pannello, allineato sotto la barra multifunzione e accessibile anche a pannello chiuso.
 - Cerca oggetti nella pagina per testo, tipo o identificatore; inserisci, modifica e collega blocchi tramite tastiera.
@@ -45,6 +46,10 @@ Consulta la [guida all’installazione](../installation.md).
 - Adattamento automatico delle forme al testo, con misurazione dei font e disposizione condivisa tra interfaccia, SVG e PDF.
 - Copie locali automatiche per il recupero dopo un arresto anomalo, senza sovrascrivere gli originali.
 - CLI e server MCP locali: ispezione, validazione e patch JSON atomiche.
+
+L'organizzazione è salvata in metadati v7 facoltativi. Le applicazioni precedenti mostrano gli oggetti nascosti e scartano gruppi, livelli e blocchi al salvataggio.
+
+[Gruppi e livelli](../organisation.md) (FR).
 
 Il formato dei documenti **v7** e l’API per agenti **v1** hanno numeri di versione
 propri, indipendenti dall’applicazione. I file nei formati v1–v6 vengono migrati

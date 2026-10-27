@@ -58,6 +58,7 @@ fn group(ui: &mut egui::Ui, width: f32, label: &str, body: impl FnOnce(&mut egui
 impl DrawApp {
     pub(super) fn quick_toolbar(&mut self, ctx: &egui::Context) {
         if !self.show_quick_toolbar
+            || !self.selection_editable()
             || self.selected.len() != 1
             || self.drag.is_some()
             || self.tool == Tool::Connect

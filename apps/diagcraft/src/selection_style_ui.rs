@@ -61,6 +61,9 @@ impl DrawApp {
         replace_effect: bool,
         uniform: bool,
     ) {
+        if !self.selection_editable() {
+            return;
+        }
         let replace = replace_effect || uniform;
         for n in &mut self.doc.nodes {
             if !self.selected.contains(&n.id) || n.kind == ShapeKind::Text {

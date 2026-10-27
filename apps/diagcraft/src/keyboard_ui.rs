@@ -116,18 +116,24 @@ impl DrawApp {
         false
     }
 
-    pub(super) fn keyboard_movable(&self, id: u64) -> bool {
-        self.doc.node(id).is_some()
-            || self.doc.charts.iter().any(|c| c.id == id)
-            || self.doc.drawings.iter().any(|d| d.id == id)
+    pub(super) fn selection_has_movable(&self) -> bool {
+        let selected: HashSet<_> = self.selected.iter().copied().collect();
+        self.doc.nodes.iter().any(|n| selected.contains(&n.id))
+            || self.doc.charts.iter().any(|c| selected.contains(&c.id))
+            || self.doc.drawings.iter().any(|d| selected.contains(&d.id))
             || self
                 .doc
                 .connectors
                 .iter()
-                .any(|e| e.id == id && (e.from == 0 || e.to == 0))
+                .any(|e| selected.contains(&e.id) && (e.from == 0 || e.to == 0))
     }
 
     pub(super) fn nudge_selection(&mut self, raw: Point, continuous: bool) {
+        self.normalize_selection();
+        if !self.selection_editable() {
+            self.status = "La sélection est verrouillée".into();
+            return;
+        }
         if self.keyboard_move_cancelled {
             return;
         }
@@ -164,12 +170,12 @@ impl DrawApp {
             include(d.start, None);
             include(d.end, None);
         }
-        for e in self
-            .doc
-            .connectors
-            .iter()
-            .filter(|e| selected.contains(&e.id) && (e.from == 0 || e.to == 0))
-        {
+        for e in self.doc.connectors.iter().filter(|e| {
+            selected.contains(&e.id)
+                && (e.from == 0
+                    || e.to == 0
+                    || (selected.contains(&e.from) && selected.contains(&e.to)))
+        }) {
             for p in e
                 .free_start
                 .iter()
@@ -221,12 +227,12 @@ impl DrawApp {
             translate(&mut d.start);
             translate(&mut d.end);
         }
-        for e in self
-            .doc
-            .connectors
-            .iter_mut()
-            .filter(|e| selected.contains(&e.id) && (e.from == 0 || e.to == 0))
-        {
+        for e in self.doc.connectors.iter_mut().filter(|e| {
+            selected.contains(&e.id)
+                && (e.from == 0
+                    || e.to == 0
+                    || (selected.contains(&e.from) && selected.contains(&e.to)))
+        }) {
             for p in e
                 .free_start
                 .iter_mut()

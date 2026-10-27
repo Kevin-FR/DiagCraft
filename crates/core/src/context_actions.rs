@@ -11,6 +11,7 @@ impl Document {
         next.set_automatic_route(id, false)?;
         let edge = next.connectors.iter().find(|e| e.id == id).unwrap();
         if edge.waypoints.contains(&point) {
+            self.check_locked_changes(&next)?;
             *self = next;
             return Ok(());
         }
@@ -43,11 +44,17 @@ impl Document {
             .waypoints
             .insert(closest.1, point);
         next.validate()?;
+        self.check_locked_changes(&next)?;
         *self = next;
         Ok(())
     }
     /// Preserve the displayed elbow route when switching to editable waypoints.
     pub fn set_automatic_route(&mut self, id: u64, automatic: bool) -> Result<(), String> {
+        if !self.can_edit_object(id) {
+            return Err(
+                "Déverrouillez les objets et affichez leur calque avant de les modifier.".into(),
+            );
+        }
         let index = self
             .connectors
             .iter()
@@ -143,6 +150,7 @@ impl Document {
         edge.from_port = direction;
         edge.to_port = opposite(direction);
         next.validate()?;
+        self.check_locked_changes(&next)?;
         *self = next;
         Ok(id)
     }
@@ -220,6 +228,7 @@ impl Document {
             next.page_size[axis] = next.page_size[axis].max(v);
         }
         next.validate()?;
+        self.check_locked_changes(&next)?;
         *self = next;
         Ok(id)
     }
@@ -304,6 +313,7 @@ impl Document {
             return Err("Ce lien existe déjà.".into());
         }
         next.validate()?;
+        self.check_locked_changes(&next)?;
         *self = next;
         Ok(())
     }
@@ -333,6 +343,7 @@ impl Document {
             e.to_port = Port::Auto;
         }
         next.validate()?;
+        self.check_locked_changes(&next)?;
         *self = next;
         Ok(())
     }
@@ -389,6 +400,7 @@ impl Document {
         {
             return Err("Le connecteur est trop court.".into());
         }
+        self.check_locked_changes(&next)?;
         *self = next;
         Ok(id)
     }

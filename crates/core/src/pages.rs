@@ -55,6 +55,11 @@ pub struct Page {
     pub page_style: PageStyle,
     #[serde(default)]
     pub page_layout: PageLayout,
+    #[serde(
+        default,
+        skip_serializing_if = "crate::organization::Organization::is_empty"
+    )]
+    pub organization: crate::organization::Organization,
 }
 #[derive(Serialize, PartialEq)]
 struct PageRef<'a> {
@@ -66,6 +71,8 @@ struct PageRef<'a> {
     charts: &'a [crate::chart::Chart],
     page_style: &'a PageStyle,
     page_layout: &'a PageLayout,
+    #[serde(skip_serializing_if = "crate::organization::Organization::is_empty")]
+    organization: &'a crate::organization::Organization,
 }
 impl<'a> From<&'a Page> for PageRef<'a> {
     fn from(p: &'a Page) -> Self {
@@ -78,6 +85,7 @@ impl<'a> From<&'a Page> for PageRef<'a> {
             charts: &p.charts,
             page_style: &p.page_style,
             page_layout: &p.page_layout,
+            organization: &p.organization,
         }
     }
 }
@@ -93,6 +101,7 @@ impl Document {
                 charts: &self.charts,
                 page_style: &self.page_style,
                 page_layout: &self.page_layout,
+                organization: &self.organization,
             }
         } else {
             PageRef::from(
@@ -121,6 +130,7 @@ impl Document {
             charts: p.charts.to_vec(),
             page_style: p.page_style.clone(),
             page_layout: p.page_layout.clone(),
+            organization: p.organization.clone(),
         })
     }
     pub fn page_document(&self, index: usize) -> Option<Self> {
@@ -137,6 +147,7 @@ impl Document {
             charts: p.charts,
             page_style: p.page_style,
             page_layout: p.page_layout,
+            organization: p.organization,
             ..Self::default()
         }
     }
@@ -202,6 +213,12 @@ impl Document {
         }
         if index >= self.page_count() {
             return Err("Page introuvable.".into());
+        }
+        let page = self.page_document(index).unwrap();
+        if page.organization_view().editable_ids.len() < page.object_ids().len() {
+            return Err(
+                "Déverrouillez les objets et affichez leur calque avant de les modifier.".into(),
+            );
         }
         let mut pages = (0..self.page_count())
             .map(|i| self.page(i).unwrap())

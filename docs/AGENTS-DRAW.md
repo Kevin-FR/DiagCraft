@@ -165,3 +165,56 @@ Références du protocole :
 https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle
 https://modelcontextprotocol.io/specification/2025-11-25/basic/transports
 https://modelcontextprotocol.io/specification/2025-11-25/server/tools
+
+## Groupes, verrouillage et calques (0.8.0)
+
+L’inspection expose `organization` sur chaque page et les états `layer`,
+`visible`, `locked` et `group` des objets. Le calque 0 est la base implicite ;
+les calques explicites sont ordonnés du fond vers le premier plan. Les groupes
+sont plats et leurs membres appartiennent au même calque. Les identifiants des
+objets, groupes et calques sont dans des espaces distincts, toujours propres à
+leur page.
+
+Opérations supplémentaires, toujours en API 1 :
+
+| Opération | Champs |
+| --- | --- |
+| `group_objects` | `page`, `targets` (IDs ou alias d’objets) |
+| `ungroup_objects` | `page`, `targets` |
+| `set_objects_locked` | `page`, `targets`, `locked` |
+| `add_layer` | `page`, `alias`, `name` |
+| `update_layer` | `page`, `layer`, puis `name`, `visible` ou `locked` |
+| `move_layer` | `page`, `layer`, `index` (index des calques explicites, à partir de 0) |
+| `move_objects_to_layer` | `page`, `targets`, `layer` |
+| `delete_layer` | `page`, `layer` |
+
+`layer` est un ID numérique ou l’alias d’un calque créé plus tôt dans le lot.
+Le rapport distingue `layer_aliases` et `aliases` : ne pas confondre leurs IDs.
+Grouper inclut les membres des groupes déjà sélectionnés et les connecteurs
+internes admissibles. Affecter ou verrouiller un membre concerne le groupe entier.
+Retirer un calque conserve ses objets et les replace sur la base.
+
+Exemple de corps `operations` pour deux objets existants de la page 0 :
+
+```json
+[
+  {"op":"add_layer","page":0,"alias":"details","name":"Détails"},
+  {"op":"move_objects_to_layer","page":0,"targets":[1,2],"layer":"details"},
+  {"op":"group_objects","page":0,"targets":[1,2]},
+  {"op":"set_objects_locked","page":0,"targets":[1],"locked":true}
+]
+```
+
+Réutiliser la révision de l’inspection dans l’enveloppe habituelle. Pour modifier
+ces objets ensuite, afficher leur calque et déverrouiller les objets et le calque
+si nécessaire, puis réaliser la modification. Un seul lot peut contenir ces étapes
+explicites dans cet ordre ; une erreur annule l’ensemble.
+
+Les objets masqués restent présents dans `.draw` et dans l’inspection, mais sont
+omis du canevas et des exports SVG/PDF. Le masquage d’une forme masque aussi les
+connecteurs qui lui sont attachés. La protection porte sur les champs enregistrés ;
+une route calculée peut suivre les formes auxquelles elle est attachée.
+
+Le format reste v7 grâce au champ facultatif `organization`. Les applications
+antérieures à 0.8.0 ignorent ce champ, affichent les éléments masqués et perdent
+l’organisation au réenregistrement. Voir [organisation.md](organisation.md).

@@ -67,16 +67,21 @@ impl DrawApp {
         if !rect.is_positive() {
             return vec![];
         }
-        self.doc
+        let view = self.doc.organization_view();
+        let hits = self
+            .doc
             .nodes
             .iter()
-            .filter(|n| node_crosses(n, rect))
+            .filter(|n| view.is_object_visible(n.id) && node_crosses(n, rect))
             .map(|n| n.id)
             .chain(
                 self.doc
                     .drawings
                     .iter()
-                    .filter(|d| crosses(&d.points(), rect.expand(d.width / 2.), false))
+                    .filter(|d| {
+                        view.is_object_visible(d.id)
+                            && crosses(&d.points(), rect.expand(d.width / 2.), false)
+                    })
                     .map(|d| d.id),
             )
             .chain(
@@ -84,10 +89,11 @@ impl DrawApp {
                     .charts
                     .iter()
                     .filter(|c| {
-                        rect.intersects(Rect::from_min_size(
-                            pos2(c.position[0], c.position[1]),
-                            vec2(c.size[0], c.size[1]),
-                        ))
+                        view.is_object_visible(c.id)
+                            && rect.intersects(Rect::from_min_size(
+                                pos2(c.position[0], c.position[1]),
+                                vec2(c.size[0], c.size[1]),
+                            ))
                     })
                     .map(|c| c.id),
             )
@@ -95,10 +101,14 @@ impl DrawApp {
                 self.doc
                     .connectors
                     .iter()
-                    .filter(|e| crosses(&self.doc.route(e), rect.expand(e.width / 2.), false))
+                    .filter(|e| {
+                        view.is_object_visible(e.id)
+                            && crosses(&self.doc.route(e), rect.expand(e.width / 2.), false)
+                    })
                     .map(|e| e.id),
             )
-            .collect()
+            .collect::<Vec<_>>();
+        view.expand_groups(&hits)
     }
     pub(super) fn cancel_marquee(&mut self) {
         if let Some(Drag::Marquee { initial, .. }) = self.drag.take() {

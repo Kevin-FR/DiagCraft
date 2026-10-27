@@ -8305,5 +8305,563 @@
     "it": "Posizione originale ripristinata",
     "pt": "Posição original restaurada",
     "zh-Hans": "已恢复原始位置"
+  },
+  "Ajouter un calque": {
+    "fr": "Ajouter un calque",
+    "en": "Add layer",
+    "de": "Ebene hinzufügen",
+    "es": "Añadir capa",
+    "it": "Aggiungi livello",
+    "pt": "Adicionar camada",
+    "zh-Hans": "添加图层"
+  },
+  "Calque ajouté": {
+    "fr": "Calque ajouté",
+    "en": "Layer added",
+    "de": "Ebene hinzugefügt",
+    "es": "Capa añadida",
+    "it": "Livello aggiunto",
+    "pt": "Camada adicionada",
+    "zh-Hans": "已添加图层"
+  },
+  "Calque de base": {
+    "fr": "Calque de base",
+    "en": "Base layer",
+    "de": "Basisebene",
+    "es": "Capa base",
+    "it": "Livello di base",
+    "pt": "Camada base",
+    "zh-Hans": "基础图层"
+  },
+  "Calque introuvable ou réservé.": {
+    "fr": "Calque introuvable ou réservé.",
+    "en": "Layer not found or reserved.",
+    "de": "Ebene nicht gefunden oder reserviert.",
+    "es": "Capa no encontrada o reservada.",
+    "it": "Livello non trovato o riservato.",
+    "pt": "Camada não encontrada ou reservada.",
+    "zh-Hans": "图层不存在或为保留图层。"
+  },
+  "Calque invalide ou dupliqué.": {
+    "fr": "Calque invalide ou dupliqué.",
+    "en": "Invalid or duplicate layer.",
+    "de": "Ungültige oder doppelte Ebene.",
+    "es": "Capa no válida o duplicada.",
+    "it": "Livello non valido o duplicato.",
+    "pt": "Camada inválida ou duplicada.",
+    "zh-Hans": "图层无效或重复。"
+  },
+  "Calque retiré · les objets sont conservés": {
+    "fr": "Calque retiré · les objets sont conservés",
+    "en": "Layer removed · objects preserved",
+    "de": "Ebene entfernt · Objekte bleiben erhalten",
+    "es": "Capa eliminada · objetos conservados",
+    "it": "Livello rimosso · oggetti conservati",
+    "pt": "Camada removida · objetos preservados",
+    "zh-Hans": "已移除图层 · 对象已保留"
+  },
+  "Calque {0}": {
+    "fr": "Calque {0}",
+    "en": "Layer {0}",
+    "de": "Ebene {0}",
+    "es": "Capa {0}",
+    "it": "Livello {0}",
+    "pt": "Camada {0}",
+    "zh-Hans": "图层 {0}"
+  },
+  "Calques": {
+    "fr": "Calques",
+    "en": "Layers",
+    "de": "Ebenen",
+    "es": "Capas",
+    "it": "Livelli",
+    "pt": "Camadas",
+    "zh-Hans": "图层"
+  },
+  "Calques…": {
+    "fr": "Calques…",
+    "en": "Layers…",
+    "de": "Ebenen…",
+    "es": "Capas…",
+    "it": "Livelli…",
+    "pt": "Camadas…",
+    "zh-Hans": "图层…"
+  },
+  "Descendre le calque": {
+    "fr": "Descendre le calque",
+    "en": "Move layer down",
+    "de": "Ebene nach unten",
+    "es": "Bajar capa",
+    "it": "Sposta livello in basso",
+    "pt": "Descer camada",
+    "zh-Hans": "下移图层"
+  },
+  "Dessiner ici": {
+    "fr": "Dessiner ici",
+    "en": "Draw here",
+    "de": "Hier zeichnen",
+    "es": "Dibujar aquí",
+    "it": "Disegna qui",
+    "pt": "Desenhar aqui",
+    "zh-Hans": "在此绘制"
+  },
+  "Dégrouper": {
+    "fr": "Dégrouper",
+    "en": "Ungroup",
+    "de": "Gruppierung aufheben",
+    "es": "Desagrupar",
+    "it": "Separa gruppo",
+    "pt": "Desagrupar",
+    "zh-Hans": "取消组合"
+  },
+  "Déverrouiller": {
+    "fr": "Déverrouiller",
+    "en": "Unlock",
+    "de": "Entsperren",
+    "es": "Desbloquear",
+    "it": "Sblocca",
+    "pt": "Desbloquear",
+    "zh-Hans": "解锁"
+  },
+  "Déverrouillez le calque pour modifier ses objets": {
+    "fr": "Déverrouillez le calque pour modifier ses objets",
+    "en": "Unlock the layer to edit its objects",
+    "de": "Entsperren Sie die Ebene, um ihre Objekte zu bearbeiten",
+    "es": "Desbloquea la capa para editar sus objetos",
+    "it": "Sblocca il livello per modificare i suoi oggetti",
+    "pt": "Desbloqueie a camada para editar os objetos",
+    "zh-Hans": "请解锁图层以编辑其中的对象"
+  },
+  "Déverrouillez les objets et affichez leur calque avant de les modifier.": {
+    "fr": "Déverrouillez les objets et affichez leur calque avant de les modifier.",
+    "en": "Unlock the objects and show their layer before editing them.",
+    "de": "Entsperren Sie die Objekte und blenden Sie ihre Ebene vor der Bearbeitung ein.",
+    "es": "Desbloquea los objetos y muestra su capa antes de editarlos.",
+    "it": "Sblocca gli oggetti e mostra il loro livello prima di modificarli.",
+    "pt": "Desbloqueie os objetos e mostre a camada antes de os editar.",
+    "zh-Hans": "请先解锁对象并显示其图层，然后再编辑。"
+  },
+  "Groupe dissocié · les objets restent sélectionnés": {
+    "fr": "Groupe dissocié · les objets restent sélectionnés",
+    "en": "Group dissolved · objects remain selected",
+    "de": "Gruppierung aufgehoben · Objekte bleiben ausgewählt",
+    "es": "Grupo separado · los objetos siguen seleccionados",
+    "it": "Gruppo separato · gli oggetti restano selezionati",
+    "pt": "Grupo desfeito · os objetos continuam selecionados",
+    "zh-Hans": "已取消组合 · 对象仍保持选中"
+  },
+  "Groupe invalide ou dupliqué.": {
+    "fr": "Groupe invalide ou dupliqué.",
+    "en": "Invalid or duplicate group.",
+    "de": "Ungültige oder doppelte Gruppe.",
+    "es": "Grupo no válido o duplicado.",
+    "it": "Gruppo non valido o duplicato.",
+    "pt": "Grupo inválido ou duplicado.",
+    "zh-Hans": "组合无效或重复。"
+  },
+  "Grouper": {
+    "fr": "Grouper",
+    "en": "Group",
+    "de": "Gruppieren",
+    "es": "Agrupar",
+    "it": "Raggruppa",
+    "pt": "Agrupar",
+    "zh-Hans": "组合"
+  },
+  "Gérer les calques…": {
+    "fr": "Gérer les calques…",
+    "en": "Manage layers…",
+    "de": "Ebenen verwalten…",
+    "es": "Gestionar capas…",
+    "it": "Gestisci livelli…",
+    "pt": "Gerir camadas…",
+    "zh-Hans": "管理图层…"
+  },
+  "La sélection est verrouillée": {
+    "fr": "La sélection est verrouillée",
+    "en": "Selection is locked",
+    "de": "Auswahl ist gesperrt",
+    "es": "La selección está bloqueada",
+    "it": "La selezione è bloccata",
+    "pt": "A seleção está bloqueada",
+    "zh-Hans": "所选对象已锁定"
+  },
+  "Le calque de base reste visible et déverrouillé. Déplacez les objets sur un autre calque pour les masquer ensemble.": {
+    "fr": "Le calque de base reste visible et déverrouillé. Déplacez les objets sur un autre calque pour les masquer ensemble.",
+    "en": "The base layer stays visible and unlocked. Move objects to another layer to hide them together.",
+    "de": "Die Basisebene bleibt sichtbar und entsperrt. Verschieben Sie Objekte auf eine andere Ebene, um sie gemeinsam auszublenden.",
+    "es": "La capa base permanece visible y desbloqueada. Mueve los objetos a otra capa para ocultarlos juntos.",
+    "it": "Il livello di base resta visibile e sbloccato. Sposta gli oggetti su un altro livello per nasconderli insieme.",
+    "pt": "A camada base permanece visível e desbloqueada. Mova os objetos para outra camada para os ocultar em conjunto.",
+    "zh-Hans": "基础图层始终可见且未锁定。将对象移至其他图层可一并隐藏。"
+  },
+  "Les calques du haut sont dessinés au premier plan. Les calques masqués ne sont pas exportés.": {
+    "fr": "Les calques du haut sont dessinés au premier plan. Les calques masqués ne sont pas exportés.",
+    "en": "Upper layers are drawn in front. Hidden layers are excluded from exports.",
+    "de": "Obere Ebenen werden im Vordergrund gezeichnet. Ausgeblendete Ebenen werden nicht exportiert.",
+    "es": "Las capas superiores se dibujan delante. Las capas ocultas no se exportan.",
+    "it": "I livelli superiori vengono disegnati davanti. I livelli nascosti non vengono esportati.",
+    "pt": "As camadas superiores são desenhadas à frente. As camadas ocultas não são exportadas.",
+    "zh-Hans": "上层图层显示在前方。隐藏图层不会导出。"
+  },
+  "Les membres du groupe doivent être uniques et sur le même calque.": {
+    "fr": "Les membres du groupe doivent être uniques et sur le même calque.",
+    "en": "Group members must be unique and on the same layer.",
+    "de": "Gruppenmitglieder müssen eindeutig sein und derselben Ebene angehören.",
+    "es": "Los miembros del grupo deben ser únicos y estar en la misma capa.",
+    "it": "I membri del gruppo devono essere unici e sullo stesso livello.",
+    "pt": "Os membros do grupo devem ser únicos e pertencer à mesma camada.",
+    "zh-Hans": "组合成员必须唯一且位于同一图层。"
+  },
+  "Les objets sont replacés sur le calque de base.": {
+    "fr": "Les objets sont replacés sur le calque de base.",
+    "en": "Objects move to the base layer.",
+    "de": "Die Objekte werden auf die Basisebene verschoben.",
+    "es": "Los objetos se trasladan a la capa base.",
+    "it": "Gli oggetti vengono spostati sul livello di base.",
+    "pt": "Os objetos passam para a camada base.",
+    "zh-Hans": "对象将移至基础图层。"
+  },
+  "Monter le calque": {
+    "fr": "Monter le calque",
+    "en": "Move layer up",
+    "de": "Ebene nach oben",
+    "es": "Subir capa",
+    "it": "Sposta livello in alto",
+    "pt": "Subir camada",
+    "zh-Hans": "上移图层"
+  },
+  "Nom de calque invalide.": {
+    "fr": "Nom de calque invalide.",
+    "en": "Invalid layer name.",
+    "de": "Ungültiger Ebenenname.",
+    "es": "Nombre de capa no válido.",
+    "it": "Nome del livello non valido.",
+    "pt": "Nome de camada inválido.",
+    "zh-Hans": "图层名称无效。"
+  },
+  "Nom du calque mis à jour": {
+    "fr": "Nom du calque mis à jour",
+    "en": "Layer name updated",
+    "de": "Ebenenname aktualisiert",
+    "es": "Nombre de la capa actualizado",
+    "it": "Nome del livello aggiornato",
+    "pt": "Nome da camada atualizado",
+    "zh-Hans": "已更新图层名称"
+  },
+  "Objets groupés · Ctrl/⌘ Z pour annuler": {
+    "fr": "Objets groupés · Ctrl/⌘ Z pour annuler",
+    "en": "Objects grouped · Ctrl/⌘ Z to undo",
+    "de": "Objekte gruppiert · Strg/⌘ Z zum Rückgängigmachen",
+    "es": "Objetos agrupados · Ctrl/⌘ Z para deshacer",
+    "it": "Oggetti raggruppati · Ctrl/⌘ Z per annullare",
+    "pt": "Objetos agrupados · Ctrl/⌘ Z para anular",
+    "zh-Hans": "对象已组合 · Ctrl/⌘ Z 撤销"
+  },
+  "Ordre des calques mis à jour": {
+    "fr": "Ordre des calques mis à jour",
+    "en": "Layer order updated",
+    "de": "Ebenenreihenfolge aktualisiert",
+    "es": "Orden de capas actualizado",
+    "it": "Ordine dei livelli aggiornato",
+    "pt": "Ordem das camadas atualizada",
+    "zh-Hans": "已更新图层顺序"
+  },
+  "Organisation de page trop volumineuse.": {
+    "fr": "Organisation de page trop volumineuse.",
+    "en": "Page organization exceeds the limit.",
+    "de": "Die Seitenorganisation überschreitet das Limit.",
+    "es": "La organización de la página supera el límite.",
+    "it": "L'organizzazione della pagina supera il limite.",
+    "pt": "A organização da página excede o limite.",
+    "zh-Hans": "页面组织信息超出限制。"
+  },
+  "Organisation liée à un objet ou calque absent.": {
+    "fr": "Organisation liée à un objet ou calque absent.",
+    "en": "Organization references a missing object or layer.",
+    "de": "Die Organisation verweist auf ein fehlendes Objekt oder eine fehlende Ebene.",
+    "es": "La organización hace referencia a un objeto o capa inexistente.",
+    "it": "L'organizzazione fa riferimento a un oggetto o livello mancante.",
+    "pt": "A organização refere um objeto ou uma camada inexistente.",
+    "zh-Hans": "组织信息引用了不存在的对象或图层。"
+  },
+  "Placer la sélection ici": {
+    "fr": "Placer la sélection ici",
+    "en": "Move selection here",
+    "de": "Auswahl hierher verschieben",
+    "es": "Mover selección aquí",
+    "it": "Sposta selezione qui",
+    "pt": "Mover seleção para aqui",
+    "zh-Hans": "将所选对象移至此处"
+  },
+  "Position de calque invalide.": {
+    "fr": "Position de calque invalide.",
+    "en": "Invalid layer position.",
+    "de": "Ungültige Ebenenposition.",
+    "es": "Posición de capa no válida.",
+    "it": "Posizione del livello non valida.",
+    "pt": "Posição de camada inválida.",
+    "zh-Hans": "图层位置无效。"
+  },
+  "Retirer le calque": {
+    "fr": "Retirer le calque",
+    "en": "Remove layer",
+    "de": "Ebene entfernen",
+    "es": "Quitar capa",
+    "it": "Rimuovi livello",
+    "pt": "Remover camada",
+    "zh-Hans": "移除图层"
+  },
+  "Sélection déplacée sur le calque": {
+    "fr": "Sélection déplacée sur le calque",
+    "en": "Selection moved to layer",
+    "de": "Auswahl auf Ebene verschoben",
+    "es": "Selección movida a la capa",
+    "it": "Selezione spostata sul livello",
+    "pt": "Seleção movida para a camada",
+    "zh-Hans": "已将所选对象移至图层"
+  },
+  "Sélection déverrouillée": {
+    "fr": "Sélection déverrouillée",
+    "en": "Selection unlocked",
+    "de": "Auswahl entsperrt",
+    "es": "Selección desbloqueada",
+    "it": "Selezione sbloccata",
+    "pt": "Seleção desbloqueada",
+    "zh-Hans": "已解锁所选对象"
+  },
+  "Sélection d’objets invalide.": {
+    "fr": "Sélection d’objets invalide.",
+    "en": "Invalid object selection.",
+    "de": "Ungültige Objektauswahl.",
+    "es": "Selección de objetos no válida.",
+    "it": "Selezione di oggetti non valida.",
+    "pt": "Seleção de objetos inválida.",
+    "zh-Hans": "所选对象无效。"
+  },
+  "Sélection verrouillée": {
+    "fr": "Sélection verrouillée",
+    "en": "Selection locked",
+    "de": "Auswahl gesperrt",
+    "es": "Selección bloqueada",
+    "it": "Selezione bloccata",
+    "pt": "Seleção bloqueada",
+    "zh-Hans": "已锁定所选对象"
+  },
+  "Sélectionnez au moins deux objets du même calque.": {
+    "fr": "Sélectionnez au moins deux objets du même calque.",
+    "en": "Select at least two objects on the same layer.",
+    "de": "Wählen Sie mindestens zwei Objekte derselben Ebene aus.",
+    "es": "Selecciona al menos dos objetos de la misma capa.",
+    "it": "Seleziona almeno due oggetti sullo stesso livello.",
+    "pt": "Selecione pelo menos dois objetos na mesma camada.",
+    "zh-Hans": "请选择同一图层上至少两个对象。"
+  },
+  "Sélectionnez au moins deux objets modifiables du même calque": {
+    "fr": "Sélectionnez au moins deux objets modifiables du même calque",
+    "en": "Select at least two editable objects on the same layer",
+    "de": "Wählen Sie mindestens zwei bearbeitbare Objekte derselben Ebene aus",
+    "es": "Selecciona al menos dos objetos editables de la misma capa",
+    "it": "Seleziona almeno due oggetti modificabili sullo stesso livello",
+    "pt": "Selecione pelo menos dois objetos editáveis na mesma camada",
+    "zh-Hans": "请选择同一图层上至少两个可编辑对象"
+  },
+  "Verrouillage du calque mis à jour": {
+    "fr": "Verrouillage du calque mis à jour",
+    "en": "Layer lock updated",
+    "de": "Ebenensperre aktualisiert",
+    "es": "Bloqueo de la capa actualizado",
+    "it": "Blocco del livello aggiornato",
+    "pt": "Bloqueio da camada atualizado",
+    "zh-Hans": "已更新图层锁定状态"
+  },
+  "Verrouiller": {
+    "fr": "Verrouiller",
+    "en": "Lock",
+    "de": "Sperren",
+    "es": "Bloquear",
+    "it": "Blocca",
+    "pt": "Bloquear",
+    "zh-Hans": "锁定"
+  },
+  "Verrouillé": {
+    "fr": "Verrouillé",
+    "en": "Locked",
+    "de": "Gesperrt",
+    "es": "Bloqueado",
+    "it": "Bloccato",
+    "pt": "Bloqueado",
+    "zh-Hans": "已锁定"
+  },
+  "Visibilité du calque mise à jour": {
+    "fr": "Visibilité du calque mise à jour",
+    "en": "Layer visibility updated",
+    "de": "Ebenensichtbarkeit aktualisiert",
+    "es": "Visibilidad de la capa actualizada",
+    "it": "Visibilità del livello aggiornata",
+    "pt": "Visibilidade da camada atualizada",
+    "zh-Hans": "已更新图层可见性"
+  },
+  "Grouper la sélection": {
+    "fr": "Grouper la sélection",
+    "en": "Group selection",
+    "de": "Auswahl gruppieren",
+    "es": "Agrupar selección",
+    "it": "Raggruppa selezione",
+    "pt": "Agrupar seleção",
+    "zh-Hans": "组合所选对象"
+  },
+  "Dissocier le groupe": {
+    "fr": "Dissocier le groupe",
+    "en": "Ungroup selection",
+    "de": "Gruppierung der Auswahl aufheben",
+    "es": "Desagrupar selección",
+    "it": "Separa gruppo selezionato",
+    "pt": "Desagrupar seleção",
+    "zh-Hans": "取消所选组合"
+  },
+  "Verrouiller la sélection": {
+    "fr": "Verrouiller la sélection",
+    "en": "Lock selection",
+    "de": "Auswahl sperren",
+    "es": "Bloquear selección",
+    "it": "Blocca selezione",
+    "pt": "Bloquear seleção",
+    "zh-Hans": "锁定所选对象"
+  },
+  "Déverrouiller la sélection": {
+    "fr": "Déverrouiller la sélection",
+    "en": "Unlock selection",
+    "de": "Auswahl entsperren",
+    "es": "Desbloquear selección",
+    "it": "Sblocca selezione",
+    "pt": "Desbloquear seleção",
+    "zh-Hans": "解锁所选对象"
+  },
+  "Visible": {
+    "fr": "Visible",
+    "en": "Visible",
+    "de": "Sichtbar",
+    "es": "Visible",
+    "it": "Visibile",
+    "pt": "Visível",
+    "zh-Hans": "可见"
+  },
+  "Affichez et déverrouillez le calque avant de dupliquer": {
+    "fr": "Affichez et déverrouillez le calque avant de dupliquer",
+    "en": "Show and unlock the layer before duplicating",
+    "de": "Blenden Sie die Ebene ein und entsperren Sie sie vor dem Duplizieren",
+    "es": "Muestra y desbloquea la capa antes de duplicar",
+    "it": "Mostra e sblocca il livello prima di duplicare",
+    "pt": "Mostre e desbloqueie a camada antes de duplicar",
+    "zh-Hans": "请先显示并解锁图层，然后再复制"
+  },
+  "Sélectionnez un groupe": {
+    "fr": "Sélectionnez un groupe",
+    "en": "Select a group",
+    "de": "Wählen Sie eine Gruppe aus",
+    "es": "Selecciona un grupo",
+    "it": "Seleziona un gruppo",
+    "pt": "Selecione um grupo",
+    "zh-Hans": "请选择一个组合"
+  },
+  "Grouper les objets": {
+    "fr": "Grouper les objets",
+    "en": "Group objects",
+    "de": "Objekte gruppieren",
+    "es": "Agrupar objetos",
+    "it": "Raggruppa oggetti",
+    "pt": "Agrupar objetos",
+    "zh-Hans": "组合对象"
+  },
+  "Dégrouper les objets": {
+    "fr": "Dégrouper les objets",
+    "en": "Ungroup objects",
+    "de": "Objektgruppierung aufheben",
+    "es": "Desagrupar objetos",
+    "it": "Separa gli oggetti",
+    "pt": "Desagrupar objetos",
+    "zh-Hans": "取消对象组合"
+  },
+  "Verrouiller les objets": {
+    "fr": "Verrouiller les objets",
+    "en": "Lock objects",
+    "de": "Objekte sperren",
+    "es": "Bloquear objetos",
+    "it": "Blocca oggetti",
+    "pt": "Bloquear objetos",
+    "zh-Hans": "锁定对象"
+  },
+  "Déverrouiller les objets": {
+    "fr": "Déverrouiller les objets",
+    "en": "Unlock objects",
+    "de": "Objekte entsperren",
+    "es": "Desbloquear objetos",
+    "it": "Sblocca oggetti",
+    "pt": "Desbloquear objetos",
+    "zh-Hans": "解锁对象"
+  },
+  "Modifier un calque": {
+    "fr": "Modifier un calque",
+    "en": "Edit a layer",
+    "de": "Ebene bearbeiten",
+    "es": "Modificar una capa",
+    "it": "Modifica un livello",
+    "pt": "Editar uma camada",
+    "zh-Hans": "编辑图层"
+  },
+  "Réordonner un calque": {
+    "fr": "Réordonner un calque",
+    "en": "Reorder a layer",
+    "de": "Ebene neu anordnen",
+    "es": "Reordenar una capa",
+    "it": "Riordina un livello",
+    "pt": "Reordenar uma camada",
+    "zh-Hans": "重新排列图层"
+  },
+  "Déplacer les objets sur un calque": {
+    "fr": "Déplacer les objets sur un calque",
+    "en": "Move objects to a layer",
+    "de": "Objekte auf eine Ebene verschieben",
+    "es": "Mover objetos a una capa",
+    "it": "Sposta oggetti su un livello",
+    "pt": "Mover objetos para uma camada",
+    "zh-Hans": "将对象移至图层"
+  },
+  "Supprimer un calque en conservant ses objets": {
+    "fr": "Supprimer un calque en conservant ses objets",
+    "en": "Remove a layer and keep its objects",
+    "de": "Ebene entfernen und ihre Objekte behalten",
+    "es": "Eliminar una capa y conservar sus objetos",
+    "it": "Rimuovi un livello conservando gli oggetti",
+    "pt": "Remover uma camada preservando os objetos",
+    "zh-Hans": "移除图层并保留其中的对象"
+  },
+  "Alias de calque introuvable sur cette page.": {
+    "fr": "Alias de calque introuvable sur cette page.",
+    "en": "Layer alias not found on this page.",
+    "de": "Ebenenalias auf dieser Seite nicht gefunden.",
+    "es": "Alias de capa no encontrado en esta página.",
+    "it": "Alias del livello non trovato in questa pagina.",
+    "pt": "Alias de camada não encontrado nesta página.",
+    "zh-Hans": "此页面中不存在该图层别名。"
+  },
+  "Alias de calque vide, trop long ou déjà utilisé.": {
+    "fr": "Alias de calque vide, trop long ou déjà utilisé.",
+    "en": "Layer alias is empty, too long or already used.",
+    "de": "Ebenenalias ist leer, zu lang oder bereits vergeben.",
+    "es": "El alias de capa está vacío, es demasiado largo o ya se utiliza.",
+    "it": "L'alias del livello è vuoto, troppo lungo o già utilizzato.",
+    "pt": "O alias da camada está vazio, é demasiado longo ou já está em uso.",
+    "zh-Hans": "图层别名为空、过长或已被使用。"
+  },
+  "1 objet": {
+    "fr": "1 objet",
+    "en": "1 object",
+    "de": "1 Objekt",
+    "es": "1 objeto",
+    "it": "1 oggetto",
+    "pt": "1 objeto",
+    "zh-Hans": "1 个对象"
   }
 }

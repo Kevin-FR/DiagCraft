@@ -79,6 +79,7 @@ fn entry(id: u64, kind: Kind, text: &str, label: &str, position: Point) -> Entry
     }
 }
 fn entries(doc: &Document) -> Vec<Entry> {
+    let view = doc.organization_view();
     doc.nodes
         .iter()
         .map(|n| entry(n.id, Kind::Nodes, &n.text, &t(n.kind.label()), n.position))
@@ -109,6 +110,7 @@ fn entries(doc: &Document) -> Vec<Entry> {
                 .iter()
                 .map(|c| entry(c.id, Kind::Charts, &c.title, &t(c.kind.label()), c.position)),
         )
+        .filter(|e| view.is_object_visible(e.id))
         .collect()
 }
 
@@ -200,7 +202,8 @@ impl DrawApp {
         };
         let old = std::mem::take(&mut self.selected);
         self.set_tool(Tool::Select);
-        self.selected = vec![id];
+        self.selected = self.doc.expand_groups(&[id]);
+        self.normalize_selection();
         self.reveal_selection(ctx);
         if add {
             self.selected = old;
@@ -208,6 +211,7 @@ impl DrawApp {
                 self.selected.push(id);
             }
         }
+        self.normalize_selection();
         self.status = i18n::render(
             "Objets sélectionnés : {0} · Maj + F pour zoomer",
             &[("0", self.selected.len().to_string())],

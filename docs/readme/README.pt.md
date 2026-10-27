@@ -21,12 +21,13 @@ As aplicações e as respetivas somas de verificação SHA-256 estão disponíve
 | Windows x86_64 | ZIP portátil com a aplicação e a CLI |
 | Linux x86_64 | Pacote `.deb` para amd64 ou arquivo `.tar.gz`, com a aplicação e a CLI |
 
-**A versão 0.7.3 é experimental** e corrige a moldura escura da janela no Ubuntu/Wayland. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
+**A versão 0.8.0 é experimental** e adiciona grupos persistentes, bloqueio de objetos e camadas visíveis ou ocultas. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
 Os pacotes Windows não estão assinados com um certificado de editor.
 Consulte o [guia de instalação](../installation.md).
 
 ## Funcionalidades
 
+- Grupos persistentes, bloqueio de objetos e camadas por página, com visibilidade comum na área de desenho e nas exportações SVG/PDF.
 - Setas: 1 px; Shift: 10 px. Manter uma tecla premida cria um único movimento anulável sem deformar a seleção.
 - Um único botão por painel, alinhado sob a faixa de opções e acessível quando o painel está fechado.
 - Procura objetos da página por texto, tipo ou identificador; coloca, edita e liga blocos pelo teclado.
@@ -44,6 +45,10 @@ Consulte o [guia de instalação](../installation.md).
 - Ajuste automático das formas ao texto, com medição dos tipos de letra e disposição partilhada entre a interface, SVG e PDF.
 - Cópias locais automáticas para recuperação após uma falha, sem substituir os originais.
 - CLI e servidor MCP locais: inspeção, validação e patches JSON atómicos.
+
+A organização é guardada em metadados v7 opcionais. As aplicações anteriores mostram os objetos ocultos e descartam grupos, camadas e bloqueios ao guardar.
+
+[Grupos e camadas](../organisation.md) (FR).
 
 O formato de documento **v7** e a API para agentes **v1** têm números de versão
 próprios, independentes da aplicação. Os ficheiros dos formatos v1–v6 são migrados

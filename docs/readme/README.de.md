@@ -21,12 +21,13 @@ Die Anwendungen und ihre SHA-256-Prüfsummen stehen auf der
 | Windows x86_64 | Portables ZIP mit Anwendung und CLI |
 | Linux x86_64 | `.deb`-Paket für amd64 oder `.tar.gz`-Archiv mit Anwendung und CLI |
 
-**0.7.3 ist experimentell** und korrigiert den dunklen Fensterrahmen unter Ubuntu/Wayland. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
+**0.8.0 ist experimentell** und ergänzt dauerhafte Gruppen, Objektsperren sowie sichtbare und ausgeblendete Ebenen. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
 Die Windows-Pakete sind nicht mit einem Herausgeberzertifikat signiert.
 Siehe die [Installationsanleitung](../installation.md).
 
 ## Funktionen
 
+- Dauerhafte Gruppen, Objekt- und Ebenensperren sowie seitenbezogene Ebenen mit gemeinsamer Sichtbarkeit in Zeichenfläche, SVG und PDF.
 - Pfeile verschieben um 1 px, Umschalt um 10 px; ein gehaltener Pfeil erzeugt eine abbrechbare Verschiebung und hält die Auswahl zusammen.
 - Ein Schalter je Seitenleiste, unter dem Menüband ausgerichtet und auch bei geschlossener Leiste erreichbar.
 - Seitenobjekte nach Text, Typ oder ID suchen; Blöcke per Tastatur platzieren, bearbeiten und verbinden.
@@ -44,6 +45,10 @@ Siehe die [Installationsanleitung](../installation.md).
 - Automatische Größenanpassung an den Text mit Schriftmessung und gemeinsamer Anordnung in Oberfläche, SVG und PDF.
 - Automatische lokale Wiederherstellungskopien nach einem Absturz, ohne Originaldateien zu überschreiben.
 - Lokale CLI und lokaler MCP-Server: Inspektion, Validierung und atomare JSON-Patches.
+
+Die Organisation wird in optionalen v7-Metadaten gespeichert. Ältere Anwendungen zeigen ausgeblendete Objekte an und verlieren Gruppen, Ebenen und Sperren beim Speichern.
+
+[Gruppen und Ebenen](../organisation.md) (FR).
 
 Das Dokumentformat **v7** und die Agenten-API **v1** haben eigene Versionsnummern,
 unabhängig von der Anwendung. Dateien der Formate v1–v6 werden beim Öffnen im
