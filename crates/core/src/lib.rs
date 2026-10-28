@@ -32,3 +32,5 @@ pub mod text_layout;
 pub mod images;
 
 pub mod raster;
+
+pub mod mermaid;

@@ -21,15 +21,18 @@ Le applicazioni e le relative somme di controllo SHA-256 sono disponibili nella
 | Windows x86_64 | ZIP portatile con applicazione e CLI |
 | Linux x86_64 | Pacchetto `.deb` per amd64 o archivio `.tar.gz`, con applicazione e CLI |
 
-**0.10.0 è sperimentale** e aggiunge immagini incorporate, ritaglio non distruttivo ed esportazione PNG configurabile.
+**0.11.0 è sperimentale** e aggiunge lo scambio di diagrammi di flusso Mermaid con anteprima e diagnostica contestuale per gli agenti.
 Il pacchetto Mac ha una firma ad hoc e non è stato autenticato da Apple tramite
 notarizzazione. I pacchetti Windows non sono firmati con un certificato dell’editore.
 Consulta la [guida all’installazione](../installation.md).
 
 Le applicazioni precedenti alla 0.10.0 eliminano le immagini incorporate al salvataggio. La [guida a immagini e PNG](../images.md) descrive formati, scorciatoie e limiti.
 
+Consulta le guide a [Mermaid](../mermaid.md) e alla [diagnostica degli agenti](../diagnostics.md). Conserva `.draw` come fonte modificabile completa; Mermaid non preserva tutti i dettagli visivi.
+
 ## Funzionalità
 
+- Importa/esporta un sottoinsieme Mermaid documentato con rapporto e conferma delle perdite; gli errori degli agenti indicano operazione, pagina, destinazione e suggerimento di correzione.
 - Importa PNG/JPEG, trascina immagini o usa il comando dedicato per incollarle; esporta pagine o selezioni con dimensioni, risoluzione e trasparenza opzionale.
 - I connettori ortogonali evitano blocchi e grafici visibili mantenendo punti manuali, porte scelte ed estremità libere.
 - Gruppi persistenti, blocco degli oggetti e livelli per pagina, con visibilità condivisa tra area di disegno ed esportazioni SVG/PDF.

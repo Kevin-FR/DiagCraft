@@ -240,6 +240,7 @@ pub struct DrawApp {
     styled_cache: appearance_ui::SharedCache,
     route_cache: std::cell::RefCell<routing_ui::Cache>,
     image_ui: image_ui::State,
+    mermaid_ui: Option<mermaid_ui::Panel>,
     property_edit: bool,
     drag_snapshot: Option<gestures_ui::DragSnapshot>,
     keyboard_move: Option<keyboard_ui::Move>,
@@ -254,6 +255,10 @@ pub struct DrawApp {
 
 impl DrawApp {
     pub fn capture_tab(&mut self, name: &str) {
+        if matches!(name, "mermaid-import" | "mermaid-export") {
+            self.prepare_mermaid_capture(name == "mermaid-export");
+            return;
+        }
         if matches!(name, "images" | "export-png") {
             self.prepare_images_capture(name == "export-png");
             return;
@@ -824,6 +829,7 @@ impl DrawApp {
             styled_cache: Default::default(),
             route_cache: Default::default(),
             image_ui: Default::default(),
+            mermaid_ui: None,
             property_edit: false,
             drag_snapshot: None,
             keyboard_move: None,
@@ -2576,7 +2582,7 @@ impl eframe::App for DrawApp {
         }
         self.inline_outside_press(ctx);
         let dropped = ctx.input(|i| i.raw.dropped_files.clone());
-        if !dropped.is_empty() && !self.image_ui.png_open {
+        if !dropped.is_empty() && !self.image_ui.png_open && self.mermaid_ui.is_none() {
             if dropped.len() == 1
                 && dropped[0].path.as_ref().is_some_and(|p| {
                     p.extension()
@@ -2614,6 +2620,7 @@ impl eframe::App for DrawApp {
                 && !self.show_gallery
                 && !self.show_pdf_export
                 && !self.image_ui.png_open
+                && self.mermaid_ui.is_none()
                 && !self.show_pages
                 && !self.show_layers
                 && self.page_draft.is_none()
@@ -2631,6 +2638,7 @@ impl eframe::App for DrawApp {
         self.pages_dialogs(ctx);
         self.layers_dialog(ctx);
         self.png_dialog(ctx);
+        self.mermaid_dialog(ctx);
         self.agent_dialog(ctx);
         self.inline_text_toolbar(ctx);
         self.dialogs(ctx);
@@ -2836,3 +2844,6 @@ mod organization_tests;
 #[cfg(test)]
 #[path = "image_tests.rs"]
 mod image_tests;
+
+#[path = "mermaid_ui.rs"]
+mod mermaid_ui;

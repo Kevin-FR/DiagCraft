@@ -1,6 +1,6 @@
 //! Headless JSON CLI and MCP stdio transport. No networking or provider credentials.
 use crate::{
-    agent,
+    agent::{self, Failure},
     document::{Document, MAX_FILE_BYTES},
 };
 use serde::Deserialize;
@@ -11,19 +11,60 @@ use std::{
 };
 
 pub fn cli(args: &[String]) -> Result<Value, String> {
+    cli_detailed(args).map_err(|e| e.to_string())
+}
+fn load_document(path: &Path) -> Result<Document, Failure> {
+    Document::load(path).map_err(|e|Failure::new("invalid_document",if e.starts_with("Document JSON invalide") { "Document JSON invalide.".into() } else { e },"Choisissez un fichier .draw valide et lisible ; validez ou restaurez une copie du document avant de réessayer."))
+}
+fn output_error(e: String) -> Failure {
+    Failure::new(
+        "output_write",
+        e,
+        "Choisissez un nouveau fichier dans un dossier accessible en écriture ; les originaux et sorties existantes ne sont jamais remplacés.",
+    )
+}
+fn arguments_error(e: serde_json::Error) -> Failure {
+    Failure::arguments(&e)
+}
+pub fn cli_detailed(args: &[String]) -> Result<Value, Failure> {
     match args.first().map(String::as_str) {
-        Some("catalog") if args.len()==1=>Ok(agent::catalog()),
-        Some("inspect") if args.len()==2=>agent::inspect(&Document::load(Path::new(&args[1]))?),
-        Some("validate") if args.len()==2=>{let d=Document::load(Path::new(&args[1]))?;Ok(json!({"valid":true,"revision":agent::revision(&d),"diagnostics":agent::diagnostics(&d)}))},
-        Some("apply") if args.len()==4 || (args.len()==5 && args[4]=="--dry-run")=>{
-            let doc=Document::load(Path::new(&args[1]))?;let patch=agent::read_patch(Path::new(&args[2]))?;
-            let mut preview=agent::preview(&doc,&patch)?;let dry=args.len()==5;
-            if !dry {agent::save_new(&preview.document,Path::new(&args[3]))?;}
-            preview.report["dry_run"]=json!(dry);preview.report["output"]=if dry{Value::Null}else{json!(args[3])};Ok(preview.report)
-        },
-        _=>Err("Utilisation : --agent catalog | inspect FILE | validate FILE | apply FILE PATCH OUTPUT [--dry-run]".into())
+        Some("catalog") if args.len() == 1 => Ok(agent::catalog()),
+        Some("inspect") if args.len() == 2 => {
+            let doc = load_document(Path::new(&args[1]))?;
+            agent::inspect(&doc).map_err(|e| {
+                Failure::new(
+                    "invalid_document",
+                    e,
+                    "Validez le document source avant de demander son inspection.",
+                )
+            })
+        }
+        Some("validate") if args.len() == 2 => {
+            let d = load_document(Path::new(&args[1]))?;
+            Ok(
+                json!({"valid":true,"revision":agent::revision(&d),"diagnostics":agent::diagnostics(&d)}),
+            )
+        }
+        Some("apply") if args.len() == 4 || (args.len() == 5 && args[4] == "--dry-run") => {
+            let doc = load_document(Path::new(&args[1]))?;
+            let patch = agent::read_patch_detailed(Path::new(&args[2]))?;
+            let mut preview = agent::preview_detailed(&doc, &patch)?;
+            let dry = args.len() == 5;
+            if !dry {
+                agent::save_new(&preview.document, Path::new(&args[3])).map_err(output_error)?;
+            }
+            preview.report["dry_run"] = json!(dry);
+            preview.report["output"] = if dry { Value::Null } else { json!(args[3]) };
+            Ok(preview.report)
+        }
+        _ => Err(Failure::new(
+            "invalid_arguments",
+            "Utilisation : --agent catalog | inspect FILE | validate FILE | apply FILE PATCH OUTPUT [--dry-run]",
+            "Consultez --help ; apply nécessite source, patch, nouvelle sortie, puis éventuellement --dry-run.",
+        )),
     }
 }
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct FileArgs {
@@ -73,17 +114,24 @@ fn output_path(root: &Path, name: &str) -> Result<PathBuf, String> {
     let file = p.file_name().ok_or("Nom de sortie absent.")?;
     Ok(parent.join(file))
 }
-fn tool(root: &Path, name: &str, args: Value) -> Result<Value, String> {
+fn tool(root: &Path, name: &str, args: Value) -> Result<Value, Failure> {
     match name {
         "draw_catalog" => {
-            let _: EmptyArgs = serde_json::from_value(args).map_err(|e| e.to_string())?;
+            let _: EmptyArgs = serde_json::from_value(args).map_err(arguments_error)?;
             Ok(agent::catalog())
         }
         "draw_inspect" | "draw_validate" => {
-            let a: FileArgs = serde_json::from_value(args).map_err(|e| e.to_string())?;
-            let doc = Document::load(&input_path(root, &a.file)?)?;
+            let a: FileArgs = serde_json::from_value(args).map_err(arguments_error)?;
+            let path = input_path(root, &a.file).map_err(|e| Failure::new("path_outside_root",e,"Utilisez un chemin relatif vers un fichier existant à l’intérieur du dossier MCP configuré."))?;
+            let doc = load_document(&path)?;
             if name == "draw_inspect" {
-                agent::inspect(&doc)
+                agent::inspect(&doc).map_err(|e| {
+                    Failure::new(
+                        "invalid_document",
+                        e,
+                        "Validez le document source avant de demander son inspection.",
+                    )
+                })
             } else {
                 Ok(
                     json!({"valid":true,"revision":agent::revision(&doc),"diagnostics":agent::diagnostics(&doc)}),
@@ -91,16 +139,18 @@ fn tool(root: &Path, name: &str, args: Value) -> Result<Value, String> {
             }
         }
         "draw_apply" => {
-            let a: ApplyArgs = serde_json::from_value(args).map_err(|e| e.to_string())?;
-            let doc = Document::load(&input_path(root, &a.file)?)?;
-            let patch = agent::parse_patch(&a.patch.to_string())?;
-            let mut p = agent::preview(&doc, &patch)?;
+            let a: ApplyArgs = serde_json::from_value(args).map_err(arguments_error)?;
+            let path = input_path(root, &a.file).map_err(|e| Failure::new("path_outside_root",e,"Utilisez un chemin relatif vers un fichier existant à l’intérieur du dossier MCP configuré."))?;
+            let doc = load_document(&path)?;
+            let patch = agent::parse_patch_detailed(&a.patch.to_string())?;
+            let mut p = agent::preview_detailed(&doc, &patch)?;
             if !a.dry_run {
                 let output = a
                     .output
                     .as_ref()
-                    .ok_or("output obligatoire pour enregistrer.")?;
-                agent::save_new(&p.document, &output_path(root, output)?)?;
+                    .ok_or_else(||Failure::new("invalid_arguments","output obligatoire pour enregistrer.","Avec dry_run:false, donnez un chemin output relatif vers un nouveau fichier .draw."))?;
+                let path=output_path(root, output).map_err(|e|Failure::new("path_outside_root",e,"Choisissez une nouvelle sortie relative dans le dossier MCP ; aucun fichier existant ne peut être remplacé."))?;
+                agent::save_new(&p.document, &path).map_err(output_error)?;
             }
             p.report["dry_run"] = json!(a.dry_run);
             p.report["output"] = if a.dry_run {
@@ -110,7 +160,11 @@ fn tool(root: &Path, name: &str, args: Value) -> Result<Value, String> {
             };
             Ok(p.report)
         }
-        _ => Err("Outil inconnu.".into()),
+        _ => Err(Failure::new(
+            "invalid_arguments",
+            "Outil inconnu.",
+            "Utilisez l’un des quatre outils annoncés par tools/list.",
+        )),
     }
 }
 fn tools_list() -> Value {
@@ -218,7 +272,9 @@ fn dispatch(root: &Path, state: &mut State, msg: Value) -> Option<Value> {
                 Ok(value) => {
                     json!({"content":[{"type":"text","text":value.to_string()}],"structuredContent":value,"isError":false})
                 }
-                Err(e) => json!({"content":[{"type":"text","text":e}],"isError":true}),
+                Err(e) => {
+                    json!({"content":[{"type":"text","text":e.to_string()}],"structuredContent":e.to_value(),"isError":true})
+                }
             }
         }
         _ => return Some(rpc_error(id, -32601, "Method not found")),

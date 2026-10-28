@@ -110,6 +110,20 @@ def main():
                                   cwd=tmp, text=True, encoding="utf-8", capture_output=True)
         assert rejected.returncode != 0 and not (tmp / "blocked.draw").exists()
         assert (tmp / "organized.draw").read_bytes() == before
+        # Detailed failures retain the human field while exposing actionable context.
+        failure = json.loads(rejected.stderr)
+        diagnostic = failure["diagnostic"]
+        assert failure["error"] and diagnostic["severity"] == "error" and diagnostic["hint"]
+        assert diagnostic["operation"] == 1 and diagnostic["operation_name"] == "update_node"
+        assert diagnostic["page"] == 0 and diagnostic["target"] == ids[0]
+        rejected_requests = json.loads(json.dumps(requests))
+        rejected_requests[-1]["params"]["arguments"] = {
+            "file": "organized.draw", "patch": blocked, "output": "blocked-mcp.draw", "dry_run": False}
+        result = subprocess.run([str(binary), "--mcp", str(tmp)], cwd=tmp, text=True, encoding="utf-8",
+                                input="".join(json.dumps(r) + "\n" for r in rejected_requests), capture_output=True, check=True)
+        rejection = json.loads(result.stdout.splitlines()[-1])["result"]
+        assert rejection["isError"] and not (tmp / "blocked-mcp.draw").exists()
+        assert rejection["structuredContent"]["diagnostic"] == diagnostic
         # Actual CLI/MCP routing contract, including immutable manual anchors.
         empty=json.loads((tmp / "cli.draw").read_text(encoding="utf-8"))
         for key in ("nodes", "connectors", "drawings", "charts", "pages"):
@@ -168,7 +182,44 @@ def main():
         run("--export-pdf",tmp / "images.draw",tmp / "images.pdf",cwd=tmp)
         assert "data:image/png;base64," in (tmp / "images.svg").read_text(encoding="utf-8")
         assert b"/Subtype /Image" in (tmp / "images.pdf").read_bytes()
-    print(f"CLI/MCP smoke passed: {count} format fixtures, SVG/PDF, dry run, identical patches, protected organization, obstacle routing, embedded images and PNG.")
+        # Mermaid preflight must expose limitations before any output is created.
+        mermaid_source = ROOT / "examples/mermaid-flowchart.mmd"
+        original = mermaid_source.read_bytes()
+        imported = tmp / "mermaid.draw"
+        preview = json.loads(run("--import-mermaid", mermaid_source, imported, "--dry-run", cwd=tmp))
+        assert preview["dry_run"] and preview["requires_confirmation"] and preview["diagnostics"]
+        assert not imported.exists() and len(preview["preview"]["pages"][0]["nodes"]) == 6
+        unconfirmed = subprocess.run([str(binary), "--import-mermaid", str(mermaid_source), str(imported)],
+                                     cwd=tmp, text=True, encoding="utf-8", capture_output=True)
+        assert unconfirmed.returncode != 0 and not imported.exists()
+        assert json.loads(unconfirmed.stderr)["requires_confirmation"]
+        run("--import-mermaid", mermaid_source, imported, "--accept-losses", cwd=tmp)
+        original_draw = imported.read_bytes()
+        run("--agent", "validate", imported, cwd=tmp)
+        context = json.loads(run("--agent", "inspect", imported, cwd=tmp))
+        assert len(context["pages"][0]["nodes"]) == 6 and len(context["pages"][0]["connectors"]) == 6
+        exported = tmp / "mermaid.mmd"
+        report = json.loads(run("--export-mermaid", imported, exported, "--dry-run", cwd=tmp))
+        assert report["source"].startswith("flowchart ") and not exported.exists()
+        run("--export-mermaid", imported, exported, "--accept-losses", cwd=tmp)
+        run("--import-mermaid", exported, tmp / "mermaid-roundtrip.draw", "--accept-losses", cwd=tmp)
+        roundtrip = json.loads(run("--agent", "inspect", tmp / "mermaid-roundtrip.draw", cwd=tmp))
+        assert sorted(n["text"] for n in context["pages"][0]["nodes"]) == sorted(n["text"] for n in roundtrip["pages"][0]["nodes"])
+        assert sorted(e["label"] for e in context["pages"][0]["connectors"]) == sorted(e["label"] for e in roundtrip["pages"][0]["connectors"])
+        existing = exported.read_bytes()
+        overwrite = subprocess.run([str(binary), "--export-mermaid", str(imported), str(exported), "--accept-losses"],
+                                   cwd=tmp, text=True, encoding="utf-8", capture_output=True)
+        assert overwrite.returncode != 0 and exported.read_bytes() == existing
+        bad_source = tmp / "unsupported.mmd"
+        bad_source.write_text("flowchart TB\nsubgraph secret\nA-->B\nend\n", encoding="utf-8")
+        bad = subprocess.run([str(binary), "--import-mermaid", str(bad_source), str(tmp / "bad-mermaid.draw"), "--accept-losses"],
+                             cwd=tmp, text=True, encoding="utf-8", capture_output=True)
+        assert bad.returncode != 0 and not (tmp / "bad-mermaid.draw").exists()
+        assert any(d["severity"] == "error" and d["line"] and d["hint"] for d in json.loads(bad.stderr)["diagnostics"])
+        assert mermaid_source.read_bytes() == original and imported.read_bytes() == original_draw
+        run("--export-png", imported, tmp / "mermaid.png", "--width", "400", cwd=tmp)
+        run("--export-pdf", imported, tmp / "mermaid.pdf", cwd=tmp)
+    print(f"CLI/MCP smoke passed: {count} format fixtures, SVG/PDF, dry run, identical patches, protected organization, obstacle routing, embedded images, PNG, Mermaid preflight and contextual diagnostics.")
 
 
 if __name__ == "__main__":

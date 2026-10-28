@@ -32,3 +32,6 @@ Les [intégrations officielles egui](https://github.com/emilk/egui) prennent en
 charge glow et wgpu. Conserver glow pour cette publication évite de cumuler
 réorganisation et changement du moteur de rendu. Cargo.lock fixe les versions
 résolues ; les sources Git non approuvées sont refusées par deny.toml.
+
+L’interopérabilité Mermaid (0.11.0) utilise un parseur borné original du moteur.
+Elle n’ajoute ni dépendance Rust, ni runtime JavaScript, ni service distant.

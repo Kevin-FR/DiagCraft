@@ -15,6 +15,8 @@ pub(super) enum Command {
     ExportSvg,
     ExportPdf,
     ExportPng,
+    ImportMermaid,
+    ExportMermaid,
     ImportImage,
     PasteImage,
     Gallery,
@@ -113,6 +115,18 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
         "Exporter en PNG…",
         "Fichier",
         "image pixels transparent png"
+    ),
+    command!(
+        ImportMermaid,
+        "Importer du Mermaid…",
+        "Fichier",
+        "mermaid flowchart graph import texte"
+    ),
+    command!(
+        ExportMermaid,
+        "Exporter en Mermaid…",
+        "Fichier",
+        "mermaid flowchart graph export texte"
     ),
     command!(ImportImage,"Importer des images…","Insertion","image png jpeg fichier",Modifiers::COMMAND=>I),
     command!(PasteImage,"Coller une image","Insertion","image clipboard presse papiers",Modifiers::COMMAND.plus(Modifiers::SHIFT)=>I),
@@ -345,6 +359,7 @@ impl DrawApp {
             || self.show_gallery
             || self.show_pdf_export
             || self.image_ui.png_open
+            || self.mermaid_ui.is_some()
             || self.show_pages
             || self.show_layers
             || self.page_draft.is_some()
@@ -488,6 +503,8 @@ impl DrawApp {
             ExportSvg => self.export(),
             ExportPdf => self.show_pdf_export = true,
             ExportPng => self.open_png_export(),
+            ImportMermaid => self.open_mermaid(false),
+            ExportMermaid => self.open_mermaid(true),
             ImportImage => self.import_image(),
             PasteImage => {
                 if !self.paste_image() {

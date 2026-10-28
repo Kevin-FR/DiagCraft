@@ -1,0 +1,8 @@
+%% Original synthetic DiagCraft flowchart, MIT.
+flowchart TB
+    start(["Une idée"]) --> collect["Préciser le besoin"]
+    collect --> ready{"Prêt à partager ?"}
+    ready -->|"Oui"| send[["Partager le diagramme"]]
+    ready -.->|"À améliorer"| refine("Ajuster les détails")
+    refine --> collect
+    send --> finish(["Terminé"])

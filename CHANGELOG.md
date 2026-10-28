@@ -3,6 +3,18 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.11.0 — Mermaid et diagnostics
+
+- Sous-ensemble flowchart défini avant implémentation ; parseur local borné sans navigateur ni dépendance ajoutée.
+- Import éditable, aperçu, ajout sur une nouvelle page, révision vérifiée et annulation unique.
+- Export Mermaid de page avec textes, relations, rapport de pertes et acceptation explicite.
+- CLI d’import/export avec dry-run et fichiers nouveaux ; sources préservées.
+- Diagnostics CLI/MCP structurés avec opération, page, cible, code et aide ; champs texte conservés.
+- Avertissements de page et de routage présentés distinctement dans les propriétés des agents.
+- Interface et README dans les sept langues, exemples originaux et guides.
+
+Format `.draw` **v7**, API de patches **v1**, quatre outils MCP inchangés.
+
 ## 0.10.0 — images embarquées et PNG
 
 - Import PNG/JPEG, dépôt et collage d’image avec normalisation, orientation JPEG et réduction bornée, sans modifier les sources.

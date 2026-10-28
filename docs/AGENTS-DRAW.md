@@ -241,3 +241,20 @@ Pour importer un fichier sans mettre des octets dans le contexte, utiliser
 `--import-image INPUT IMAGE OUTPUT [X Y]`. Pour les PNG, utiliser `--export-png`
 avec `--width`, `--height`, `--dpi`, `--page`, `--selection` et `--transparent`.
 Voir [le guide images](images.md) pour les limites et la compatibilité.
+
+## Diagnostics et Mermaid (0.11.0)
+
+Les erreurs conservent `error` et ajoutent `diagnostic` : code, gravité, message,
+aide et, lorsqu’ils sont connus, `operation` (index 0), `operation_name`, `page`
+(index 0), `target` (ID/alias), `line` et `column` (index 1). MCP fournit le même
+objet dans `structuredContent` d’un résultat `isError: true`. Corriger la cause
+puis inspecter à nouveau ; une erreur ne produit aucun résultat partiel.
+Les avertissements de page et de routage ont des codes et aides distincts.
+Voir [diagnostics.md](diagnostics.md).
+
+Pour convertir un flowchart Mermaid local, commencer par `--import-mermaid INPUT
+OUTPUT --dry-run` ou `--export-mermaid INPUT OUTPUT --page 0 --dry-run`. Examiner
+le rapport, puis ajouter `--accept-losses` pour créer une nouvelle sortie. Le
+sous-ensemble et les limites sont dans [mermaid.md](mermaid.md). Les quatre outils
+MCP n’exécutent pas de Mermaid ; ils inspectent et modifient les objets DiagCraft
+obtenus avec les mêmes opérations API 1 et les mêmes contrôles de révision.

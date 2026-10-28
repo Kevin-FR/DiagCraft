@@ -21,14 +21,17 @@ Les applications et leurs empreintes SHA-256 sont sur la page des
 | Windows x86_64 | ZIP portable avec application et CLI |
 | Linux x86_64 | Paquet `.deb` amd64 ou archive `.tar.gz`, application et CLI |
 
-**0.10.0 est expérimentale** et ajoute les images embarquées, le recadrage non destructif et l’export PNG configurable. Le paquet
+**0.11.0 est expérimentale** et ajoute les échanges de flowcharts Mermaid avec aperçu et des diagnostics agents contextualisés. Le paquet
 Mac est signé ad hoc et n’est pas notarié par Apple. Les paquets Windows ne
 sont pas signés avec un certificat éditeur. Voir [l’installation](../installation.md).
 
 Les applications antérieures à 0.10.0 perdent les images embarquées au réenregistrement. Voir le [guide images et PNG](../images.md) pour les formats, raccourcis et limites.
 
+Voir les guides [Mermaid](../mermaid.md) et [diagnostics agents](../diagnostics.md). Conservez le `.draw` comme source complète : Mermaid ne préserve pas tous les éléments visuels.
+
 ## Fonctions disponibles
 
+- Import/export d’un sous-ensemble Mermaid documenté avec rapport et confirmation des pertes ; erreurs agents précisant opération, page, cible et piste de correction.
 - Import PNG/JPEG, dépôt et commande de collage d’image ; export de pages ou sélections avec dimensions, résolution et transparence au choix.
 - Les connecteurs à angle droit évitent les blocs et graphiques visibles en conservant points manuels, ports choisis et extrémités libres.
 - Groupes persistants, verrouillage des objets et calques par page, avec visibilité commune sur la feuille et dans les exports SVG/PDF.

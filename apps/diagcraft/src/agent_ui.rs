@@ -99,7 +99,11 @@ impl DrawApp {
                                 let object = c["id"].as_u64().map(|id| i18n::render(" · objet {0}", &[("0", id.to_string())])).unwrap_or_default();
                                 ui.label(i18n::render("{0}  {1} · page {2}{3}", &[("0",(c["operation"].as_u64().unwrap()+1).to_string()),("1",c["description"].as_str().unwrap().into()),("2",c["page"].to_string()),("3",object)]));
                             }
-                            for w in preview.report["diagnostics"].as_array().unwrap(){ui.colored_label(Color32::from_rgb(178,104,22),i18n::render("Hors page : page {0} · objet {1}", &[("0", format!("{}", w["page"])),("1", format!("{}", w["id"]))]));}
+                            for w in preview.report["diagnostics"].as_array().unwrap() {
+                                ui.colored_label(Color32::from_rgb(178,104,22),format!("{} · {}",w["code"].as_str().unwrap_or("diagnostic"),w["message"].as_str().unwrap_or_default()));
+                                ui.small(i18n::render("Page {0} · objet {1}", &[("0",w["page"].to_string()),("1",w["id"].to_string())]));
+                                if let Some(hint)=w["hint"].as_str(){ui.small(hint);}
+                            }
                         });
                     } else {
                         let (r,_)=ui.allocate_exact_size(vec2(ui.available_width(),230.),Sense::hover());library_ui::paint_document_preview(ui.painter(),&self.doc.page_document(self.doc.page_index).unwrap(),r);

@@ -10,6 +10,10 @@ use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, HashSet};
 
+#[path = "agent_diagnostics.rs"]
+mod diagnostic_details;
+pub use diagnostic_details::{Diagnostic, Failure};
+
 pub const API_VERSION: u32 = 1;
 pub const MAX_OPERATIONS: usize = 500;
 
@@ -253,15 +257,44 @@ pub fn revision(doc: &Document) -> String {
     format!("sha256:{:x}", Sha256::digest(bytes))
 }
 pub fn parse_patch(text: &str) -> Result<Patch, String> {
-    if text.len() > MAX_FILE_BYTES as usize {
-        return Err("Patch trop volumineux (16 Mio maximum).".into());
-    }
-    // Nested text styles and chart series normally tolerate extra fields in .draw files.
-    // Agent patches must catch typos even in these legacy model types.
-    let value: Value = serde_json::from_str(text).map_err(|e| format!("JSON du patch : {e}"))?;
-    check_nested_fields(&value)?;
-    serde_json::from_value(value).map_err(|e| format!("Schéma du patch : {e}"))
+    parse_patch_detailed(text).map_err(|e| e.to_string())
 }
+/// Parse a patch without echoing its data; schema locations point to the operation start.
+pub fn parse_patch_detailed(text: &str) -> Result<Patch, Failure> {
+    if text.len() > MAX_FILE_BYTES as usize {
+        return Err(Failure::new(
+            "patch_too_large",
+            "Patch trop volumineux (16 Mio maximum).",
+            "Réduisez le lot ou les images embarquées ; la limite est de 16 Mio par patch.",
+        ));
+    }
+    let value: Value = serde_json::from_str(text).map_err(|e| {
+        Failure::new("patch_json", "JSON du patch invalide.", "Corrigez la syntaxe JSON à cet emplacement ; les chaînes utilisent des guillemets doubles.")
+            .location(e.line(), e.column())
+    })?;
+    if let Some(ops) = value["operations"].as_array() {
+        let offsets = diagnostic_details::operation_offsets(text);
+        for (index, op) in ops.iter().enumerate() {
+            let error = check_nested_fields(op)
+                .err()
+                .map(|_| "Champ imbriqué inconnu dans le patch.".into())
+                .or_else(|| {
+                    serde_json::from_value::<Operation>(op.clone())
+                        .err()
+                        .map(|e| diagnostic_details::schema_message(&e))
+                });
+            if let Some(message) = error {
+                let (line, column) =
+                    diagnostic_details::location(text, offsets.get(index).copied().unwrap_or(0));
+                return Err(Failure::new("patch_schema", message, "Consultez patch_schema dans draw_catalog et corrigez les champs ou types de cette opération.")
+                    .raw_operation(index, op).location(line,column));
+            }
+        }
+    }
+    serde_json::from_str(text).map_err(|e| Failure::new("patch_schema", diagnostic_details::schema_message(&e),
+        "Utilisez api_version, expected_revision et operations, avec les types du catalogue ; les champs inconnus sont refusés.").location(e.line(),e.column()))
+}
+
 fn check_nested_fields(value: &Value) -> Result<(), String> {
     match value {
         Value::Object(map) => {
@@ -457,7 +490,7 @@ pub fn diagnostics(doc: &Document) -> Vec<Value> {
                 _ => None,
             };
             if let Some(code) = code {
-                warnings.push(json!({"code":code,"page":page,"id":edge.id,"message":"Connector constraints block routing; move the conflicting block, endpoint or waypoint. Manual anchors are preserved."}));
+                warnings.push(json!({"code":code,"severity":"warning","page":page,"id":edge.id,"message":"Connector constraints block routing; manual anchors are preserved.","hint":"Move the conflicting block, endpoint or waypoint, then inspect the computed route again."}));
             }
             objects.push((edge.id, route.points));
         }
@@ -466,7 +499,7 @@ pub fn diagnostics(doc: &Document) -> Vec<Value> {
                 .iter()
                 .any(|p| p[0] < 0. || p[1] < 0. || p[0] > d.page_size[0] || p[1] > d.page_size[1])
             {
-                warnings.push(json!({"code":"outside_page","page":page,"id":id,"message":"Objet hors de la page ; agrandir la page ou utiliser fit_page."}));
+                warnings.push(json!({"code":"outside_page","severity":"warning","page":page,"id":id,"message":"Objet hors de la page ; agrandir la page ou utiliser fit_page.","hint":"Increase the page dimensions, move this object inside the page, or apply fit_page to this page."}));
             }
         }
     }
@@ -588,17 +621,30 @@ fn edge_changes(
     Ok(())
 }
 pub fn preview(doc: &Document, patch: &Patch) -> Result<Preview, String> {
-    doc.validate()?;
+    preview_detailed(doc, patch).map_err(|e| e.to_string())
+}
+pub fn preview_detailed(doc: &Document, patch: &Patch) -> Result<Preview, Failure> {
+    doc.validate().map_err(|e| Failure::new("invalid_document",e,"Validez le document source avant de préparer un patch ; aucune modification n’a été appliquée."))?;
     if patch.api_version != API_VERSION {
-        return Err("Version d’API du patch non prise en charge.".into());
+        return Err(Failure::new(
+            "unsupported_api",
+            "Version d’API du patch non prise en charge.",
+            "Utilisez api_version: 1 et le schéma fourni par draw_catalog.",
+        ));
     }
     if patch.expected_revision != revision(doc) {
-        return Err(
-            "Révision différente : exporter un nouveau contexte avant de réessayer.".into(),
-        );
+        return Err(Failure::new(
+            "revision_conflict",
+            "Révision différente : exporter un nouveau contexte avant de réessayer.",
+            "Appelez draw_inspect, régénérez le patch depuis cette révision et prévisualisez-le avant application.",
+        ));
     }
     if patch.operations.is_empty() || patch.operations.len() > MAX_OPERATIONS {
-        return Err("Un patch doit contenir de 1 à 500 opérations.".into());
+        return Err(Failure::new(
+            "operation_limit",
+            "Un patch doit contenir de 1 à 500 opérations.",
+            "Préparez un lot de 1 à 500 opérations ; après chaque application, inspectez sa nouvelle révision.",
+        ));
     }
     let original_page = doc.page_index;
     let mut result = doc.clone();
@@ -606,12 +652,24 @@ pub fn preview(doc: &Document, patch: &Patch) -> Result<Preview, String> {
     let mut layer_aliases = BTreeMap::new();
     let mut changes = Vec::new();
     for (index, op) in patch.operations.iter().enumerate() {
+        if diagnostic_details::page(op).is_some_and(|page| page >= result.page_count())
+            || matches!(op,Operation::MovePage {to,..} if *to >= result.page_count())
+        {
+            return Err(Failure::new("page_not_found", "Page introuvable.", "Les pages commencent à 0 ; utilisez un index de draw_inspect ou créez d’abord la page dans ce lot.").operation(index,op,&aliases));
+        }
         let (page, id, description) = execute(&mut result, op, &mut aliases, &mut layer_aliases)
-            .map_err(|e| format!("Opération {} : {e}", index + 1))?;
+            .map_err(|e| diagnostic_details::domain(e).operation(index, op, &aliases))?;
         result.grow_page_to_content();
-        result
-            .validate()
-            .map_err(|e| format!("Opération {} : {e}", index + 1))?;
+        result.validate().map_err(|e| {
+            let mut failure = diagnostic_details::domain(e).operation(index, op, &aliases);
+            if id.is_some() {
+                failure.diagnostic.id = id;
+            }
+            if failure.diagnostic.page.is_none() {
+                failure.diagnostic.page = page;
+            }
+            failure
+        })?;
         changes.push(Change {
             operation: index,
             page,
@@ -619,7 +677,15 @@ pub fn preview(doc: &Document, patch: &Patch) -> Result<Preview, String> {
             description,
         });
     }
-    result.switch_page(original_page.min(result.page_count() - 1))?;
+    result
+        .switch_page(original_page.min(result.page_count() - 1))
+        .map_err(|e| {
+            Failure::new(
+                "invalid_document",
+                e,
+                "Inspectez le nombre et l’ordre des pages avant de réessayer le lot.",
+            )
+        })?;
     aliases.retain(|_, (_, id)| *id > 0);
     layer_aliases.retain(|_, (_, id)| *id > 0);
     let report = json!({"api_version":API_VERSION,"base_revision":patch.expected_revision,"revision":revision(&result),"changes":changes,"aliases":aliases,"layer_aliases":layer_aliases,"diagnostics":diagnostics(&result),"page_count":result.page_count(),"object_count":result.object_count()});
@@ -1018,6 +1084,8 @@ pub fn catalog() -> Value {
         "organization":{"base_layer":0,"max_layers":crate::organization::MAX_LAYERS,"max_groups":crate::organization::MAX_GROUPS,"groups":"flat, same-layer; IDs page-local in a separate namespace","layer_order":"bottom-to-top; base layer first","hidden_layers":"omitted from rendering/exports, retained in saved files and agent inspection","locks":"protect stored fields; unlock in a separate operation before editing"},
         "routing":{"orthogonal":"avoids visible block/chart envelopes; text, frames and swimlanes do not obstruct","waypoints":"immutable ordered anchors, maximum 16; detours between anchors","status":"inspection routing_status: clear, constrained, limited, direct; diagnostics are non-blocking","deterministic":true},
         "images":{"format":"embedded normalized PNG; file import accepts PNG/JPEG","max_input_bytes":crate::images::MAX_INPUT_BYTES,"max_input_pixels":crate::images::MAX_INPUT_PIXELS,"import_resize":"alpha-aware reduction to pixel/PNG limits; source file unchanged","max_png_bytes":crate::images::MAX_PNG_BYTES,"max_pixels":crate::images::MAX_PIXELS,"document_pixels":crate::images::MAX_DOCUMENT_PIXELS,"crop":"normalized [x,y,width,height] inside [0,1]; non-destructive","inspection":"payload omitted; SHA-256 and dimensions retained","operations":["add_image","update_image"]},
+        "diagnostics":{"envelope":"error string plus diagnostic object; MCP errors use structuredContent and isError:true","operation_index":"zero_based; human display is one_based","page_index":"zero_based","source_location":"line and byte column one_based; schema errors locate the operation start","fields":["code","severity","message","hint","operation","operation_name","page","target","id","line","column"],"codes":["patch_too_large","patch_json","patch_schema","unsupported_api","revision_conflict","operation_limit","page_not_found","object_locked","alias_not_found","object_not_found","invalid_geometry","resource_limit","invalid_alias","invalid_endpoint","invalid_operation","invalid_document","input_read","output_write","invalid_arguments","path_outside_root","outside_page","route_constrained","route_limited"]},
+        "mermaid":{"subset":"flowchart-v1","guide":"https://github.com/Kevin-FR/DiagCraft/blob/main/docs/mermaid.md","import":"--import-mermaid INPUT OUTPUT [--dry-run] [--accept-losses]","export":"--export-mermaid INPUT OUTPUT [--page INDEX] [--dry-run] [--accept-losses]","patch_api":1,"mcp_tools":"unchanged; use CLI for Mermaid conversion"},
         "patch_schema":schema(),"guide":include_str!("../../../docs/AGENTS-DRAW.md")})
 }
 pub fn schema() -> Value {
@@ -1026,15 +1094,31 @@ pub fn schema() -> Value {
         .expect("bundled patch schema")
 }
 pub fn read_patch(path: &std::path::Path) -> Result<Patch, String> {
+    read_patch_detailed(path).map_err(|e| e.to_string())
+}
+pub fn read_patch_detailed(path: &std::path::Path) -> Result<Patch, Failure> {
     use std::io::Read;
     let mut text = String::new();
     std::fs::File::open(path)
-        .map_err(|e| e.to_string())?
+        .map_err(|e| {
+            Failure::new(
+                "input_read",
+                e.to_string(),
+                "Choisissez un fichier de patch UTF-8 accessible en lecture.",
+            )
+        })?
         .take(MAX_FILE_BYTES + 1)
         .read_to_string(&mut text)
-        .map_err(|e| e.to_string())?;
-    parse_patch(&text)
+        .map_err(|e| {
+            Failure::new(
+                "input_read",
+                e.to_string(),
+                "Choisissez un fichier de patch UTF-8 accessible en lecture.",
+            )
+        })?;
+    parse_patch_detailed(&text)
 }
+
 /// A result copy must never replace an existing file (including the input).
 pub fn save_new(doc: &Document, path: &std::path::Path) -> Result<(), String> {
     use std::io::Write;

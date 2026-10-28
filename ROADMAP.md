@@ -14,8 +14,8 @@ Les critères détaillés et l’avancement sont suivis dans les issues GitHub.
 | **0.8.0 — livrée** | Groupes persistants, verrouillage et calques visibles ou masqués. | [#1](https://github.com/Kevin-FR/DiagCraft/issues/1) |
 | **0.9.0 — livrée** | Connecteurs évitant les obstacles, avec parcours stables et respect des points manuels. | [#2](https://github.com/Kevin-FR/DiagCraft/issues/2) |
 | **0.10.0 — livrée** | Images embarquées, recadrage, collage et export PNG configurable. | [#3](https://github.com/Kevin-FR/DiagCraft/issues/3) |
-| **0.11.0 — suivant** | Interopérabilité Mermaid et diagnostics CLI/MCP plus compréhensibles. | [#4](https://github.com/Kevin-FR/DiagCraft/issues/4) |
-| **1.0.0** | Parcours utilisateurs validés, accessibilité, performances et distribution fiable. | [#5](https://github.com/Kevin-FR/DiagCraft/issues/5) |
+| **0.11.0 — livrée** | Interopérabilité Mermaid et diagnostics CLI/MCP plus compréhensibles. | [#4](https://github.com/Kevin-FR/DiagCraft/issues/4) |
+| **1.0.0 — suivant** | Parcours utilisateurs validés, accessibilité, performances et distribution fiable. | [#5](https://github.com/Kevin-FR/DiagCraft/issues/5) |
 
 ### Critères du lot 0.8.0
 
@@ -67,7 +67,7 @@ les jalons ci-dessus sans retarder les corrections et les tests utilisateurs.
 - [x] Sauvegarde de récupération après fermeture anormale, sans écraser le dessin source (0.4.0).
   Copie locale des onglets modifiés, reprise dans de nouveaux onglets et verrous entre instances.
 - [x] Tests d’intégration CLI/MCP sur les trois systèmes : migrations, SVG/PDF, dry-run et patches identiques en CI.
-- [ ] Diagnostics CLI/MCP plus lisibles, avec page, objet, opération et piste de correction (0.11.0).
+- [x] Diagnostics CLI/MCP plus lisibles, avec page, objet, opération et piste de correction (0.11.0).
 
 ## Internationalisation
 
@@ -86,7 +86,8 @@ les jalons ci-dessus sans retarder les corrections et les tests utilisateurs.
 - [x] Routage évitant les obstacles, entre points manuels conservés, avec voies stables et calcul borné (0.9.0).
 - [x] Images PNG/JPEG embarquées, recadrage non destructif et export PNG page/sélection avec dimensions, DPI et transparence (0.10.0).
 - [ ] Bibliothèques métier originales avec provenance et critères de contribution.
-- [ ] Import/export Mermaid et meilleure interopérabilité SVG.
+- [x] Import/export d’un sous-ensemble flowchart Mermaid, aperçu et confirmation des pertes (0.11.0).
+- [ ] Meilleure interopérabilité SVG.
 
 ## Distribution
 

@@ -21,15 +21,18 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.10.0 is experimental** and adds embedded images, non-destructive cropping and configurable PNG export.
+**0.11.0 is experimental** and adds Mermaid flowchart exchange with previews and contextual agent diagnostics.
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).
 
 Applications older than 0.10.0 discard embedded images when saving. See the [images and PNG guide](docs/images.md) for formats, shortcuts and resource limits.
 
+See the [Mermaid guide](docs/mermaid.md) and [agent diagnostics](docs/diagnostics.md). Keep `.draw` as the complete editable source; Mermaid does not preserve every visual feature.
+
 ## Features
 
+- Import/export a documented Mermaid flowchart subset with conversion reports and explicit loss confirmation; agent errors identify the operation, page, target and correction hint.
 - Import PNG/JPEG files, drop images or use the dedicated image-paste command; export pages or selections at a chosen size and resolution with optional transparency.
 - Orthogonal connectors avoid visible blocks and charts while keeping manual waypoints, selected ports and free endpoints.
 - Persistent groups, object and layer locks, and page-local layers with shared canvas/SVG/PDF visibility.

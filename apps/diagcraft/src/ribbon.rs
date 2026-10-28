@@ -123,6 +123,7 @@ impl DrawApp {
                 }
             }
             RibbonTab::Insert => {
+                self.command_button(ui, Command::ImportMermaid);
                 self.command_button(ui, Command::ImportImage);
                 self.command_button(ui, Command::PasteImage);
                 self.shape_menu(ui);
@@ -435,6 +436,14 @@ impl DrawApp {
                         if ui.button(t("Enregistrer sous…")).clicked() {
                             ui.close();
                             self.save(true);
+                        }
+                        if ui.button(t("Importer du Mermaid…")).clicked() {
+                            ui.close();
+                            self.open_mermaid(false);
+                        }
+                        if ui.button(t("Exporter en Mermaid…")).clicked() {
+                            ui.close();
+                            self.open_mermaid(true);
                         }
                         if ui.button(t("Exporter en SVG…")).clicked() {
                             ui.close();
@@ -789,6 +798,10 @@ impl DrawApp {
         });
     }
     pub(super) fn insert_ribbon(&mut self, ui: &mut egui::Ui) {
+        group(ui, 190., "Mermaid", |ui| {
+            self.command_button(ui, commands_ui::Command::ImportMermaid);
+            self.command_button(ui, commands_ui::Command::ExportMermaid);
+        });
         group(ui, 190., "Images", |ui| {
             self.command_button(ui, commands_ui::Command::ImportImage);
             self.command_button(ui, commands_ui::Command::PasteImage);

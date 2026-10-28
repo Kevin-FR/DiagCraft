@@ -9394,5 +9394,302 @@
     "it": "Adatta ai limiti PNG",
     "pt": "Ajustar aos limites PNG",
     "zh-Hans": "适应 PNG 限制"
+  },
+  "Actualiser l’export": {
+    "fr": "Actualiser l’export",
+    "en": "Refresh export",
+    "de": "Export aktualisieren",
+    "es": "Actualizar exportación",
+    "it": "Aggiorna esportazione",
+    "pt": "Atualizar exportação",
+    "zh-Hans": "刷新导出"
+  },
+  "Charger un fichier Mermaid…": {
+    "fr": "Charger un fichier Mermaid…",
+    "en": "Load a Mermaid file…",
+    "de": "Mermaid-Datei laden…",
+    "es": "Cargar archivo Mermaid…",
+    "it": "Carica un file Mermaid…",
+    "pt": "Carregar ficheiro Mermaid…",
+    "zh-Hans": "加载 Mermaid 文件…"
+  },
+  "Copier le Mermaid": {
+    "fr": "Copier le Mermaid",
+    "en": "Copy Mermaid",
+    "de": "Mermaid kopieren",
+    "es": "Copiar Mermaid",
+    "it": "Copia Mermaid",
+    "pt": "Copiar Mermaid",
+    "zh-Hans": "复制 Mermaid"
+  },
+  "Enregistrer le Mermaid…": {
+    "fr": "Enregistrer le Mermaid…",
+    "en": "Save Mermaid…",
+    "de": "Mermaid speichern…",
+    "es": "Guardar Mermaid…",
+    "it": "Salva Mermaid…",
+    "pt": "Guardar Mermaid…",
+    "zh-Hans": "保存 Mermaid…"
+  },
+  "Exemple Mermaid": {
+    "fr": "Exemple Mermaid",
+    "en": "Mermaid example",
+    "de": "Mermaid-Beispiel",
+    "es": "Ejemplo Mermaid",
+    "it": "Esempio Mermaid",
+    "pt": "Exemplo Mermaid",
+    "zh-Hans": "Mermaid 示例"
+  },
+  "Exporter en Mermaid": {
+    "fr": "Exporter en Mermaid",
+    "en": "Export Mermaid",
+    "de": "Als Mermaid exportieren",
+    "es": "Exportar a Mermaid",
+    "it": "Esporta in Mermaid",
+    "pt": "Exportar para Mermaid",
+    "zh-Hans": "导出 Mermaid"
+  },
+  "Exporter en Mermaid…": {
+    "fr": "Exporter en Mermaid…",
+    "en": "Export Mermaid…",
+    "de": "Als Mermaid exportieren…",
+    "es": "Exportar a Mermaid…",
+    "it": "Esporta in Mermaid…",
+    "pt": "Exportar para Mermaid…",
+    "zh-Hans": "导出 Mermaid…"
+  },
+  "Flowcharts uniquement : textes et liens deviennent des objets modifiables. Le placement Mermaid n’est pas conservé.": {
+    "fr": "Flowcharts uniquement : textes et liens deviennent des objets modifiables. Le placement Mermaid n’est pas conservé.",
+    "en": "Flowcharts only: text and links become editable objects. Mermaid positioning is not preserved.",
+    "de": "Nur Flussdiagramme: Texte und Verbindungen werden bearbeitbare Objekte. Die Mermaid-Anordnung wird nicht übernommen.",
+    "es": "Solo diagramas de flujo: los textos y enlaces serán objetos editables. No se conserva la disposición de Mermaid.",
+    "it": "Solo diagrammi di flusso: testi e collegamenti diventano oggetti modificabili. La disposizione Mermaid non viene conservata.",
+    "pt": "Apenas fluxogramas: textos e ligações tornam-se objetos editáveis. A disposição Mermaid não é preservada.",
+    "zh-Hans": "仅支持流程图：文字和连线将转换为可编辑对象，不保留 Mermaid 布局。"
+  },
+  "Import Mermaid": {
+    "fr": "Import Mermaid",
+    "en": "Mermaid import",
+    "de": "Mermaid-Import",
+    "es": "Importación Mermaid",
+    "it": "Importazione Mermaid",
+    "pt": "Importação Mermaid",
+    "zh-Hans": "Mermaid 导入"
+  },
+  "Importer du Mermaid": {
+    "fr": "Importer du Mermaid",
+    "en": "Import Mermaid",
+    "de": "Mermaid importieren",
+    "es": "Importar Mermaid",
+    "it": "Importa Mermaid",
+    "pt": "Importar Mermaid",
+    "zh-Hans": "导入 Mermaid"
+  },
+  "Importer du Mermaid…": {
+    "fr": "Importer du Mermaid…",
+    "en": "Import Mermaid…",
+    "de": "Mermaid importieren…",
+    "es": "Importar Mermaid…",
+    "it": "Importa Mermaid…",
+    "pt": "Importar Mermaid…",
+    "zh-Hans": "导入 Mermaid…"
+  },
+  "Importer sur une nouvelle page": {
+    "fr": "Importer sur une nouvelle page",
+    "en": "Import on a new page",
+    "de": "Auf neuer Seite importieren",
+    "es": "Importar en una página nueva",
+    "it": "Importa in una nuova pagina",
+    "pt": "Importar numa nova página",
+    "zh-Hans": "导入到新页面"
+  },
+  "J’accepte les pertes décrites dans le rapport.": {
+    "fr": "J’accepte les pertes décrites dans le rapport.",
+    "en": "I accept the losses described in the report.",
+    "de": "Ich akzeptiere die im Bericht beschriebenen Verluste.",
+    "es": "Acepto las pérdidas descritas en el informe.",
+    "it": "Accetto le perdite descritte nel rapporto.",
+    "pt": "Aceito as perdas descritas no relatório.",
+    "zh-Hans": "我接受报告中说明的信息丢失。"
+  },
+  "Le document a changé. Actualisez l’aperçu avant de continuer.": {
+    "fr": "Le document a changé. Actualisez l’aperçu avant de continuer.",
+    "en": "The document has changed. Refresh the preview before continuing.",
+    "de": "Das Dokument wurde geändert. Aktualisieren Sie die Vorschau, bevor Sie fortfahren.",
+    "es": "El documento ha cambiado. Actualiza la vista previa antes de continuar.",
+    "it": "Il documento è cambiato. Aggiorna l’anteprima prima di continuare.",
+    "pt": "O documento mudou. Atualize a pré-visualização antes de continuar.",
+    "zh-Hans": "文档已更改。请刷新预览后继续。"
+  },
+  "Le fichier Mermaid doit être en UTF-8.": {
+    "fr": "Le fichier Mermaid doit être en UTF-8.",
+    "en": "The Mermaid file must use UTF-8.",
+    "de": "Die Mermaid-Datei muss UTF-8 verwenden.",
+    "es": "El archivo Mermaid debe usar UTF-8.",
+    "it": "Il file Mermaid deve usare UTF-8.",
+    "pt": "O ficheiro Mermaid deve usar UTF-8.",
+    "zh-Hans": "Mermaid 文件必须使用 UTF-8 编码。"
+  },
+  "Ligne {0} · colonne {1}": {
+    "fr": "Ligne {0} · colonne {1}",
+    "en": "Line {0} · column {1}",
+    "de": "Zeile {0} · Spalte {1}",
+    "es": "Línea {0} · columna {1}",
+    "it": "Riga {0} · colonna {1}",
+    "pt": "Linha {0} · coluna {1}",
+    "zh-Hans": "第 {0} 行 · 第 {1} 列"
+  },
+  "L’import ajoute une page ; les pages existantes restent intactes.": {
+    "fr": "L’import ajoute une page ; les pages existantes restent intactes.",
+    "en": "Import adds a page; existing pages stay intact.",
+    "de": "Der Import fügt eine Seite hinzu; vorhandene Seiten bleiben unverändert.",
+    "es": "La importación añade una página; las existentes permanecen intactas.",
+    "it": "L’importazione aggiunge una pagina; quelle esistenti restano intatte.",
+    "pt": "A importação adiciona uma página; as existentes ficam intactas.",
+    "zh-Hans": "导入会添加一个页面，现有页面保持不变。"
+  },
+  "Mermaid copié.": {
+    "fr": "Mermaid copié.",
+    "en": "Mermaid copied.",
+    "de": "Mermaid kopiert.",
+    "es": "Mermaid copiado.",
+    "it": "Mermaid copiato.",
+    "pt": "Mermaid copiado.",
+    "zh-Hans": "Mermaid 已复制。"
+  },
+  "Mermaid exporté.": {
+    "fr": "Mermaid exporté.",
+    "en": "Mermaid exported.",
+    "de": "Mermaid exportiert.",
+    "es": "Mermaid exportado.",
+    "it": "Mermaid esportato.",
+    "pt": "Mermaid exportado.",
+    "zh-Hans": "Mermaid 已导出。"
+  },
+  "Mermaid importé sur une nouvelle page. Une annulation retire l’import.": {
+    "fr": "Mermaid importé sur une nouvelle page. Une annulation retire l’import.",
+    "en": "Mermaid imported on a new page. One undo removes the import.",
+    "de": "Mermaid auf neuer Seite importiert. Ein Rückgängig entfernt den Import.",
+    "es": "Mermaid importado en una página nueva. Una acción de deshacer elimina la importación.",
+    "it": "Mermaid importato in una nuova pagina. Una sola azione Annulla rimuove l’importazione.",
+    "pt": "Mermaid importado numa nova página. Uma anulação remove a importação.",
+    "zh-Hans": "Mermaid 已导入到新页面，可通过一次撤销移除导入内容。"
+  },
+  "Page exportée : {0}": {
+    "fr": "Page exportée : {0}",
+    "en": "Exported page: {0}",
+    "de": "Exportierte Seite: {0}",
+    "es": "Página exportada: {0}",
+    "it": "Pagina esportata: {0}",
+    "pt": "Página exportada: {0}",
+    "zh-Hans": "导出页面：{0}"
+  },
+  "Page {0} · objet {1}": {
+    "fr": "Page {0} · objet {1}",
+    "en": "Page {0} · object {1}",
+    "de": "Seite {0} · Objekt {1}",
+    "es": "Página {0} · objeto {1}",
+    "it": "Pagina {0} · oggetto {1}",
+    "pt": "Página {0} · objeto {1}",
+    "zh-Hans": "页面 {0} · 对象 {1}"
+  },
+  "Prévisualisez le Mermaid avant de l’importer.": {
+    "fr": "Prévisualisez le Mermaid avant de l’importer.",
+    "en": "Preview the Mermaid before importing it.",
+    "de": "Sehen Sie sich vor dem Import die Vorschau an.",
+    "es": "Previsualiza el Mermaid antes de importarlo.",
+    "it": "Visualizza l’anteprima Mermaid prima di importare.",
+    "pt": "Pré-visualize o Mermaid antes de importar.",
+    "zh-Hans": "请在导入前预览 Mermaid。"
+  },
+  "Rapport de conversion": {
+    "fr": "Rapport de conversion",
+    "en": "Conversion report",
+    "de": "Konvertierungsbericht",
+    "es": "Informe de conversión",
+    "it": "Rapporto di conversione",
+    "pt": "Relatório de conversão",
+    "zh-Hans": "转换报告"
+  },
+  "Source Mermaid trop volumineuse : maximum 256 Kio.": {
+    "fr": "Source Mermaid trop volumineuse : maximum 256 Kio.",
+    "en": "Mermaid source too large: maximum 256 KiB.",
+    "de": "Mermaid-Quelle zu groß: maximal 256 KiB.",
+    "es": "Código Mermaid demasiado grande: máximo 256 KiB.",
+    "it": "Sorgente Mermaid troppo grande: massimo 256 KiB.",
+    "pt": "Código Mermaid demasiado grande: máximo 256 KiB.",
+    "zh-Hans": "Mermaid 源文件过大：最大为 256 KiB。"
+  },
+  "Vérifiez le texte pour préparer l’import.": {
+    "fr": "Vérifiez le texte pour préparer l’import.",
+    "en": "Validate the text to prepare the import.",
+    "de": "Prüfen Sie den Text, um den Import vorzubereiten.",
+    "es": "Verifica el texto para preparar la importación.",
+    "it": "Verifica il testo per preparare l’importazione.",
+    "pt": "Verifique o texto para preparar a importação.",
+    "zh-Hans": "请检查文字以准备导入。"
+  },
+  "Mermaid": {
+    "fr": "Mermaid",
+    "en": "Mermaid",
+    "de": "Mermaid",
+    "es": "Mermaid",
+    "it": "Mermaid",
+    "pt": "Mermaid",
+    "zh-Hans": "Mermaid"
+  },
+  "La sortie existe déjà. Choisissez un nouveau nom pour préserver les fichiers.": {
+    "fr": "La sortie existe déjà. Choisissez un nouveau nom pour préserver les fichiers.",
+    "en": "The output already exists. Choose a new name to preserve the files.",
+    "de": "Die Ausgabedatei existiert bereits. Wählen Sie einen neuen Namen, um die Dateien zu erhalten.",
+    "es": "La salida ya existe. Elige un nombre nuevo para conservar los archivos.",
+    "it": "Il file di uscita esiste già. Scegli un nuovo nome per preservare i file.",
+    "pt": "A saída já existe. Escolha um novo nome para preservar os ficheiros.",
+    "zh-Hans": "输出文件已存在。请选择新名称以保留现有文件。"
+  },
+  "Terminez l’édition en cours avant d’ouvrir Mermaid.": {
+    "fr": "Terminez l’édition en cours avant d’ouvrir Mermaid.",
+    "en": "Finish the current edit before opening Mermaid.",
+    "de": "Beenden Sie die aktuelle Bearbeitung, bevor Sie Mermaid öffnen.",
+    "es": "Termina la edición actual antes de abrir Mermaid.",
+    "it": "Completa la modifica corrente prima di aprire Mermaid.",
+    "pt": "Termine a edição atual antes de abrir Mermaid.",
+    "zh-Hans": "请先完成当前编辑，再打开 Mermaid。"
+  },
+  "L’export Mermaid ne conserve pas les positions, tailles, parcours, ports, styles ou l’apparence des pages.": {
+    "fr": "L’export Mermaid ne conserve pas les positions, tailles, parcours, ports, styles ou l’apparence des pages.",
+    "en": "Mermaid export does not preserve positions, sizes, routes, ports, styles or page appearance.",
+    "de": "Der Mermaid-Export bewahrt weder Positionen, Größen, Verläufe, Anschlüsse, Stile noch das Erscheinungsbild der Seiten.",
+    "es": "La exportación Mermaid no conserva posiciones, tamaños, recorridos, puertos, estilos ni la apariencia de las páginas.",
+    "it": "L’esportazione Mermaid non conserva posizioni, dimensioni, percorsi, porte, stili o l’aspetto delle pagine.",
+    "pt": "A exportação Mermaid não preserva posições, tamanhos, percursos, portas, estilos ou a aparência das páginas.",
+    "zh-Hans": "Mermaid 导出不保留位置、尺寸、路径、连接端口、样式或页面外观。"
+  },
+  "Conservez le fichier .draw comme source visuelle modifiable et vérifiez l’aperçu Mermaid avant d’enregistrer.": {
+    "fr": "Conservez le fichier .draw comme source visuelle modifiable et vérifiez l’aperçu Mermaid avant d’enregistrer.",
+    "en": "Keep the .draw file as the editable visual source and review the Mermaid preview before saving.",
+    "de": "Behalten Sie die .draw-Datei als bearbeitbare visuelle Quelle und prüfen Sie vor dem Speichern die Mermaid-Vorschau.",
+    "es": "Conserva el archivo .draw como fuente visual editable y revisa la vista previa Mermaid antes de guardar.",
+    "it": "Conserva il file .draw come sorgente visiva modificabile e controlla l’anteprima Mermaid prima di salvare.",
+    "pt": "Conserve o ficheiro .draw como fonte visual editável e reveja a pré-visualização Mermaid antes de guardar.",
+    "zh-Hans": "请保留 .draw 文件作为可编辑的视觉源文件，并在保存前检查 Mermaid 预览。"
+  },
+  "DiagCraft crée un placement modifiable à partir de la structure du flowchart.": {
+    "fr": "DiagCraft crée un placement modifiable à partir de la structure du flowchart.",
+    "en": "DiagCraft creates an editable layout from the flowchart structure.",
+    "de": "DiagCraft erstellt aus der Flussdiagrammstruktur eine bearbeitbare Anordnung.",
+    "es": "DiagCraft crea una disposición editable a partir de la estructura del diagrama de flujo.",
+    "it": "DiagCraft crea una disposizione modificabile dalla struttura del diagramma di flusso.",
+    "pt": "O DiagCraft cria uma disposição editável a partir da estrutura do fluxograma.",
+    "zh-Hans": "DiagCraft 根据流程图结构生成可编辑的布局。"
+  },
+  "Vérifiez les positions et les connecteurs avant l’import ; le placement visuel Mermaid n’est pas conservé.": {
+    "fr": "Vérifiez les positions et les connecteurs avant l’import ; le placement visuel Mermaid n’est pas conservé.",
+    "en": "Review positions and connectors before importing; Mermaid visual positioning is not preserved.",
+    "de": "Prüfen Sie vor dem Import die Positionen und Verbindungen; die visuelle Mermaid-Anordnung wird nicht übernommen.",
+    "es": "Revisa las posiciones y los conectores antes de importar; no se conserva la disposición visual de Mermaid.",
+    "it": "Controlla posizioni e connettori prima di importare; la disposizione visiva Mermaid non viene conservata.",
+    "pt": "Reveja as posições e os conectores antes de importar; a disposição visual Mermaid não é preservada.",
+    "zh-Hans": "请在导入前检查位置和连线；不保留 Mermaid 的视觉布局。"
   }
 }

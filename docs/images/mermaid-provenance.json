@@ -1,0 +1,16 @@
+[
+  {
+    "file": "docs/images/mermaid-import.png",
+    "sha256": "a8ee10cff7aac216f2a5dc2863768cafcb61c2e0ff76cd99188400319bae70ef",
+    "source": "Native DiagCraft 0.11.0 capture using its own synthetic flowchart and original bounded Mermaid interpreter; no external application artwork.",
+    "license": "MIT",
+    "command": "diagcraft --language fr --screenshot docs/images/mermaid-import.png mermaid-import"
+  },
+  {
+    "file": "docs/images/mermaid-export.png",
+    "sha256": "0b1d60f77da4890409880e66a9c6dfe8d7005d2ed24854e3ecace35c3a7bc222",
+    "source": "Native DiagCraft 0.11.0 capture using its own synthetic flowchart and original bounded Mermaid interpreter; no external application artwork.",
+    "license": "MIT",
+    "command": "diagcraft --language fr --screenshot docs/images/mermaid-export.png mermaid-export"
+  }
+]

@@ -233,3 +233,21 @@ d’image a une commande dédiée, car egui-winit consomme les raccourcis de col
 natif pour produire du texte. Les agents utilisent les mêmes contrôles de données
 et les opérations atomiques API 1 ; l’inspection remplace la charge par ses
 métadonnées et son empreinte. Les bibliothèques tierces étaient déjà résolues.
+
+## Interopérabilité Mermaid et diagnostics
+
+`mermaid.rs` interprète un sous-ensemble borné de flowcharts, défini dans
+`docs/mermaid.md` avant implémentation. Le parseur est propre au projet et ne lance
+aucun moteur JavaScript ou interpréteur HTML. Il produit des `Node` et `Connector`
+ordinaires, avec un placement déterministe et un rapport de conversion explicite.
+L’export privilégie les textes et relations ; les pertes sont examinées avant écriture.
+
+`mermaid_cli.rs` conserve les préflights et exige une acceptation explicite des
+avertissements avant de créer un fichier nouveau, sans écrasement. `mermaid_ui.rs`
+garde le brouillon et l’aperçu hors du document jusqu’à validation ; l’import ajoute
+une page en une étape annulable et vérifie la révision de l’aperçu.
+
+Les variantes détaillées des opérations agents portent un diagnostic structuré ;
+les anciens retours texte restent des wrappers. CLI et MCP exposent le même contexte
+d’erreur. Les champs enregistrés du document, les opérations API 1, le confinement
+MCP et l’atomicité des patches ne dépendent pas de la présentation du diagnostic.

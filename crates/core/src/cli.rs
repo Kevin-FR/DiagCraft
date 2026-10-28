@@ -1,12 +1,27 @@
 //! Shared headless commands used by desktop and console entry points.
 use crate::{document::Document, svg};
+#[path = "mermaid_cli.rs"]
+mod mermaid_commands;
 
 pub fn run(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) == Some("--agent") {
-        match crate::agent_io::cli(&args[1..]) {
+        match crate::agent_io::cli_detailed(&args[1..]) {
             Ok(value) => println!("{}", serde_json::to_string_pretty(&value)?),
             Err(error) => {
-                eprintln!("{}", serde_json::json!({"error": error}));
+                eprintln!("{}", error.to_value());
+                std::process::exit(1);
+            }
+        }
+        return Ok(true);
+    }
+    if matches!(
+        args.first().map(String::as_str),
+        Some("--import-mermaid" | "--export-mermaid")
+    ) {
+        match mermaid_commands::run(args) {
+            Ok(report) => println!("{}", serde_json::to_string_pretty(&report)?),
+            Err(report) => {
+                eprintln!("{report}");
                 std::process::exit(1);
             }
         }

@@ -58,3 +58,7 @@ les textes intégraux fournis avec la version effectivement téléchargée.
 Depuis 0.10.0, les imports PNG/JPEG utilisent les codecs déjà verrouillés, sans
 nouvelle version de dépendance. Les captures et l’exemple d’images montrent
 uniquement des aplats générés dans `images::demo`, sous la licence du projet.
+
+Le sous-ensemble Mermaid de 0.11.0 est interprété par du code original du projet,
+sans SDK, code JavaScript ou ressource Mermaid incorporé. Les exemples et captures
+de conversion sont des schémas synthétiques originaux sous MIT.
