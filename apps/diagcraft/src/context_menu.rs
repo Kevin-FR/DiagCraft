@@ -482,7 +482,7 @@ impl DrawApp {
             Action::Detach(start) => {
                 if let Some(e) = id.and_then(|id| self.doc.connectors.iter().find(|e| e.id == id)) {
                     let id = e.id;
-                    let route = self.doc.route(e);
+                    let route = self.cached_route(e.id);
                     let point = if start { route.first() } else { route.last() }.copied();
                     if let Some(point) = point
                         && let Err(e) = self.doc.release_connector_end(id, start, point)
@@ -648,7 +648,7 @@ impl DrawApp {
         }
         for e in &self.doc.connectors {
             if self.selected.contains(&e.id) {
-                for p in self.doc.route(e) {
+                for p in self.cached_route(e.id) {
                     rect.extend_with(self.screen(p));
                 }
             }
@@ -674,7 +674,7 @@ impl DrawApp {
         else {
             return;
         };
-        let route = self.doc.route(e);
+        let route = self.cached_route(e.id);
         for (index, point) in route.first().into_iter().chain(route.last()).enumerate() {
             p.circle(
                 self.screen(*point),

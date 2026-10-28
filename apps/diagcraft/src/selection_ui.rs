@@ -67,6 +67,7 @@ impl DrawApp {
         if !rect.is_positive() {
             return vec![];
         }
+        let routes = self.route_cache.borrow_mut().scene(&self.doc);
         let view = self.doc.organization_view();
         let hits = self
             .doc
@@ -103,7 +104,7 @@ impl DrawApp {
                     .iter()
                     .filter(|e| {
                         view.is_object_visible(e.id)
-                            && crosses(&self.doc.route(e), rect.expand(e.width / 2.), false)
+                            && crosses(&routes[&e.id].points, rect.expand(e.width / 2.), false)
                     })
                     .map(|e| e.id),
             )
@@ -250,7 +251,7 @@ impl DrawApp {
         for e in &self.doc.connectors {
             if self.selected.contains(&e.id) {
                 let mut r = Rect::NOTHING;
-                for p in self.doc.route(e) {
+                for p in self.cached_route(e.id) {
                     r.extend_with(pos2(p[0], p[1]));
                 }
                 bounds = bounds.union(r.expand(

@@ -302,7 +302,7 @@ impl DrawApp {
         }
         for edge in &self.doc.connectors {
             if let Some(index) = membership.get(&edge.id) {
-                for p in self.doc.route(edge) {
+                for p in self.cached_route(edge.id) {
                     units[*index].1.extend_with(pos2(p[0], p[1]));
                 }
             }

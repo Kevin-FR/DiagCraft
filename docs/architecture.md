@@ -199,6 +199,8 @@ ils ne donnent jamais lieu à un déplacement implicite de point manuel.
 `routing_ui.rs` garde un cache transitoire de géométrie, comparée sans empreinte
 approximative. Les changements de positions, tailles, types, visibilité, extrémités
 ou points l’invalident ; les textes des blocs et le titre ne l’invalident pas.
-Le canevas utilise le même tracé pour la ligne, les styles et le libellé. SVG et
+Le canevas utilise le même tracé pour la ligne, les styles et le libellé.
+Le survol, les poignées et la sélection réutilisent ce cache ; la sélection par
+rectangle prépare le snapshot une seule fois pour tous ses connecteurs. SVG et
 inspection réutilisent un contexte de page. Les diagnostics agents exposent le
 statut calculé sans changer le contrat de patch API 1 ou la sérialisation v7.

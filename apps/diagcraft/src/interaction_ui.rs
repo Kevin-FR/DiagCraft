@@ -194,8 +194,7 @@ impl DrawApp {
         else {
             return vec![];
         };
-        self.doc
-            .route(e)
+        self.cached_route(e.id)
             .windows(2)
             .filter(|p| (p[0][0] - p[1][0]).hypot(p[0][1] - p[1][1]) * self.zoom > 36.)
             .map(|p| [(p[0][0] + p[1][0]) / 2., (p[0][1] + p[1][1]) / 2.])

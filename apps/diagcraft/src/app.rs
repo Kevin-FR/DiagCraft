@@ -238,7 +238,7 @@ pub struct DrawApp {
     capture_marquee: bool,
     style_tab: appearance_ui::StyleTab,
     styled_cache: appearance_ui::SharedCache,
-    route_cache: routing_ui::Cache,
+    route_cache: std::cell::RefCell<routing_ui::Cache>,
     property_edit: bool,
     drag_snapshot: Option<gestures_ui::DragSnapshot>,
     keyboard_move: Option<keyboard_ui::Move>,
@@ -1617,7 +1617,7 @@ impl DrawApp {
                 let preview = self.inline_preview_document();
                 let rendered = preview.as_ref().unwrap_or(&self.doc);
                 let organization = rendered.organization_view();
-                let routes = self.route_cache.scene(rendered);
+                let routes = self.route_cache.borrow_mut().scene(rendered);
                 let mut paths = std::collections::BTreeMap::<u64, Vec<_>>::new();
                 let mut edges = std::collections::BTreeMap::<u64, Vec<_>>::new();
                 let mut nodes = std::collections::BTreeMap::<u64, Vec<_>>::new();
@@ -1791,7 +1791,7 @@ impl DrawApp {
                         let point = match name.as_str() {
                             "contexte-connecteur" => {
                                 let e = &self.doc.connectors[2];
-                                let route = self.doc.route(e);
+                                let route = self.cached_route(e.id);
                                 [
                                     (route[0][0] + route[1][0]) / 2.,
                                     (route[0][1] + route[1][1]) / 2.,
@@ -1974,7 +1974,7 @@ impl DrawApp {
                         .filter(|_| self.selected.len() == 1 && self.selection_editable())
                         .and_then(|id| self.doc.connectors.iter().find(|e| e.id == *id))
                         .and_then(|e| {
-                            let r = self.doc.route(e);
+                            let r = self.cached_route(e.id);
                             [r.first().map(|p| (true, *p)), r.last().map(|p| (false, *p))]
                                 .into_iter()
                                 .flatten()
@@ -2089,8 +2089,7 @@ impl DrawApp {
                         }
                         self.select_for_drag(id, world, ui.input(|i| i.modifiers.shift));
                     } else if let Some(id) = self
-                        .doc
-                        .hit_connector(world, 7. / self.zoom)
+                        .hit_connector_cached(world, 7. / self.zoom)
                         .filter(|id| Some(*id) == top_hit)
                     {
                         if let Some(source) = self

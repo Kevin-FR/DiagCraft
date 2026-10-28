@@ -80,6 +80,31 @@ impl Cache {
     }
 }
 impl DrawApp {
+    pub(super) fn cached_route(&self, id: u64) -> Vec<Point> {
+        self.route_cache
+            .borrow_mut()
+            .scene(&self.doc)
+            .get(&id)
+            .map(|r| r.points.clone())
+            .unwrap_or_default()
+    }
+    pub(super) fn hit_connector_cached(&self, point: Point, tolerance: f32) -> Option<u64> {
+        let routes = self.route_cache.borrow_mut().scene(&self.doc);
+        let view = self.doc.organization_view();
+        self.doc
+            .connectors
+            .iter()
+            .enumerate()
+            .filter(|(_, e)| {
+                view.is_object_visible(e.id)
+                    && routes[&e.id]
+                        .points
+                        .windows(2)
+                        .any(|p| document::segment_distance(point, p[0], p[1]) <= tolerance)
+            })
+            .max_by_key(|(index, e)| (view.layer_order(view.object_layer(e.id)), *index))
+            .map(|(_, e)| e.id)
+    }
     pub(super) fn routing_notice(&mut self, ui: &mut egui::Ui) {
         if self.selected.len() != 1 {
             return;
@@ -95,7 +120,7 @@ impl DrawApp {
         if edge.kind != ConnectorKind::Elbow {
             return;
         }
-        let routes = self.route_cache.scene(&self.doc);
+        let routes = self.route_cache.borrow_mut().scene(&self.doc);
         match routes[&edge.id].status {
             RouteStatus::Clear | RouteStatus::Direct => {
                 ui.small(t(

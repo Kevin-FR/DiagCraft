@@ -244,7 +244,7 @@ impl DrawApp {
             .filter(|_| self.selected.len() == 1 && self.selection_editable())
             .and_then(|id| self.doc.connectors.iter().find(|e| e.id == *id))
         {
-            let route = self.doc.route(e);
+            let route = self.cached_route(e.id);
             let endpoint = route
                 .first()
                 .into_iter()
@@ -275,7 +275,7 @@ impl DrawApp {
         {
             return egui::CursorIcon::Grab;
         }
-        if let Some(id) = self.doc.hit_connector(world, 7. / self.zoom) {
+        if let Some(id) = self.hit_connector_cached(world, 7. / self.zoom) {
             return if self
                 .doc
                 .connectors

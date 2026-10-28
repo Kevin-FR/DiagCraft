@@ -64,7 +64,7 @@ impl DrawApp {
         let layers = self.doc.layer_ids();
         [
             self.doc.hit_drawing(point, 7. / self.zoom),
-            self.doc.hit_connector(point, 7. / self.zoom),
+            self.hit_connector_cached(point, 7. / self.zoom),
             self.doc.hit_node(point),
             self.doc.hit_chart(point),
         ]
