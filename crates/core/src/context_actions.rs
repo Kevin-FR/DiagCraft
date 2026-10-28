@@ -8,7 +8,18 @@ impl Document {
             return Err("Position invalide.".into());
         }
         let mut next = self.clone();
-        next.set_automatic_route(id, false)?;
+        if !next.can_edit_object(id) {
+            return Err(
+                "Déverrouillez les objets et affichez leur calque avant de les modifier.".into(),
+            );
+        }
+        if !next
+            .connectors
+            .iter()
+            .any(|e| e.id == id && e.kind == ConnectorKind::Elbow)
+        {
+            return Err("Les points de passage nécessitent un connecteur à angle droit.".into());
+        }
         let edge = next.connectors.iter().find(|e| e.id == id).unwrap();
         if edge.waypoints.contains(&point) {
             self.check_locked_changes(&next)?;
@@ -19,30 +30,33 @@ impl Document {
             return Err("Maximum de 16 points de passage atteint.".into());
         }
         let route = next.route(edge);
-        let start = *route.first().ok_or("Tracé indisponible.")?;
-        let end = *route.last().unwrap();
-        let mut previous = start;
+        if route.len() < 2 {
+            return Err("Tracé indisponible.".into());
+        }
         let mut closest = (f32::INFINITY, 0);
-        for (i, p) in edge
-            .waypoints
-            .iter()
-            .chain(std::iter::once(&end))
-            .enumerate()
-        {
-            let corner = [p[0], previous[1]];
-            let distance = distance(project(point, previous, corner), point)
-                .min(distance(project(point, corner, *p), point));
-            if distance < closest.0 {
-                closest = (distance, i);
+        for (i, pair) in route.windows(2).enumerate() {
+            let d = distance(project(point, pair[0], pair[1]), point);
+            if d < closest.0 {
+                closest = (d, i);
             }
-            previous = *p;
+        }
+        let mut cursor = 0;
+        let mut insertion = edge.waypoints.len();
+        for (i, p) in edge.waypoints.iter().enumerate() {
+            if let Some(offset) = route[cursor..].iter().position(|q| q == p) {
+                cursor += offset;
+                if cursor > closest.1 {
+                    insertion = i;
+                    break;
+                }
+            }
         }
         next.connectors
             .iter_mut()
             .find(|e| e.id == id)
             .unwrap()
             .waypoints
-            .insert(closest.1, point);
+            .insert(insertion, point);
         next.validate()?;
         self.check_locked_changes(&next)?;
         *self = next;
@@ -88,6 +102,12 @@ impl Document {
                 (route[0][0] + route[1][0]) / 2.,
                 (route[0][1] + route[1][1]) / 2.,
             ]);
+        }
+        if points.len() > 16 {
+            return Err(
+                "Tracé trop complexe pour figer tous les coudes. Ajoutez un point de passage."
+                    .into(),
+            );
         }
         let edge = &mut self.connectors[index];
         edge.from_port = from_port;

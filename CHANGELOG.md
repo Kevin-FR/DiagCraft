@@ -3,6 +3,18 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.9.0 — connecteurs et obstacles
+
+- Routage orthogonal déterministe autour des blocs et graphiques visibles, entre des points manuels immuables et ordonnés.
+- Ports explicites, extrémités libres et libellés préservés ; géométrie commune au canevas, aux aperçus, aux exports SVG/PDF et à l’inspection agents.
+- Ajout d’un point sans figer tous les coudes automatiques ; magnétisme appliqué au déplacement, annulation conservée.
+- Recherche bornée, voies stables et cache géométrique pour le rendu natif.
+- État dérivé `routing_status` et diagnostics non bloquants pour les passages contraints ou recherches limitées ; propriétés traduites dans les sept langues.
+- Guide des connecteurs et tests de labyrinthes, densité, visibilité, précision des coordonnées, stabilité et copies compatibles.
+
+Format `.draw` **v7**, API agents **v1**, aucune dépendance ajoutée.
+Les anciennes applications utilisent leur ancien routage. Les croisements de liens et collisions de libellés restent possibles.
+
 ## 0.8.0 — groupes, verrouillage et calques
 
 - Groupes persistants par page : sélection, déplacement et duplication collectifs, regroupement et dissociation.

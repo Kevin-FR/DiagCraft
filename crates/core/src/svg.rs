@@ -57,8 +57,9 @@ pub fn export(doc: &Document) -> Result<String, String> {
             escape(&doc.page_style.watermark)
         );
     }
+    let routing = crate::routing::RoutingContext::new(doc);
     for layer in doc.layer_ids() {
-        render_layer(doc, &organization, layer, &mut out);
+        render_layer(doc, &organization, &routing, layer, &mut out);
     }
     out.push_str("</svg>\n");
     Ok(out)
@@ -67,6 +68,7 @@ pub fn export(doc: &Document) -> Result<String, String> {
 fn render_layer(
     doc: &Document,
     organization: &crate::organization::OrganizationView,
+    routing: &crate::routing::RoutingContext<'_>,
     layer: u64,
     out: &mut String,
 ) {
@@ -121,7 +123,8 @@ fn render_layer(
     for edge in doc.connectors.iter().filter(|e| {
         organization.object_layer(e.id) == layer && organization.is_object_visible(e.id)
     }) {
-        let points = doc.route(edge);
+        let routed = routing.route(edge);
+        let points = routed.points;
         let color = hex(edge.color);
         let coords = points
             .iter()
@@ -168,7 +171,7 @@ fn render_layer(
             }
         }
         if !edge.label.is_empty() && points.len() >= 2 {
-            let pos = doc.edge_label_point(edge);
+            let pos = crate::routing::label_position(&points, edge.label_t);
             let label_width = edge.label.chars().count() as f32 * 8. + 8.;
             let _ = writeln!(
                 out,

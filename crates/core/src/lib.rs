@@ -20,7 +20,7 @@ pub mod pages;
 pub mod agent;
 pub mod agent_io;
 
-mod routing;
+pub mod routing;
 
 pub mod appearance;
 pub mod appearance_svg;

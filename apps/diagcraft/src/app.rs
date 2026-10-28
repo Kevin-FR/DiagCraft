@@ -85,6 +85,8 @@ enum Drag {
     Waypoint {
         id: u64,
         index: usize,
+        start: Point,
+        origin: Point,
     },
     DrawPath {
         id: u64,
@@ -236,6 +238,7 @@ pub struct DrawApp {
     capture_marquee: bool,
     style_tab: appearance_ui::StyleTab,
     styled_cache: appearance_ui::SharedCache,
+    route_cache: routing_ui::Cache,
     property_edit: bool,
     drag_snapshot: Option<gestures_ui::DragSnapshot>,
     keyboard_move: Option<keyboard_ui::Move>,
@@ -250,6 +253,10 @@ pub struct DrawApp {
 
 impl DrawApp {
     pub fn capture_tab(&mut self, name: &str) {
+        if name == "routage" {
+            self.prepare_routing_capture();
+            return;
+        }
         if name == "organisation" {
             self.prepare_organization_capture();
             return;
@@ -810,6 +817,7 @@ impl DrawApp {
             capture_marquee: false,
             style_tab: Default::default(),
             styled_cache: Default::default(),
+            route_cache: Default::default(),
             property_edit: false,
             drag_snapshot: None,
             keyboard_move: None,
@@ -1352,6 +1360,7 @@ impl DrawApp {
             panels_ui::heading(ui, if self.selected.is_empty() { "Document" } else { "Propriétés" }, Some(&mut self.show_inspector));
             egui::ScrollArea::vertical().id_salt("inspector_scroll").auto_shrink([false, false]).show(ui,|ui| {
                 self.organization_inspector(ui);
+                self.routing_notice(ui);
                 let editable = self.selected.is_empty() || self.selection_editable();
                 ui.add_enabled_ui(editable, |ui| {
                 if self.selected.len()==1 {
@@ -1608,6 +1617,7 @@ impl DrawApp {
                 let preview = self.inline_preview_document();
                 let rendered = preview.as_ref().unwrap_or(&self.doc);
                 let organization = rendered.organization_view();
+                let routes = self.route_cache.scene(rendered);
                 let mut paths = std::collections::BTreeMap::<u64, Vec<_>>::new();
                 let mut edges = std::collections::BTreeMap::<u64, Vec<_>>::new();
                 let mut nodes = std::collections::BTreeMap::<u64, Vec<_>>::new();
@@ -1643,9 +1653,9 @@ impl DrawApp {
                     }
                 }
                 for edge in edges.get(&layer).into_iter().flatten() {
-                    let pts: Vec<_> = rendered
-                        .route(edge)
-                        .into_iter()
+                    let routed = &routes[&edge.id];
+                    let pts: Vec<_> = routed.points
+                        .iter().copied()
                         .map(|v| self.screen(v))
                         .collect();
                     let mut color = if self.selected.contains(&edge.id) {
@@ -1657,7 +1667,7 @@ impl DrawApp {
                         color = color.gamma_multiply(0.25);
                     }
                     if !edge.appearance.is_default() {
-                        self.styled_cache.borrow_mut().edge(&p,edge,&rendered.route(edge),self.canvas.min+self.pan,self.zoom,self.doc.page_style.background);
+                        self.styled_cache.borrow_mut().edge(&p,edge,&routed.points,self.canvas.min+self.pan,self.zoom,self.doc.page_style.background);
                     } else {
                     paint_pattern(
                         &p,
@@ -1690,7 +1700,7 @@ impl DrawApp {
                     }
                     }
                     if !edge.label.is_empty() && pts.len() >= 2 {
-                        let pos = self.screen(rendered.edge_label_point(edge));
+                        let pos = self.screen(routed.label_position(edge.label_t));
                         let galley = p.layout_no_wrap(
                             edge.label.clone(),
                             FontId::proportional(14. * self.zoom),
@@ -2003,7 +2013,19 @@ impl DrawApp {
                         self.drag = Some(Drag::Endpoint { id, start, point });
                     } else if let Some((id, index)) = waypoint {
                         self.begin_edit_drag();
-                        self.drag = Some(Drag::Waypoint { id, index });
+                        let origin = self
+                            .doc
+                            .connectors
+                            .iter()
+                            .find(|e| e.id == id)
+                            .unwrap()
+                            .waypoints[index];
+                        self.drag = Some(Drag::Waypoint {
+                            id,
+                            index,
+                            start: world,
+                            origin,
+                        });
                     } else if let Some((id, point)) = segment {
                         self.begin_edit_drag();
                         match self.doc.add_connector_waypoint(id, point) {
@@ -2018,7 +2040,12 @@ impl DrawApp {
                                     .iter()
                                     .position(|p| *p == point)
                                     .unwrap();
-                                self.drag = Some(Drag::Waypoint { id, index });
+                                self.drag = Some(Drag::Waypoint {
+                                    id,
+                                    index,
+                                    start: world,
+                                    origin: point,
+                                });
                             }
                             Err(e) => {
                                 self.drag_snapshot = None;
@@ -2239,15 +2266,20 @@ impl DrawApp {
                     }
                 }
                 Drag::Endpoint { .. } | Drag::Connect { .. } => {}
-                Drag::Waypoint { id, index } => {
+                Drag::Waypoint {
+                    id,
+                    index,
+                    start,
+                    origin,
+                } => {
                     if let Some(e) = self.doc.connectors.iter_mut().find(|e| e.id == *id)
                         && let Some(p) = e.waypoints.get_mut(*index)
                     {
                         for a in 0..2 {
                             p[a] = if self.snap && !ui.input(|i| i.modifiers.alt) {
-                                (world[a] / snap_step).round() * snap_step
+                                origin[a] + ((world[a] - start[a]) / snap_step).round() * snap_step
                             } else {
-                                world[a]
+                                origin[a] + world[a] - start[a]
                             };
                             p[a] = p[a].clamp(-100_000., 100_000.);
                         }
@@ -2770,6 +2802,8 @@ mod rich_text_ui;
 
 #[path = "organization_ui.rs"]
 mod organization_ui;
+#[path = "routing_ui.rs"]
+mod routing_ui;
 
 #[cfg(test)]
 #[path = "organization_tests.rs"]

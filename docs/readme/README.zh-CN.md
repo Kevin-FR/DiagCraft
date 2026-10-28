@@ -19,12 +19,13 @@
 | Windows x86_64 | 包含应用和 CLI 的便携式 ZIP |
 | Linux x86_64 | 包含应用和 CLI 的 amd64 `.deb` 软件包或 `.tar.gz` 压缩包 |
 
-**0.8.0 为实验版本**，新增持久组合、对象锁定以及可显示或隐藏的图层。Mac 安装包使用临时签名（ad hoc），
+**0.9.0 为实验版本**，新增绕开图形的连线，同时保留手动路径点。Mac 安装包使用临时签名（ad hoc），
 尚未通过 Apple 公证。Windows 安装包未使用发布者证书签名。
 请参阅[安装指南](../installation.md)。
 
 ## 功能
 
+- 直角连线绕开可见图形和图表，并保留手动路径点、所选连接端口和自由端点。
 - 持久组合、对象与图层锁定，以及每页独立的图层；画布与 SVG/PDF 导出使用相同的可见性。
 - 方向键移动 1 像素，Shift 移动 10 像素；按住按键产生一次可取消的移动，并保持所选对象的相对位置。
 - 每个侧栏只保留一个开关，在功能区下方对齐，侧栏收起后仍可使用。
@@ -114,3 +115,5 @@ python3 -m unittest discover -s packaging -p 'test_*.py'
 项目代码采用 [MIT 许可](../../LICENSE)。依赖和字体保留各自的许可，相关声明随安装包分发。
 [THIRD_PARTY.md](../../THIRD_PARTY.md) 列出来源与署名信息，
 [发布审计](../licensing.md)说明检查内容及其局限。
+
+[Connector routing guide / Guide des connecteurs](../connecteurs.md).

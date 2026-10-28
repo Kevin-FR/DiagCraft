@@ -1,0 +1,9 @@
+[
+  {
+    "file": "docs/images/routing.png",
+    "sha256": "c69b28bb49231cee7ced7b93dae9cfd72bcab4330c7d764d201c8dc36237ad6e",
+    "source": "Native DiagCraft 0.9.0 capture using its own synthetic obstacle and waypoint diagram; no external application artwork.",
+    "license": "MIT",
+    "command": "diagcraft --language fr --screenshot docs/images/routing.png routage"
+  }
+]

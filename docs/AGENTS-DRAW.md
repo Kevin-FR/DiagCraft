@@ -64,7 +64,13 @@ Un `target` est un ID numérique existant ou un alias déjà créé sur la même
 Une extrémité est soit `{ "node": 12, "port": "right" }`, soit
 `{ "point": [600, 300] }` pour une extrémité libre. Ports : auto/left/right/top/bottom.
 `update_connector` permet de libérer/rattacher ses extrémités avec `start` / `end`.
-`waypoints` contient les points intermédiaires (maximum 16).
+`waypoints` contient les points intermédiaires (maximum 16). Depuis 0.9.0, ces
+ancres restent exactement à leurs coordonnées et dans leur ordre ; le moteur
+contourne les blocs visibles entre elles. Les lignes directes restent directes.
+L’inspection expose `routing_status` (`clear`, `constrained`, `limited`, `direct`).
+Les avertissements `route_constrained` / `route_limited` ne bloquent pas le patch :
+corrigez les blocs, ports, extrémités ou points en conflit, sans supposer qu’un
+point a été déplacé automatiquement. Voir [les limites du routage](connecteurs.md).
 `delete` supprime aussi les connecteurs incidents au nœud supprimé.
 `add_page` ajoute à la fin ; `move_page`/`delete_page` changent les index suivants.
 `fit_page` recentre tous les objets et modifie donc leurs positions.

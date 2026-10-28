@@ -8872,5 +8872,41 @@
     "it": "Oggetti raggruppati",
     "pt": "Objetos agrupados",
     "zh-Hans": "已组合对象"
+  },
+  "Le tracé contourne les blocs ; les points manuels restent fixes.": {
+    "fr": "Le tracé contourne les blocs ; les points manuels restent fixes.",
+    "en": "The route avoids blocks; manual waypoints stay fixed.",
+    "de": "Die Verbindung umgeht Blöcke; manuelle Wegpunkte bleiben fest.",
+    "es": "El trazado evita los bloques; los puntos manuales permanecen fijos.",
+    "it": "Il percorso evita i blocchi; i punti manuali restano fissi.",
+    "pt": "O traçado evita os blocos; os pontos manuais permanecem fixos.",
+    "zh-Hans": "连线绕开图形；手动路径点保持固定。"
+  },
+  "Passage bloqué : déplacez le bloc, l’extrémité ou le point manuel.": {
+    "fr": "Passage bloqué : déplacez le bloc, l’extrémité ou le point manuel.",
+    "en": "Route blocked: move the block, endpoint or manual waypoint.",
+    "de": "Weg blockiert: Block, Endpunkt oder manuellen Wegpunkt verschieben.",
+    "es": "Paso bloqueado: mueve el bloque, el extremo o el punto manual.",
+    "it": "Passaggio bloccato: sposta il blocco, l’estremità o il punto manuale.",
+    "pt": "Passagem bloqueada: mova o bloco, a extremidade ou o ponto manual.",
+    "zh-Hans": "路径受阻：请移动图形、端点或手动路径点。"
+  },
+  "Tracé simplifié : espacez les blocs ou ajoutez un point de passage.": {
+    "fr": "Tracé simplifié : espacez les blocs ou ajoutez un point de passage.",
+    "en": "Simplified route: space the blocks apart or add a waypoint.",
+    "de": "Vereinfachter Verlauf: Blöcke weiter auseinanderstellen oder einen Wegpunkt hinzufügen.",
+    "es": "Trazado simplificado: separa los bloques o añade un punto de paso.",
+    "it": "Percorso semplificato: distanzia i blocchi o aggiungi un punto di passaggio.",
+    "pt": "Traçado simplificado: afaste os blocos ou adicione um ponto de passagem.",
+    "zh-Hans": "使用简化路径：请增大图形间距或添加路径点。"
+  },
+  "Tracé trop complexe pour figer tous les coudes. Ajoutez un point de passage.": {
+    "fr": "Tracé trop complexe pour figer tous les coudes. Ajoutez un point de passage.",
+    "en": "The route has too many bends to pin them all. Add a waypoint.",
+    "de": "Der Verlauf hat zu viele Knicke, um alle zu fixieren. Fügen Sie einen Wegpunkt hinzu.",
+    "es": "El trazado tiene demasiados codos para fijarlos todos. Añade un punto de paso.",
+    "it": "Il percorso ha troppe curve per fissarle tutte. Aggiungi un punto di passaggio.",
+    "pt": "O traçado tem demasiadas curvas para fixar todas. Adicione um ponto de passagem.",
+    "zh-Hans": "路径折点过多，无法全部固定。请添加路径点。"
   }
 }

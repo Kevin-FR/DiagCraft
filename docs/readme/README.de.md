@@ -21,12 +21,13 @@ Die Anwendungen und ihre SHA-256-Prüfsummen stehen auf der
 | Windows x86_64 | Portables ZIP mit Anwendung und CLI |
 | Linux x86_64 | `.deb`-Paket für amd64 oder `.tar.gz`-Archiv mit Anwendung und CLI |
 
-**0.8.0 ist experimentell** und ergänzt dauerhafte Gruppen, Objektsperren sowie sichtbare und ausgeblendete Ebenen. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
+**0.9.0 ist experimentell** und ergänzt Verbindungen, die Blöcke umgehen und manuelle Wegpunkte beibehalten. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
 Die Windows-Pakete sind nicht mit einem Herausgeberzertifikat signiert.
 Siehe die [Installationsanleitung](../installation.md).
 
 ## Funktionen
 
+- Rechtwinklige Verbindungen umgehen sichtbare Blöcke und Diagramme; manuelle Wegpunkte, gewählte Anschlüsse und freie Endpunkte bleiben erhalten.
 - Dauerhafte Gruppen, Objekt- und Ebenensperren sowie seitenbezogene Ebenen mit gemeinsamer Sichtbarkeit in Zeichenfläche, SVG und PDF.
 - Pfeile verschieben um 1 px, Umschalt um 10 px; ein gehaltener Pfeil erzeugt eine abbrechbare Verschiebung und hält die Auswahl zusammen.
 - Ein Schalter je Seitenleiste, unter dem Menüband ausgerichtet und auch bei geschlossener Leiste erreichbar.
@@ -124,3 +125,5 @@ Der Projektcode steht unter der [MIT-Lizenz](../../LICENSE). Abhängigkeiten und
 Schriften behalten ihre eigenen Lizenzen; die Hinweise liegen den Paketen bei.
 [THIRD_PARTY.md](../../THIRD_PARTY.md) nennt die Quellen und Urheber. Die
 [Publikationsprüfung](../licensing.md) erklärt die Kontrollen und ihre Grenzen.
+
+[Connector routing guide / Guide des connecteurs](../connecteurs.md).

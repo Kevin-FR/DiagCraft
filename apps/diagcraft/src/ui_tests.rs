@@ -7637,3 +7637,42 @@ fn command_palette_repeated_arrows_keep_query_focus_and_do_not_edit_the_canvas()
     }
     assert_eq!(app.doc, before);
 }
+
+#[test]
+fn a_detour_segment_creates_only_one_manual_anchor_and_drag_is_reversible() {
+    let (ctx, mut app) = setup();
+    app.prepare_routing_capture();
+    app.show_inspector = false;
+    app.fit_next = false;
+    app.zoom = 1.;
+    app.pan = Vec2::ZERO;
+    let id = app.doc.connectors[0].id;
+    app.selected = vec![id];
+    app.commit();
+    frame(&ctx, &mut app, vec![], egui::Modifiers::NONE);
+    let before = app.doc.clone();
+    let point = app
+        .segment_handles(id)
+        .into_iter()
+        .find(|p| p[0] > 300. && p[0] < 900.)
+        .unwrap();
+    let at = app.screen(point);
+    pointer(&ctx, &mut app, at, true, egui::Modifiers::NONE);
+    pointer(
+        &ctx,
+        &mut app,
+        at + vec2(30., 20.),
+        false,
+        egui::Modifiers::NONE,
+    );
+    assert_eq!(
+        app.doc.connectors[0].waypoints,
+        vec![[point[0] + 30., point[1] + 20.]]
+    );
+    assert_eq!(
+        app.doc.connectors[0].from_port,
+        before.connectors[0].from_port
+    );
+    app.undo();
+    assert_eq!(app.doc, before);
+}

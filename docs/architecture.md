@@ -180,3 +180,25 @@ Les patches API 1 utilisent des alias de calque distincts des alias d’objets.
 Chaque opération vérifie ses protections ; un déverrouillage explicite peut
 précéder une modification dans un même lot atomique. Les anciens lecteurs v7
 ignorent l’organisation et ne la préservent pas au réenregistrement.
+
+## Routage des connecteurs
+
+`routing.rs` calcule des tracés orthogonaux sans modifier le document. Un contexte
+par page indexe les nœuds et obstacles visibles. Les ports produisent des amorces
+cardinales ; les points manuels sont des ancres exactes et ordonnées. Chaque
+portion est simplifiée séparément afin de préserver les ancres collinéaires.
+Les lignes directes conservent leur géométrie précédente.
+
+Des trajets courts sont essayés avant un A* rectiligne sur coordonnées comprimées.
+Les voies viennent des enveloppes proches ; deux tableaux de différences bloquent
+les arêtes pour tous les obstacles, y compris ceux sans voie dédiée. Le nombre
+de voies et d’états visités est borné. L’ordre des obstacles, la caméra et le zoom
+ne changent pas le résultat. Les résultats contraints ou limités sont signalés ;
+ils ne donnent jamais lieu à un déplacement implicite de point manuel.
+
+`routing_ui.rs` garde un cache transitoire de géométrie, comparée sans empreinte
+approximative. Les changements de positions, tailles, types, visibilité, extrémités
+ou points l’invalident ; les textes des blocs et le titre ne l’invalident pas.
+Le canevas utilise le même tracé pour la ligne, les styles et le libellé. SVG et
+inspection réutilisent un contexte de page. Les diagnostics agents exposent le
+statut calculé sans changer le contrat de patch API 1 ou la sérialisation v7.

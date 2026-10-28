@@ -922,8 +922,9 @@ impl Document {
                 max[a] = max[a].max(c.position[a] + c.size[a]);
             }
         }
+        let routing = crate::routing::RoutingContext::new(self);
         for e in &self.connectors {
-            for p in self.route(e) {
+            for p in routing.route(e).points {
                 for a in 0..2 {
                     min[a] = min[a].min(p[a]);
                     max[a] = max[a].max(p[a]);
@@ -974,69 +975,23 @@ impl Document {
         }
         Ok(())
     }
+    pub fn route_details(&self, edge: &Connector) -> crate::routing::RoutedConnector {
+        crate::routing::RoutingContext::new(self).route(edge)
+    }
     pub fn route(&self, edge: &Connector) -> Vec<Point> {
-        let a = self.node(edge.from);
-        let b = self.node(edge.to);
-        let (Some(ac), Some(bc)) = (
-            a.map(Node::center).or(edge.free_start),
-            b.map(Node::center).or(edge.free_end),
-        ) else {
-            return vec![];
-        };
-        if edge.from_port != Port::Auto || edge.to_port != Port::Auto || !edge.waypoints.is_empty()
-        {
-            let start = a.map(|a| a.port_position(edge.from_port, bc)).unwrap_or(ac);
-            let end = b.map(|b| b.port_position(edge.to_port, ac)).unwrap_or(bc);
-            if edge.kind == ConnectorKind::Straight {
-                return vec![start, end];
-            }
-            if !edge.waypoints.is_empty() {
-                let mut points = vec![start];
-                for p in edge.waypoints.iter().chain(std::iter::once(&end)) {
-                    let prev = *points.last().unwrap();
-                    if (prev[0] - p[0]).abs() > 0.001 && (prev[1] - p[1]).abs() > 0.001 {
-                        points.push([p[0], prev[1]]);
-                    }
-                    points.push(*p);
-                }
-                return simplify_route(points);
-            }
-            return simplify_route(crate::routing::orthogonal(
-                a,
-                b,
-                ac,
-                bc,
-                edge.from_port,
-                edge.to_port,
-            ));
-        }
-        if edge.kind == ConnectorKind::Straight {
-            return vec![
-                a.map(|a| a.boundary_towards(bc)).unwrap_or(ac),
-                b.map(|b| b.boundary_towards(ac)).unwrap_or(bc),
-            ];
-        }
-        if (bc[0] - ac[0]).abs() > (bc[1] - ac[1]).abs() {
-            let start = a.map(|a| a.boundary_towards([bc[0], ac[1]])).unwrap_or(ac);
-            let end = b.map(|b| b.boundary_towards([ac[0], bc[1]])).unwrap_or(bc);
-            let mid = (start[0] + end[0]) / 2.;
-            vec![start, [mid, start[1]], [mid, end[1]], end]
-        } else {
-            let start = a.map(|a| a.boundary_towards([ac[0], bc[1]])).unwrap_or(ac);
-            let end = b.map(|b| b.boundary_towards([bc[0], ac[1]])).unwrap_or(bc);
-            let mid = (start[1] + end[1]) / 2.;
-            vec![start, [start[0], mid], [end[0], mid], end]
-        }
+        self.route_details(edge).points
     }
     pub fn hit_connector(&self, p: Point, tolerance: f32) -> Option<u64> {
+        let routing = crate::routing::RoutingContext::new(self);
         let organization = self.organization_view();
         self.connectors
             .iter()
             .enumerate()
             .filter(|(_, c)| {
                 organization.is_object_visible(c.id)
-                    && self
+                    && routing
                         .route(c)
+                        .points
                         .windows(2)
                         .any(|s| segment_distance(p, s[0], s[1]) <= tolerance)
             })
@@ -1049,29 +1004,7 @@ impl Document {
             .map(|(_, c)| c.id)
     }
     pub fn edge_label_point(&self, edge: &Connector) -> Point {
-        let route = self.route(edge);
-        if route.len() < 2 {
-            return [0., 0.];
-        }
-        let total: f32 = route
-            .windows(2)
-            .map(|p| (p[1][0] - p[0][0]).hypot(p[1][1] - p[0][1]))
-            .sum();
-        let mut remain = total * edge.label_t;
-        for pair in route.windows(2) {
-            let a = pair[0];
-            let b = pair[1];
-            let len = (b[0] - a[0]).hypot(b[1] - a[1]);
-            if remain <= len && len > 0.001 {
-                let t = remain / len;
-                return [
-                    a[0] + (b[0] - a[0]) * t + if (b[0] - a[0]).abs() < 0.01 { 12. } else { 0. },
-                    a[1] + (b[1] - a[1]) * t - 10.,
-                ];
-            }
-            remain -= len;
-        }
-        route[route.len() - 1]
+        crate::routing::label_position(&self.route(edge), edge.label_t)
     }
     pub fn validate(&self) -> Result<(), String> {
         if self.format_version != FORMAT_VERSION {
@@ -1290,26 +1223,6 @@ fn valid_endpoint(id: u64, free: Option<Point>, nodes: &HashSet<u64>) -> bool {
         free.is_none() && nodes.contains(&id)
     }
 }
-fn simplify_route(mut points: Vec<Point>) -> Vec<Point> {
-    points.dedup_by(|a, b| (a[0] - b[0]).abs() + (a[1] - b[1]).abs() < 0.001);
-    let mut out: Vec<Point> = vec![];
-    for p in points {
-        while out.len() >= 2 {
-            let a = out[out.len() - 2];
-            let b = out[out.len() - 1];
-            if ((b[0] - a[0]) * (p[1] - b[1]) - (b[1] - a[1]) * (p[0] - b[0])).abs() < 0.001
-                && (b[0] - a[0]) * (p[0] - b[0]) + (b[1] - a[1]) * (p[1] - b[1]) >= 0.
-            {
-                out.pop();
-            } else {
-                break;
-            }
-        }
-        out.push(p);
-    }
-    out
-}
-
 pub fn segment_distance(p: Point, a: Point, b: Point) -> f32 {
     let dx = b[0] - a[0];
     let dy = b[1] - a[1];

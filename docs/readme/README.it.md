@@ -21,13 +21,14 @@ Le applicazioni e le relative somme di controllo SHA-256 sono disponibili nella
 | Windows x86_64 | ZIP portatile con applicazione e CLI |
 | Linux x86_64 | Pacchetto `.deb` per amd64 o archivio `.tar.gz`, con applicazione e CLI |
 
-**0.8.0 è sperimentale** e aggiunge gruppi persistenti, blocco degli oggetti e livelli visibili o nascosti.
+**0.9.0 è sperimentale** e aggiunge connettori che evitano i blocchi mantenendo i punti manuali.
 Il pacchetto Mac ha una firma ad hoc e non è stato autenticato da Apple tramite
 notarizzazione. I pacchetti Windows non sono firmati con un certificato dell’editore.
 Consulta la [guida all’installazione](../installation.md).
 
 ## Funzionalità
 
+- I connettori ortogonali evitano blocchi e grafici visibili mantenendo punti manuali, porte scelte ed estremità libere.
 - Gruppi persistenti, blocco degli oggetti e livelli per pagina, con visibilità condivisa tra area di disegno ed esportazioni SVG/PDF.
 - Frecce: 1 px; Maiusc: 10 px. Tenere premuto un tasto crea un unico spostamento annullabile senza deformare la selezione.
 - Un solo pulsante per pannello, allineato sotto la barra multifunzione e accessibile anche a pannello chiuso.
@@ -126,3 +127,5 @@ Il codice del progetto è distribuito con [licenza MIT](../../LICENSE). Le dipen
 e i font mantengono le proprie licenze; gli avvisi sono inclusi nei pacchetti.
 [THIRD_PARTY.md](../../THIRD_PARTY.md) elenca le attribuzioni e l’[audit di pubblicazione](../licensing.md)
 spiega i controlli e i loro limiti.
+
+[Connector routing guide / Guide des connecteurs](../connecteurs.md).

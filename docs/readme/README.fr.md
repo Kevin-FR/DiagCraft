@@ -21,12 +21,13 @@ Les applications et leurs empreintes SHA-256 sont sur la page des
 | Windows x86_64 | ZIP portable avec application et CLI |
 | Linux x86_64 | Paquet `.deb` amd64 ou archive `.tar.gz`, application et CLI |
 
-La version **0.8.0** reste expérimentale et ajoute les groupes persistants, le verrouillage et les calques visibles ou masqués. Le paquet
+**0.9.0 est expérimentale** et ajoute les connecteurs évitant les blocs, avec points manuels conservés. Le paquet
 Mac est signé ad hoc et n’est pas notarié par Apple. Les paquets Windows ne
 sont pas signés avec un certificat éditeur. Voir [l’installation](../installation.md).
 
 ## Fonctions disponibles
 
+- Les connecteurs à angle droit évitent les blocs et graphiques visibles en conservant points manuels, ports choisis et extrémités libres.
 - Groupes persistants, verrouillage des objets et calques par page, avec visibilité commune sur la feuille et dans les exports SVG/PDF.
 - Flèches : 1 px ; Maj : 10 px. Maintenir une touche crée un seul déplacement annulable, sans déformer la sélection.
 - Une seule icône par volet, alignée sous le ruban et accessible quand le volet est fermé.
@@ -124,3 +125,5 @@ Le code du projet est sous [licence MIT](../../LICENSE). Les dépendances et pol
 gardent leurs licences propres ; les notices sont conservées dans les paquets.
 [THIRD_PARTY.md](../../THIRD_PARTY.md) décrit les attributions, et
 [l’audit de publication](../licensing.md) explique les contrôles et leurs limites.
+
+[Connector routing guide / Guide des connecteurs](../connecteurs.md).

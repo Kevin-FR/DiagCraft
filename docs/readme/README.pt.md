@@ -21,12 +21,13 @@ As aplicações e as respetivas somas de verificação SHA-256 estão disponíve
 | Windows x86_64 | ZIP portátil com a aplicação e a CLI |
 | Linux x86_64 | Pacote `.deb` para amd64 ou arquivo `.tar.gz`, com a aplicação e a CLI |
 
-**A versão 0.8.0 é experimental** e adiciona grupos persistentes, bloqueio de objetos e camadas visíveis ou ocultas. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
+**0.9.0 é experimental** e adiciona conectores que evitam blocos preservando os pontos manuais. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
 Os pacotes Windows não estão assinados com um certificado de editor.
 Consulte o [guia de instalação](../installation.md).
 
 ## Funcionalidades
 
+- Os conectores ortogonais evitam blocos e gráficos visíveis, preservando pontos manuais, portas escolhidas e extremidades livres.
 - Grupos persistentes, bloqueio de objetos e camadas por página, com visibilidade comum na área de desenho e nas exportações SVG/PDF.
 - Setas: 1 px; Shift: 10 px. Manter uma tecla premida cria um único movimento anulável sem deformar a seleção.
 - Um único botão por painel, alinhado sob a faixa de opções e acessível quando o painel está fechado.
@@ -124,3 +125,5 @@ O código do projeto é distribuído sob a [licença MIT](../../LICENSE). As dep
 e os tipos de letra mantêm as suas próprias licenças; os avisos são incluídos nos pacotes.
 [THIRD_PARTY.md](../../THIRD_PARTY.md) apresenta as atribuições, e a
 [auditoria de publicação](../licensing.md) explica os controlos e os seus limites.
+
+[Connector routing guide / Guide des connecteurs](../connecteurs.md).

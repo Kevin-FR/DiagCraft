@@ -315,6 +315,7 @@ pub fn inspect(doc: &Document) -> Result<Value, String> {
             })
             .collect();
         nodes.sort_by_key(|n| n["id"].as_u64());
+        let routing = crate::routing::RoutingContext::new(&page);
         let connectors: Vec<Value> = page
             .connectors
             .iter()
@@ -323,8 +324,10 @@ pub fn inspect(doc: &Document) -> Result<Value, String> {
                 inspect_organization(&mut v, &organization, c.id);
                 v["object_type"] = json!("connector");
                 v["ref"] = json!(format!("page:{index}/object:{}", c.id));
-                v["route"] = json!(page.route(c));
-                v["label_position"] = json!(page.edge_label_point(c));
+                let routed = routing.route(c);
+                v["route"] = json!(routed.points);
+                v["routing_status"] = json!(routed.status);
+                v["label_position"] = json!(routed.label_position(c.label_t));
                 v
             })
             .collect();
@@ -415,7 +418,19 @@ pub fn diagnostics(doc: &Document) -> Vec<Value> {
             )
         }));
         objects.extend(d.drawings.iter().map(|x| (x.id, x.controls().to_vec())));
-        objects.extend(d.connectors.iter().map(|x| (x.id, d.route(x))));
+        let routing = crate::routing::RoutingContext::new(&d);
+        for edge in &d.connectors {
+            let route = routing.route(edge);
+            let code = match route.status {
+                crate::routing::RouteStatus::Constrained => Some("route_constrained"),
+                crate::routing::RouteStatus::Limited => Some("route_limited"),
+                _ => None,
+            };
+            if let Some(code) = code {
+                warnings.push(json!({"code":code,"page":page,"id":edge.id,"message":"Connector constraints block routing; move the conflicting block, endpoint or waypoint. Manual anchors are preserved."}));
+            }
+            objects.push((edge.id, route.points));
+        }
         for (id, points) in objects {
             if points
                 .iter()
@@ -926,6 +941,7 @@ pub fn catalog() -> Value {
         "shapes":crate::symbols::all_kinds().iter().map(|k|json!({"kind":k,"label":k.label()})).collect::<Vec<_>>(),
         "chart_kinds":ChartKind::ALL,"page_presets":crate::pages::presets().iter().map(|p|json!({"name":p.label,"size_px":p.size})).collect::<Vec<_>>(),
         "organization":{"base_layer":0,"max_layers":crate::organization::MAX_LAYERS,"max_groups":crate::organization::MAX_GROUPS,"groups":"flat, same-layer; IDs page-local in a separate namespace","layer_order":"bottom-to-top; base layer first","hidden_layers":"omitted from rendering/exports, retained in saved files and agent inspection","locks":"protect stored fields; unlock in a separate operation before editing"},
+        "routing":{"orthogonal":"avoids visible block/chart envelopes; text, frames and swimlanes do not obstruct","waypoints":"immutable ordered anchors, maximum 16; detours between anchors","status":"inspection routing_status: clear, constrained, limited, direct; diagnostics are non-blocking","deterministic":true},
         "patch_schema":schema(),"guide":include_str!("../../../docs/AGENTS-DRAW.md")})
 }
 pub fn schema() -> Value {

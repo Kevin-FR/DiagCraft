@@ -105,7 +105,37 @@ def main():
                                   cwd=tmp, text=True, encoding="utf-8", capture_output=True)
         assert rejected.returncode != 0 and not (tmp / "blocked.draw").exists()
         assert (tmp / "organized.draw").read_bytes() == before
-    print(f"CLI/MCP smoke passed: {count} format fixtures, SVG/PDF, dry run, identical patches and protected organization.")
+        # Actual CLI/MCP routing contract, including immutable manual anchors.
+        empty=json.loads((tmp / "cli.draw").read_text(encoding="utf-8"))
+        for key in ("nodes", "connectors", "drawings", "charts", "pages"):
+            empty[key]=[]
+        empty["organization"]={}
+        empty["page_size"]=[1280,800]
+        (tmp / "routing-empty.draw").write_text(json.dumps(empty),encoding="utf-8")
+        routing_patch={"api_version":1,"expected_revision":json.loads(run("--agent","inspect",tmp / "routing-empty.draw",cwd=tmp))["revision"],"operations":[
+            {"op":"add_node","page":0,"alias":"a","kind":"rectangle","position":[80,260],"size":[140,80],"text":"Start"},
+            {"op":"add_node","page":0,"alias":"b","kind":"rectangle","position":[1000,260],"size":[140,80],"text":"End"},
+            {"op":"add_node","page":0,"alias":"wall","kind":"rectangle","position":[450,200],"size":[150,200],"text":"Obstacle"},
+            {"op":"add_connector","page":0,"alias":"auto","start":{"node":"a","port":"right"},"end":{"node":"b","port":"left"},"style":{"kind":"elbow"}},
+            {"op":"add_connector","page":0,"alias":"manual","start":{"node":"a","port":"bottom"},"end":{"point":[1100,650]},"style":{"kind":"elbow","waypoints":[[340,500],[800,500]],"label":"Manual"}},
+        ]}
+        (tmp / "routing-patch.json").write_text(json.dumps(routing_patch))
+        run("--agent","apply",tmp / "routing-empty.draw",tmp / "routing-patch.json",tmp / "routing.draw",cwd=tmp)
+        routing_requests=json.loads(json.dumps(requests))
+        routing_requests[-1]["params"]["arguments"]={"file":"routing-empty.draw","patch":routing_patch,"output":"routing-mcp.draw","dry_run":False}
+        routed_mcp=subprocess.run([str(binary),"--mcp",str(tmp)],cwd=tmp,text=True,encoding="utf-8",input="".join(json.dumps(r)+"\n" for r in routing_requests),capture_output=True,check=True)
+        assert not routed_mcp.stderr and not json.loads(routed_mcp.stdout.splitlines()[-1])["result"]["isError"]
+        assert (tmp / "routing.draw").read_bytes()==(tmp / "routing-mcp.draw").read_bytes()
+        routed=json.loads(run("--agent","inspect",tmp / "routing.draw",cwd=tmp))["pages"][0]["connectors"]
+        assert all(e["routing_status"]=="clear" for e in routed)
+        assert any(p[1]<=200 or p[1]>=400 for p in routed[0]["route"])
+        assert routed[1]["waypoints"]==[[340,500],[800,500]]
+        assert all(p in routed[1]["route"] for p in routed[1]["waypoints"])
+        assert routed[1]["route"][-1]==[1100,650]
+        run("--export",tmp / "routing.draw",tmp / "routing.svg",cwd=tmp)
+        run("--export-pdf",tmp / "routing.draw",tmp / "routing.pdf",cwd=tmp)
+        assert (tmp / "routing.pdf").read_bytes().startswith(b"%PDF-")
+    print(f"CLI/MCP smoke passed: {count} format fixtures, SVG/PDF, dry run, identical patches, protected organization and obstacle routing.")
 
 
 if __name__ == "__main__":
