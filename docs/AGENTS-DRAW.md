@@ -224,3 +224,20 @@ une route calculée peut suivre les formes auxquelles elle est attachée.
 Le format reste v7 grâce au champ facultatif `organization`. Les applications
 antérieures à 0.8.0 ignorent ce champ, affichent les éléments masqués et perdent
 l’organisation au réenregistrement. Voir [organisation.md](organisation.md).
+
+## Images et exports raster (0.10.0)
+
+`add_image` crée un nœud avec `page`, `alias`, `position` et `png_base64` (PNG
+sans préfixe data-URI), plus `size`, `crop` et `alt` facultatifs. `update_image`
+prend `page`, `target`, et des champs facultatifs `png_base64`, `crop`,
+`keep_aspect`, `alt`. Remplacer la charge réinitialise le crop, puis applique le
+crop fourni. Les changements d’un objet verrouillé sont rejetés et le lot reste
+atomique. `update_node` conserve ses usages pour position, taille, style et texte.
+
+Le crop est `[x,y,largeur,hauteur]` normalisé dans l’image embarquée. L’inspection
+expose `object_type: image`, taille source normalisée, description et SHA-256,
+sans la charge base64. Les anciens fichiers sans images gardent leur révision.
+Pour importer un fichier sans mettre des octets dans le contexte, utiliser
+`--import-image INPUT IMAGE OUTPUT [X Y]`. Pour les PNG, utiliser `--export-png`
+avec `--width`, `--height`, `--dpi`, `--page`, `--selection` et `--transparent`.
+Voir [le guide images](images.md) pour les limites et la compatibilité.

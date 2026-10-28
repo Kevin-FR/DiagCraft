@@ -323,7 +323,7 @@ pub fn node_bounds(n: &Node) -> [f32; 4] {
     b
 }
 pub fn node(n: &Node) -> String {
-    if n.kind == ShapeKind::Text {
+    if n.kind == ShapeKind::Text && n.image.is_none() {
         return String::new();
     }
     let id = format!("appearance-node-{}", n.id);
@@ -345,6 +345,15 @@ pub fn node(n: &Node) -> String {
             1. - a.fill.transparency / 100.
         )
     };
+    if let Some(image) = &n.image {
+        let clip = format!("{id}-image-clip");
+        let _ = write!(defs, "<clipPath id=\"{clip}\"><path d=\"{d}\"/></clipPath>");
+        let _ = write!(
+            body,
+            "<g clip-path=\"url(#{clip})\">{}</g>",
+            image.svg(n.size)
+        );
+    }
     body.push_str(&line(
         &mut defs,
         &format!("{id}-line"),

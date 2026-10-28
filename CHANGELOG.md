@@ -3,6 +3,18 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.10.0 — images embarquées et PNG
+
+- Import PNG/JPEG, dépôt et collage d’image avec normalisation, orientation JPEG et réduction bornée, sans modifier les sources.
+- Recadrage non destructif, proportions, description et remplacement ; mêmes objets et protections que les blocs.
+- Données partagées entre clones d’annulation et conservées dans les copies, pages, bibliothèque, galerie et récupération.
+- Export PNG page/sélection, dimensions, DPI `pHYs`, transparence et adaptation aux limites ; géométrie commune au SVG/PDF.
+- CLI d’import/export, opérations `add_image` / `update_image` et inspection sans charge base64.
+- Budgets contrôlés avant décompression ; tests de données malformées, alpha, crop, sérialisation et gestes ; interface dans les sept langues.
+
+Format `.draw` **v7**, API **v1**. Les anciennes versions ignorent les images et les perdent au réenregistrement.
+Aucune nouvelle bibliothèque tierce ou mise à jour de version ; usages explicites de dépendances déjà verrouillées.
+
 ## 0.9.0 — connecteurs et obstacles
 
 - Routage orthogonal déterministe autour des blocs et graphiques visibles, entre des points manuels immuables et ordonnés.

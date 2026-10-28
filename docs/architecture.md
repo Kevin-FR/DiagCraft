@@ -204,3 +204,32 @@ Le survol, les poignées et la sélection réutilisent ce cache ; la sélection 
 rectangle prépare le snapshot une seule fois pour tous ses connecteurs. SVG et
 inspection réutilisent un contexte de page. Les diagnostics agents exposent le
 statut calculé sans changer le contrat de patch API 1 ou la sérialisation v7.
+
+## Images embarquées et PNG
+
+`images.rs` conserve une charge PNG immuable dans `Arc`, séparée du recadrage et
+attachée facultativement à un `Node`. Les objets restent des nœuds pour la
+sélection, les connecteurs, groupes, protections et pages. Le champ absent reste
+omis en v7 ; les clones d’historique partagent les octets. Les budgets globaux
+sont comptés sur toutes les occurrences avant de décompresser une charge reçue
+par désérialisation. Le résultat de validation est mémorisé dans `OnceLock` et ne
+participe ni à l’égalité documentaire ni à la sérialisation.
+
+Les imports reconnaissent seulement PNG/JPEG, contrôlent leurs dimensions avant
+allocation, appliquent l’orientation, réduisent les pixels avec alpha prémultiplié
+et réencodent en PNG RGBA. Le recadrage conserve une fenêtre normalisée. Le SVG de
+l’image est masqué par le contour du nœud ; les aperçus natifs et le PDF consomment
+la même géométrie. Aucune URL ou référence à un fichier externe n’est enregistrée.
+
+`raster.rs` exporte une page ou des objets visibles depuis `svg::export_view`.
+La sélection conserve le contexte complet des obstacles pour ses connecteurs,
+mais les autres objets ne sont pas dessinés. Le rendu tiny-skia est démultiplié
+avant encodage PNG ; `pHYs` porte la résolution choisie. Les dimensions et le
+nombre de pixels sont vérifiés avant allocation. Les polices sont celles du PDF.
+
+`image_ui.rs` regroupe import, collage natif, dépôt, propriétés et modale PNG.
+Les tests/captures n’accèdent jamais au presse-papiers utilisateur. Le collage
+d’image a une commande dédiée, car egui-winit consomme les raccourcis de collage
+natif pour produire du texte. Les agents utilisent les mêmes contrôles de données
+et les opérations atomiques API 1 ; l’inspection remplace la charge par ses
+métadonnées et son empreinte. Les bibliothèques tierces étaient déjà résolues.

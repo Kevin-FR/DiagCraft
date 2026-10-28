@@ -21,13 +21,16 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.9.0 is experimental** and adds obstacle-aware connectors while preserving manual waypoints.
+**0.10.0 is experimental** and adds embedded images, non-destructive cropping and configurable PNG export.
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).
 
+Applications older than 0.10.0 discard embedded images when saving. See the [images and PNG guide](docs/images.md) for formats, shortcuts and resource limits.
+
 ## Features
 
+- Import PNG/JPEG files, drop images or use the dedicated image-paste command; export pages or selections at a chosen size and resolution with optional transparency.
 - Orthogonal connectors avoid visible blocks and charts while keeping manual waypoints, selected ports and free endpoints.
 - Persistent groups, object and layer locks, and page-local layers with shared canvas/SVG/PDF visibility.
 - Arrow keys move by 1 px, Shift by 10 px; a held key makes one cancellable move and keeps selected objects together.

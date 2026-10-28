@@ -253,7 +253,15 @@ pub(super) fn node_inspector(
 ) -> (bool, bool, bool, bool) {
     let mut fit_text = false;
     let mut edit_content = false;
-    ui.label(RichText::new(t(n.kind.label())).size(20.).strong());
+    ui.label(
+        RichText::new(if n.image.is_some() {
+            t("Image")
+        } else {
+            t(n.kind.label())
+        })
+        .size(20.)
+        .strong(),
+    );
     ui.add_space(10.);
     if n.kind != ShapeKind::Text {
         node_controls(ui, n, tab, cache, capture_presets);
@@ -335,6 +343,15 @@ pub(super) fn node_inspector(
                 });
         });
     if n.size != before_geometry {
+        if n.keeps_image_aspect() {
+            if n.size[0] != before_geometry[0] {
+                n.size[1] =
+                    (n.size[0] * before_geometry[1] / before_geometry[0]).clamp(24., 20_000.);
+            } else {
+                n.size[0] =
+                    (n.size[1] * before_geometry[0] / before_geometry[1]).clamp(24., 20_000.);
+            }
+        }
         n.text_style.auto_fit = false;
     }
     ui.add_space(8.);

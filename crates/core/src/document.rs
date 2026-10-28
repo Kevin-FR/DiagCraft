@@ -296,6 +296,8 @@ pub struct Node {
     pub position: Point,
     pub size: Point,
     pub text: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub image: Option<crate::images::ImageContent>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub text_runs: Vec<crate::rich_text::TextRun>,
     pub fill: Color,
@@ -603,6 +605,7 @@ impl Document {
             font_size: 18.,
             text_style: TextStyle::default(),
             text_runs: vec![],
+            image: None,
             appearance: Default::default(),
         });
         id
@@ -1007,6 +1010,7 @@ impl Document {
         crate::routing::label_position(&self.route(edge), edge.label_t)
     }
     pub fn validate(&self) -> Result<(), String> {
+        self.validate_image_budget()?;
         if self.format_version != FORMAT_VERSION {
             return Err(format!(
                 "Version de document non prise en charge : {}",
@@ -1046,6 +1050,9 @@ impl Document {
         let mut ids = HashSet::new();
         for n in &self.nodes {
             n.appearance.validate()?;
+            if let Some(image) = &n.image {
+                image.validate()?;
+            }
             n.validate_text_runs()?;
             if n.id == 0 || n.id == u64::MAX || !ids.insert(n.id) {
                 return Err("Identifiant de forme invalide ou dupliqué.".into());

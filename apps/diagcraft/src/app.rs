@@ -239,6 +239,7 @@ pub struct DrawApp {
     style_tab: appearance_ui::StyleTab,
     styled_cache: appearance_ui::SharedCache,
     route_cache: std::cell::RefCell<routing_ui::Cache>,
+    image_ui: image_ui::State,
     property_edit: bool,
     drag_snapshot: Option<gestures_ui::DragSnapshot>,
     keyboard_move: Option<keyboard_ui::Move>,
@@ -253,6 +254,10 @@ pub struct DrawApp {
 
 impl DrawApp {
     pub fn capture_tab(&mut self, name: &str) {
+        if matches!(name, "images" | "export-png") {
+            self.prepare_images_capture(name == "export-png");
+            return;
+        }
         if name == "routage" {
             self.prepare_routing_capture();
             return;
@@ -818,6 +823,7 @@ impl DrawApp {
             style_tab: Default::default(),
             styled_cache: Default::default(),
             route_cache: Default::default(),
+            image_ui: Default::default(),
             property_edit: false,
             drag_snapshot: None,
             keyboard_move: None,
@@ -1366,6 +1372,7 @@ impl DrawApp {
                 if self.selected.len()==1 {
                     let id=self.selected[0];
                     ui.horizontal(|ui|{ui.monospace(i18n::render("page:{0} / objet:{1}", &[("0", format!("{}", self.doc.page_index)),("1", format!("{}", id))]));if ui.small_button(t("Copier")).on_hover_text(t("Référence JSON pour un agent")).clicked(){ctx.copy_text(serde_json::json!({"page":self.doc.page_index,"target":id}).to_string());}});ui.add_space(10.);
+                    self.image_inspector(ui,id);
                     if let Some(n)=self.doc.node_mut(id) {
                         let (front,back,fit_text,edit_content)=appearance_ui::node_inspector(ui,n,&mut self.style_tab,&self.styled_cache,&mut self.focus_text,self.capture_shadow_presets);
                         if fit_text { self.fit_selection_text(); }
@@ -2228,7 +2235,8 @@ impl DrawApp {
                             bounds: page,
                             minimum,
                             grid: (self.snap && !modifiers.alt).then_some(snap_step),
-                            proportional: modifiers.shift,
+                            proportional: modifiers.shift
+                                || self.doc.node(*id).is_some_and(Node::keeps_image_aspect),
                         },
                     );
                     if let Some(n) = self.doc.node_mut(*id) {
@@ -2384,7 +2392,7 @@ impl DrawApp {
         );
         let fill = rgb(n.fill);
         let stroke = Stroke::new(n.stroke_width * self.zoom, rgb(n.stroke));
-        let styled = !n.appearance.is_default()
+        let styled = (!n.appearance.is_default() || n.image.is_some())
             && self.styled_cache.borrow_mut().node(p, n, r.min, self.zoom);
         if !styled {
             match n.kind {
@@ -2567,9 +2575,22 @@ impl eframe::App for DrawApp {
             return;
         }
         self.inline_outside_press(ctx);
-        if let Some(path) = ctx.input(|i| i.raw.dropped_files.first().and_then(|f| f.path.clone()))
-        {
-            self.inline_open(path);
+        let dropped = ctx.input(|i| i.raw.dropped_files.clone());
+        if !dropped.is_empty() && !self.image_ui.png_open {
+            if dropped.len() == 1
+                && dropped[0].path.as_ref().is_some_and(|p| {
+                    p.extension()
+                        .is_some_and(|e| e.eq_ignore_ascii_case("draw"))
+                })
+            {
+                self.inline_open(dropped[0].path.clone().unwrap());
+            } else {
+                let position = ctx
+                    .input(|i| i.pointer.hover_pos())
+                    .filter(|p| self.canvas.contains(*p))
+                    .map(|p| self.world(p));
+                self.drop_images(dropped, position);
+            }
         }
         self.normalize_selection();
         self.shortcuts(ctx);
@@ -2592,6 +2613,7 @@ impl eframe::App for DrawApp {
                 && !self.show_symbol_manager
                 && !self.show_gallery
                 && !self.show_pdf_export
+                && !self.image_ui.png_open
                 && !self.show_pages
                 && !self.show_layers
                 && self.page_draft.is_none()
@@ -2608,6 +2630,7 @@ impl eframe::App for DrawApp {
         self.workspace_dialogs(ctx);
         self.pages_dialogs(ctx);
         self.layers_dialog(ctx);
+        self.png_dialog(ctx);
         self.agent_dialog(ctx);
         self.inline_text_toolbar(ctx);
         self.dialogs(ctx);
@@ -2799,6 +2822,8 @@ mod object_search_ui;
 #[path = "rich_text_ui.rs"]
 mod rich_text_ui;
 
+#[path = "image_ui.rs"]
+mod image_ui;
 #[path = "organization_ui.rs"]
 mod organization_ui;
 #[path = "routing_ui.rs"]
@@ -2807,3 +2832,7 @@ mod routing_ui;
 #[cfg(test)]
 #[path = "organization_tests.rs"]
 mod organization_tests;
+
+#[cfg(test)]
+#[path = "image_tests.rs"]
+mod image_tests;

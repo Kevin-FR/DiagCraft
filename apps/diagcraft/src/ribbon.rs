@@ -123,6 +123,8 @@ impl DrawApp {
                 }
             }
             RibbonTab::Insert => {
+                self.command_button(ui, Command::ImportImage);
+                self.command_button(ui, Command::PasteImage);
                 self.shape_menu(ui);
                 self.command_button(ui, Command::Text);
                 self.command_button(ui, Command::Connect);
@@ -437,6 +439,10 @@ impl DrawApp {
                         if ui.button(t("Exporter en SVG…")).clicked() {
                             ui.close();
                             self.export();
+                        }
+                        if ui.button(t("Exporter en PNG…")).clicked() {
+                            self.open_png_export();
+                            ui.close();
                         }
                         if ui.button(t("Exporter en PDF…")).clicked() {
                             self.show_pdf_export = true;
@@ -783,6 +789,10 @@ impl DrawApp {
         });
     }
     pub(super) fn insert_ribbon(&mut self, ui: &mut egui::Ui) {
+        group(ui, 190., "Images", |ui| {
+            self.command_button(ui, commands_ui::Command::ImportImage);
+            self.command_button(ui, commands_ui::Command::PasteImage);
+        });
         group(ui, 165., "Documents", |ui| {
             ui.horizontal(|ui| {
                 if tile(ui, Icon::Page, "Nouveau").clicked() {

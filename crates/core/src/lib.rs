@@ -28,3 +28,7 @@ pub mod appearance_svg;
 pub mod cli;
 pub mod rich_text;
 pub mod text_layout;
+
+pub mod images;
+
+pub mod raster;

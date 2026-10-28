@@ -2,6 +2,9 @@
 """Exercise the packaged/headless CLI, migrations, exports and MCP contract."""
 from pathlib import Path
 import argparse
+import base64
+import struct
+import zlib
 import hashlib
 import json
 import subprocess
@@ -32,6 +35,8 @@ def main():
             run("--agent", "validate", source, cwd=tmp)
             run("--export", source, tmp / "out.svg", cwd=tmp)
             run("--export-pdf", source, tmp / "out.pdf", cwd=tmp)
+            run("--export-png",source,tmp / "out.png","--width","240","--height","160","--dpi","144","--transparent",cwd=tmp)
+            assert (tmp / "out.png").read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
             assert (tmp / "out.svg").read_text(encoding="utf-8").endswith("</svg>\n")
             assert (tmp / "out.pdf").read_bytes().startswith(b"%PDF-")
             assert hashlib.sha256(source.read_bytes()).hexdigest() == before
@@ -135,7 +140,35 @@ def main():
         run("--export",tmp / "routing.draw",tmp / "routing.svg",cwd=tmp)
         run("--export-pdf",tmp / "routing.draw",tmp / "routing.pdf",cwd=tmp)
         assert (tmp / "routing.pdf").read_bytes().startswith(b"%PDF-")
-    print(f"CLI/MCP smoke passed: {count} format fixtures, SVG/PDF, dry run, identical patches, protected organization and obstacle routing.")
+        # Generate a tiny original PNG without depending on extra Python packages.
+        def chunk(kind,data):
+            return struct.pack(">I",len(data))+kind+data+struct.pack(">I",zlib.crc32(kind+data)&0xffffffff)
+        pixels=b"\x00"+bytes([30,120,230,255])*4
+        original_png=b"\x89PNG\r\n\x1a\n"+chunk(b"IHDR",struct.pack(">IIBBBBB",4,2,8,6,0,0,0))+chunk(b"IDAT",zlib.compress(pixels*2))+chunk(b"IEND",b"")
+        (tmp / "original.png").write_bytes(original_png)
+        run("--import-image",tmp / "routing-empty.draw",tmp / "original.png",tmp / "image-import.draw","50","70",cwd=tmp)
+        assert (tmp / "original.png").read_bytes()==original_png
+        image_patch={"api_version":1,"expected_revision":json.loads(run("--agent","inspect",tmp / "routing-empty.draw",cwd=tmp))["revision"],"operations":[
+            {"op":"add_image","page":0,"alias":"picture","position":[50,70],"size":[160,80],"png_base64":base64.b64encode(original_png).decode(),"alt":"Original image"},
+            {"op":"update_image","page":0,"target":"picture","crop":[0.25,0,0.5,1],"keep_aspect":True},
+        ]}
+        (tmp / "image-patch.json").write_text(json.dumps(image_patch))
+        run("--agent","apply",tmp / "routing-empty.draw",tmp / "image-patch.json",tmp / "images.draw",cwd=tmp)
+        image_requests=json.loads(json.dumps(requests));image_requests[-1]["params"]["arguments"]={"file":"routing-empty.draw","patch":image_patch,"output":"images-mcp.draw","dry_run":False}
+        image_mcp=subprocess.run([str(binary),"--mcp",str(tmp)],cwd=tmp,text=True,encoding="utf-8",input="".join(json.dumps(r)+"\n" for r in image_requests),capture_output=True,check=True)
+        assert not image_mcp.stderr and not json.loads(image_mcp.stdout.splitlines()[-1])["result"]["isError"]
+        assert (tmp / "images.draw").read_bytes()==(tmp / "images-mcp.draw").read_bytes()
+        image_context=json.loads(run("--agent","inspect",tmp / "images.draw",cwd=tmp));image_node=image_context["pages"][0]["nodes"][0]
+        assert image_node["object_type"]=="image" and "png" not in image_node["image"]["asset"]
+        assert image_node["image"]["crop"]==[0.25,0.0,0.5,1.0]
+        run("--export-png",tmp / "images.draw",tmp / "selection.png","--width","640","--height","320","--dpi","144","--transparent","--selection",str(image_node["id"]),cwd=tmp)
+        data=(tmp / "selection.png").read_bytes();assert struct.unpack(">II",data[16:24])==(640,320)
+        assert b"pHYs" in data
+        run("--export",tmp / "images.draw",tmp / "images.svg",cwd=tmp)
+        run("--export-pdf",tmp / "images.draw",tmp / "images.pdf",cwd=tmp)
+        assert "data:image/png;base64," in (tmp / "images.svg").read_text(encoding="utf-8")
+        assert b"/Subtype /Image" in (tmp / "images.pdf").read_bytes()
+    print(f"CLI/MCP smoke passed: {count} format fixtures, SVG/PDF, dry run, identical patches, protected organization, obstacle routing, embedded images and PNG.")
 
 
 if __name__ == "__main__":

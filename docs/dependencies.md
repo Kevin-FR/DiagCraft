@@ -12,8 +12,10 @@ criterion, avec des bibliothèques internes et plusieurs applications.
 | winit 0.30.13 / sctk-adwaita 0.10.1, Linux seulement | Activation ciblée des décorations Wayland Adwaita : titre, boutons, bordure et ombre adaptés au bureau. Même winit que celui d’eframe ; remplace son cadre de secours sombre. |
 | serde / serde_json | Documents et patches lisibles, contrôlés avant application. |
 | rfd 0.17.2 | Boîtes de dialogue de fichiers natives. |
-| image, fonctionnalité PNG | Icône et captures de l’application ; aucun codec photo supplémentaire nécessaire. |
-| resvg/usvg et svg2pdf | Aperçus des styles et export PDF à partir des mêmes géométries SVG. |
+| image 0.25.10, PNG/JPEG | Icône, captures et normalisation des imports, avec limites de pixels et de mémoire ; fonctionnalités déjà présentes via les exports. |
+| png 0.18.1 / base64 0.22.1 | Export PNG RGBA avec métadonnées DPI, images embarquées dans le JSON. Versions transitives déjà verrouillées. |
+| arboard 3.7.0 | Lecture explicite des images du presse-papiers natif ; même bibliothèque que celle déjà utilisée par egui-winit. |
+| resvg/usvg et svg2pdf | Aperçus des styles, images et exports PNG/PDF à partir des mêmes géométries SVG. |
 | pdf-writer | Assemblage du PDF multipage. |
 | sha2 / tempfile | Révisions, intégrité et écritures atomiques, y compris les téléchargements vérifiés. |
 | semver 1.0.28 | Comparaison des versions et filtrage des versions expérimentales. |

@@ -515,6 +515,9 @@ impl DrawApp {
                     ctx.memory_mut(|m| m.surrender_focus(focus));
                 }
                 self.paste_position = Some(self.context_position);
+                if self.paste_image() {
+                    return;
+                }
                 ctx.send_viewport_cmd(egui::ViewportCommand::RequestPaste);
             }
             Action::Front => self.reorder(true),

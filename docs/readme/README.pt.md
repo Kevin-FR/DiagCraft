@@ -21,12 +21,15 @@ As aplicações e as respetivas somas de verificação SHA-256 estão disponíve
 | Windows x86_64 | ZIP portátil com a aplicação e a CLI |
 | Linux x86_64 | Pacote `.deb` para amd64 ou arquivo `.tar.gz`, com a aplicação e a CLI |
 
-**0.9.0 é experimental** e adiciona conectores que evitam blocos preservando os pontos manuais. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
+**0.10.0 é experimental** e adiciona imagens incorporadas, recorte não destrutivo e exportação PNG configurável. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
 Os pacotes Windows não estão assinados com um certificado de editor.
 Consulte o [guia de instalação](../installation.md).
 
+As aplicações anteriores à 0.10.0 descartam imagens incorporadas ao guardar. O [guia de imagens e PNG](../images.md) descreve formatos, atalhos e limites.
+
 ## Funcionalidades
 
+- Importa PNG/JPEG, arrasta imagens ou usa o comando dedicado para as colar; exporta páginas ou seleções com dimensões, resolução e transparência opcional.
 - Os conectores ortogonais evitam blocos e gráficos visíveis, preservando pontos manuais, portas escolhidas e extremidades livres.
 - Grupos persistentes, bloqueio de objetos e camadas por página, com visibilidade comum na área de desenho e nas exportações SVG/PDF.
 - Setas: 1 px; Shift: 10 px. Manter uma tecla premida cria um único movimento anulável sem deformar a seleção.

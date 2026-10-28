@@ -1,0 +1,135 @@
+{
+  "format_version": 7,
+  "title": "Illustrer les idées",
+  "page_name": "Page 1",
+  "page_size": [
+    1100.0,
+    760.0
+  ],
+  "nodes": [
+    {
+      "id": 1,
+      "kind": "rounded",
+      "position": [
+        130.0,
+        220.0
+      ],
+      "size": [
+        640.0,
+        360.0
+      ],
+      "text": "",
+      "image": {
+        "asset": {
+          "png": "iVBORw0KGgoAAAANSUhEUgAAAUAAAAC0CAYAAADl5PURAAAGGUlEQVR4Ae3AA6AkWZbG8f937o3IzKdyS2Oubdu2bdu2bdu2bWmMnpZKr54yMyLu+Xa3anqmhztr1a+e+aaPMlf9j3f2ri/jqv8dlq/6Klz1vwLBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f9EcNVVV131/xPBVVddddX/TwRXXXXVVf8/EVx11VVX/f/EPwK0QwdLmeFHMgAAAABJRU5ErkJggg==",
+          "width": 320,
+          "height": 180
+        },
+        "crop": [
+          0.1,
+          0.0,
+          0.8,
+          1.0
+        ],
+        "keep_aspect": true,
+        "alt": "Trois couleurs originales"
+      },
+      "fill": [
+        233,
+        246,
+        241
+      ],
+      "stroke": [
+        39,
+        128,
+        107
+      ],
+      "text_color": [
+        32,
+        53,
+        64
+      ],
+      "stroke_width": 2.0,
+      "font_size": 18.0,
+      "text_style": {
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "strikethrough": false,
+        "monospace": false,
+        "align": "center",
+        "wrap": false
+      },
+      "appearance": {
+        "fill": {
+          "mode": "none",
+          "secondary": [
+            90,
+            165,
+            250
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "diagonal",
+          "texture": "paper",
+          "spacing": 12.0
+        },
+        "line": {
+          "mode": "solid",
+          "secondary": [
+            90,
+            165,
+            250
+          ],
+          "tint": 0.0,
+          "transparency": 0.0,
+          "angle": 0.0,
+          "pattern": "solid",
+          "cap": "round",
+          "join": "round",
+          "compound": "single",
+          "corner_radius": null,
+          "start_scale": 1.0,
+          "end_scale": 1.0
+        },
+        "shadow": {
+          "kind": "none",
+          "color": [
+            25,
+            38,
+            55
+          ],
+          "transparency": 72.0,
+          "scale": 100.0,
+          "blur": 6.0,
+          "angle": 0.0,
+          "offset": [
+            6.0,
+            8.0
+          ]
+        }
+      }
+    }
+  ],
+  "connectors": [],
+  "drawings": [],
+  "charts": [],
+  "page_style": {
+    "background": [
+      255,
+      255,
+      255
+    ],
+    "grid_spacing": 20.0,
+    "margin": 40.0,
+    "watermark": "",
+    "grid_style": "dots",
+    "export_grid": false
+  },
+  "page_layout": {
+    "unit": "pixels",
+    "auto_size": false
+  },
+  "pages": []
+}

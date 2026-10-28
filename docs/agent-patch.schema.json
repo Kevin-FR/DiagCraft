@@ -875,6 +875,99 @@
               "page",
               "layer"
             ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "add_image"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "alias": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "position": {
+                "$ref": "#/$defs/point"
+              },
+              "png_base64": {
+                "type": "string",
+                "maxLength": 5592408
+              },
+              "size": {
+                "$ref": "#/$defs/point"
+              },
+              "crop": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "alt": {
+                "type": "string",
+                "maxLength": 4096
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "alias",
+              "position",
+              "png_base64"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "update_image"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "target": {
+                "$ref": "#/$defs/ref"
+              },
+              "png_base64": {
+                "type": "string",
+                "maxLength": 5592408
+              },
+              "crop": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "keep_aspect": {
+                "type": "boolean"
+              },
+              "alt": {
+                "type": "string",
+                "maxLength": 4096
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "target"
+            ]
           }
         ]
       }

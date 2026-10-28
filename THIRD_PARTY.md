@@ -11,7 +11,7 @@ d’une expression SPDX sont conservés : autoriser MIT n’impose pas une optio
 copyleft lorsqu’une dépendance est proposée sous plusieurs licences.
 
 Principales dépendances : egui/eframe, serde/serde_json, rfd, image, tempfile,
-sha2, semver, resvg/usvg, svg2pdf et pdf-writer. Leur rôle est décrit dans
+sha2, semver, resvg/usvg, svg2pdf, pdf-writer, png, base64 et arboard. Leur rôle est décrit dans
 [docs/dependencies.md](docs/dependencies.md).
 
 `packaging/licenses.py` construit l’inventaire de la cible depuis Cargo, collecte
@@ -54,3 +54,7 @@ l’application et ses documents de démonstration.
 
 Les marques et noms des dépendances restent ceux de leurs titulaires. Consulter
 les textes intégraux fournis avec la version effectivement téléchargée.
+
+Depuis 0.10.0, les imports PNG/JPEG utilisent les codecs déjà verrouillés, sans
+nouvelle version de dépendance. Les captures et l’exemple d’images montrent
+uniquement des aplats générés dans `images::demo`, sous la licence du projet.

@@ -21,12 +21,15 @@ Die Anwendungen und ihre SHA-256-Prüfsummen stehen auf der
 | Windows x86_64 | Portables ZIP mit Anwendung und CLI |
 | Linux x86_64 | `.deb`-Paket für amd64 oder `.tar.gz`-Archiv mit Anwendung und CLI |
 
-**0.9.0 ist experimentell** und ergänzt Verbindungen, die Blöcke umgehen und manuelle Wegpunkte beibehalten. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
+**0.10.0 ist experimentell** und ergänzt eingebettete Bilder, verlustfreien Zuschnitt und konfigurierbaren PNG-Export. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
 Die Windows-Pakete sind nicht mit einem Herausgeberzertifikat signiert.
 Siehe die [Installationsanleitung](../installation.md).
 
+Anwendungen vor 0.10.0 verwerfen eingebettete Bilder beim Speichern. Der [Leitfaden zu Bildern und PNG](../images.md) beschreibt Formate, Tastenkürzel und Grenzen.
+
 ## Funktionen
 
+- PNG/JPEG importieren, Bilder ablegen oder den eigenen Befehl zum Einfügen von Bildern verwenden; Seiten oder Auswahlen mit gewählter Größe, Auflösung und optionaler Transparenz exportieren.
 - Rechtwinklige Verbindungen umgehen sichtbare Blöcke und Diagramme; manuelle Wegpunkte, gewählte Anschlüsse und freie Endpunkte bleiben erhalten.
 - Dauerhafte Gruppen, Objekt- und Ebenensperren sowie seitenbezogene Ebenen mit gemeinsamer Sichtbarkeit in Zeichenfläche, SVG und PDF.
 - Pfeile verschieben um 1 px, Umschalt um 10 px; ein gehaltener Pfeil erzeugt eine abbrechbare Verschiebung und hält die Auswahl zusammen.

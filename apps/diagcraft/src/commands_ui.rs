@@ -14,6 +14,9 @@ pub(super) enum Command {
     Close,
     ExportSvg,
     ExportPdf,
+    ExportPng,
+    ImportImage,
+    PasteImage,
     Gallery,
     Recovery,
     Undo,
@@ -105,6 +108,14 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
     command!(SaveAs, "Enregistrer sous…", "Fichier", "sauvegarder copie save as", Modifiers::COMMAND.plus(Modifiers::SHIFT) => S),
     command!(ExportSvg, "Exporter en SVG…", "Fichier", "export vectoriel image", Modifiers::COMMAND => E),
     command!(ExportPdf, "Exporter en PDF…", "Fichier", "export imprimer impression", Modifiers::COMMAND.plus(Modifiers::SHIFT) => E),
+    command!(
+        ExportPng,
+        "Exporter en PNG…",
+        "Fichier",
+        "image pixels transparent png"
+    ),
+    command!(ImportImage,"Importer des images…","Insertion","image png jpeg fichier",Modifiers::COMMAND=>I),
+    command!(PasteImage,"Coller une image","Insertion","image clipboard presse papiers",Modifiers::COMMAND.plus(Modifiers::SHIFT)=>I),
     command!(
         Gallery,
         "Mes travaux enregistrés…",
@@ -333,6 +344,7 @@ impl DrawApp {
             || self.show_symbol_manager
             || self.show_gallery
             || self.show_pdf_export
+            || self.image_ui.png_open
             || self.show_pages
             || self.show_layers
             || self.page_draft.is_some()
@@ -475,6 +487,13 @@ impl DrawApp {
             Close => self.request(Pending::CloseTab(self.active_tab)),
             ExportSvg => self.export(),
             ExportPdf => self.show_pdf_export = true,
+            ExportPng => self.open_png_export(),
+            ImportImage => self.import_image(),
+            PasteImage => {
+                if !self.paste_image() {
+                    self.status = "Aucune image disponible dans le presse-papiers.".into();
+                }
+            }
             Gallery => self.open_gallery(),
             Undo => self.undo(),
             Redo => self.redo(),
@@ -515,6 +534,9 @@ impl DrawApp {
             }
             Paste => {
                 self.paste_position = None;
+                if self.paste_image() {
+                    return;
+                }
                 if let Some(text) = ctx.input(|i| {
                     i.events.iter().find_map(|e| {
                         if let egui::Event::Paste(text) = e {

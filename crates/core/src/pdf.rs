@@ -66,19 +66,7 @@ fn tree(doc: &Document, format: PageFormat) -> Result<(svg2pdf::usvg::Tree, [f32
         doc.page_size[1]
     );
     let mut options = svg2pdf::usvg::Options::default();
-    for bytes in [
-        include_bytes!("../../../assets/fonts/SourceSans3-Regular.ttf").as_slice(),
-        include_bytes!("../../../assets/fonts/SourceSans3-Bold.ttf").as_slice(),
-        include_bytes!("../../../assets/fonts/SourceSans3-It.ttf").as_slice(),
-        include_bytes!("../../../assets/fonts/SourceSans3-BoldIt.ttf").as_slice(),
-        include_bytes!("../../../assets/fonts/Hack-Regular.ttf").as_slice(),
-        include_bytes!("../../../assets/fonts/NotoSansSC-Regular.otf").as_slice(),
-    ] {
-        options.fontdb_mut().load_font_data(bytes.to_vec());
-    }
-    options.fontdb_mut().set_sans_serif_family("Source Sans 3");
-    options.fontdb_mut().set_serif_family("Source Sans 3");
-    options.fontdb_mut().set_monospace_family("Hack");
+    load_fonts(&mut options);
     let tree = svg2pdf::usvg::Tree::from_str(&wrapped, &options).map_err(|e| e.to_string())?;
     Ok((tree, size))
 }
@@ -160,4 +148,20 @@ pub fn export(doc: &Document, format: PageFormat) -> Result<Vec<u8>, String> {
         .title(TextStr(&doc.title))
         .producer(TextStr("DiagCraft"));
     Ok(pdf.finish())
+}
+
+pub(crate) fn load_fonts(options: &mut svg2pdf::usvg::Options) {
+    for bytes in [
+        include_bytes!("../../../assets/fonts/SourceSans3-Regular.ttf").as_slice(),
+        include_bytes!("../../../assets/fonts/SourceSans3-Bold.ttf").as_slice(),
+        include_bytes!("../../../assets/fonts/SourceSans3-It.ttf").as_slice(),
+        include_bytes!("../../../assets/fonts/SourceSans3-BoldIt.ttf").as_slice(),
+        include_bytes!("../../../assets/fonts/Hack-Regular.ttf").as_slice(),
+        include_bytes!("../../../assets/fonts/NotoSansSC-Regular.otf").as_slice(),
+    ] {
+        options.fontdb_mut().load_font_data(bytes.to_vec());
+    }
+    options.fontdb_mut().set_sans_serif_family("Source Sans 3");
+    options.fontdb_mut().set_serif_family("Source Sans 3");
+    options.fontdb_mut().set_monospace_family("Hack");
 }

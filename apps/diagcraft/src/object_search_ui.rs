@@ -6,6 +6,7 @@ pub(super) enum Kind {
     #[default]
     All,
     Nodes,
+    Images,
     Links,
     Drawings,
     Charts,
@@ -15,6 +16,7 @@ impl Kind {
         match self {
             Self::All => "Tous",
             Self::Nodes => "Formes et textes",
+            Self::Images => "Images",
             Self::Links => "Connecteurs",
             Self::Drawings => "Traits et courbes",
             Self::Charts => "Graphiques",
@@ -82,7 +84,13 @@ fn entries(doc: &Document) -> Vec<Entry> {
     let view = doc.organization_view();
     doc.nodes
         .iter()
-        .map(|n| entry(n.id, Kind::Nodes, &n.text, &t(n.kind.label()), n.position))
+        .map(|n| {
+            if let Some(image) = &n.image {
+                entry(n.id, Kind::Images, &image.alt, &t("Image"), n.position)
+            } else {
+                entry(n.id, Kind::Nodes, &n.text, &t(n.kind.label()), n.position)
+            }
+        })
         .chain(doc.connectors.iter().map(|e| {
             entry(
                 e.id,
@@ -294,6 +302,7 @@ impl DrawApp {
                 for kind in [
                     Kind::All,
                     Kind::Nodes,
+                    Kind::Images,
                     Kind::Links,
                     Kind::Drawings,
                     Kind::Charts,

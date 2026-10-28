@@ -22,17 +22,33 @@ pub fn hex(c: Color) -> String {
 
 /// Export vector geometry using the same computed routes as the native canvas.
 pub fn export(doc: &Document) -> Result<String, String> {
+    export_view(
+        doc,
+        [0., 0., doc.page_size[0], doc.page_size[1]],
+        true,
+        None,
+    )
+}
+pub(crate) fn export_view(
+    doc: &Document,
+    region: [f32; 4],
+    background: bool,
+    selected: Option<&std::collections::HashSet<u64>>,
+) -> Result<String, String> {
     doc.validate()?;
     let organization = doc.organization_view();
+    let [x, y, w, h] = region;
     let mut out = format!(
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{}\" height=\"{}\" viewBox=\"0 0 {} {}\" role=\"img\">\n<title>{}</title>\n<rect width=\"100%\" height=\"100%\" fill=\"{}\"/>\n",
-        doc.page_size[0],
-        doc.page_size[1],
-        doc.page_size[0],
-        doc.page_size[1],
-        escape(&doc.title),
-        hex(doc.page_style.background)
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{w}\" height=\"{h}\" viewBox=\"{x} {y} {w} {h}\" role=\"img\">\n<title>{}</title>\n",
+        escape(&doc.title)
     );
+    if background {
+        let _ = writeln!(
+            out,
+            "<rect x=\"{x}\" y=\"{y}\" width=\"{w}\" height=\"{h}\" fill=\"{}\"/>",
+            hex(doc.page_style.background)
+        );
+    }
     if doc.page_style.export_grid {
         let step = doc.page_style.grid_spacing;
         let content = match doc.page_style.grid_style {
@@ -59,7 +75,7 @@ pub fn export(doc: &Document) -> Result<String, String> {
     }
     let routing = crate::routing::RoutingContext::new(doc);
     for layer in doc.layer_ids() {
-        render_layer(doc, &organization, &routing, layer, &mut out);
+        render_layer(doc, &organization, &routing, selected, layer, &mut out);
     }
     out.push_str("</svg>\n");
     Ok(out)
@@ -69,11 +85,15 @@ fn render_layer(
     doc: &Document,
     organization: &crate::organization::OrganizationView,
     routing: &crate::routing::RoutingContext<'_>,
+    selected: Option<&std::collections::HashSet<u64>>,
     layer: u64,
     out: &mut String,
 ) {
+    let include = |id: &u64| selected.is_none_or(|ids| ids.contains(id));
     for drawing in doc.drawings.iter().filter(|d| {
-        organization.object_layer(d.id) == layer && organization.is_object_visible(d.id)
+        organization.object_layer(d.id) == layer
+            && organization.is_object_visible(d.id)
+            && include(&d.id)
     }) {
         let [a, b, c, d] = drawing.controls();
         let color = hex(drawing.color);
@@ -121,7 +141,9 @@ fn render_layer(
         }
     }
     for edge in doc.connectors.iter().filter(|e| {
-        organization.object_layer(e.id) == layer && organization.is_object_visible(e.id)
+        organization.object_layer(e.id) == layer
+            && organization.is_object_visible(e.id)
+            && include(&e.id)
     }) {
         let routed = routing.route(edge);
         let points = routed.points;
@@ -189,7 +211,9 @@ fn render_layer(
         }
     }
     for n in doc.nodes.iter().filter(|n| {
-        organization.object_layer(n.id) == layer && organization.is_object_visible(n.id)
+        organization.object_layer(n.id) == layer
+            && organization.is_object_visible(n.id)
+            && include(&n.id)
     }) {
         let [x, y] = n.position;
         let [w, h] = n.size;
@@ -200,7 +224,7 @@ fn render_layer(
             hex(n.stroke),
             n.stroke_width
         );
-        if !n.appearance.is_default() {
+        if !n.appearance.is_default() || n.image.is_some() {
             out.push_str(&crate::appearance_svg::node(n));
         } else {
             match n.kind {
@@ -357,7 +381,9 @@ fn render_layer(
         out.push_str("</text>\n");
     }
     for chart in doc.charts.iter().filter(|c| {
-        organization.object_layer(c.id) == layer && organization.is_object_visible(c.id)
+        organization.object_layer(c.id) == layer
+            && organization.is_object_visible(c.id)
+            && include(&c.id)
     }) {
         let _ = writeln!(
             out,

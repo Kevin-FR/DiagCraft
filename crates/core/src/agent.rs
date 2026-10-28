@@ -97,6 +97,30 @@ pub enum Operation {
         target: ObjectRef,
         changes: NodeChanges,
     },
+    AddImage {
+        page: usize,
+        alias: String,
+        position: Point,
+        png_base64: String,
+        #[serde(default)]
+        size: Option<Point>,
+        #[serde(default)]
+        crop: Option<[f32; 4]>,
+        #[serde(default)]
+        alt: String,
+    },
+    UpdateImage {
+        page: usize,
+        target: ObjectRef,
+        #[serde(default)]
+        png_base64: Option<String>,
+        #[serde(default)]
+        crop: Option<[f32; 4]>,
+        #[serde(default)]
+        keep_aspect: Option<bool>,
+        #[serde(default)]
+        alt: Option<String>,
+    },
     AddConnector {
         page: usize,
         alias: String,
@@ -298,7 +322,13 @@ pub fn inspect(doc: &Document) -> Result<Value, String> {
             .iter()
             .map(|n| {
                 let mut v = serde_json::to_value(n).unwrap();
-                v["object_type"] = json!(if n.kind == ShapeKind::Text {
+                if let Some(image) = &n.image {
+                    v["image"]["asset"].as_object_mut().unwrap().remove("png");
+                    v["image"]["asset"]["sha256"] = json!(image.asset.sha256());
+                }
+                v["object_type"] = json!(if n.image.is_some() {
+                    "image"
+                } else if n.kind == ShapeKind::Text {
                     "text"
                 } else {
                     "node"
@@ -608,6 +638,8 @@ fn execute(
     let page = match op {
         AddNode { page, .. }
         | UpdateNode { page, .. }
+        | AddImage { page, .. }
+        | UpdateImage { page, .. }
         | AddConnector { page, .. }
         | UpdateConnector { page, .. }
         | AddChart { page, .. }
@@ -633,6 +665,7 @@ fn execute(
     }
     let alias = match op {
         AddNode { alias, .. }
+        | AddImage { alias, .. }
         | AddConnector { alias, .. }
         | AddChart { alias, .. }
         | AddDrawing { alias, .. } => Some(alias),
@@ -677,6 +710,48 @@ fn execute(
             }
             created = Some(id);
             "Modifier une forme ou un texte"
+        }
+        AddImage {
+            position,
+            png_base64,
+            size,
+            crop,
+            alt,
+            ..
+        } => {
+            let asset = crate::images::ImageAsset::import_png_base64(png_base64)?;
+            let id = doc.add_image(asset, *position)?;
+            let n = doc.node_mut(id).unwrap();
+            if let Some(size) = size {
+                n.size = *size;
+            }
+            let image = n.image.as_mut().unwrap();
+            if let Some(crop) = crop {
+                image.crop = *crop;
+            }
+            image.alt = alt.clone();
+            created = Some(id);
+            "Ajouter une image embarquée"
+        }
+        UpdateImage {
+            target,
+            png_base64,
+            crop,
+            keep_aspect,
+            alt,
+            ..
+        } => {
+            let id = resolve(target, doc.page_index, aliases)?;
+            let asset = png_base64
+                .as_ref()
+                .map(|v| crate::images::ImageAsset::import_png_base64(v))
+                .transpose()?;
+            doc.update_image(id, asset, *crop, *keep_aspect)?;
+            if let Some(alt) = alt {
+                doc.node_mut(id).unwrap().image.as_mut().unwrap().alt = alt.clone();
+            }
+            created = Some(id);
+            "Modifier une image embarquée"
         }
         AddConnector {
             start, end, style, ..
@@ -942,6 +1017,7 @@ pub fn catalog() -> Value {
         "chart_kinds":ChartKind::ALL,"page_presets":crate::pages::presets().iter().map(|p|json!({"name":p.label,"size_px":p.size})).collect::<Vec<_>>(),
         "organization":{"base_layer":0,"max_layers":crate::organization::MAX_LAYERS,"max_groups":crate::organization::MAX_GROUPS,"groups":"flat, same-layer; IDs page-local in a separate namespace","layer_order":"bottom-to-top; base layer first","hidden_layers":"omitted from rendering/exports, retained in saved files and agent inspection","locks":"protect stored fields; unlock in a separate operation before editing"},
         "routing":{"orthogonal":"avoids visible block/chart envelopes; text, frames and swimlanes do not obstruct","waypoints":"immutable ordered anchors, maximum 16; detours between anchors","status":"inspection routing_status: clear, constrained, limited, direct; diagnostics are non-blocking","deterministic":true},
+        "images":{"format":"embedded normalized PNG; file import accepts PNG/JPEG","max_input_bytes":crate::images::MAX_INPUT_BYTES,"max_input_pixels":crate::images::MAX_INPUT_PIXELS,"import_resize":"alpha-aware reduction to pixel/PNG limits; source file unchanged","max_png_bytes":crate::images::MAX_PNG_BYTES,"max_pixels":crate::images::MAX_PIXELS,"document_pixels":crate::images::MAX_DOCUMENT_PIXELS,"crop":"normalized [x,y,width,height] inside [0,1]; non-destructive","inspection":"payload omitted; SHA-256 and dimensions retained","operations":["add_image","update_image"]},
         "patch_schema":schema(),"guide":include_str!("../../../docs/AGENTS-DRAW.md")})
 }
 pub fn schema() -> Value {

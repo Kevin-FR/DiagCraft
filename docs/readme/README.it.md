@@ -21,13 +21,16 @@ Le applicazioni e le relative somme di controllo SHA-256 sono disponibili nella
 | Windows x86_64 | ZIP portatile con applicazione e CLI |
 | Linux x86_64 | Pacchetto `.deb` per amd64 o archivio `.tar.gz`, con applicazione e CLI |
 
-**0.9.0 è sperimentale** e aggiunge connettori che evitano i blocchi mantenendo i punti manuali.
+**0.10.0 è sperimentale** e aggiunge immagini incorporate, ritaglio non distruttivo ed esportazione PNG configurabile.
 Il pacchetto Mac ha una firma ad hoc e non è stato autenticato da Apple tramite
 notarizzazione. I pacchetti Windows non sono firmati con un certificato dell’editore.
 Consulta la [guida all’installazione](../installation.md).
 
+Le applicazioni precedenti alla 0.10.0 eliminano le immagini incorporate al salvataggio. La [guida a immagini e PNG](../images.md) descrive formati, scorciatoie e limiti.
+
 ## Funzionalità
 
+- Importa PNG/JPEG, trascina immagini o usa il comando dedicato per incollarle; esporta pagine o selezioni con dimensioni, risoluzione e trasparenza opzionale.
 - I connettori ortogonali evitano blocchi e grafici visibili mantenendo punti manuali, porte scelte ed estremità libere.
 - Gruppi persistenti, blocco degli oggetti e livelli per pagina, con visibilità condivisa tra area di disegno ed esportazioni SVG/PDF.
 - Frecce: 1 px; Maiusc: 10 px. Tenere premuto un tasto crea un unico spostamento annullabile senza deformare la selezione.

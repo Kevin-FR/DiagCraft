@@ -1,0 +1,16 @@
+[
+  {
+    "file": "docs/images/images.png",
+    "sha256": "6fd80db83894a8b8381e7941f25fc0424148edefe6a613229af7a42090e7606f",
+    "source": "Native DiagCraft 0.10.0 capture using its own synthetic three-colour image; no external application artwork or third-party photographs.",
+    "license": "MIT",
+    "command": "diagcraft --language fr --screenshot docs/images/images.png images"
+  },
+  {
+    "file": "docs/images/export-png.png",
+    "sha256": "8322b36a88ee1efdaf8496b2e953a58b18c0839ae2c8dc36f9a569557051952c",
+    "source": "Native DiagCraft 0.10.0 capture using its own synthetic three-colour image; no external application artwork or third-party photographs.",
+    "license": "MIT",
+    "command": "diagcraft --language fr --screenshot docs/images/export-png.png export-png"
+  }
+]

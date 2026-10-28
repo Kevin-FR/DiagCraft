@@ -20,9 +20,9 @@ def check():
             assert sorted(re.findall(r"\{([^{}]+)\}", translation)) == substitutions, (key, language)
     required = set()
     for path in (ROOT / "apps/diagcraft/src").glob("*.rs"):
-        if path.name in {"main.rs", "i18n.rs", "ui_tests.rs"}:
+        if path.name in {"main.rs", "i18n.rs"} or path.name.endswith("_tests.rs"):
             continue
-        source = path.read_text(encoding="utf-8").split("#[cfg(test)]")[0]
+        source = re.split(r"#\[cfg\(test\)\]\s*(?:#\[[^\]]+\]\s*)?mod\s", path.read_text(encoding="utf-8"), maxsplit=1)[0]
         if path.name == "object_search_ui.rs":
             for match in re.finditer(r'fn label\(self\).*?\{(.*?)\n    \}', source, re.S):
                 required.update(json.loads(literal) for literal in re.findall(LITERAL, match[1]))

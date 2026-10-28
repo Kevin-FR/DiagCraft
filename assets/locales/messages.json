@@ -8908,5 +8908,491 @@
     "it": "Il percorso ha troppe curve per fissarle tutte. Aggiungi un punto di passaggio.",
     "pt": "O traçado tem demasiadas curvas para fixar todas. Adicione um ponto de passagem.",
     "zh-Hans": "路径折点过多，无法全部固定。请添加路径点。"
+  },
+  "Ajuster le cadre à l’image": {
+    "fr": "Ajuster le cadre à l’image",
+    "en": "Fit frame to image",
+    "de": "Rahmen an Bild anpassen",
+    "es": "Ajustar marco a la imagen",
+    "it": "Adatta cornice all’immagine",
+    "pt": "Ajustar moldura à imagem",
+    "zh-Hans": "使边框适应图像"
+  },
+  "Aucune image disponible dans le presse-papiers.": {
+    "fr": "Aucune image disponible dans le presse-papiers.",
+    "en": "No image is available in the clipboard.",
+    "de": "Die Zwischenablage enthält kein Bild.",
+    "es": "No hay ninguna imagen en el portapapeles.",
+    "it": "Nessuna immagine disponibile negli appunti.",
+    "pt": "Não existe imagem na área de transferência.",
+    "zh-Hans": "剪贴板中没有图像。"
+  },
+  "Coller une image": {
+    "fr": "Coller une image",
+    "en": "Paste image",
+    "de": "Bild einfügen",
+    "es": "Pegar imagen",
+    "it": "Incolla immagine",
+    "pt": "Colar imagem",
+    "zh-Hans": "粘贴图像"
+  },
+  "Conserver les proportions de l’image": {
+    "fr": "Conserver les proportions de l’image",
+    "en": "Keep image proportions",
+    "de": "Bildproportionen beibehalten",
+    "es": "Mantener proporciones de la imagen",
+    "it": "Mantieni proporzioni dell’immagine",
+    "pt": "Manter proporções da imagem",
+    "zh-Hans": "保持图像比例"
+  },
+  "Description de l’image": {
+    "fr": "Description de l’image",
+    "en": "Image description",
+    "de": "Bildbeschreibung",
+    "es": "Descripción de la imagen",
+    "it": "Descrizione dell’immagine",
+    "pt": "Descrição da imagem",
+    "zh-Hans": "图像描述"
+  },
+  "Exporter en PNG": {
+    "fr": "Exporter en PNG",
+    "en": "Export PNG",
+    "de": "Als PNG exportieren",
+    "es": "Exportar a PNG",
+    "it": "Esporta in PNG",
+    "pt": "Exportar para PNG",
+    "zh-Hans": "导出 PNG"
+  },
+  "Fond transparent": {
+    "fr": "Fond transparent",
+    "en": "Transparent background",
+    "de": "Transparenter Hintergrund",
+    "es": "Fondo transparente",
+    "it": "Sfondo trasparente",
+    "pt": "Fundo transparente",
+    "zh-Hans": "透明背景"
+  },
+  "Hauteur en pixels": {
+    "fr": "Hauteur en pixels",
+    "en": "Height in pixels",
+    "de": "Höhe in Pixeln",
+    "es": "Altura en píxeles",
+    "it": "Altezza in pixel",
+    "pt": "Altura em píxeis",
+    "zh-Hans": "像素高度"
+  },
+  "Image": {
+    "fr": "Image",
+    "en": "Image",
+    "de": "Bild",
+    "es": "Imagen",
+    "it": "Immagine",
+    "pt": "Imagem",
+    "zh-Hans": "图像"
+  },
+  "Image embarquée": {
+    "fr": "Image embarquée",
+    "en": "Embedded image",
+    "de": "Eingebettetes Bild",
+    "es": "Imagen incrustada",
+    "it": "Immagine incorporata",
+    "pt": "Imagem incorporada",
+    "zh-Hans": "嵌入图像"
+  },
+  "Images": {
+    "fr": "Images",
+    "en": "Images",
+    "de": "Bilder",
+    "es": "Imágenes",
+    "it": "Immagini",
+    "pt": "Imagens",
+    "zh-Hans": "图像"
+  },
+  "Images PNG et JPEG": {
+    "fr": "Images PNG et JPEG",
+    "en": "PNG and JPEG images",
+    "de": "PNG- und JPEG-Bilder",
+    "es": "Imágenes PNG y JPEG",
+    "it": "Immagini PNG e JPEG",
+    "pt": "Imagens PNG e JPEG",
+    "zh-Hans": "PNG 和 JPEG 图像"
+  },
+  "Images embarquées dans le document.": {
+    "fr": "Images embarquées dans le document.",
+    "en": "Images embedded in the document.",
+    "de": "Bilder im Dokument eingebettet.",
+    "es": "Imágenes incrustadas en el documento.",
+    "it": "Immagini incorporate nel documento.",
+    "pt": "Imagens incorporadas no documento.",
+    "zh-Hans": "图像已嵌入文档。"
+  },
+  "Import d’image impossible : {0}": {
+    "fr": "Import d’image impossible : {0}",
+    "en": "Could not import image: {0}",
+    "de": "Bildimport fehlgeschlagen: {0}",
+    "es": "No se pudo importar la imagen: {0}",
+    "it": "Impossibile importare l’immagine: {0}",
+    "pt": "Não foi possível importar a imagem: {0}",
+    "zh-Hans": "无法导入图像：{0}"
+  },
+  "Importer des images": {
+    "fr": "Importer des images",
+    "en": "Import images",
+    "de": "Bilder importieren",
+    "es": "Importar imágenes",
+    "it": "Importa immagini",
+    "pt": "Importar imagens",
+    "zh-Hans": "导入图像"
+  },
+  "Insertion": {
+    "fr": "Insertion",
+    "en": "Insert",
+    "de": "Einfügen",
+    "es": "Insertar",
+    "it": "Inserisci",
+    "pt": "Inserir",
+    "zh-Hans": "插入"
+  },
+  "Largeur en pixels": {
+    "fr": "Largeur en pixels",
+    "en": "Width in pixels",
+    "de": "Breite in Pixeln",
+    "es": "Anchura en píxeles",
+    "it": "Larghezza in pixel",
+    "pt": "Largura em píxeis",
+    "zh-Hans": "像素宽度"
+  },
+  "Lier les dimensions de sortie": {
+    "fr": "Lier les dimensions de sortie",
+    "en": "Link output dimensions",
+    "de": "Ausgabemaße verknüpfen",
+    "es": "Vincular dimensiones de salida",
+    "it": "Collega dimensioni di uscita",
+    "pt": "Vincular dimensões de saída",
+    "zh-Hans": "锁定输出比例"
+  },
+  "Maximum 16 millions de pixels. Le PNG exporte une seule page ou la sélection visible.": {
+    "fr": "Maximum 16 millions de pixels. Le PNG exporte une seule page ou la sélection visible.",
+    "en": "Maximum 16 million pixels. PNG exports one page or the visible selection.",
+    "de": "Maximal 16 Millionen Pixel. PNG exportiert eine Seite oder die sichtbare Auswahl.",
+    "es": "Máximo 16 millones de píxeles. PNG exporta una página o la selección visible.",
+    "it": "Massimo 16 milioni di pixel. PNG esporta una pagina o la selezione visibile.",
+    "pt": "Máximo de 16 milhões de píxeis. PNG exporta uma página ou a seleção visível.",
+    "zh-Hans": "最多 1600 万像素。PNG 导出单页或可见选区。"
+  },
+  "Maximum de 16 images par import.": {
+    "fr": "Maximum de 16 images par import.",
+    "en": "Maximum 16 images per import.",
+    "de": "Maximal 16 Bilder pro Import.",
+    "es": "Máximo 16 imágenes por importación.",
+    "it": "Massimo 16 immagini per importazione.",
+    "pt": "Máximo de 16 imagens por importação.",
+    "zh-Hans": "每次最多导入 16 张图像。"
+  },
+  "PNG exporté.": {
+    "fr": "PNG exporté.",
+    "en": "PNG exported.",
+    "de": "PNG exportiert.",
+    "es": "PNG exportado.",
+    "it": "PNG esportato.",
+    "pt": "PNG exportado.",
+    "zh-Hans": "PNG 已导出。"
+  },
+  "Page actuelle": {
+    "fr": "Page actuelle",
+    "en": "Current page",
+    "de": "Aktuelle Seite",
+    "es": "Página actual",
+    "it": "Pagina corrente",
+    "pt": "Página atual",
+    "zh-Hans": "当前页"
+  },
+  "Recadrage de l’image": {
+    "fr": "Recadrage de l’image",
+    "en": "Image crop",
+    "de": "Bildzuschnitt",
+    "es": "Recorte de imagen",
+    "it": "Ritaglio immagine",
+    "pt": "Recorte da imagem",
+    "zh-Hans": "图像裁剪"
+  },
+  "Remplacer l’image…": {
+    "fr": "Remplacer l’image…",
+    "en": "Replace image…",
+    "de": "Bild ersetzen…",
+    "es": "Reemplazar imagen…",
+    "it": "Sostituisci immagine…",
+    "pt": "Substituir imagem…",
+    "zh-Hans": "替换图像…"
+  },
+  "Réinitialiser le recadrage": {
+    "fr": "Réinitialiser le recadrage",
+    "en": "Reset crop",
+    "de": "Zuschnitt zurücksetzen",
+    "es": "Restablecer recorte",
+    "it": "Ripristina ritaglio",
+    "pt": "Repor recorte",
+    "zh-Hans": "重置裁剪"
+  },
+  "Résolution (ppp)": {
+    "fr": "Résolution (ppp)",
+    "en": "Resolution (DPI)",
+    "de": "Auflösung (dpi)",
+    "es": "Resolución (ppp)",
+    "it": "Risoluzione (DPI)",
+    "pt": "Resolução (ppp)",
+    "zh-Hans": "分辨率 (DPI)"
+  },
+  "Sélection actuelle": {
+    "fr": "Sélection actuelle",
+    "en": "Current selection",
+    "de": "Aktuelle Auswahl",
+    "es": "Selección actual",
+    "it": "Selezione corrente",
+    "pt": "Seleção atual",
+    "zh-Hans": "当前选区"
+  },
+  "Terminez l’édition en cours avant d’importer une image.": {
+    "fr": "Terminez l’édition en cours avant d’importer une image.",
+    "en": "Finish the current edit before importing an image.",
+    "de": "Beenden Sie die aktuelle Bearbeitung vor dem Bildimport.",
+    "es": "Termina la edición actual antes de importar una imagen.",
+    "it": "Termina la modifica corrente prima di importare un’immagine.",
+    "pt": "Termine a edição atual antes de importar uma imagem.",
+    "zh-Hans": "请先完成当前编辑，再导入图像。"
+  },
+  "Image trop grande : maximum 4 millions de pixels et 8192 px par côté.": {
+    "fr": "Image trop grande : maximum 4 millions de pixels et 8192 px par côté.",
+    "en": "Image too large: maximum 4 million pixels and 8192 px per side.",
+    "de": "Bild zu groß: maximal 4 Millionen Pixel und 8192 px pro Seite.",
+    "es": "Imagen demasiado grande: máximo 4 millones de píxeles y 8192 px por lado.",
+    "it": "Immagine troppo grande: massimo 4 milioni di pixel e 8192 px per lato.",
+    "pt": "Imagem demasiado grande: máximo de 4 milhões de píxeis e 8192 px por lado.",
+    "zh-Hans": "图像过大：最多 400 万像素，每边不超过 8192 像素。"
+  },
+  "Image trop volumineuse : maximum 8 Mio à l’import.": {
+    "fr": "Image trop volumineuse : maximum 8 Mio à l’import.",
+    "en": "Image file too large: maximum 8 MiB per import.",
+    "de": "Bilddatei zu groß: maximal 8 MiB pro Import.",
+    "es": "Archivo de imagen demasiado grande: máximo 8 MiB por importación.",
+    "it": "File immagine troppo grande: massimo 8 MiB per importazione.",
+    "pt": "Ficheiro de imagem demasiado grande: máximo de 8 MiB por importação.",
+    "zh-Hans": "图像文件过大：导入上限为 8 MiB。"
+  },
+  "Format non pris en charge : PNG ou JPEG requis.": {
+    "fr": "Format non pris en charge : PNG ou JPEG requis.",
+    "en": "Unsupported format: PNG or JPEG required.",
+    "de": "Nicht unterstütztes Format: PNG oder JPEG erforderlich.",
+    "es": "Formato no compatible: se requiere PNG o JPEG.",
+    "it": "Formato non supportato: è richiesto PNG o JPEG.",
+    "pt": "Formato não suportado: é necessário PNG ou JPEG.",
+    "zh-Hans": "不支持此格式：需要 PNG 或 JPEG。"
+  },
+  "Image PNG normalisée trop volumineuse : maximum 4 Mio.": {
+    "fr": "Image PNG normalisée trop volumineuse : maximum 4 Mio.",
+    "en": "Normalized PNG too large: maximum 4 MiB.",
+    "de": "Normalisierte PNG-Datei zu groß: maximal 4 MiB.",
+    "es": "PNG normalizado demasiado grande: máximo 4 MiB.",
+    "it": "PNG normalizzato troppo grande: massimo 4 MiB.",
+    "pt": "PNG normalizado demasiado grande: máximo de 4 MiB.",
+    "zh-Hans": "标准化后的 PNG 过大：上限为 4 MiB。"
+  },
+  "Pixels d’image invalides.": {
+    "fr": "Pixels d’image invalides.",
+    "en": "Invalid image pixels.",
+    "de": "Ungültige Bildpixel.",
+    "es": "Píxeles de imagen no válidos.",
+    "it": "Pixel immagine non validi.",
+    "pt": "Píxeis da imagem inválidos.",
+    "zh-Hans": "图像像素无效。"
+  },
+  "Image base64 invalide.": {
+    "fr": "Image base64 invalide.",
+    "en": "Invalid base64 image.",
+    "de": "Ungültiges Base64-Bild.",
+    "es": "Imagen base64 no válida.",
+    "it": "Immagine base64 non valida.",
+    "pt": "Imagem base64 inválida.",
+    "zh-Hans": "图像的 Base64 数据无效。"
+  },
+  "Dimensions d’image incohérentes.": {
+    "fr": "Dimensions d’image incohérentes.",
+    "en": "Image dimensions do not match.",
+    "de": "Bildabmessungen stimmen nicht überein.",
+    "es": "Las dimensiones de imagen no coinciden.",
+    "it": "Le dimensioni dell’immagine non corrispondono.",
+    "pt": "As dimensões da imagem não correspondem.",
+    "zh-Hans": "图像尺寸不一致。"
+  },
+  "Les images embarquées doivent être au format PNG.": {
+    "fr": "Les images embarquées doivent être au format PNG.",
+    "en": "Embedded images must be PNG.",
+    "de": "Eingebettete Bilder müssen PNG sein.",
+    "es": "Las imágenes incrustadas deben ser PNG.",
+    "it": "Le immagini incorporate devono essere PNG.",
+    "pt": "As imagens incorporadas devem ser PNG.",
+    "zh-Hans": "嵌入的图像必须为 PNG 格式。"
+  },
+  "Recadrage invalide : rectangle normalisé inclus dans l’image requis.": {
+    "fr": "Recadrage invalide : rectangle normalisé inclus dans l’image requis.",
+    "en": "Invalid crop: a normalized rectangle inside the image is required.",
+    "de": "Ungültiger Zuschnitt: normalisiertes Rechteck innerhalb des Bildes erforderlich.",
+    "es": "Recorte no válido: se requiere un rectángulo normalizado dentro de la imagen.",
+    "it": "Ritaglio non valido: serve un rettangolo normalizzato all’interno dell’immagine.",
+    "pt": "Recorte inválido: é necessário um retângulo normalizado dentro da imagem.",
+    "zh-Hans": "裁剪无效：需要位于图像内的归一化矩形。"
+  },
+  "Description d’image trop longue.": {
+    "fr": "Description d’image trop longue.",
+    "en": "Image description too long.",
+    "de": "Bildbeschreibung zu lang.",
+    "es": "Descripción de imagen demasiado larga.",
+    "it": "Descrizione immagine troppo lunga.",
+    "pt": "Descrição da imagem demasiado longa.",
+    "zh-Hans": "图像描述过长。"
+  },
+  "Image introuvable.": {
+    "fr": "Image introuvable.",
+    "en": "Image not found.",
+    "de": "Bild nicht gefunden.",
+    "es": "Imagen no encontrada.",
+    "it": "Immagine non trovata.",
+    "pt": "Imagem não encontrada.",
+    "zh-Hans": "找不到图像。"
+  },
+  "Image déposée introuvable.": {
+    "fr": "Image déposée introuvable.",
+    "en": "Dropped image not found.",
+    "de": "Abgelegtes Bild nicht gefunden.",
+    "es": "No se encontró la imagen soltada.",
+    "it": "Immagine trascinata non trovata.",
+    "pt": "Imagem largada não encontrada.",
+    "zh-Hans": "找不到拖入的图像。"
+  },
+  "Export PNG trop grand : maximum 16 millions de pixels et 8192 px par côté.": {
+    "fr": "Export PNG trop grand : maximum 16 millions de pixels et 8192 px par côté.",
+    "en": "PNG export too large: maximum 16 million pixels and 8192 px per side.",
+    "de": "PNG-Export zu groß: maximal 16 Millionen Pixel und 8192 px pro Seite.",
+    "es": "Exportación PNG demasiado grande: máximo 16 millones de píxeles y 8192 px por lado.",
+    "it": "Esportazione PNG troppo grande: massimo 16 milioni di pixel e 8192 px per lato.",
+    "pt": "Exportação PNG demasiado grande: máximo de 16 milhões de píxeis e 8192 px por lado.",
+    "zh-Hans": "PNG 导出过大：最多 1600 万像素，每边不超过 8192 像素。"
+  },
+  "Résolution PNG invalide : 36 à 1200 ppp requis.": {
+    "fr": "Résolution PNG invalide : 36 à 1200 ppp requis.",
+    "en": "Invalid PNG resolution: 36 to 1200 DPI required.",
+    "de": "Ungültige PNG-Auflösung: 36 bis 1200 dpi erforderlich.",
+    "es": "Resolución PNG no válida: se requiere de 36 a 1200 ppp.",
+    "it": "Risoluzione PNG non valida: sono richiesti da 36 a 1200 DPI.",
+    "pt": "Resolução PNG inválida: são necessários 36 a 1200 ppp.",
+    "zh-Hans": "PNG 分辨率无效：需要 36 至 1200 DPI。"
+  },
+  "Sélection PNG absente ou masquée.": {
+    "fr": "Sélection PNG absente ou masquée.",
+    "en": "PNG selection is missing or hidden.",
+    "de": "PNG-Auswahl fehlt oder ist ausgeblendet.",
+    "es": "La selección PNG no existe o está oculta.",
+    "it": "La selezione PNG è assente o nascosta.",
+    "pt": "A seleção PNG está ausente ou oculta.",
+    "zh-Hans": "PNG 选区不存在或已隐藏。"
+  },
+  "Sélection PNG vide.": {
+    "fr": "Sélection PNG vide.",
+    "en": "PNG selection is empty.",
+    "de": "PNG-Auswahl ist leer.",
+    "es": "La selección PNG está vacía.",
+    "it": "La selezione PNG è vuota.",
+    "pt": "A seleção PNG está vazia.",
+    "zh-Hans": "PNG 选区为空。"
+  },
+  "Sélection PNG trop volumineuse.": {
+    "fr": "Sélection PNG trop volumineuse.",
+    "en": "PNG selection too large.",
+    "de": "PNG-Auswahl zu groß.",
+    "es": "Selección PNG demasiado grande.",
+    "it": "Selezione PNG troppo grande.",
+    "pt": "Seleção PNG demasiado grande.",
+    "zh-Hans": "PNG 选区过大。"
+  },
+  "Page PNG introuvable.": {
+    "fr": "Page PNG introuvable.",
+    "en": "PNG page not found.",
+    "de": "PNG-Seite nicht gefunden.",
+    "es": "Página PNG no encontrada.",
+    "it": "Pagina PNG non trovata.",
+    "pt": "Página PNG não encontrada.",
+    "zh-Hans": "找不到 PNG 页面。"
+  },
+  "Allocation PNG impossible.": {
+    "fr": "Allocation PNG impossible.",
+    "en": "Could not allocate PNG pixels.",
+    "de": "PNG-Pixel konnten nicht reserviert werden.",
+    "es": "No se pudo reservar memoria para PNG.",
+    "it": "Impossibile allocare i pixel PNG.",
+    "pt": "Não foi possível reservar memória para PNG.",
+    "zh-Hans": "无法为 PNG 像素分配内存。"
+  },
+  "Trop d’images : maximum 16 millions de pixels et 8 Mio de données base64 par document.": {
+    "fr": "Trop d’images : maximum 16 millions de pixels et 8 Mio de données base64 par document.",
+    "en": "Too many images: maximum 16 million pixels and 8 MiB of base64 data per document.",
+    "de": "Zu viele Bilder: maximal 16 Millionen Pixel und 8 MiB Base64-Daten pro Dokument.",
+    "es": "Demasiadas imágenes: máximo 16 millones de píxeles y 8 MiB de datos base64 por documento.",
+    "it": "Troppe immagini: massimo 16 milioni di pixel e 8 MiB di dati base64 per documento.",
+    "pt": "Demasiadas imagens: máximo de 16 milhões de píxeis e 8 MiB de dados base64 por documento.",
+    "zh-Hans": "图像过多：每个文档最多 1600 万像素和 8 MiB 的 Base64 数据。"
+  },
+  "Image illisible : {0}": {
+    "fr": "Image illisible : {0}",
+    "en": "Cannot decode image: {0}",
+    "de": "Bild kann nicht dekodiert werden: {0}",
+    "es": "No se puede decodificar la imagen: {0}",
+    "it": "Impossibile decodificare l’immagine: {0}",
+    "pt": "Não é possível descodificar a imagem: {0}",
+    "zh-Hans": "无法解码图像：{0}"
+  },
+  "Exporter en PNG…": {
+    "fr": "Exporter en PNG…",
+    "en": "Export PNG…",
+    "de": "Als PNG exportieren…",
+    "es": "Exportar a PNG…",
+    "it": "Esporta in PNG…",
+    "pt": "Exportar para PNG…",
+    "zh-Hans": "导出 PNG…"
+  },
+  "Importer des images…": {
+    "fr": "Importer des images…",
+    "en": "Import images…",
+    "de": "Bilder importieren…",
+    "es": "Importar imágenes…",
+    "it": "Importa immagini…",
+    "pt": "Importar imagens…",
+    "zh-Hans": "导入图像…"
+  },
+  "Image source trop grande : maximum 16 millions de pixels et 8192 px par côté.": {
+    "fr": "Image source trop grande : maximum 16 millions de pixels et 8192 px par côté.",
+    "en": "Source image too large: maximum 16 million pixels and 8192 px per side.",
+    "de": "Quellbild zu groß: maximal 16 Millionen Pixel und 8192 px pro Seite.",
+    "es": "Imagen de origen demasiado grande: máximo 16 millones de píxeles y 8192 px por lado.",
+    "it": "Immagine sorgente troppo grande: massimo 16 milioni di pixel e 8192 px per lato.",
+    "pt": "Imagem de origem demasiado grande: máximo de 16 milhões de píxeis e 8192 px por lado.",
+    "zh-Hans": "源图像过大：最多 1600 万像素，每边不超过 8192 像素。"
+  },
+  "Les grands imports sont réduits ; le fichier source reste intact.": {
+    "fr": "Les grands imports sont réduits ; le fichier source reste intact.",
+    "en": "Large imports are reduced; the source file stays unchanged.",
+    "de": "Große Importe werden verkleinert; die Quelldatei bleibt unverändert.",
+    "es": "Las imágenes grandes se reducen; el archivo de origen no se modifica.",
+    "it": "Le immagini grandi vengono ridotte; il file sorgente resta invariato.",
+    "pt": "As imagens grandes são reduzidas; o ficheiro de origem permanece intacto.",
+    "zh-Hans": "大图会被缩小，源文件保持不变。"
+  },
+  "Adapter aux limites PNG": {
+    "fr": "Adapter aux limites PNG",
+    "en": "Fit PNG limits",
+    "de": "An PNG-Grenzen anpassen",
+    "es": "Ajustar a los límites PNG",
+    "it": "Adatta ai limiti PNG",
+    "pt": "Ajustar aos limites PNG",
+    "zh-Hans": "适应 PNG 限制"
   }
 }
