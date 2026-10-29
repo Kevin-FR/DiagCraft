@@ -21,7 +21,7 @@ As aplicações e as respetivas somas de verificação SHA-256 estão disponíve
 | Windows x86_64 | ZIP portátil com a aplicação e a CLI |
 | Linux x86_64 | Pacote `.deb` para amd64 ou arquivo `.tar.gz`, com a aplicação e a CLI |
 
-**0.11.3 é experimental** e melhora a legibilidade dos textos da interface e das ajudas de ligação. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
+**0.12.0 é experimental** e acrescenta um minimapa opcional para navegar em páginas grandes. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
 Os pacotes Windows não estão assinados com um certificado de editor.
 Consulte o [guia de instalação](../installation.md).
 
@@ -32,6 +32,8 @@ Consulte os guias de [Mermaid](../mermaid.md) e de [diagnósticos dos agentes](.
 Muda de área com F6 / Shift+F6; consulta o [guia de teclado](../keyboard-navigation.md).
 
 Contrastes, testes automáticos e verificações manuais pendentes: [guia de legibilidade](../readability.md).
+
+Navega em páginas grandes com um [minimapa opcional](../minimap.md): clique, arrastamento, teclado e preferência de visibilidade local.
 
 ## Funcionalidades
 

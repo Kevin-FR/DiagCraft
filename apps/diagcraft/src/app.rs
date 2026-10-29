@@ -181,6 +181,8 @@ pub struct DrawApp {
     page_breaks: bool,
     show_library: bool,
     show_inspector: bool,
+    show_minimap: bool,
+    minimap_ui: minimap_ui::State,
     library_width: f32,
     inspector_width: f32,
     interface_path: Option<PathBuf>,
@@ -529,6 +531,17 @@ impl DrawApp {
         if name == "placement-clavier" {
             self.prepare_keyboard_capture();
         }
+        if name == "minicarte" {
+            self.show_minimap = true;
+            self.show_library = false;
+            self.show_inspector = false;
+            self.show_quick_toolbar = false;
+            self.ribbon_expanded = Some(false);
+            self.fit_next = false;
+            self.zoom = 1.2;
+            self.pan = vec2(-250., -140.);
+            self.selected = vec![3];
+        }
     }
     fn prepare_rich_text_capture(&mut self, editor: bool) {
         let mut doc = Document {
@@ -772,6 +785,8 @@ impl DrawApp {
             page_breaks: false,
             show_library: true,
             show_inspector: false,
+            show_minimap: false,
+            minimap_ui: Default::default(),
             library_width: 256.,
             inspector_width: 280.,
             interface_path: None,
@@ -1546,9 +1561,11 @@ impl DrawApp {
                     self.selected=self.marquee_hits([70.,70.],[750.,530.]);
                     self.drag=Some(Drag::Marquee {start:[70.,70.],current:[750.,530.],initial:vec![],additive:false});
                 }
-                if interactive && self.rich_editor.is_none() && !self.context_open && !self.capture_marquee && !self.capture_alignment {
+                self.minimap(ctx, interactive);
+                let minimap_blocks_canvas = self.minimap_blocks_canvas(ctx);
+                if interactive && !minimap_blocks_canvas && self.rich_editor.is_none() && !self.context_open && !self.capture_marquee && !self.capture_alignment {
                     self.canvas_input(ui, &response);
-                } else if self.rich_editor.is_some() {
+                } else if self.rich_editor.is_some() && !minimap_blocks_canvas {
                     let pos = ui.input(|i|i.pointer.hover_pos());
                     self.canvas_navigation(ui,ui.rect_contains_pointer(rect),pos);
                 }
@@ -1851,7 +1868,7 @@ impl DrawApp {
                             self.open_context(self.screen(point), true);
                         }
                     }
-                    self.canvas_context(ui, &response);
+                    if !minimap_blocks_canvas { self.canvas_context(ui, &response); }
                     if !self.context_open {
                         self.quick_toolbar(ctx);
                     }
@@ -1886,6 +1903,11 @@ impl DrawApp {
                                         self.set_zoom(self.zoom * 1.2, rect.center());
                                     }
                                     ui.separator();
+                                    let minimap_toggle = minimap_ui::toggle_button(ui, self.show_minimap);
+                                    self.minimap_ui.remember_opener(&minimap_toggle);
+                                    if minimap_toggle.clicked() {
+                                        self.show_minimap = !self.show_minimap;
+                                    }
                                     if ui.button(t("Ajuster")).on_hover_text(t("F")).clicked() {
                                         self.fit_next = true;
                                     }
@@ -2829,6 +2851,9 @@ mod focus_ui;
 
 #[path = "theme_ui.rs"]
 mod theme_ui;
+
+#[path = "minimap_ui.rs"]
+mod minimap_ui;
 
 #[path = "commands_ui.rs"]
 mod commands_ui;

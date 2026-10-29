@@ -52,6 +52,14 @@ utilisent un fond opaque ; les invites de page vide choisissent une couleur
 lisible sur le fond RGB de la page. Les tests de peinture sont décrits dans
 [readability.md](readability.md).
 
+`minimap_ui.rs` projette la page et les primitives visibles dans une vue compacte.
+Les bornes dépendent du document et de sa visibilité, jamais de la caméra ; le
+cadre de la vue dépend du zoom et du pan. Un snapshot du cache de routage suffit
+pour les liens. Les gestes de navigation restent un état d’interface et sont
+interceptés avant l’entrée du canevas, sans sélection ni historique documentaire.
+La carte s’efface temporairement quand une saisie, une modale ou un geste du
+dessin a priorité. Sa visibilité facultative est une préférence locale.
+
 ## Référence structurelle
 
 L’organisation de [PhotoCraft](https://github.com/storytold/photocraft) sépare

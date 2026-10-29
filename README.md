@@ -21,7 +21,7 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.11.3 is experimental** and improves the readability of interface text and connector hints.
+**0.12.0 is experimental** and adds an optional mini-map for navigating large sheets.
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).
@@ -35,6 +35,8 @@ Move between workspace areas with F6 / Shift+F6; see the [keyboard navigation gu
 Interface contrast targets, automated checks and remaining manual checks: [readability guide](docs/readability.md).
 
 ## Features
+
+- Navigate large sheets with an optional [mini-map](docs/minimap.md): click/drag to pan, keyboard navigation and a local visibility preference.
 
 - Import/export a documented Mermaid flowchart subset with conversion reports and explicit loss confirmation; agent errors identify the operation, page, target and correction hint.
 - Import PNG/JPEG files, drop images or use the dedicated image-paste command; export pages or selections at a chosen size and resolution with optional transparency.

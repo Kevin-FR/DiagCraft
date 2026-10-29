@@ -55,6 +55,7 @@ pub(super) enum Command {
     ActualSize,
     Library,
     Inspector,
+    Minimap,
     Ribbon,
     ResetInterface,
     Settings,
@@ -205,6 +206,12 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
         "Afficher / masquer les propriétés",
         "Affichage",
         "volet droite document inspecteur"
+    ),
+    command!(
+        Minimap,
+        "Afficher / masquer la mini-carte",
+        "Affichage",
+        "minimap mini map navigation carte overview aperçu vue"
     ),
     command!(
         Ribbon,
@@ -603,6 +610,7 @@ impl DrawApp {
             }
             Library => self.show_library = !self.show_library,
             Inspector => self.show_inspector = !self.show_inspector,
+            Minimap => self.show_minimap = !self.show_minimap,
             Ribbon => self.ribbon_expanded = Some(!self.ribbon_is_expanded(ctx)),
             ResetInterface => self.reset_interface(ctx),
             Grid => self.grid = !self.grid,

@@ -9772,5 +9772,59 @@
     "it": "Riduci zoom",
     "pt": "Diminuir zoom",
     "zh-Hans": "缩小"
+  },
+  "Afficher / masquer la mini-carte": {
+    "fr": "Afficher / masquer la mini-carte",
+    "en": "Show / hide the mini-map",
+    "de": "Minikarte ein-/ausblenden",
+    "es": "Mostrar / ocultar el minimapa",
+    "it": "Mostra / nascondi la minimappa",
+    "pt": "Mostrar / ocultar o minimapa",
+    "zh-Hans": "显示／隐藏缩略地图"
+  },
+  "Cliquez ou glissez pour déplacer la vue. Flèches : déplacer · Début : ajuster la page.": {
+    "fr": "Cliquez ou glissez pour déplacer la vue. Flèches : déplacer · Début : ajuster la page.",
+    "en": "Click or drag to pan the view. Arrows: pan · Home: fit page.",
+    "de": "Zum Verschieben der Ansicht klicken oder ziehen. Pfeile: verschieben · Pos1: Seite einpassen.",
+    "es": "Haz clic o arrastra para desplazar la vista. Flechas: desplazar · Inicio: ajustar página.",
+    "it": "Fai clic o trascina per spostare la vista. Frecce: sposta · Home: adatta pagina.",
+    "pt": "Clica ou arrasta para deslocar a vista. Setas: deslocar · Home: ajustar página.",
+    "zh-Hans": "单击或拖动以平移视图。方向键：平移 · Home：适应页面。"
+  },
+  "Masquer la mini-carte": {
+    "fr": "Masquer la mini-carte",
+    "en": "Hide the mini-map",
+    "de": "Minikarte ausblenden",
+    "es": "Ocultar el minimapa",
+    "it": "Nascondi la minimappa",
+    "pt": "Ocultar o minimapa",
+    "zh-Hans": "隐藏缩略地图"
+  },
+  "Mini-carte": {
+    "fr": "Mini-carte",
+    "en": "Mini-map",
+    "de": "Minikarte",
+    "es": "Minimapa",
+    "it": "Minimappa",
+    "pt": "Minimapa",
+    "zh-Hans": "缩略地图"
+  },
+  "Naviguer dans la mini-carte": {
+    "fr": "Naviguer dans la mini-carte",
+    "en": "Navigate the mini-map",
+    "de": "In der Minikarte navigieren",
+    "es": "Navegar por el minimapa",
+    "it": "Navigare nella minimappa",
+    "pt": "Navegar no minimapa",
+    "zh-Hans": "在缩略地图中导航"
+  },
+  "Afficher la mini-carte": {
+    "fr": "Afficher la mini-carte",
+    "en": "Show the mini-map",
+    "de": "Minikarte einblenden",
+    "es": "Mostrar el minimapa",
+    "it": "Mostra la minimappa",
+    "pt": "Mostrar o minimapa",
+    "zh-Hans": "显示缩略地图"
   }
 }

@@ -58,6 +58,15 @@ sélectionner un objet hors écran et de le rejoindre sans agrandir les volets.
 **Maj+Entrée** ajoute un résultat à la sélection et **F2** ouvre son texte dans
 le bloc. Voir [la recherche et le clavier](recherche-objets.md).
 
+## Naviguer sur une grande feuille
+
+L’icône page et cadre près du zoom ouvre une mini-carte de la page active.
+Elle est aussi accessible dans **Affichage → Volets et ruban** ou par la palette.
+Un clic ou un glissement déplace la vue ; les flèches et Début sont disponibles
+quand la carte a le focus. La sélection et le dessin restent inchangés.
+L’affichage est facultatif, masqué par défaut et mémorisé localement.
+Voir [le guide de la mini-carte](minimap.md).
+
 ## Références de conception
 
 La revue de [PDFCraft au commit d8b2705](https://github.com/storytold/pdfcraft/tree/d8b27058252da24a08df8ff06c23418ac4fb97a1)

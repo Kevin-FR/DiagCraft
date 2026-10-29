@@ -3,6 +3,18 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.12.0 — mini-carte de navigation
+
+- Aperçu facultatif de la page active, avec objets visibles, sélection et cadre de la vue ; projection indépendante de la caméra.
+- Clic et glissement pour déplacer la vue à zoom constant ; flèches, Maj + flèches et Début au clavier.
+- Bouton permanent près du zoom, commande Affichage/palette et préférence locale masquée par défaut.
+- Priorité aux saisies, modales et gestes du dessin ; capture des pressions et relâchements sans action derrière la carte.
+- Focus rendu au bouton d’ouverture après fermeture ; calques masqués exclus et contenu hors page inclus.
+- Aperçu simplifié utilisant le cache des connecteurs, sans export, décodage d’image ou bibliothèque supplémentaire.
+- Tests d’interaction, petites fenêtres, pages extrêmes, sept langues, préférences et conservation du document, de la sélection et de la branche d’annulation.
+
+Le format `.draw` reste **v7**, l’API de patches **v1**.
+
 ## 0.11.3 — lisibilité des textes et aides de connexion
 
 - Rôles distincts pour les textes informatifs, actions, avertissements et erreurs ; statuts, graduations et placeholders plus lisibles sur les fonds de l’interface.

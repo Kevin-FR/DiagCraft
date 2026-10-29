@@ -13,6 +13,7 @@ struct Preferences {
     last_update_check: u64,
     library: bool,
     inspector: bool,
+    minimap: bool,
     library_width: f32,
     inspector_width: f32,
     ribbon: Option<bool>,
@@ -31,6 +32,7 @@ impl Default for Preferences {
             last_update_check: 0,
             library: true,
             inspector: false,
+            minimap: false,
             library_width: 256.,
             inspector_width: 280.,
             ribbon: None,
@@ -50,6 +52,7 @@ impl DrawApp {
             last_update_check: self.settings.last_check,
             library: self.show_library,
             inspector: self.show_inspector,
+            minimap: self.show_minimap,
             library_width: self.library_width,
             inspector_width: self.inspector_width,
             ribbon: self.ribbon_expanded,
@@ -68,6 +71,7 @@ impl DrawApp {
         i18n::activate(self.language.unwrap_or_else(Language::system));
         self.show_library = prefs.library;
         self.show_inspector = prefs.inspector;
+        self.show_minimap = prefs.minimap;
         self.library_width = bounded(prefs.library_width, 240., 256.);
         self.inspector_width = bounded(prefs.inspector_width, 260., 280.);
         self.ribbon_expanded = prefs.ribbon;

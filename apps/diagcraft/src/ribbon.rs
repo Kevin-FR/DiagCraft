@@ -44,6 +44,7 @@ impl DrawApp {
         ui.menu_button(t("Volets et ruban"), |ui| {
             ui.checkbox(&mut self.show_library, t("Bibliothèque de symboles"));
             ui.checkbox(&mut self.show_inspector, t("Propriétés de la sélection"));
+            ui.checkbox(&mut self.show_minimap, t("Mini-carte"));
             ui.checkbox(
                 &mut self.show_quick_toolbar,
                 t("Barre de mise en forme flottante"),

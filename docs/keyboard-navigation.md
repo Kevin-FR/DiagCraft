@@ -71,3 +71,12 @@ screen-reader tests, operating-system announcements, contrast across all states
 and the complete workflow on a 13-inch MacBook remain part of the
 [1.0 quality work](quality.md). This version does not claim complete screen-reader
 support.
+
+## Mini-map controls
+
+Since 0.12.0, the zoom-bar overview icon, View menu and command palette can show
+the optional [mini-map](minimap.md). Tab reaches its navigation surface. While
+that surface has focus, arrows pan the camera, Shift+arrows pan farther, Home
+fits the page and Escape cancels its active drag. The drawing selection is
+preserved. Closing the panel returns focus to its permanent zoom-bar opener;
+Enter can show it again. It belongs to the existing canvas area for F6 traversal.
