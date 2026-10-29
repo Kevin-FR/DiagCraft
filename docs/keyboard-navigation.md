@@ -74,7 +74,7 @@ support.
 
 ## Mini-map controls
 
-Since 0.12.0, the zoom-bar overview icon, View menu and command palette can show
+Since 0.12.1, the zoom-bar overview icon, View menu and command palette can show
 the optional [mini-map](minimap.md). Tab reaches its navigation surface. While
 that surface has focus, arrows pan the camera, Shift+arrows pan farther, Home
 fits the page and Escape cancels its active drag. The drawing selection is

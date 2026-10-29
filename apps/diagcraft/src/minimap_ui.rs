@@ -12,9 +12,51 @@ pub(super) struct State {
     opener: Option<egui::Id>,
     restore_opener: bool,
     captured_buttons: [bool; egui::NUM_POINTER_BUTTONS],
+    activation_keys: [bool; 2],
 }
 
 impl State {
+    /// One keyboard activation must not click both Close and its focus target.
+    /// egui's synthetic Enter/Space click does not consume the key event.
+    pub(super) fn filter_activation(&mut self, ctx: &egui::Context) {
+        if !self.activation_keys.iter().any(|blocked| *blocked) {
+            return;
+        }
+        ctx.input_mut(|input| {
+            input.events.retain(|event| {
+                if let egui::Event::Text(text) = event
+                    && ((self.activation_keys[1] && text == " ")
+                        || (self.activation_keys[0] && matches!(text.as_str(), "\n" | "\r")))
+                {
+                    return false;
+                }
+                if let egui::Event::Key { key, pressed, .. } = event {
+                    let index = match key {
+                        Key::Enter => Some(0),
+                        Key::Space => Some(1),
+                        _ => None,
+                    };
+                    if let Some(index) = index
+                        && self.activation_keys[index]
+                    {
+                        if !*pressed {
+                            self.activation_keys[index] = false;
+                        }
+                        return false;
+                    }
+                }
+                true
+            });
+            // Also clear a held activation after native focus loss. A press
+            // and release in one frame must not block the next distinct press.
+            for (index, key) in [Key::Enter, Key::Space].into_iter().enumerate() {
+                if !input.key_down(key) {
+                    self.activation_keys[index] = false;
+                }
+            }
+        });
+    }
+
     pub(super) fn remember_opener(&mut self, response: &egui::Response) {
         self.opener = Some(response.id);
         if self.restore_opener {
@@ -215,6 +257,7 @@ impl DrawApp {
     }
 
     pub(super) fn minimap(&mut self, ctx: &egui::Context, interactive: bool) {
+        self.minimap_ui.filter_activation(ctx);
         let down = ctx.input(|i| i.pointer.primary_down());
         self.minimap_ui.blocks_this_frame = self.minimap_ui.is_dragging()
             || self.minimap_ui.block_until_release
@@ -340,6 +383,10 @@ impl DrawApp {
                 }
             });
         if close {
+            self.minimap_ui.activation_keys = ctx.input(|input| {
+                [Key::Enter, Key::Space].map(|key| input.key_down(key) || input.key_pressed(key))
+            });
+            self.minimap_ui.filter_activation(ctx);
             self.show_minimap = false;
             self.minimap_ui.drag = None;
             self.minimap_ui.blocks_this_frame = true;

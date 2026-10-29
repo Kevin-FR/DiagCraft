@@ -2575,6 +2575,7 @@ impl eframe::App for DrawApp {
         visuals.panel_fill.to_normalized_gamma_f32()
     }
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.minimap_ui.filter_activation(ctx);
         self.poll_updates(ctx);
         self.frame_count += 1;
         if let Some(path) = self.screenshot.clone() {

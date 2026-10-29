@@ -1,6 +1,6 @@
 # Mini-map navigation
 
-DiagCraft 0.12.0 adds an optional overview of the active page. Open it with the
+DiagCraft 0.12.1 adds an optional overview of the active page. Open it with the
 small page-and-viewport icon beside the zoom controls, **View → Panels and
 ribbon → Mini-map**, or the **Show / hide the mini-map** command in the command
 palette (Cmd+K / Ctrl+K). Its visibility is a local interface preference and is

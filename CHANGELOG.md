@@ -3,7 +3,15 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
-## 0.12.0 — mini-carte de navigation
+## 0.12.1 — mini-carte et fermeture au clavier
+
+- Première publication du lot mini-carte, après contrôle natif de la candidate 0.12.0 restée en brouillon.
+- Fermer avec Entrée ou Espace consomme l’activation avant de rendre le focus au bouton d’ouverture : la carte reste fermée.
+- Le maintien et les répétitions de la touche de fermeture ne réactivent pas le bouton ; une nouvelle pression après relâchement le peut.
+- Régression utilisant le vrai parcours Maj + Tab vers la fermeture, Entrée/Espace et cycles de touches dans les sept langues.
+- Le tag et les paquets de la candidate 0.12.0 restent conservés ; aucune release publiée n’est remplacée.
+
+## 0.12.0 — candidate non publiée, mini-carte de navigation
 
 - Aperçu facultatif de la page active, avec objets visibles, sélection et cadre de la vue ; projection indépendante de la caméra.
 - Clic et glissement pour déplacer la vue à zoom constant ; flèches, Maj + flèches et Début au clavier.

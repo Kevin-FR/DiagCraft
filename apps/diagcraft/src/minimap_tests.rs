@@ -597,3 +597,115 @@ fn minimap_close_returns_focus_to_its_opener_and_enter_can_reopen_it() {
     }
     i18n::activate(Language::French);
 }
+
+#[test]
+fn minimap_keyboard_close_stays_closed_until_the_activation_key_is_released() {
+    for language in Language::ALL {
+        for activation in [Key::Enter, Key::Space] {
+            for batched_release in [false, true] {
+                let (ctx, mut app, id) = map_setup();
+                i18n::activate(language);
+                let point = app.minimap_transform().unwrap().project([2000., 1100.]);
+                panel_click(&ctx, &mut app, WINDOW, point);
+                let output = stable_panel(&ctx, &mut app, WINDOW);
+                assert_eq!(
+                    map_label(&output).as_deref(),
+                    Some(t("Naviguer dans la mini-carte").as_str())
+                );
+                panel_frame(
+                    &ctx,
+                    &mut app,
+                    WINDOW,
+                    vec![nudge_key(Key::Tab, true, false, egui::Modifiers::SHIFT)],
+                );
+                let output = panel_frame(
+                    &ctx,
+                    &mut app,
+                    WINDOW,
+                    vec![nudge_key(Key::Tab, false, false, egui::Modifiers::NONE)],
+                );
+                assert_eq!(
+                    map_label(&output).as_deref(),
+                    Some(t("Masquer la mini-carte").as_str())
+                );
+                let focused = ctx
+                    .read_response(ctx.memory(|m| m.focused()).unwrap())
+                    .unwrap();
+                assert!(
+                    app.panel_rect().unwrap().contains_rect(focused.rect),
+                    "Shift+Tab must reach the overview header Close, not its toolbar opener"
+                );
+                let before = app.doc.clone();
+                let pan = app.pan;
+                let zoom = app.zoom;
+                let press = |repeat| {
+                    let mut events =
+                        vec![nudge_key(activation, true, repeat, egui::Modifiers::NONE)];
+                    if activation == Key::Space {
+                        events.push(egui::Event::Text(" ".into()));
+                    }
+                    events
+                };
+                let mut closing_events = press(false);
+                if batched_release {
+                    closing_events.push(nudge_key(activation, false, false, egui::Modifiers::NONE));
+                }
+                panel_frame(&ctx, &mut app, WINDOW, closing_events);
+                assert!(
+                    !app.show_minimap,
+                    "{} {activation:?}: activating the header Close must not reopen through the returned focus",
+                    language.code()
+                );
+                for _ in 0..3 {
+                    let output = panel_frame(
+                        &ctx,
+                        &mut app,
+                        WINDOW,
+                        if batched_release { vec![] } else { press(true) },
+                    );
+                    assert!(
+                        !app.show_minimap,
+                        "{} {activation:?}: repeats from the closing key must not activate the opener",
+                        language.code()
+                    );
+                    assert!(!has_map_title(&output));
+                    assert_eq!(
+                        map_label(&output).as_deref(),
+                        Some(t("Afficher la mini-carte").as_str())
+                    );
+                }
+                panel_frame(
+                    &ctx,
+                    &mut app,
+                    WINDOW,
+                    if batched_release {
+                        vec![]
+                    } else {
+                        vec![nudge_key(activation, false, false, egui::Modifiers::NONE)]
+                    },
+                );
+                assert!(
+                    !app.show_minimap,
+                    "releasing the closing key must keep the overview hidden"
+                );
+                panel_frame(&ctx, &mut app, WINDOW, press(false));
+                assert!(
+                    app.show_minimap,
+                    "a fresh activation after release must reopen the overview"
+                );
+                panel_frame(
+                    &ctx,
+                    &mut app,
+                    WINDOW,
+                    vec![nudge_key(activation, false, false, egui::Modifiers::NONE)],
+                );
+                assert_eq!(app.pan, pan);
+                assert_eq!(app.zoom, zoom);
+                assert_eq!(app.doc, before);
+                assert_eq!(app.selected, vec![id]);
+                assert!(!app.history.can_undo());
+            }
+        }
+    }
+    i18n::activate(Language::French);
+}

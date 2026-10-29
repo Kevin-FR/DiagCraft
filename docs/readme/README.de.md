@@ -21,7 +21,7 @@ Die Anwendungen und ihre SHA-256-Prüfsummen stehen auf der
 | Windows x86_64 | Portables ZIP mit Anwendung und CLI |
 | Linux x86_64 | `.deb`-Paket für amd64 oder `.tar.gz`-Archiv mit Anwendung und CLI |
 
-**0.12.0 ist experimentell** und bietet eine optionale Minikarte zur Navigation auf großen Seiten. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
+**0.12.1 ist experimentell** und bietet eine optionale Minikarte zur Navigation auf großen Seiten. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
 Die Windows-Pakete sind nicht mit einem Herausgeberzertifikat signiert.
 Siehe die [Installationsanleitung](../installation.md).
 

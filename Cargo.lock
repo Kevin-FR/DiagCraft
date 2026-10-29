@@ -723,7 +723,7 @@ checksum = "be1e0bca6c3637f992fc1cc7cbc52a78c1ef6db076dbf1059c4323d6a2048376"
 
 [[package]]
 name = "diagcraft"
-version = "0.12.0"
+version = "0.12.1"
 dependencies = [
  "arboard",
  "diagcraft-core",
@@ -741,14 +741,14 @@ dependencies = [
 
 [[package]]
 name = "diagcraft-cli"
-version = "0.12.0"
+version = "0.12.1"
 dependencies = [
  "diagcraft-core",
 ]
 
 [[package]]
 name = "diagcraft-core"
-version = "0.12.0"
+version = "0.12.1"
 dependencies = [
  "base64",
  "image",

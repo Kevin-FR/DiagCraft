@@ -15,10 +15,10 @@ Les critères détaillés et l’avancement sont suivis dans les issues GitHub.
 | **0.9.0 — livrée** | Connecteurs évitant les obstacles, avec parcours stables et respect des points manuels. | [#2](https://github.com/Kevin-FR/DiagCraft/issues/2) |
 | **0.10.0 — livrée** | Images embarquées, recadrage, collage et export PNG configurable. | [#3](https://github.com/Kevin-FR/DiagCraft/issues/3) |
 | **0.11.0 — livrée** | Interopérabilité Mermaid et diagnostics CLI/MCP plus compréhensibles. | [#4](https://github.com/Kevin-FR/DiagCraft/issues/4) |
-| **0.12.0 — livrée** | Mini-carte facultative et navigation sur les grandes feuilles. | [#10](https://github.com/Kevin-FR/DiagCraft/issues/10) |
+| **0.12.1 — livrée** | Mini-carte facultative et navigation sur les grandes feuilles. | [#10](https://github.com/Kevin-FR/DiagCraft/issues/10) |
 | **1.0.0 — suivant** | Parcours utilisateurs validés, accessibilité, performances et distribution fiable. | [#5](https://github.com/Kevin-FR/DiagCraft/issues/5) |
 
-### Lot 0.12.0 — mini-carte
+### Lot 0.12.1 — mini-carte
 
 - [x] Vue simplifiée de la page active et de ses objets visibles, avec repère de sélection et cadre de la caméra.
 - [x] Navigation au clic, au glissement et au clavier, sans modifier le document ni l’historique.
@@ -60,7 +60,7 @@ d’écran restent à effectuer.
 
 - [ ] Mise en page automatique d’organigrammes et de flux, avec aperçu et annulation.
 - [ ] Composants réutilisables liés : mise à jour des instances depuis une définition commune.
-- [x] Mini-carte de navigation pour les grandes feuilles (0.12.0).
+- [x] Mini-carte de navigation pour les grandes feuilles (0.12.1).
 
 Les explorations non cochées n’ont pas encore de numéro de version attribué.
 Elles complètent les jalons ci-dessus sans retarder les corrections et les tests utilisateurs.
