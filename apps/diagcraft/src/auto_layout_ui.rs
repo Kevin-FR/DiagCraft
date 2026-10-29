@@ -1,21 +1,23 @@
 //! Preview state is transient and never edits a drawing until Apply.
 use super::*;
-use diagcraft::auto_layout::{self, Direction};
+use diagcraft::auto_layout::{self, Direction, Spacing};
 
 pub(super) struct Panel {
     source: Document,
     tab: usize,
     direction: Direction,
+    spacing: Spacing,
     selection_only: bool,
     selection: Vec<u64>,
     preview: Result<auto_layout::Preview, String>,
 }
 impl Panel {
     fn refresh(&mut self) {
-        self.preview = auto_layout::preview(
+        self.preview = auto_layout::preview_with_spacing(
             &self.source,
             self.selection_only.then_some(self.selection.as_slice()),
             self.direction,
+            self.spacing,
         );
     }
     fn current(&self, app: &DrawApp) -> bool {
@@ -31,6 +33,7 @@ impl DrawApp {
             source: self.doc.clone(),
             tab: self.active_tab,
             direction: Direction::Horizontal,
+            spacing: Spacing::default(),
             selection_only: !self.selected.is_empty(),
             selection: self.selected.clone(),
             preview: Err(String::new()),
@@ -65,6 +68,22 @@ impl DrawApp {
                 ui.checkbox(&mut panel.selection_only, t("Sélection uniquement"));
                 if before != (panel.direction, panel.selection_only) { panel.refresh(); }
             });
+            let previous = panel.spacing;
+            ui.horizontal_wrapped(|ui| {
+                ui.label(t("Espacement"));
+                for (label, gap) in [("Compact", 30.), ("Normal", 60.), ("Aéré", 120.)] {
+                    if ui.selectable_label(panel.spacing == Spacing { levels: gap, blocks: gap }, t(label)).clicked() {
+                        panel.spacing = Spacing { levels: gap, blocks: gap };
+                    }
+                }
+            });
+            ui.horizontal_wrapped(|ui| {
+                let levels = ui.label(t("Entre les niveaux"));
+                ui.add(egui::DragValue::new(&mut panel.spacing.levels).range(20. ..=300.).speed(1.).suffix(" px")).labelled_by(levels.id);
+                let blocks = ui.label(t("Entre les blocs"));
+                ui.add(egui::DragValue::new(&mut panel.spacing.blocks).range(20. ..=300.).speed(1.).suffix(" px")).labelled_by(blocks.id);
+            });
+            if panel.spacing != previous { panel.refresh(); }
             ui.label(t("Les groupes, textes et blocs protégés restent en place. Les points manuels sont conservés."));
             if !panel.current(self) {
                 ui.colored_label(theme_ui::ERROR_TEXT, t("Le document a changé. Actualisez l’aperçu avant de continuer."));
@@ -77,7 +96,7 @@ impl DrawApp {
                 Ok(preview) => {
                     ui.label(i18n::render("{0} blocs déplacés · {1} blocs conservés", &[("0", preview.moved.to_string()), ("1", preview.fixed.to_string())]));
                     ui.label(t("Aperçu des positions · liaisons simplifiées"));
-                    let (rect, _) = ui.allocate_exact_size(vec2(ui.available_width(), (ctx.content_rect().height() - 320.).clamp(120., 320.)), Sense::hover());
+                    let (rect, _) = ui.allocate_exact_size(vec2(ui.available_width(), (ctx.content_rect().height() - 400.).clamp(120., 300.)), Sense::hover());
                     paint_preview(ui.painter(), &preview.document, rect);
                     ui.label(t("La page peut s’agrandir. Vérifiez l’aperçu avant d’appliquer."));
                 }
@@ -208,6 +227,89 @@ mod tests {
             // Cancel by dropping transient preview, with no document edit.
             app.auto_layout_ui = None;
             assert!(!app.command_dialog_blocked());
+        }
+        i18n::activate(Language::French);
+    }
+    #[test]
+    fn preset_clicks_refresh_only_the_preview_and_apply_as_one_edit() {
+        for language in Language::ALL {
+            let ctx = egui::Context::default();
+            let mut app = DrawApp::from_context(&ctx, Document::demo(), None, None);
+            app.set_language(Some(language));
+            app.open_auto_layout();
+            let before = app.doc.clone();
+            let render = |app: &mut DrawApp, events| {
+                ctx.run(
+                    egui::RawInput {
+                        screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1200., 680.))),
+                        focused: true,
+                        events,
+                        ..Default::default()
+                    },
+                    |ctx| app.auto_layout_dialog(ctx),
+                )
+            };
+            for (label, gap) in [("Compact", 30.), ("Normal", 60.), ("Aéré", 120.)] {
+                render(&mut app, vec![]);
+                let output = render(&mut app, vec![]);
+                let point = output
+                    .shapes
+                    .iter()
+                    .find_map(|shape| {
+                        if let egui::Shape::Text(text) = &shape.shape
+                            && text.galley.text() == t(label)
+                        {
+                            Some(text.pos + text.galley.size() / 2.)
+                        } else {
+                            None
+                        }
+                    })
+                    .expect("preset must be visible in the short window");
+                for pressed in [true, false] {
+                    render(
+                        &mut app,
+                        vec![
+                            egui::Event::PointerMoved(point),
+                            egui::Event::PointerButton {
+                                pos: point,
+                                button: egui::PointerButton::Primary,
+                                pressed,
+                                modifiers: egui::Modifiers::NONE,
+                            },
+                        ],
+                    );
+                }
+                let panel = app.auto_layout_ui.as_ref().unwrap();
+                assert_eq!(
+                    panel.spacing,
+                    Spacing {
+                        levels: gap,
+                        blocks: gap
+                    }
+                );
+                let expected = auto_layout::preview_with_spacing(
+                    &before,
+                    None,
+                    Direction::Horizontal,
+                    panel.spacing,
+                )
+                .unwrap();
+                assert_eq!(panel.preview.as_ref().unwrap().document, expected.document);
+                assert_eq!(app.doc, before);
+                assert!(!app.history.can_undo());
+            }
+            let mut panel = app.auto_layout_ui.take().unwrap();
+            panel.spacing = Spacing {
+                levels: 85.,
+                blocks: 35.,
+            };
+            panel.refresh();
+            let expected = panel.preview.as_ref().unwrap().document.clone();
+            assert!(app.apply_auto_layout(&panel));
+            assert_eq!(app.doc, expected);
+            app.undo();
+            assert_eq!(app.doc, before);
+            assert!(!app.history.can_undo());
         }
         i18n::activate(Language::French);
     }

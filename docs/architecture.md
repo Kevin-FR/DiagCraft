@@ -199,7 +199,11 @@ borné évitant les boîtes des blocs et graphiques fixes. Les objets sont ordon
 par ID pour un résultat déterministe ; seuls les blocs éligibles changent de
 position. `auto_layout_ui.rs` conserve le document source, la page et l’onglet,
 montre un aperçu simplifié et refuse une application périmée. La validation du
-lot utilise l’historique existant. Aucun champ documentaire ou API n’est ajouté.
+lot utilise l’historique existant. `Spacing` distingue les distances entre niveaux
+et entre blocs ; les valeurs finies de 20 à 300 px sont validées avant le calcul.
+Le wrapper `preview` conserve le défaut 60/60, tandis que l’interface appelle
+`preview_with_spacing` avec les réglages transitoires de sa modale. Aucun champ
+documentaire ou API agents n’est ajouté.
 
 ## Organisation des objets
 

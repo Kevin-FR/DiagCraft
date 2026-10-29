@@ -1,5 +1,5 @@
 use diagcraft::{
-    auto_layout::{Direction, preview},
+    auto_layout::{Direction, Spacing, preview, preview_with_spacing},
     document::{ConnectorKind, Document, ShapeKind},
 };
 fn flow() -> (Document, Vec<u64>) {
@@ -92,4 +92,79 @@ fn other_pages_and_source_survive_and_limits_fail_without_mutation() {
     let before = d.clone();
     assert!(preview(&d, None, Direction::Horizontal).is_err());
     assert_eq!(d, before);
+}
+
+#[test]
+fn custom_spacing_controls_levels_and_siblings_independently_in_both_directions() {
+    let (doc, ids) = flow();
+    let before = doc.clone();
+    for (axis, direction) in [(0, Direction::Horizontal), (1, Direction::Vertical)] {
+        for spacing in [
+            Spacing {
+                levels: 20.,
+                blocks: 300.,
+            },
+            Spacing {
+                levels: 300.,
+                blocks: 20.,
+            },
+            Spacing {
+                levels: 85.,
+                blocks: 35.,
+            },
+        ] {
+            let p = preview_with_spacing(&doc, None, direction, spacing).unwrap();
+            let a = p.document.node(ids[0]).unwrap();
+            let b = p.document.node(ids[1]).unwrap();
+            let c = p.document.node(ids[2]).unwrap();
+            assert_eq!(
+                b.position[axis] - a.position[axis] - a.size[axis],
+                spacing.levels
+            );
+            assert_eq!(
+                c.position[1 - axis] - b.position[1 - axis] - b.size[1 - axis],
+                spacing.blocks
+            );
+            assert_eq!(p.document.connectors, doc.connectors);
+            let repeated = preview_with_spacing(&p.document, None, direction, spacing).unwrap();
+            assert_eq!(repeated.moved, 0);
+            p.document.validate().unwrap();
+        }
+    }
+    assert_eq!(doc, before);
+    assert_eq!(
+        preview(&doc, None, Direction::Horizontal).unwrap().document,
+        preview_with_spacing(&doc, None, Direction::Horizontal, Spacing::default())
+            .unwrap()
+            .document
+    );
+}
+
+#[test]
+fn invalid_spacing_is_rejected_without_mutating_the_source() {
+    let (doc, _) = flow();
+    let before = doc.clone();
+    for value in [
+        f32::NAN,
+        f32::INFINITY,
+        f32::NEG_INFINITY,
+        -1.,
+        0.,
+        19.,
+        301.,
+    ] {
+        for spacing in [
+            Spacing {
+                levels: value,
+                blocks: 60.,
+            },
+            Spacing {
+                levels: 60.,
+                blocks: value,
+            },
+        ] {
+            assert!(preview_with_spacing(&doc, None, Direction::Vertical, spacing).is_err());
+            assert_eq!(doc, before);
+        }
+    }
 }

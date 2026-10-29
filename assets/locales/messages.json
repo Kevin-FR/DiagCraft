@@ -9988,5 +9988,59 @@
     "it": "La disposizione supera le dimensioni consentite.",
     "pt": "A disposição excede as dimensões permitidas.",
     "zh-Hans": "布局超出允许的尺寸。"
+  },
+  "Compact": {
+    "fr": "Compact",
+    "en": "Compact",
+    "de": "Kompakt",
+    "es": "Compacto",
+    "it": "Compatto",
+    "pt": "Compacto",
+    "zh-Hans": "紧凑"
+  },
+  "Normal": {
+    "fr": "Normal",
+    "en": "Normal",
+    "de": "Normal",
+    "es": "Normal",
+    "it": "Normale",
+    "pt": "Normal",
+    "zh-Hans": "标准"
+  },
+  "Aéré": {
+    "fr": "Aéré",
+    "en": "Spacious",
+    "de": "Großzügig",
+    "es": "Amplio",
+    "it": "Ampio",
+    "pt": "Espaçoso",
+    "zh-Hans": "宽松"
+  },
+  "Entre les niveaux": {
+    "fr": "Entre les niveaux",
+    "en": "Between levels",
+    "de": "Zwischen Ebenen",
+    "es": "Entre niveles",
+    "it": "Tra i livelli",
+    "pt": "Entre os níveis",
+    "zh-Hans": "层级间距"
+  },
+  "Entre les blocs": {
+    "fr": "Entre les blocs",
+    "en": "Between blocks",
+    "de": "Zwischen Blöcken",
+    "es": "Entre bloques",
+    "it": "Tra i blocchi",
+    "pt": "Entre os blocos",
+    "zh-Hans": "块间距"
+  },
+  "Espacements invalides : utilisez des valeurs de 20 à 300 px.": {
+    "fr": "Espacements invalides : utilisez des valeurs de 20 à 300 px.",
+    "en": "Invalid spacing: use values from 20 to 300 px.",
+    "de": "Ungültige Abstände: Verwenden Sie Werte von 20 bis 300 px.",
+    "es": "Espaciado no válido: usa valores de 20 a 300 px.",
+    "it": "Spaziatura non valida: usa valori da 20 a 300 px.",
+    "pt": "Espaçamento inválido: use valores de 20 a 300 px.",
+    "zh-Hans": "间距无效：请输入 20 至 300 像素的值。"
   }
 }

@@ -7,6 +7,21 @@ pub enum Direction {
     Horizontal,
     Vertical,
 }
+/// Page coordinates in pixels; independent from interface zoom and direction.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Spacing {
+    pub levels: f32,
+    pub blocks: f32,
+}
+impl Default for Spacing {
+    fn default() -> Self {
+        Self {
+            levels: 60.,
+            blocks: 60.,
+        }
+    }
+}
+
 pub struct Preview {
     pub document: Document,
     pub moved: usize,
@@ -18,6 +33,21 @@ pub fn preview(
     selection: Option<&[u64]>,
     direction: Direction,
 ) -> Result<Preview, String> {
+    preview_with_spacing(doc, selection, direction, Spacing::default())
+}
+
+pub fn preview_with_spacing(
+    doc: &Document,
+    selection: Option<&[u64]>,
+    direction: Direction,
+    spacing: Spacing,
+) -> Result<Preview, String> {
+    if [spacing.levels, spacing.blocks]
+        .iter()
+        .any(|gap| !gap.is_finite() || !(20. ..=300.).contains(gap))
+    {
+        return Err("Espacements invalides : utilisez des valeurs de 20 à 300 px.".into());
+    }
     doc.validate()?;
     let view = doc.organization_view();
     let selection = selection.map(|ids| ids.iter().copied().collect::<BTreeSet<_>>());
@@ -114,7 +144,8 @@ pub fn preview(
     }
     let axis = usize::from(direction == Direction::Vertical);
     let cross = 1 - axis;
-    let gap = 60.;
+    let mut gaps = [spacing.blocks; 2];
+    gaps[axis] = spacing.levels;
     let mut extents = vec![0_f32; count];
     for (&id, node) in &nodes {
         let r = rank[component[indices[&id]]];
@@ -122,7 +153,7 @@ pub fn preview(
     }
     let mut origins = vec![40.; count];
     for r in 1..count {
-        origins[r] = origins[r - 1] + extents[r - 1] + gap;
+        origins[r] = origins[r - 1] + extents[r - 1] + spacing.levels;
     }
     let mut occupied: Vec<(Point, Point)> = doc
         .nodes
@@ -147,11 +178,11 @@ pub fn preview(
                 .iter()
                 .filter(|(p, size)| {
                     (0..2).all(|a| {
-                        position[a] < p[a] + size[a] + gap
-                            && position[a] + node.size[a] + gap > p[a]
+                        position[a] < p[a] + size[a] + gaps[a]
+                            && position[a] + node.size[a] + gaps[a] > p[a]
                     })
                 })
-                .map(|(p, size)| p[cross] + size[cross] + gap)
+                .map(|(p, size)| p[cross] + size[cross] + spacing.blocks)
                 .fold(position[cross], f32::max);
             if after == position[cross] {
                 break;

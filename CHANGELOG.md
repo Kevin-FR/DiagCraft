@@ -5,6 +5,10 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — mise en page, insertion directe et accueil multilingue
 
+- Réglages d’espacement indépendants entre niveaux et entre blocs (20 à 300 px), avec préréglages Compact/Normal/Aéré et recalcul de l’aperçu.
+- Espacement initial de 60 px conservé ; choix transitoires, sans modification du format documentaire ni des préférences enregistrées.
+- Tests des clics sur les préréglages dans sept langues, de l’annulation, des espacements asymétriques et des valeurs invalides.
+
 - Première mise en page automatique des blocs de la sélection ou page active, horizontale/verticale, avec aperçu des positions et validation explicite.
 - Blocs protégés, masqués, groupés et textes laissés en place ; obstacles fixes évités, points de passage manuels conservés.
 - Flux cycliques acceptés, calcul déterministe borné à 500 blocs, page extensible et une seule annulation ; aperçu périmé refusé.
