@@ -33,7 +33,7 @@ Les préréglages **Compact**, **Normal** et **Aéré** choisissent respectiveme
 Les champs acceptent de 20 à 300 px. L’aperçu se recalcule à chaque changement ;
 les obstacles fixes gardent leur position. Les réglages concernent l’aperçu
 courant et reviennent à 60 px à la prochaine ouverture. Ils ne sont pas enregistrés
-dans le document. Le calcul par défaut conserve le placement de la première version.
+dans le document. Les espacements par défaut restent à 60 px.
 Les connecteurs sont conservés : les routes automatiques suivent les blocs et
 les points de passage manuels restent à leurs coordonnées, donc peuvent demander
 une retouche. Les libellés, styles, IDs et appartenances aux calques sont conservés.
@@ -41,7 +41,23 @@ une retouche. Les libellés, styles, IDs et appartenances aux calques sont conse
 Cette première version traite au maximum 500 blocs éligibles. Une sélection
 plus petite permet de travailler sur les grands dessins. Les dimensions trop
 grandes sont refusées sans changement. Il ne s’agit pas d’un optimiseur de
-croisements ; le déplacement des groupes reste prévu.
+croisements globalement optimal ; le déplacement des groupes reste prévu.
+
+L’ordre initial des blocs de chaque niveau est déterminé par leurs IDs. Le moteur
+tente ensuite au plus huit balayages avant/arrière, en rapprochant les blocs de
+leurs voisins. Seul un ordre dont le score est strictement meilleur est retenu ;
+en cas d’égalité, l’ordre déjà retenu reste inchangé. Le calcul reste déterministe.
+Cet ordre est conservé pendant le placement, même lorsque des obstacles fixes
+décalent des blocs de tailles différentes.
+
+Le score « Croisements entre niveaux voisins » compare le placement automatique
+initial et la proposition améliorée. Il compte les inversions des liaisons entre
+niveaux consécutifs, avec des lignes simplifiées entre centres. Les liaisons avec
+un même départ ou une même arrivée ne sont pas comptées comme croisements.
+Ce score ne mesure pas les croisements du dessin source ni des routes finales :
+les liaisons longues, les boucles au sein d’un niveau, les coudes et les points
+manuels peuvent produire un résultat visuel différent. L’aperçu et l’annulation
+restent donc nécessaires.
 
 L’application vérifie le document source, la page et l’onglet avant validation.
 Un aperçu périmé doit être actualisé. Les tests couvrent cycles, branches, blocs

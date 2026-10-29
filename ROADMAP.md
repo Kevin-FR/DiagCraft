@@ -88,7 +88,8 @@ versionnés avec migration ; aucun numéro n’est promis ici.
 - [x] Insertion directe sur connecteur et repère de survol (branche de développement, non publié).
 - [x] Première mise en page automatique des blocs avec aperçu et annulation (branche de développement, non publié). Voir [le périmètre et les limites](docs/mise-en-page.md).
 - [x] Espacements indépendants entre niveaux et entre blocs, préréglages Compact/Normal/Aéré et aperçu recalculé (branche de développement, non publié).
-- [ ] Affiner la mise en page : réduction des croisements et déplacement des groupes comme unités.
+- [x] Réduire les croisements estimés entre niveaux voisins : balayages bornés, meilleur ordre retenu et score dans l’aperçu (branche de développement, non publié).
+- [ ] Affiner la mise en page : déplacement des groupes comme unités et prise en compte des routes réelles/liaisons longues dans l’optimisation.
 - [ ] Arborescence des objets.
 - [ ] Liens de navigation entre pages.
 - [ ] Conteneurs et couloirs de processus.

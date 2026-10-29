@@ -10042,5 +10042,23 @@
     "it": "Spaziatura non valida: usa valori da 20 a 300 px.",
     "pt": "Espaçamento inválido: use valores de 20 a 300 px.",
     "zh-Hans": "间距无效：请输入 20 至 300 像素的值。"
+  },
+  "Croisements entre niveaux voisins : {0} → {1}": {
+    "fr": "Croisements entre niveaux voisins : {0} → {1}",
+    "en": "Crossings between adjacent levels: {0} → {1}",
+    "de": "Kreuzungen zwischen benachbarten Ebenen: {0} → {1}",
+    "es": "Cruces entre niveles vecinos: {0} → {1}",
+    "it": "Incroci tra livelli adiacenti: {0} → {1}",
+    "pt": "Cruzamentos entre níveis adjacentes: {0} → {1}",
+    "zh-Hans": "相邻层级间的交叉数：{0} → {1}"
+  },
+  "Comparaison avec le placement automatique initial. Les routes finales peuvent différer.": {
+    "fr": "Comparaison avec le placement automatique initial. Les routes finales peuvent différer.",
+    "en": "Compared with the initial automatic placement. Final routes may differ.",
+    "de": "Vergleich mit der ursprünglichen automatischen Platzierung. Die endgültigen Verläufe können abweichen.",
+    "es": "Comparación con la distribución automática inicial. Las rutas finales pueden diferir.",
+    "it": "Confronto con la disposizione automatica iniziale. I percorsi finali possono differire.",
+    "pt": "Comparação com a disposição automática inicial. Os trajetos finais podem diferir.",
+    "zh-Hans": "与初始自动排列比较。最终连接路径可能不同。"
   }
 }

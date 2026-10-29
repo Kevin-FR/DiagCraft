@@ -26,6 +26,10 @@ pub struct Preview {
     pub document: Document,
     pub moved: usize,
     pub fixed: usize,
+    /// Straight centre-line crossings between consecutive levels, not routed geometry.
+    // Baseline is the automatic ID order, not the source drawing's geometry.
+    pub crossings_before: u64,
+    pub crossings_after: u64,
 }
 
 pub fn preview(
@@ -142,6 +146,15 @@ pub fn preview_with_spacing(
             }
         }
     }
+    let node_rank: Vec<_> = component.iter().map(|c| rank[*c]).collect();
+    let mut levels = vec![vec![]; count];
+    for (node, &level) in node_rank.iter().enumerate() {
+        levels[level].push(node);
+    }
+    let crossings_before = crossing_count(&levels, &node_rank, &graph);
+    let (levels, crossings_after) = reduce_crossings(levels, &node_rank, &graph, &reverse);
+    let ids: Vec<_> = nodes.keys().copied().collect();
+    let placement_order: Vec<_> = levels.iter().flatten().map(|index| ids[*index]).collect();
     let axis = usize::from(direction == Direction::Vertical);
     let cross = 1 - axis;
     let mut gaps = [spacing.blocks; 2];
@@ -169,9 +182,13 @@ pub fn preview_with_spacing(
         .collect();
     let mut next = doc.clone();
     let mut moved = 0;
-    for (&id, node) in &nodes {
+    let mut cursors = vec![40.; levels.len()];
+    for id in placement_order {
+        let node = nodes[&id];
         let mut position = [40.; 2];
-        position[axis] = origins[rank[component[indices[&id]]]];
+        let level = node_rank[indices[&id]];
+        position[axis] = origins[level];
+        position[cross] = cursors[level];
         // Skip fixed obstacles and previous placements, with bounded monotone progress.
         loop {
             let after = occupied
@@ -204,6 +221,7 @@ pub fn preview_with_spacing(
         }
         next.node_mut(id).unwrap().position = position;
         occupied.push((position, node.size));
+        cursors[level] = position[cross] + node.size[cross] + spacing.blocks;
         for (a, coordinate) in position.iter().enumerate() {
             next.page_size[a] = next.page_size[a].max(coordinate + node.size[a] + 40.);
         }
@@ -214,5 +232,189 @@ pub fn preview_with_spacing(
         document: next,
         moved,
         fixed: doc.nodes.len() - moved,
+        crossings_before,
+        crossings_after,
     })
+}
+
+// Positions are ranks within a level, independent of coordinates and obstacles.
+fn row_positions(levels: &[Vec<usize>], count: usize) -> Vec<usize> {
+    let mut rows = vec![0; count];
+    for level in levels {
+        for (row, &node) in level.iter().enumerate() {
+            rows[node] = row;
+        }
+    }
+    rows
+}
+
+/// Count edge inversions with a Fenwick tree, batching shared sources so fans
+/// are never counted as crossings. O(E log E + E log V), including dense graphs.
+fn crossing_count(levels: &[Vec<usize>], rank: &[usize], graph: &[Vec<usize>]) -> u64 {
+    let rows = row_positions(levels, graph.len());
+    let mut edges = vec![vec![]; levels.len()];
+    for (a, children) in graph.iter().enumerate() {
+        for &b in children {
+            if rank[b] == rank[a] + 1 {
+                edges[rank[a]].push((rows[a], rows[b]));
+            }
+        }
+    }
+    let mut crossings = 0;
+    for mut edges in edges {
+        edges.sort_unstable();
+        let mut tree = vec![0_u64; graph.len() + 1];
+        let mut processed = 0;
+        let mut start = 0;
+        while start < edges.len() {
+            let end = start
+                + edges[start..]
+                    .iter()
+                    .take_while(|e| e.0 == edges[start].0)
+                    .count();
+            for &(_, row) in &edges[start..end] {
+                let mut index = row + 1;
+                let mut prefix = 0;
+                while index > 0 {
+                    prefix += tree[index];
+                    index &= index - 1;
+                }
+                crossings += processed - prefix;
+            }
+            for &(_, row) in &edges[start..end] {
+                let mut index = row + 1;
+                while index < tree.len() {
+                    tree[index] += 1;
+                    index += index & index.wrapping_neg();
+                }
+                processed += 1;
+            }
+            start = end;
+        }
+    }
+    crossings
+}
+
+fn reduce_crossings(
+    mut levels: Vec<Vec<usize>>,
+    rank: &[usize],
+    graph: &[Vec<usize>],
+    reverse: &[Vec<usize>],
+) -> (Vec<Vec<usize>>, u64) {
+    let mut best_score = crossing_count(&levels, rank, graph);
+    let mut best = levels.clone();
+    // Eight bounded directional sweeps. Keep the original ID order on ties.
+    for pass in 0..8 {
+        if best_score == 0 {
+            break;
+        }
+        let forward = pass % 2 == 0;
+        let order: Vec<_> = if forward {
+            (1..levels.len()).collect()
+        } else {
+            (0..levels.len().saturating_sub(1)).rev().collect()
+        };
+        for level in order {
+            let rows = row_positions(&levels, graph.len());
+            let mut centers = vec![(0_u64, 1_u64); graph.len()];
+            for &node in &levels[level] {
+                let neighbors = if forward {
+                    &reverse[node]
+                } else {
+                    &graph[node]
+                };
+                let mut sum = 0;
+                let mut count = 0;
+                for &other in neighbors {
+                    if (forward && rank[other] + 1 == level)
+                        || (!forward && rank[other] == level + 1)
+                    {
+                        sum += rows[other] as u64;
+                        count += 1;
+                    }
+                }
+                centers[node] = if count == 0 {
+                    (rows[node] as u64, 1)
+                } else {
+                    (sum, count)
+                };
+            }
+            levels[level].sort_by(|a, b| {
+                let (sa, ca) = centers[*a];
+                let (sb, cb) = centers[*b];
+                (sa * cb)
+                    .cmp(&(sb * ca))
+                    .then_with(|| rows[*a].cmp(&rows[*b]))
+            });
+        }
+        let score = crossing_count(&levels, rank, graph);
+        if score < best_score {
+            best_score = score;
+            best = levels.clone();
+        }
+    }
+    (best, best_score)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn oracle(levels: &[Vec<usize>], rank: &[usize], graph: &[Vec<usize>]) -> u64 {
+        let rows = row_positions(levels, graph.len());
+        let edges: Vec<_> = graph
+            .iter()
+            .enumerate()
+            .flat_map(|(a, children)| children.iter().map(move |&b| (a, b)))
+            .filter(|(a, b)| rank[*b] == rank[*a] + 1)
+            .collect();
+        let mut count = 0;
+        for (index, &(a, b)) in edges.iter().enumerate() {
+            for &(c, d) in &edges[index + 1..] {
+                if rank[a] == rank[c]
+                    && ((rows[a] < rows[c] && rows[b] > rows[d])
+                        || (rows[a] > rows[c] && rows[b] < rows[d]))
+                {
+                    count += 1;
+                }
+            }
+        }
+        count
+    }
+    #[test]
+    fn every_three_by_three_graph_matches_pairwise_oracle_and_never_regresses() {
+        let ranks = [0, 0, 0, 1, 1, 1];
+        let original = vec![vec![0, 1, 2], vec![3, 4, 5]];
+        for mask in 0..512 {
+            let mut graph = vec![vec![]; 6];
+            let mut reverse = graph.clone();
+            for (a, children) in graph.iter_mut().enumerate().take(3) {
+                for (b, parents) in reverse.iter_mut().enumerate().skip(3) {
+                    if mask & (1 << (a * 3 + b - 3)) != 0 {
+                        children.push(b);
+                        parents.push(a);
+                    }
+                }
+            }
+            let before = crossing_count(&original, &ranks, &graph);
+            assert_eq!(before, oracle(&original, &ranks, &graph));
+            let (after, score) = reduce_crossings(original.clone(), &ranks, &graph, &reverse);
+            assert_eq!(score, oracle(&after, &ranks, &graph));
+            assert!(score <= before);
+            assert_eq!(
+                (after, score),
+                reduce_crossings(original.clone(), &ranks, &graph, &reverse)
+            );
+        }
+    }
+    #[test]
+    fn shared_endpoints_parallel_links_and_long_edges_are_counted_correctly() {
+        let levels = vec![vec![0, 1], vec![2, 3], vec![4]];
+        let rank = [0, 0, 1, 1, 2];
+        let graph = vec![vec![3, 3, 2, 4], vec![2, 3], vec![4], vec![4], vec![]];
+        assert_eq!(crossing_count(&levels, &rank, &graph), 2);
+        assert_eq!(
+            crossing_count(&levels, &rank, &graph),
+            oracle(&levels, &rank, &graph)
+        );
+    }
 }

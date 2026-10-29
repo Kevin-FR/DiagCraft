@@ -5,6 +5,10 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — mise en page, insertion directe et accueil multilingue
 
+- Réordonnancement déterministe des blocs par niveaux pour réduire les croisements estimés des liaisons entre niveaux voisins, avec au plus huit balayages.
+- L’ordre initial est conservé si aucun score strictement meilleur n’est trouvé ; compteur avant/après dans l’aperçu, avec limites du score précisées.
+- Vérification exhaustive sur 512 petits graphes et conservation des styles, points manuels et identifiants.
+
 - Réglages d’espacement indépendants entre niveaux et entre blocs (20 à 300 px), avec préréglages Compact/Normal/Aéré et recalcul de l’aperçu.
 - Espacement initial de 60 px conservé ; choix transitoires, sans modification du format documentaire ni des préférences enregistrées.
 - Tests des clics sur les préréglages dans sept langues, de l’annulation, des espacements asymétriques et des valeurs invalides.

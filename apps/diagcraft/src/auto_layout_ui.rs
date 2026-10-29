@@ -95,8 +95,9 @@ impl DrawApp {
             match &panel.preview {
                 Ok(preview) => {
                     ui.label(i18n::render("{0} blocs déplacés · {1} blocs conservés", &[("0", preview.moved.to_string()), ("1", preview.fixed.to_string())]));
+                    ui.label(i18n::render("Croisements entre niveaux voisins : {0} → {1}", &[("0", preview.crossings_before.to_string()), ("1", preview.crossings_after.to_string())])).on_hover_text(t("Comparaison avec le placement automatique initial. Les routes finales peuvent différer."));
                     ui.label(t("Aperçu des positions · liaisons simplifiées"));
-                    let (rect, _) = ui.allocate_exact_size(vec2(ui.available_width(), (ctx.content_rect().height() - 400.).clamp(120., 300.)), Sense::hover());
+                    let (rect, _) = ui.allocate_exact_size(vec2(ui.available_width(), (ctx.content_rect().height() - 425.).clamp(120., 280.)), Sense::hover());
                     paint_preview(ui.painter(), &preview.document, rect);
                     ui.label(t("La page peut s’agrandir. Vérifiez l’aperçu avant d’appliquer."));
                 }

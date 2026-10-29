@@ -168,3 +168,67 @@ fn invalid_spacing_is_rejected_without_mutating_the_source() {
         }
     }
 }
+
+#[test]
+fn crossing_branches_are_reordered_without_changing_connections_or_source() {
+    let mut doc = Document::default();
+    let ids: Vec<_> = (0..4)
+        .map(|i| doc.add_node(ShapeKind::Rectangle, [300. + i as f32 * 160., 400.]))
+        .collect();
+    doc.connect(ids[0], ids[3], ConnectorKind::Elbow).unwrap();
+    doc.connect(ids[1], ids[2], ConnectorKind::Elbow).unwrap();
+    doc.connectors[0].waypoints = vec![[700., 200.], [900., 200.]];
+    let before = doc.clone();
+    for (cross, direction) in [(1, Direction::Horizontal), (0, Direction::Vertical)] {
+        let p = preview(&doc, None, direction).unwrap();
+        assert_eq!((p.crossings_before, p.crossings_after), (1, 0));
+        assert!(
+            p.document.node(ids[3]).unwrap().position[cross]
+                < p.document.node(ids[2]).unwrap().position[cross]
+        );
+        assert_eq!(p.document.connectors, doc.connectors);
+        assert_eq!(preview(&p.document, None, direction).unwrap().moved, 0);
+        let mut shuffled = doc.clone();
+        shuffled.connectors.reverse();
+        let reordered = preview(&shuffled, None, direction).unwrap();
+        for n in &p.document.nodes {
+            assert_eq!(reordered.document.node(n.id).unwrap().position, n.position);
+        }
+    }
+    assert_eq!(doc, before);
+}
+
+#[test]
+fn fixed_obstacles_do_not_reverse_the_optimized_order_of_unequal_blocks() {
+    let mut doc = Document::default();
+    let ids: Vec<_> = (0..4)
+        .map(|_| doc.add_node(ShapeKind::Rectangle, [800., 600.]))
+        .collect();
+    doc.node_mut(ids[2]).unwrap().size = [100., 100.];
+    doc.node_mut(ids[3]).unwrap().size = [300., 100.];
+    doc.connect(ids[0], ids[3], ConnectorKind::Elbow).unwrap();
+    doc.connect(ids[1], ids[2], ConnectorKind::Elbow).unwrap();
+    let obstacle = doc.add_node(ShapeKind::Text, [500., 40.]);
+    let n = doc.node_mut(obstacle).unwrap();
+    n.position = [500., 40.];
+    n.size = [80., 250.];
+    let before = doc.clone();
+    let p = preview(&doc, None, Direction::Horizontal).unwrap();
+    assert_eq!((p.crossings_before, p.crossings_after), (1, 0));
+    let first = p.document.node(ids[3]).unwrap();
+    let second = p.document.node(ids[2]).unwrap();
+    assert!(first.position[1] >= 350.);
+    assert!(second.position[1] >= first.position[1] + first.size[1] + 60.);
+    assert_eq!(
+        p.document.node(obstacle).unwrap(),
+        doc.node(obstacle).unwrap()
+    );
+    assert_eq!(p.document.connectors, doc.connectors);
+    assert_eq!(doc, before);
+    assert_eq!(
+        preview(&p.document, None, Direction::Horizontal)
+            .unwrap()
+            .moved,
+        0
+    );
+}

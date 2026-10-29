@@ -196,8 +196,13 @@ d’historique. Texte seul et symboles personnels conservent le placement ordina
 `auto_layout.rs` produit un nouveau document à partir de la page active :
 composantes fortement connexes itératives, niveaux du graphe condensé et placement
 borné évitant les boîtes des blocs et graphiques fixes. Les objets sont ordonnés
-par ID pour un résultat déterministe ; seuls les blocs éligibles changent de
-position. `auto_layout_ui.rs` conserve le document source, la page et l’onglet,
+par ID pour un résultat déterministe, puis réordonnés en huit balayages maximum
+selon le barycentre des voisins des niveaux adjacents. Un comptage d’inversions
+par arbre de Fenwick exclut les extrémités partagées ; seul un score strictement
+meilleur remplace le meilleur ordre retenu. Ce score ignore les routes finales et
+les liaisons longues. Un curseur par niveau conserve l’ordre retenu autour des
+obstacles fixes, y compris pour des blocs de tailles différentes. Seuls les blocs
+éligibles changent de position. `auto_layout_ui.rs` conserve le document source, la page et l’onglet,
 montre un aperçu simplifié et refuse une application périmée. La validation du
 lot utilise l’historique existant. `Spacing` distingue les distances entre niveaux
 et entre blocs ; les valeurs finies de 20 à 300 px sont validées avant le calcul.
