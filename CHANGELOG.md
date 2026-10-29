@@ -3,6 +3,12 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## Non publié — accueil multilingue
+
+- Dessin d’accueil et modèle « De l’idée au diagramme » générés dans la langue de l’interface, dans les sept langues prises en charge.
+- Le titre, les blocs et les libellés des liens sont localisés à la création ; changer la langue ne traduit jamais un dessin existant ou un modèle personnel.
+- Géométrie, IDs, historique initial et format v7 conservés ; les autres modèles restent à localiser.
+
 ## 0.12.1 — mini-carte et fermeture au clavier
 
 - Première publication du lot mini-carte, après contrôle natif de la candidate 0.12.0 restée en brouillon.

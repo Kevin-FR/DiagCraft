@@ -1,4 +1,5 @@
-//! Interface-only translation. Document text and API identifiers never pass here.
+//! Interface translation and newly generated welcome content only.
+//! Existing drawing text and API identifiers never pass here.
 use serde::{Deserialize, Serialize};
 use std::{cell::Cell, collections::BTreeMap, sync::OnceLock};
 

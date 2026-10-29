@@ -181,6 +181,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             if let Some(language) = language {
                 app.set_language(Some(language));
             }
+            app.initialize_welcome();
             if let Some(name) = capture_tab {
                 app.capture_tab(&name);
             }

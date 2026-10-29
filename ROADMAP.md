@@ -104,7 +104,8 @@ Elles complètent les jalons ci-dessus sans retarder les corrections et les test
 
 - [x] Interface en anglais, français, allemand, espagnol, italien, portugais et chinois simplifié (0.3.0).
 - [x] Police chinoise embarquée sous OFL pour l’interface et les exports PDF.
-- [ ] Relecture des traductions par des locuteurs natifs et localisation des contenus des modèles.
+- [x] Localisation du nouveau dessin d’accueil et de son modèle dans les sept langues (branche de développement, non publié).
+- [ ] Relecture des traductions par des locuteurs natifs et localisation des autres contenus des modèles.
 - [ ] Chinois traditionnel et autres langues selon les contributions.
 
 ## Diagrammes plus riches

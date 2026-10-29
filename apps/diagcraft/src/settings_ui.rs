@@ -18,6 +18,7 @@ impl DrawApp {
     pub(crate) fn set_language(&mut self, language: Option<Language>) {
         self.language = language;
         i18n::activate(language.unwrap_or_else(Language::system));
+        self.builtin_templates = welcome_ui::catalog();
         self.status = t("Langue de l’interface mise à jour");
         self.symbol_search.clear();
         self.command_palette.query.clear();

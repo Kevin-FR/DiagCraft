@@ -72,7 +72,11 @@ sont détaillés dans [dependencies.md](dependencies.md).
 
 `i18n.rs` et `assets/locales/messages.json` traduisent les libellés de l’interface.
 Les identifiants du moteur, l’API v1, le format v7 et les textes des documents
-ne passent pas par le catalogue. Les valeurs des modèles de message sont
+ne passent pas par le catalogue. Exception à la création : `welcome_ui.rs`
+localise une nouvelle copie du dessin d’accueil original et son entrée de catalogue.
+Cette génération utilise la langue restaurée ou `--language` ; les fichiers chargés,
+modèles personnels et documents déjà ouverts ne sont jamais retraduits. Un changement
+de langue régénère seulement le catalogue intégré pour les prochaines ouvertures. Les valeurs des modèles de message sont
 substituées après traduction, sans interpréter les accolades du texte utilisateur.
 Le choix de langue est propre au thread de l’interface.
 

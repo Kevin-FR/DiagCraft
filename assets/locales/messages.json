@@ -9826,5 +9826,68 @@
     "it": "Mostra la minimappa",
     "pt": "Mostrar o minimapa",
     "zh-Hans": "显示缩略地图"
+  },
+  "Ajuster les détails": {
+    "fr": "Ajuster les détails",
+    "en": "Refine the details",
+    "de": "Details verfeinern",
+    "es": "Ajustar los detalles",
+    "it": "Perfezionare i dettagli",
+    "pt": "Ajustar os detalhes",
+    "zh-Hans": "完善细节"
+  },
+  "Dessiner le parcours": {
+    "fr": "Dessiner le parcours",
+    "en": "Draw the journey",
+    "de": "Den Weg zeichnen",
+    "es": "Dibujar el recorrido",
+    "it": "Disegnare il percorso",
+    "pt": "Desenhar o percurso",
+    "zh-Hans": "绘制流程"
+  },
+  "Donnez forme à vos idées": {
+    "fr": "Donnez forme à vos idées",
+    "en": "Give shape to your ideas",
+    "de": "Geben Sie Ihren Ideen Form",
+    "es": "Da forma a tus ideas",
+    "it": "Dai forma alle tue idee",
+    "pt": "Dê forma às suas ideias",
+    "zh-Hans": "让创意成形"
+  },
+  "Prêt à partager ?": {
+    "fr": "Prêt à partager ?",
+    "en": "Ready to share?",
+    "de": "Bereit zum Teilen?",
+    "es": "¿Listo para compartir?",
+    "it": "Pronto da condividere?",
+    "pt": "Pronto para compartilhar?",
+    "zh-Hans": "准备好分享了吗？"
+  },
+  "Un parcours simple, prêt à devenir le vôtre.": {
+    "fr": "Un parcours simple, prêt à devenir le vôtre.",
+    "en": "A simple journey, ready to make your own.",
+    "de": "Ein einfacher Weg, den Sie selbst gestalten.",
+    "es": "Un recorrido sencillo, listo para hacerlo tuyo.",
+    "it": "Un percorso semplice, pronto a diventare tuo.",
+    "pt": "Um percurso simples, pronto para ser seu.",
+    "zh-Hans": "从简单的流程开始，打造自己的图表。"
+  },
+  "Une idée": {
+    "fr": "Une idée",
+    "en": "An idea",
+    "de": "Eine Idee",
+    "es": "Una idea",
+    "it": "Un’idea",
+    "pt": "Uma ideia",
+    "zh-Hans": "一个创意"
+  },
+  "À peaufiner": {
+    "fr": "À peaufiner",
+    "en": "Needs refinement",
+    "de": "Noch verfeinern",
+    "es": "Por mejorar",
+    "it": "Da perfezionare",
+    "pt": "A aperfeiçoar",
+    "zh-Hans": "待完善"
   }
 }

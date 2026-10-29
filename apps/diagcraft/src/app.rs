@@ -805,7 +805,7 @@ impl DrawApp {
             library_panel: LibraryPanel::Symbols,
             library: Library::default(),
             library_path: None,
-            builtin_templates: templates::catalog(),
+            builtin_templates: welcome_ui::catalog(),
             show_templates: false,
             template_search: String::new(),
             template_filter: "Recommandé".into(),
@@ -2799,6 +2799,8 @@ mod ribbon;
 
 #[path = "library_ui.rs"]
 mod library_ui;
+#[path = "welcome_ui.rs"]
+mod welcome_ui;
 use library_ui::{paint_chart, paint_geometry, paint_selection};
 
 #[path = "context_menu.rs"]
