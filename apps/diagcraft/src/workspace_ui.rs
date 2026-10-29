@@ -60,7 +60,7 @@ impl DrawApp {
             let modal=egui::Modal::new("symbol_manager".into()).show(ctx,|ui|{
                 ui.set_width(940_f32.min(ctx.content_rect().width()-60.));
                 ui.heading(t("Ajouter une bibliothèque de symboles"));
-                ui.label(RichText::new(t("Choisissez les bibliothèques affichées dans le volet de gauche.")).color(MUTED));
+                ui.label(RichText::new(t("Choisissez les bibliothèques affichées dans le volet de gauche.")).color(INFO_TEXT));
                 ui.add_space(8.);ui.separator();
                 let body_height=(ctx.content_rect().height()-240.).clamp(200.,560.);
                 ui.horizontal_top(|ui|{
@@ -93,7 +93,7 @@ impl DrawApp {
                 ui.separator();ui.horizontal(|ui|{
                     ui.label(i18n::render("{0} bibliothèques visibles · {1} formes disponibles", &[("0", format!("{}", self.visible_draft.len())),("1", format!("{}", symbols::all_kinds().len()))]));
                     ui.with_layout(Layout::right_to_left(Align::Center),|ui|{
-                        if ui.button(RichText::new(t("Appliquer")).color(ACCENT)).clicked(){self.apply_libraries();}
+                        if ui.button(RichText::new(t("Appliquer")).color(ACTION_TEXT)).clicked(){self.apply_libraries();}
                         if ui.button(t("Annuler")).clicked(){self.show_symbol_manager=false;}
                     });
                 });
@@ -110,13 +110,13 @@ impl DrawApp {
                     ui.heading(t(if self.gallery_versions.is_some(){"Versions enregistrées"}else{"Mes travaux"}));
                     ui.with_layout(Layout::right_to_left(Align::Center),|ui|{if ui.button(t("Fermer")).clicked(){self.show_gallery=false;}});
                 });
-                ui.label(RichText::new(t("Fichiers .draw éditables · 10 versions par travail · historique conservé sur cet ordinateur")).color(MUTED));
+                ui.label(RichText::new(t("Fichiers .draw éditables · 10 versions par travail · historique conservé sur cet ordinateur")).color(INFO_TEXT));
                 ui.separator();
                 if let Some(key)=self.gallery_versions.clone(){
                     if ui.button(t("← Tous mes travaux")).clicked(){self.gallery_versions=None;}
                     if let Some(project)=self.gallery.projects().iter().find(|p|p.key==key).cloned(){
                         ui.label(RichText::new(&project.title).strong());
-                        ui.label(RichText::new(project.path.to_string_lossy()).small().color(MUTED));
+                        ui.label(RichText::new(project.path.to_string_lossy()).small().color(INFO_TEXT));
                         let mut restore=None;
                         egui::ScrollArea::vertical().id_salt("project_versions").max_height((ctx.content_rect().height()-270.).clamp(180.,540.)).show(ui,|ui|{
                             for (i,r) in project.revisions.iter().enumerate(){
@@ -149,11 +149,11 @@ impl DrawApp {
                                 egui::Frame::new().fill(SURFACE).corner_radius(10).inner_margin(10).show(ui,|ui|{ui.vertical(|ui|{
                                     ui.set_width(width-20.);
                                     let (rect,response)=ui.allocate_exact_size(vec2(width-20.,155.),Sense::click());
-                                    if let Some(doc)=doc {paint_document_preview(ui.painter(),doc,rect);}else{ui.painter().text(rect.center(),Align2::CENTER_CENTER,t("Aperçu indisponible"),FontId::proportional(14.),MUTED);}
+                                    if let Some(doc)=doc {paint_document_preview(ui.painter(),doc,rect);}else{ui.painter().text(rect.center(),Align2::CENTER_CENTER,t("Aperçu indisponible"),FontId::proportional(14.),INFO_TEXT);}
                                     if response.double_clicked(){open=Some(p.clone());}
                                     ui.add(egui::Label::new(RichText::new(&p.title).strong()).truncate()).on_hover_text(&p.title);
-                                    ui.add(egui::Label::new(RichText::new(p.path.file_name().unwrap_or_default().to_string_lossy()).small().color(MUTED)).truncate()).on_hover_text(p.path.to_string_lossy());
-                                    if let Some(r)=p.revisions.first(){ui.label(RichText::new(date(r.saved_at)).small().color(MUTED));}
+                                    ui.add(egui::Label::new(RichText::new(p.path.file_name().unwrap_or_default().to_string_lossy()).small().color(INFO_TEXT)).truncate()).on_hover_text(p.path.to_string_lossy());
+                                    if let Some(r)=p.revisions.first(){ui.label(RichText::new(date(r.saved_at)).small().color(INFO_TEXT));}
                                     ui.horizontal(|ui|{
                                         if ui.button(t("Ouvrir")).clicked(){open=Some(p.clone());}
                                         if ui.button(i18n::render("Versions ({0})", &[("0",p.revisions.len().to_string())])).clicked(){versions=Some(p.key.clone());}

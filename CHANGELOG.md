@@ -3,6 +3,15 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.11.3 — lisibilité des textes et aides de connexion
+
+- Rôles distincts pour les textes informatifs, actions, avertissements et erreurs ; statuts, graduations et placeholders plus lisibles sur les fonds de l’interface.
+- Aides de navigation opaques et repliées à la largeur disponible ; accueil vide adapté aux fonds de page personnalisés.
+- Aides de connexion valide, invalide ou libre lisibles et visibles dans tout le canevas, y compris hors de la feuille.
+- Indicateur de document modifié renforcé sur les onglets actifs et inactifs.
+- Sept tests de peinture réelle : couleurs des glyphes, fonds et opacité, états stabilisés, sept langues et fenêtre de 1200 × 680 points.
+- Couleurs des dessins, format v7 et API v1 inchangés ; contrôles humains et lecteurs d’écran restant à réaliser.
+
 ## 0.11.2 — petites fenêtres et bibliothèques au clavier
 
 - Fenêtre de contenu à partir de 1200 × 680 points ; largeurs préférées des volets restaurées après agrandissement.

@@ -21,7 +21,7 @@ Die Anwendungen und ihre SHA-256-Prüfsummen stehen auf der
 | Windows x86_64 | Portables ZIP mit Anwendung und CLI |
 | Linux x86_64 | `.deb`-Paket für amd64 oder `.tar.gz`-Archiv mit Anwendung und CLI |
 
-**0.11.2 ist experimentell** und verbessert niedrigere Fenster, die Bibliotheksnavigation per Tastatur und die Fokusbefehle. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
+**0.11.3 ist experimentell** und verbessert die Lesbarkeit von Oberflächentexten und Verbindungshinweisen. Das Mac-Paket ist ad hoc signiert und wurde von Apple nicht notarisiert.
 Die Windows-Pakete sind nicht mit einem Herausgeberzertifikat signiert.
 Siehe die [Installationsanleitung](../installation.md).
 
@@ -30,6 +30,8 @@ Anwendungen vor 0.10.0 verwerfen eingebettete Bilder beim Speichern. Der [Leitfa
 Siehe die Leitfäden zu [Mermaid](../mermaid.md) und [Agentendiagnosen](../diagnostics.md). `.draw` bleibt die vollständige bearbeitbare Quelle; Mermaid bewahrt nicht alle visuellen Eigenschaften.
 
 Mit F6 / Umschalt+F6 zwischen Arbeitsbereichen wechseln: [Tastaturanleitung](../keyboard-navigation.md).
+
+Kontrastziele, automatische Tests und ausstehende manuelle Prüfungen: [Leitfaden zur Lesbarkeit](../readability.md).
 
 ## Funktionen
 

@@ -168,7 +168,7 @@ impl DrawApp {
                     self.canvas,
                     at,
                     "Glissez vers un bloc, ou cliquez pour relier",
-                    ACCENT,
+                    ACTION_TEXT,
                 );
             }
         }

@@ -389,7 +389,7 @@ impl DrawApp {
             .validate()
             .and_then(|_| self.png_region().map(|_| ()));
         if let Err(e) = &validation {
-            ui.colored_label(Color32::from_rgb(180, 70, 50), t(e));
+            ui.colored_label(ERROR_TEXT, t(e));
         }
         ui.horizontal(|ui| {
             if ui.button(t("Annuler")).clicked() {

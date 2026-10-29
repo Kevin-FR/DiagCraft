@@ -225,7 +225,7 @@ impl DrawApp {
                         "Glissez les losanges bleus pour modifier le tracé."
                     }))
                     .size(11.)
-                    .color(MUTED),
+                    .color(INFO_TEXT),
                 );
             }
         });

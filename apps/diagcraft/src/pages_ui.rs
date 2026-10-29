@@ -315,8 +315,8 @@ impl DrawApp {
                     if ui.selectable_label(draft.size[0]>=draft.size[1],t("Paysage")).clicked() && draft.size[0]<draft.size[1]{draft.size.swap(0,1);}
                 });
                 ui.checkbox(&mut draft.auto,t("Extension automatique vers la droite et le bas"));
-                ui.label(RichText::new(t("Les objets gardent leur taille et leur position. Une page plus petite peut rogner le dessin dans les exports.")).small().color(MUTED));
-                if let Some(e)=&draft.error {ui.colored_label(Color32::RED,e);}
+                ui.label(RichText::new(t("Les objets gardent leur taille et leur position. Une page plus petite peut rogner le dessin dans les exports.")).small().color(INFO_TEXT));
+                if let Some(e)=&draft.error {ui.colored_label(ERROR_TEXT,e);}
                 ui.separator();ui.horizontal(|ui| {
                     if ui.button(t("Ajuster au dessin")).clicked(){fit=true;}
                     if ui.button(t("Annuler")).clicked(){cancel=true;}

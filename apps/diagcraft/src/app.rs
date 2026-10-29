@@ -18,6 +18,7 @@ use eframe::egui::{
 };
 use i18n::{Language, t};
 use std::path::PathBuf;
+use theme_ui::{ACTION_FILL, ACTION_TEXT, ERROR_TEXT, INFO_TEXT, WARNING_TEXT};
 
 const INK: Color32 = Color32::from_rgb(35, 51, 65);
 const MUTED: Color32 = Color32::from_rgb(131, 143, 155);
@@ -700,6 +701,10 @@ impl DrawApp {
         style.spacing.interact_size.y = 30.;
         style.visuals.panel_fill = Color32::WHITE;
         style.visuals.override_text_color = Some(INK);
+        style.visuals.weak_text_color = Some(INFO_TEXT);
+        style.visuals.hyperlink_color = ACTION_TEXT;
+        style.visuals.error_fg_color = ERROR_TEXT;
+        style.visuals.warn_fg_color = WARNING_TEXT;
         style.visuals.widgets.inactive.weak_bg_fill = SURFACE;
         style.visuals.widgets.inactive.bg_fill = SURFACE;
         style.visuals.widgets.inactive.bg_stroke = Stroke::new(1., BORDER);
@@ -712,7 +717,7 @@ impl DrawApp {
         style.visuals.widgets.active.bg_fill = Color32::from_rgb(224, 238, 255);
         style.visuals.widgets.active.bg_stroke = Stroke::new(1., ACCENT);
         style.visuals.selection.bg_fill = Color32::from_rgb(224, 238, 255);
-        style.visuals.selection.stroke = Stroke::new(1., ACCENT);
+        style.visuals.selection.stroke = Stroke::new(1., ACTION_TEXT);
         style.visuals.widgets.inactive.corner_radius = CornerRadius::same(6);
         style.visuals.widgets.hovered.corner_radius = CornerRadius::same(6);
         style.visuals.widgets.active.corner_radius = CornerRadius::same(6);
@@ -1426,7 +1431,7 @@ impl DrawApp {
                     if ui.button(t("Nom et dimensions de page…")).clicked(){self.open_page_settings();}
                     if ui.button(t("Gérer les pages…")).clicked(){self.show_pages=true;}
                     ui.add_space(12.);ui.separator();
-                    ui.label(RichText::new(t("Sélectionnez un objet pour modifier son texte, ses couleurs et sa taille.")).size(12.).color(MUTED));
+                    ui.label(RichText::new(t("Sélectionnez un objet pour modifier son texte, ses couleurs et sa taille.")).size(12.).color(INFO_TEXT));
                 }
                 });
             });
@@ -1455,7 +1460,7 @@ impl DrawApp {
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new("•").size(9.).color(ACCENT));
-                    ui.label(RichText::new(t(&self.status)).size(11.).color(MUTED));
+                    ui.label(RichText::new(t(&self.status)).size(11.).color(INFO_TEXT));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         ui.label(
                             RichText::new(i18n::render(
@@ -1468,13 +1473,13 @@ impl DrawApp {
                                 ],
                             ))
                             .size(11.)
-                            .color(MUTED),
+                            .color(INFO_TEXT),
                         );
                         ui.separator();
                         ui.label(
                             RichText::new(t("En local, simplement."))
                                 .size(11.)
-                                .color(MUTED),
+                                .color(INFO_TEXT),
                         );
                     });
                 });
@@ -1765,13 +1770,13 @@ impl DrawApp {
                         page.center() - vec2(0., 14.),
                         Align2::CENTER_CENTER,t("Tout commence par une idée."),
                         FontId::proportional(23.),
-                        MUTED,
+                        theme_ui::page_prompt_color(rgb(self.doc.page_style.background)),
                     );
                     p.text(
                         page.center() + vec2(0., 22.),
                         Align2::CENTER_CENTER,t("Choisissez une forme à gauche, puis cliquez ici."),
                         FontId::proportional(13.),
-                        MUTED,
+                        theme_ui::page_prompt_color(rgb(self.doc.page_style.background)),
                     );
                 }
                 if self.rich_editor.is_none() && (response.hovered() || self.drag.is_some()) {
@@ -1803,13 +1808,11 @@ impl DrawApp {
                     _ => "Glisser dans le vide : sélectionner · Deux doigts : déplacer · Pincer : zoomer"
                         .into(),
                 };
-                ui.painter().text(
-                    rect.min + vec2(20., 19.),
-                    Align2::LEFT_TOP,
-                    t(hint),
-                    FontId::proportional(11.),
-                    MUTED,
-                );
+                let hint = ui.painter().layout(t(hint), FontId::proportional(11.), INFO_TEXT, (rect.width()-40.).max(1.));
+                let hint_position = rect.min + vec2(20., 19.);
+                let hint_painter = ui.painter().with_clip_rect(rect);
+                hint_painter.rect_filled(Rect::from_min_size(hint_position, hint.size()).expand2(vec2(5., 3.)), 4, theme_ui::HELP_BACKGROUND);
+                hint_painter.galley(hint_position, hint, INFO_TEXT);
                 if interactive && self.rich_editor.is_none() {
                     if let Some(name) = self.capture_menu.take() {
                         let point = match name.as_str() {
@@ -2505,7 +2508,7 @@ impl DrawApp {
                 ui.horizontal(|ui| {
                     if ui.button(t("Annuler")).clicked(){self.pending=None;}
                     if ui.button(t("Ne pas enregistrer")).clicked(){self.pending=None;self.execute(action.clone());}
-                    if ui.add(egui::Button::new(RichText::new(t("Enregistrer")).color(Color32::WHITE)).fill(ACCENT)).clicked() && self.save(false) {self.pending=None;self.execute(action);}
+                    if ui.add(egui::Button::new(RichText::new(t("Enregistrer")).color(Color32::WHITE)).fill(ACTION_FILL)).clicked() && self.save(false) {self.pending=None;self.execute(action);}
                 });
             });
         }
@@ -2729,7 +2732,7 @@ fn install_fonts(ctx: &egui::Context) {
     ctx.set_fonts(fonts);
 }
 fn field_label(ui: &mut egui::Ui, label: &str) {
-    ui.label(RichText::new(t(label)).size(10.).strong().color(MUTED));
+    ui.label(RichText::new(t(label)).size(10.).strong().color(INFO_TEXT));
     ui.add_space(4.);
 }
 fn swatch(ui: &mut egui::Ui, c: [u8; 3], active: bool) -> egui::Response {
@@ -2823,6 +2826,9 @@ mod keyboard_ui;
 
 #[path = "focus_ui.rs"]
 mod focus_ui;
+
+#[path = "theme_ui.rs"]
+mod theme_ui;
 
 #[path = "commands_ui.rs"]
 mod commands_ui;

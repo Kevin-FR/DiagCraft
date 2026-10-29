@@ -211,7 +211,7 @@ impl DrawApp {
             ui.add_space(8.);
             egui::ScrollArea::vertical().max_height((ctx.content_rect().height() - 270.).clamp(150., 380.)).show(ui, |ui| {
                 for e in self.recovery.discovery_error.iter().chain(self.recovery.error.iter()) {
-                    ui.colored_label(Color32::DARK_RED, i18n::render("Récupération indisponible : {0}", &[("0", e.clone())]));
+                    ui.colored_label(ERROR_TEXT, i18n::render("Récupération indisponible : {0}", &[("0", e.clone())]));
                 }
                 if self.recovery.candidates.is_empty() {
                     ui.label(t("Aucun dessin à récupérer."));
@@ -225,14 +225,14 @@ impl DrawApp {
                                 let minutes = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)
                                     .unwrap_or_default().as_secs().saturating_sub(snapshot.updated) / 60;
                                 ui.label(RichText::new(if minutes == 0 { t("Dernière copie : moins d’une minute") }
-                                    else { i18n::render("Dernière copie : il y a {0} min", &[("0", minutes.to_string())]) }).small().color(MUTED));
+                                    else { i18n::render("Dernière copie : il y a {0} min", &[("0", minutes.to_string())]) }).small().color(INFO_TEXT));
                                 for copy in &snapshot.copies {
                                     ui.label(&copy.document.title);
-                                    if let Some(path) = &copy.source { ui.label(RichText::new(path.to_string_lossy()).small().color(MUTED)); }
-                                    else { ui.label(RichText::new(t("Jamais enregistré")).small().color(MUTED)); }
+                                    if let Some(path) = &copy.source { ui.label(RichText::new(path.to_string_lossy()).small().color(INFO_TEXT)); }
+                                    else { ui.label(RichText::new(t("Jamais enregistré")).small().color(INFO_TEXT)); }
                                 }
                                 if candidate.restored_at.is_some() { ui.label(t("Copies déjà ouvertes")); }
-                                else if ui.button(RichText::new(t("Récupérer cette session")).color(ACCENT)).clicked() { restore = Some(index); }
+                                else if ui.button(RichText::new(t("Récupérer cette session")).color(ACTION_TEXT)).clicked() { restore = Some(index); }
                             },
                             Err(e) => {
                                 ui.label(t("Copie illisible ou issue d’une version plus récente. Elle est conservée."));

@@ -256,7 +256,7 @@ impl DrawApp {
             ui.label(
                 RichText::new(t("La sélection est verrouillée"))
                     .small()
-                    .color(MUTED),
+                    .color(INFO_TEXT),
             );
         }
         ui.add_space(6.);
@@ -337,7 +337,7 @@ impl DrawApp {
                         self.organization_result(result, t("Sélection déplacée sur le calque"));
                     }
                 });
-                ui.label(RichText::new(t("Le calque de base reste visible et déverrouillé. Déplacez les objets sur un autre calque pour les masquer ensemble.")).small().color(MUTED));
+                ui.label(RichText::new(t("Le calque de base reste visible et déverrouillé. Déplacez les objets sur un autre calque pour les masquer ensemble.")).small().color(INFO_TEXT));
             });
             ui.separator();
             if ui.button(t("Ajouter un calque")).clicked() {
@@ -379,6 +379,7 @@ impl DrawApp {
             return;
         };
         let color = if locked { MUTED } else { ACCENT };
+        let text_color = if locked { INFO_TEXT } else { ACTION_TEXT };
         let rect = rect.expand(5.);
         painter.rect_stroke(rect, 3, Stroke::new(1.5, color), StrokeKind::Inside);
         let label = t(if locked {
@@ -386,7 +387,7 @@ impl DrawApp {
         } else {
             "Objets groupés"
         });
-        let galley = painter.layout_no_wrap(label, FontId::proportional(12.), color);
+        let galley = painter.layout_no_wrap(label, FontId::proportional(12.), text_color);
         let at = pos2(
             rect.left().max(self.canvas.left() + 6.),
             (rect.top() - 24.).max(self.canvas.top() + 6.),
@@ -396,7 +397,7 @@ impl DrawApp {
             3,
             Color32::WHITE,
         );
-        painter.galley(at + vec2(5., 3.), galley, color);
+        painter.galley(at + vec2(5., 3.), galley, text_color);
     }
 
     pub(super) fn prepare_organization_capture(&mut self) {

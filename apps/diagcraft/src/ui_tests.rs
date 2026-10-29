@@ -9,6 +9,9 @@ mod small_screen_tests;
 #[path = "library_keyboard_tests.rs"]
 mod library_keyboard_tests;
 
+#[path = "contrast_tests.rs"]
+mod contrast_tests;
+
 fn nudge_key(key: Key, pressed: bool, repeat: bool, modifiers: egui::Modifiers) -> egui::Event {
     egui::Event::Key {
         key,

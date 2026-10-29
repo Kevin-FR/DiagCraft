@@ -299,7 +299,7 @@ pub(super) fn node_inspector(
                     "Avec retour automatique, la largeur est conservée et la hauteur s’adapte.",
                 ))
                 .small()
-                .color(MUTED),
+                .color(INFO_TEXT),
             );
             fit_text = ui.button(t("Ajuster la forme au texte")).clicked();
             color(ui, "Couleur du texte", &mut n.text_color);

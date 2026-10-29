@@ -51,7 +51,7 @@ fn group(ui: &mut egui::Ui, width: f32, label: &str, body: impl FnOnce(&mut egui
     ui.vertical(|ui| {
         ui.set_width(width);
         body(ui);
-        ui.label(RichText::new(t(label)).small().color(MUTED));
+        ui.label(RichText::new(t(label)).small().color(INFO_TEXT));
     });
     ui.separator();
 }
@@ -125,7 +125,7 @@ impl DrawApp {
                                 ))
                                 .strong()
                                 .size(12.)
-                                .color(MUTED),
+                                .color(INFO_TEXT),
                             );
                             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                                 if ui

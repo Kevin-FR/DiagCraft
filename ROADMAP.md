@@ -17,6 +17,15 @@ Les critères détaillés et l’avancement sont suivis dans les issues GitHub.
 | **0.11.0 — livrée** | Interopérabilité Mermaid et diagnostics CLI/MCP plus compréhensibles. | [#4](https://github.com/Kevin-FR/DiagCraft/issues/4) |
 | **1.0.0 — suivant** | Parcours utilisateurs validés, accessibilité, performances et distribution fiable. | [#5](https://github.com/Kevin-FR/DiagCraft/issues/5) |
 
+### Lot 0.11.3 — lisibilité des textes
+
+- [x] Inventaire des rôles, tailles et fonds ; textes informatifs, actions et erreurs séparés des décorations.
+- [x] Contrastes contrôlés sur les glyphes et fonds réels, recherche et états de sélection/focus, dans sept langues à 1200 × 680 points.
+- [x] Aides de connexion visibles hors page et accueil lisible sur fonds personnalisés, sans modifier les dessins.
+- [ ] Parcours réel sur petit écran et lecteur d’écran ; revue humaine des contrastes et transitions ([#9](https://github.com/Kevin-FR/DiagCraft/issues/9)).
+
+Voir [les critères de lisibilité et les limites des tests](docs/readability.md).
+
 ### Lot 0.11.2 — fenêtres courtes et clavier
 
 - [x] Fenêtres de 1200 × 680 points, contrôles principaux atteignables et préférences des volets conservées ([#6](https://github.com/Kevin-FR/DiagCraft/issues/6)).

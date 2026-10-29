@@ -145,7 +145,7 @@ impl DrawApp {
                             ui.add_space(12.);
                             ui.label(t("Retrouvez vos dessins et leurs dernières versions enregistrées."));
                             ui.add_space(12.);
-                            ui.label(RichText::new(t("Enregistrez un dessin avec Ctrl/⌘ S pour l’ajouter à la galerie.")).color(MUTED));
+                            ui.label(RichText::new(t("Enregistrez un dessin avec Ctrl/⌘ S pour l’ajouter à la galerie.")).color(INFO_TEXT));
                         }
                         LibraryPanel::Symbols => self.symbol_library(ui),
                         LibraryPanel::Charts => self.chart_library(ui),
@@ -194,7 +194,7 @@ impl DrawApp {
                             }
                             ui.label(
                                 RichText::new(t("Choisissez un style puis cliquez sur la page."))
-                                    .color(MUTED),
+                                    .color(INFO_TEXT),
                             );
                         }
                     });
@@ -411,7 +411,7 @@ impl DrawApp {
         ui.label(
             RichText::new(t("Modifiez les valeurs et les séries dans Propriétés."))
                 .size(12.)
-                .color(MUTED),
+                .color(INFO_TEXT),
         );
     }
     pub(super) fn insert_chart(&mut self, kind: ChartKind) {
@@ -480,7 +480,7 @@ impl DrawApp {
         ui.label(
             RichText::new(t("Valeurs positives · 24 catégories, 8 séries maximum"))
                 .size(11.)
-                .color(MUTED),
+                .color(INFO_TEXT),
         );
         for i in 0..c.categories.len() {
             ui.push_id(i, |ui| {

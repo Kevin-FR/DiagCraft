@@ -210,7 +210,7 @@ impl DrawApp {
             ui.label(
                 RichText::new(format!("{count} / {} · {}", self.selected.len(), t(if varied { "Styles variés" } else { "Même style" })))
                     .size(12.)
-                    .color(MUTED),
+                    .color(INFO_TEXT),
             ).on_hover_text(t("Valeurs du premier objet compatible. Seuls les champs modifiés sont appliqués. Remplissage et ombre : formes. Ligne : formes, liens et tracés. Textes seuls et graphiques conservent leur apparence."));
             if let Some(before) = sample {
                 let corners = all_corners

@@ -85,6 +85,14 @@ de la source ou changement partiel du document courant.
 Ce corpus complète les tests de limites d’images, de ressources et de révisions.
 Il ne remplace pas une campagne prolongée avec un moteur de fuzzing.
 
+## Contraste des textes
+
+La 0.11.3 ajoute sept tests de peinture des textes et fonds réellement utilisés,
+dans les sept langues à 1200 × 680 points. Ils couvrent les états stabilisés,
+les aides hors page et des fonds personnalisés. Voir les critères, le périmètre
+et les limites dans [le guide de lisibilité](readability.md). Les transitions
+animées et l’expérience des lecteurs d’écran ne sont pas validées par ces tests.
+
 ## Essais utilisateurs restant à organiser
 
 Le [guide clavier](keyboard-navigation.md) décrit les accès F6, les noms accessibles

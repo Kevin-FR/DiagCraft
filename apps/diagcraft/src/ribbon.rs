@@ -262,7 +262,7 @@ impl DrawApp {
                             Align2::CENTER_CENTER,
                             format!("{}", value as i32),
                             FontId::proportional(10.),
-                            MUTED,
+                            INFO_TEXT,
                         );
                     } else {
                         painter.line_segment(
@@ -274,7 +274,7 @@ impl DrawApp {
                             Align2::RIGHT_CENTER,
                             format!("{}", value as i32),
                             FontId::proportional(8.),
-                            MUTED,
+                            INFO_TEXT,
                         );
                     }
                 }
@@ -286,7 +286,7 @@ impl DrawApp {
             Align2::LEFT_TOP,
             t(unit.label()),
             FontId::proportional(9.),
-            MUTED,
+            INFO_TEXT,
         );
     }
     pub(super) fn ribbon(&mut self, ctx: &egui::Context) {
@@ -362,7 +362,7 @@ impl DrawApp {
                                                 if tab.recovered || tab.doc != tab.saved {
                                                     ui.label(
                                                         RichText::new("•")
-                                                            .color(Color32::from_rgb(245, 83, 83)),
+                                                            .color(theme_ui::CHANGE_INDICATOR),
                                                     );
                                                 }
                                                 let close_button = ui
@@ -509,7 +509,7 @@ impl DrawApp {
                     }
                     ui.separator();
                     if ui
-                        .button(RichText::new(t("Agents / IA")).color(ACCENT))
+                        .button(RichText::new(t("Agents / IA")).color(ACTION_TEXT))
                         .clicked()
                     {
                         self.open_agent_panel();
@@ -549,7 +549,7 @@ impl DrawApp {
                                         egui::Button::new(
                                             RichText::new(t(label))
                                                 .size(14.)
-                                                .color(if selected { ACCENT } else { INK })
+                                                .color(if selected { ACTION_TEXT } else { INK })
                                                 .strong(),
                                         )
                                         .frame(false),
@@ -894,7 +894,7 @@ impl DrawApp {
             ui.label(
                 RichText::new(t("Appliquer un thème au diagramme"))
                     .size(11.)
-                    .color(MUTED),
+                    .color(INFO_TEXT),
             );
         });
         group(ui, 235., "Couleur de fond", |ui| {
@@ -1348,7 +1348,7 @@ impl DrawApp {
 fn group(ui: &mut egui::Ui, width: f32, label: &str, content: impl FnOnce(&mut egui::Ui)) {
     ui.allocate_ui_with_layout(vec2(width, 90.), Layout::top_down(Align::Center), |ui| {
         ui.allocate_ui_with_layout(vec2(width, 68.), Layout::top_down(Align::LEFT), content);
-        ui.label(RichText::new(t(label)).size(11.).color(MUTED));
+        ui.label(RichText::new(t(label)).size(11.).color(INFO_TEXT));
     });
     ui.separator();
 }

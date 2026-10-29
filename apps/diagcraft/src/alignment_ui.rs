@@ -265,7 +265,7 @@ impl DrawApp {
                 if ui.add_enabled_ui(count >= 3, |ui| ui.add_sized(vec2(width, 28.), egui::Button::new(t(label)).truncate())).inner.on_hover_text(t("Espaces égaux entre les objets ; le premier et le dernier restent en place. Au moins trois formes, textes ou graphiques.")).clicked() { self.distribute(vertical); }
             }
         });
-        ui.label(RichText::new(i18n::render("{0} formes, textes ou graphiques", &[("0", format!("{}", count))])).size(12.).color(MUTED))
+        ui.label(RichText::new(i18n::render("{0} formes, textes ou graphiques", &[("0", format!("{}", count))])).size(12.).color(INFO_TEXT))
             .on_hover_text(t("Les liens et tracés libres ne sont pas déplacés par ces commandes. Les liens attachés suivent leurs blocs."));
     }
 

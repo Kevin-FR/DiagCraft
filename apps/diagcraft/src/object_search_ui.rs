@@ -152,7 +152,7 @@ fn result_row(ui: &mut egui::Ui, e: &Entry, selected: bool, height: f32) -> egui
     content.spacing_mut().item_spacing.y = 2.;
     content.add(egui::Label::new(&e.label).truncate().selectable(false));
     content.add(
-        egui::Label::new(RichText::new(&e.detail).small().color(MUTED))
+        egui::Label::new(RichText::new(&e.detail).small().color(INFO_TEXT))
             .truncate()
             .selectable(false),
     );
@@ -331,7 +331,7 @@ impl DrawApp {
                     &[("0", found.len().to_string())],
                 ))
                 .small()
-                .color(MUTED),
+                .color(INFO_TEXT),
             );
             let row_height = 48.;
             let scroll = egui::ScrollArea::vertical()
@@ -390,7 +390,7 @@ impl DrawApp {
                     "↑ ↓ Choisir · Entrée Sélectionner · Maj+Entrée Ajouter · F2 Texte",
                 ))
                 .small()
-                .color(MUTED),
+                .color(INFO_TEXT),
             );
             if let Some(e) = active {
                 if select || add {

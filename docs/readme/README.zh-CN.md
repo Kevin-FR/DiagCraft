@@ -19,7 +19,7 @@
 | Windows x86_64 | 包含应用和 CLI 的便携式 ZIP |
 | Linux x86_64 | 包含应用和 CLI 的 amd64 `.deb` 软件包或 `.tar.gz` 压缩包 |
 
-**0.11.2 为实验版本**，改进了较矮窗口中的布局、素材库键盘导航和焦点命令。Mac 安装包使用临时签名（ad hoc），
+**0.11.3 为实验版本**，改进了界面文字和连接提示的可读性。Mac 安装包使用临时签名（ad hoc），
 尚未通过 Apple 公证。Windows 安装包未使用发布者证书签名。
 请参阅[安装指南](../installation.md)。
 
@@ -28,6 +28,8 @@
 参阅 [Mermaid 指南](../mermaid.md)和[智能体诊断](../diagnostics.md)。请保留 `.draw` 作为完整可编辑源文件；Mermaid 无法保留所有视觉细节。
 
 按 F6 / Shift+F6 切换工作区区域；请参阅[键盘导航指南](../keyboard-navigation.md)。
+
+对比度目标、自动测试和待完成的人工验证：[可读性指南](../readability.md)。
 
 ## 功能
 

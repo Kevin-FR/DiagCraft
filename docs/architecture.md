@@ -46,6 +46,12 @@ Son bouton garde les mêmes coordonnées ouvert ou fermé. Le ruban et la barre
 des documents ne dupliquent pas ces icônes. Le corps de l’inspecteur défile
 indépendamment de son en-tête.
 
+`theme_ui.rs` sépare les couleurs des textes informatifs, actions, erreurs et
+avertissements des couleurs des dessins et des décorations atténuées. Les aides
+utilisent un fond opaque ; les invites de page vide choisissent une couleur
+lisible sur le fond RGB de la page. Les tests de peinture sont décrits dans
+[readability.md](readability.md).
+
 ## Référence structurelle
 
 L’organisation de [PhotoCraft](https://github.com/storytold/photocraft) sépare

@@ -251,7 +251,7 @@ pub(super) fn text_input(
     if output.response.changed()
         && let Err(error) = node.set_text(buffer)
     {
-        ui.colored_label(Color32::DARK_RED, error);
+        ui.colored_label(ERROR_TEXT, error);
     }
     output
 }
@@ -744,8 +744,8 @@ impl DrawApp {
                         cancel = ui.button(t("Annuler")).on_hover_text(t("Échap : annuler la saisie")).clicked();
                         apply = ui.button(RichText::new(t("Terminer")).strong()).on_hover_text(t("Cliquer en dehors du bloc ou ⌘Entrée / Ctrl+Entrée pour terminer.")).clicked();
                     });
-                    ui.label(RichText::new(t("Écrire dans le bloc · Entrée : nouvelle ligne")).small().color(MUTED));
-                    if let Some(error)=&editor.error {ui.colored_label(Color32::DARK_RED,error);}
+                    ui.label(RichText::new(t("Écrire dans le bloc · Entrée : nouvelle ligne")).small().color(INFO_TEXT));
+                    if let Some(error)=&editor.error {ui.colored_label(ERROR_TEXT,error);}
                 });
             });
         editor.toolbar_rect = area.response.rect;

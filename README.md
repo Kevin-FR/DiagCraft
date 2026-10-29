@@ -21,7 +21,7 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.11.2 is experimental** and improves shorter windows, keyboard library navigation and focus commands.
+**0.11.3 is experimental** and improves the readability of interface text and connector hints.
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).
@@ -31,6 +31,8 @@ Applications older than 0.10.0 discard embedded images when saving. See the [ima
 See the [Mermaid guide](docs/mermaid.md) and [agent diagnostics](docs/diagnostics.md). Keep `.draw` as the complete editable source; Mermaid does not preserve every visual feature.
 
 Move between workspace areas with F6 / Shift+F6; see the [keyboard navigation guide](docs/keyboard-navigation.md).
+
+Interface contrast targets, automated checks and remaining manual checks: [readability guide](docs/readability.md).
 
 ## Features
 

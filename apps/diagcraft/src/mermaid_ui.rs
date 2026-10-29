@@ -134,9 +134,9 @@ fn notice_text(notice: &mermaid::Notice, exporting: bool) -> (String, String) {
 fn notices(ui: &mut egui::Ui, diagnostics: &[mermaid::Notice], exporting: bool) {
     for notice in diagnostics {
         let color = if notice.severity == "error" {
-            Color32::from_rgb(180, 50, 40)
+            ERROR_TEXT
         } else {
-            Color32::from_rgb(157, 103, 22)
+            WARNING_TEXT
         };
         let (message, hint) = notice_text(notice, exporting);
         ui.colored_label(color, format!("{} · {}", notice.code, message));
@@ -305,7 +305,7 @@ impl DrawApp {
                     }
                 }
                 if let Some(error) = &panel.error {
-                    ui.colored_label(Color32::from_rgb(180, 50, 40), error);
+                    ui.colored_label(ERROR_TEXT, error);
                 }
             });
             ui.separator();

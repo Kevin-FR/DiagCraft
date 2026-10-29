@@ -21,7 +21,7 @@ Les applications et leurs empreintes SHA-256 sont sur la page des
 | Windows x86_64 | ZIP portable avec application et CLI |
 | Linux x86_64 | Paquet `.deb` amd64 ou archive `.tar.gz`, application et CLI |
 
-**0.11.2 est expérimentale** et améliore les fenêtres de petite hauteur, les bibliothèques au clavier et les commandes de focus. Le paquet
+**0.11.3 est expérimentale** et améliore la lisibilité des textes de l’interface et des aides de connexion. Le paquet
 Mac est signé ad hoc et n’est pas notarié par Apple. Les paquets Windows ne
 sont pas signés avec un certificat éditeur. Voir [l’installation](../installation.md).
 
@@ -30,6 +30,8 @@ Les applications antérieures à 0.10.0 perdent les images embarquées au réenr
 Voir les guides [Mermaid](../mermaid.md) et [diagnostics agents](../diagnostics.md). Conservez le `.draw` comme source complète : Mermaid ne préserve pas tous les éléments visuels.
 
 Passez entre les zones avec F6 / Maj+F6 ; voir le [guide clavier](../keyboard-navigation.md).
+
+Contrastes, tests automatisés et vérifications manuelles restantes : [guide de lisibilité](../readability.md).
 
 ## Fonctions disponibles
 

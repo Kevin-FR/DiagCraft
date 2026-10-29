@@ -241,7 +241,7 @@ impl DrawApp {
                 self.canvas,
                 pos,
                 "Glissez vers un autre bloc, ou cliquez sur l’arrivée",
-                ACCENT,
+                ACTION_TEXT,
             );
             return;
         }
@@ -365,7 +365,13 @@ impl DrawApp {
         } else {
             "Cliquez pour une extrémité libre"
         };
-        paint_link_hint(p, self.canvas, pos, hint, color);
+        paint_link_hint(
+            p,
+            self.canvas,
+            pos,
+            hint,
+            if invalid { ERROR_TEXT } else { ACTION_TEXT },
+        );
     }
 }
 pub(super) fn paint_link_hint(
@@ -375,7 +381,15 @@ pub(super) fn paint_link_hint(
     text: &str,
     color: Color32,
 ) {
-    let galley = p.layout_no_wrap(t(text), FontId::proportional(12.), color);
+    // This interface hint can sit outside the page, unlike the connector itself.
+    let mut p = p.clone();
+    p.set_clip_rect(canvas);
+    let galley = p.layout(
+        t(text),
+        FontId::proportional(12.),
+        color,
+        (canvas.width() - 28.).max(1.),
+    );
     let size = galley.size() + vec2(16., 10.);
     let origin = pos2(
         (at.x + 18.).clamp(

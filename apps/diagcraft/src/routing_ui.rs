@@ -129,13 +129,13 @@ impl DrawApp {
             }
             RouteStatus::Constrained => {
                 ui.colored_label(
-                    Color32::from_rgb(170, 100, 20),
+                    WARNING_TEXT,
                     t("Passage bloqué : déplacez le bloc, l’extrémité ou le point manuel."),
                 );
             }
             RouteStatus::Limited => {
                 ui.colored_label(
-                    Color32::from_rgb(170, 100, 20),
+                    WARNING_TEXT,
                     t("Tracé simplifié : espacez les blocs ou ajoutez un point de passage."),
                 );
             }

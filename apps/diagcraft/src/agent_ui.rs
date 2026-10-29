@@ -59,7 +59,7 @@ impl DrawApp {
         let modal=egui::Modal::new("agents_panel".into()).show(ctx,|ui| {
             ui.set_width(1020_f32.min(ctx.content_rect().width()-64.));
             ui.horizontal(|ui|{ui.heading(t("Travailler avec un agent"));ui.with_layout(Layout::right_to_left(Align::Center),|ui|{if ui.button(t("Fermer")).clicked(){close=true;}});});
-            ui.label(RichText::new(t("Claude, ChatGPT ou tout autre agent ayant accès à vos fichiers ou à MCP.")).color(MUTED));
+            ui.label(RichText::new(t("Claude, ChatGPT ou tout autre agent ayant accès à vos fichiers ou à MCP.")).color(INFO_TEXT));
             ui.add_space(12.);
             ui.horizontal(|ui|{for (tab,label) in [(0,"1  Partager le contexte"),(1,"2  Examiner le résultat"),(2,"CLI et connexion MCP")] {ui.selectable_value(&mut panel.tab,tab,t(label));}});
             ui.add_space(10.);ui.separator();ui.add_space(10.);
@@ -91,12 +91,12 @@ impl DrawApp {
                 });
                 ui.add_space(10.);
                 ui.columns(2,|cols| {
-                    cols[0].label(RichText::new(t("PATCH JSON")).strong().color(MUTED));
+                    cols[0].label(RichText::new(t("PATCH JSON")).strong().color(INFO_TEXT));
                     egui::ScrollArea::vertical().id_salt("agent_patch_scroll").max_height(390.).show(&mut cols[0],|ui|{if ui.add(egui::TextEdit::multiline(&mut panel.patch).font(egui::TextStyle::Monospace).desired_width(f32::INFINITY).desired_rows(24).char_limit(document::MAX_FILE_BYTES as usize).hint_text("{\n  \"api_version\": 1,\n  \"expected_revision\": \"sha256:…\",\n  \"operations\": […]\n}")).changed(){panel.preview=None;panel.error=None;}});
                     let ui=&mut cols[1];
                     if let Some(preview)=&panel.preview {
                         panel.page=panel.page.min(preview.document.page_count()-1);
-                        ui.horizontal(|ui|{ui.label(RichText::new(t("APERÇU DU RÉSULTAT")).strong().color(ACCENT));egui::ComboBox::from_id_salt("agent_preview_page").selected_text(i18n::render("Page {0}", &[("0", format!("{}", panel.page+1))])).show_ui(ui,|ui|{for (i,name) in preview.document.page_names().iter().enumerate(){ui.selectable_value(&mut panel.page,i,*name);}});});
+                        ui.horizontal(|ui|{ui.label(RichText::new(t("APERÇU DU RÉSULTAT")).strong().color(ACTION_TEXT));egui::ComboBox::from_id_salt("agent_preview_page").selected_text(i18n::render("Page {0}", &[("0", format!("{}", panel.page+1))])).show_ui(ui,|ui|{for (i,name) in preview.document.page_names().iter().enumerate(){ui.selectable_value(&mut panel.page,i,*name);}});});
                         let (r,_)=ui.allocate_exact_size(vec2(ui.available_width(),230.),Sense::hover());
                         library_ui::paint_document_preview(ui.painter(),&preview.document.page_document(panel.page).unwrap(),r);
                         ui.label(RichText::new(i18n::render("{0} opérations · {1} pages · {2} objets", &[("0", format!("{}", preview.report["changes"].as_array().unwrap().len())),("1", format!("{}", preview.document.page_count())),("2", format!("{}", preview.document.object_count()))])).strong());
@@ -106,7 +106,7 @@ impl DrawApp {
                                 ui.label(i18n::render("{0}  {1} · page {2}{3}", &[("0",(c["operation"].as_u64().unwrap()+1).to_string()),("1",c["description"].as_str().unwrap().into()),("2",c["page"].to_string()),("3",object)]));
                             }
                             for w in preview.report["diagnostics"].as_array().unwrap() {
-                                ui.colored_label(Color32::from_rgb(178,104,22),format!("{} · {}",w["code"].as_str().unwrap_or("diagnostic"),w["message"].as_str().unwrap_or_default()));
+                                ui.colored_label(WARNING_TEXT,format!("{} · {}",w["code"].as_str().unwrap_or("diagnostic"),w["message"].as_str().unwrap_or_default()));
                                 ui.small(i18n::render("Page {0} · objet {1}", &[("0",w["page"].to_string()),("1",w["id"].to_string())]));
                                 if let Some(hint)=w["hint"].as_str(){ui.small(hint);}
                             }
@@ -117,7 +117,7 @@ impl DrawApp {
                     }
                 });
                 ui.add_space(12.);
-                ui.horizontal(|ui|{apply=ui.add_enabled(panel.preview.is_some(),egui::Button::new(RichText::new(t("Appliquer les modifications")).strong().color(Color32::WHITE)).fill(ACCENT).stroke(Stroke::NONE)).clicked();ui.label(t("Un seul ⌘ Z annule tout le lot."));});
+                ui.horizontal(|ui|{apply=ui.add_enabled(panel.preview.is_some(),egui::Button::new(RichText::new(t("Appliquer les modifications")).strong().color(Color32::WHITE)).fill(ACTION_FILL).stroke(Stroke::NONE)).clicked();ui.label(t("Un seul ⌘ Z annule tout le lot."));});
             } else {
                 ui.heading(t("Vos outils, votre modèle"));
                 ui.label(t("Un agent peut utiliser le binaire de l’app sans ouvrir de fenêtre. L’accès MCP est limité au dossier que vous choisissez dans la configuration de votre client."));
@@ -130,7 +130,7 @@ impl DrawApp {
                 ui.add_space(12.);
                 egui::ScrollArea::vertical().id_salt("agent_guide_scroll").max_height(290.).show(ui,|ui|{ui.label(include_str!("../../../docs/AGENTS-DRAW.md"));});
             }
-            if let Some(error)=&panel.error {ui.add_space(8.);ui.colored_label(Color32::from_rgb(190,50,50),error);}
+            if let Some(error)=&panel.error {ui.add_space(8.);ui.colored_label(ERROR_TEXT,error);}
             });
         });
         close |= modal.should_close();

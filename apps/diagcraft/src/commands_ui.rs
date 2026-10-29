@@ -1,8 +1,6 @@
 use super::*;
 use egui::{KeyboardShortcut, Modifiers};
 
-const SECONDARY: Color32 = Color32::from_rgb(95, 111, 126);
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum Command {
     Palette,
@@ -722,7 +720,7 @@ impl DrawApp {
                     close = ui.button(t("Fermer")).clicked();
                 });
             });
-            ui.label(RichText::new(t("Outils, fichiers, pages et affichage")).color(SECONDARY));
+            ui.label(RichText::new(t("Outils, fichiers, pages et affichage")).color(INFO_TEXT));
             ui.add_space(8.);
             let response = ui.add(
                 egui::TextEdit::singleline(&mut self.command_palette.query)
@@ -798,7 +796,7 @@ impl DrawApp {
                 ui.label(
                     RichText::new(t("↑ ↓ Choisir · Entrée Exécuter · Échap Fermer"))
                         .size(12.)
-                        .color(SECONDARY),
+                        .color(INFO_TEXT),
                 );
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if ui.small_button(t("Tous les raccourcis")).clicked() {
@@ -883,7 +881,7 @@ impl DrawApp {
                             if category != spec.category {
                                 category = spec.category;
                                 ui.add_space(6.);
-                                ui.label(RichText::new(t(category)).strong().color(ACCENT));
+                                ui.label(RichText::new(t(category)).strong().color(ACTION_TEXT));
                             }
                             ui.horizontal(|ui| {
                                 ui.label(t(spec.label));
@@ -904,7 +902,7 @@ impl DrawApp {
                     "Les lettres seules agissent sur la feuille, hors saisie de texte.",
                 ))
                 .size(12.)
-                .color(SECONDARY),
+                .color(INFO_TEXT),
             );
         });
         if close || modal.should_close() {
