@@ -115,6 +115,8 @@ python3 -m unittest discover -s packaging -p 'test_*.py'
 Le moteur est partagé par l’interface, la CLI et MCP. Il ne dépend pas d’egui.
 Voir [l’architecture](../architecture.md) et [les choix de bibliothèques](../dependencies.md).
 
+Contrôles de qualité et parcours de test pour contribuer : [guide qualité](../quality.md).
+
 ## Contribuer
 
 Les éléments à réaliser et leurs critères sont dans [ROADMAP.md](../../ROADMAP.md).

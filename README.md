@@ -118,6 +118,8 @@ The interface, CLI and MCP share the same engine, which does not depend on egui.
 See the [architecture](docs/architecture.md) and
 [dependency choices](docs/dependencies.md).
 
+Development quality checks and contributor test scenarios: [quality guide](docs/quality.md).
+
 ## Contributing
 
 Planned work and acceptance criteria are in [ROADMAP.md](ROADMAP.md).

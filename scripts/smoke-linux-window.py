@@ -6,6 +6,7 @@ Weston compositor without server decorations exercises the same client frame
 as GNOME/Ubuntu. The built-in --screenshot captures only the client content.
 """
 import argparse
+from collections import Counter
 import json
 import os
 from pathlib import Path
@@ -16,18 +17,24 @@ import time
 from PIL import Image
 
 
-def inspect_frame(path, *, first_row=0):
+def inspect_frame(path, *, legacy=False):
     with Image.open(path) as image:
         pixels = image.convert("RGB")
     # The fixed light test desktop has no settings portal. The old fallback
     # frame is #3a3a3a, regardless of the desktop's appearance preference.
+    first_row = 35 if legacy else 0
     best = {"visible": False, "width": pixels.width, "height": pixels.height,
             "first_row": first_row, "header_y": None, "title_pixels": 0, "button_pixels": 0}
     # Weston may place a window directly beneath its desktop bar. The previous
     # scan skipped its first 35 rows and could miss the title at y=0..34.
     for y in range(first_row, min(300, pixels.height - 40)):
         row = [pixels.getpixel((x, y)) for x in range(pixels.width)]
-        for color in ((235, 235, 235), (250, 250, 250)):
+        # Weston can composite a fade-in frame (e.g. 230 instead of 235).
+        # The header must remain neutral/light and meet the same glyph counts.
+        colors = ((235, 235, 235), (250, 250, 250)) if legacy else (
+            color for color, count in Counter(row).items()
+            if count >= 1000 and color[0] == color[1] == color[2] and 220 <= color[0] <= 250)
+        for color in colors:
             positions = [x for x, pixel in enumerate(row) if pixel == color]
             if len(positions) < 1000:
                 continue
@@ -41,11 +48,15 @@ def inspect_frame(path, *, first_row=0):
                 data = image.tobytes()
                 return sum(max(data[i:i + 3]) < 180 for i in range(0, len(data), 3))
             title_pixels, button_pixels = dark(title), dark(buttons)
-            candidate = {"visible": title_pixels > 50 and button_pixels > 30,
+            # A ribbon row can also contain text and icons. A real titlebar
+            # starts at the desktop/shadow boundary, rather than inside the app.
+            above = pixels.crop((left + 8, max(0, y - 2), right - 8, y))
+            edge_fraction = dark(above) / (above.width * above.height) if y else 1.
+            candidate = {"visible": title_pixels > 50 and button_pixels > 30 and (legacy or edge_fraction >= 0.8),
                          "width": pixels.width, "height": pixels.height, "first_row": first_row,
                          "header_y": y, "header_left": left, "header_right": right,
                          "header_color": list(color), "title_pixels": title_pixels,
-                         "button_pixels": button_pixels}
+                         "button_pixels": button_pixels, "edge_dark_fraction": edge_fraction}
             if min(title_pixels / 50, button_pixels / 30) > min(
                     best["title_pixels"] / 50, best["button_pixels"] / 30):
                 best = candidate
@@ -128,7 +139,9 @@ def main():
                             raise RuntimeError("Expected Wayland client decorations")
                         # Retain whether the older y>=35 detector would have
                         # rejected this exact image, rather than inferring why.
-                        report["legacy_visible"] = inspect_frame(screenshot, first_row=35)["visible"]
+                        previous = inspect_frame(screenshot, legacy=True)
+                        report["legacy_visible"] = previous["visible"]
+                        report["legacy_header_y"] = previous["header_y"]
                         report["status"] = "passed"
                         save_report()
                         print("Wayland frame verified: light header, visible title and native buttons")

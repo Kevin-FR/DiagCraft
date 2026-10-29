@@ -76,6 +76,21 @@ jobs:
       - run: cargo clippy --locked --workspace --all-targets -- -D warnings
       - run: cargo test --locked --workspace
       - run: cargo build --release --locked --workspace
+      - name: Release-profile performance budgets
+        shell: bash
+        run: |
+          set -o pipefail
+          cargo run --release --locked -p diagcraft-core --example quality_report -- --output "$RUNNER_TEMP/diagcraft-quality.json" --enforce 2>&1 | tee "$RUNNER_TEMP/diagcraft-quality.log"
+      - name: Retain performance measurements
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: quality-${{ matrix.name }}
+          path: |
+            ${{ runner.temp }}/diagcraft-quality.json
+            ${{ runner.temp }}/diagcraft-quality.log
+          retention-days: 14
+          if-no-files-found: warn
       - name: CLI, exports and MCP
         shell: bash
         run: |
@@ -90,9 +105,13 @@ jobs:
           python scripts/verify-debian.py
           python scripts/smoke.py --bin /usr/bin/diagcraft-cli
           timeout 60s xvfb-run -a /usr/bin/diagcraft --screenshot /tmp/diagcraft-debian.png ruban-compact
+          native_window_failed=0
           for attempt in 1 2 3; do
-            timeout 60s xvfb-run -a -s '-screen 0 1700x1200x24' /usr/bin/python3 scripts/smoke-linux-window.py --bin /usr/bin/diagcraft --output /tmp/diagcraft-wayland/$attempt
+            if ! timeout 60s xvfb-run -a -s '-screen 0 1700x1200x24' /usr/bin/python3 scripts/smoke-linux-window.py --bin /usr/bin/diagcraft --output /tmp/diagcraft-wayland/$attempt; then
+              native_window_failed=1
+            fi
           done
+          test "$native_window_failed" = 0
           sudo apt-get remove -y diagcraft
           test ! -e /usr/bin/diagcraft
           test ! -e /usr/share/applications/org.diagcraft.editor.desktop

@@ -107,6 +107,8 @@ python3 -m unittest discover -s packaging -p 'test_*.py'
 界面、CLI 和 MCP 共用同一引擎；引擎不依赖 egui。
 请参阅[架构](../architecture.md)和[依赖选择](../dependencies.md)。
 
+开发质量检查和贡献者测试流程：[质量指南](../quality.md)。
+
 ## 参与贡献
 
 计划中的工作和验收标准见 [ROADMAP.md](../../ROADMAP.md)。分组、旋转、图片导入、PNG 导出、

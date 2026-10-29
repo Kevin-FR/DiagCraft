@@ -116,6 +116,8 @@ python3 -m unittest discover -s packaging -p 'test_*.py'
 Interfaccia, CLI e MCP condividono lo stesso motore, che non dipende da egui.
 Consulta l’[architettura](../architecture.md) e le [scelte delle librerie](../dependencies.md).
 
+Controlli di qualità e scenari di prova per contribuire: [guida alla qualità](../quality.md).
+
 ## Contribuire
 
 Le attività previste e i criteri di accettazione sono in [ROADMAP.md](../../ROADMAP.md).

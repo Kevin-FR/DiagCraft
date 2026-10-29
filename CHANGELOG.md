@@ -3,6 +3,14 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## En développement — préparation de la 1.0
+
+- Contrôle Wayland couvrant le haut de l’écran, les couleurs de transition et le bord de fenêtre, avec rejet d’une ligne du ruban.
+- Neuf régressions synthétiques, trois sessions natives par CI et conservation des captures/journaux/rapports.
+- Budgets release mesurés sur trois corpus originaux, rapports JSON par plateforme et échec CI en cas de dépassement.
+- Corpus déterministe de documents, patches et Mermaid corrompus ; sources et atomicité vérifiées.
+- Guides de qualité et de reproduction, sans déclarer les essais utilisateurs ou la 1.0 terminés.
+
 ## 0.11.0 — Mermaid et diagnostics
 
 - Sous-ensemble flowchart défini avant implémentation ; parseur local borné sans navigateur ni dépendance ajoutée.

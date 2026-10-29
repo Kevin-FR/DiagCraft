@@ -115,6 +115,8 @@ python3 -m unittest discover -s packaging -p 'test_*.py'
 Oberfläche, CLI und MCP verwenden dieselbe Engine, die nicht von egui abhängt.
 Siehe [Architektur](../architecture.md) und [Bibliotheksauswahl](../dependencies.md).
 
+Qualitätsprüfungen und Testszenarien für Beiträge: [Qualitätsleitfaden](../quality.md).
+
 ## Mitwirken
 
 Geplante Arbeiten und Abnahmekriterien stehen in [ROADMAP.md](../../ROADMAP.md).

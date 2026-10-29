@@ -92,6 +92,7 @@ les jalons ci-dessus sans retarder les corrections et les tests utilisateurs.
 ## Distribution
 
 - [x] Décorations Ubuntu/Wayland adaptées au bureau, sans cadre de secours sombre, avec contrôle de fenêtre complète en CI (0.7.3).
+- [x] Contrôle Wayland instrumenté, régressions de détection et conservation des captures en trois sessions CI (branche de développement).
 - [ ] Signature Developer ID et notarisation Apple, après configuration des certificats.
 - [ ] Icône et métadonnées natives Windows, installateur et signature éditeur.
 - [x] Intégration Linux : fichier desktop, icône, MIME et paquet Debian amd64 (0.2.1).
@@ -103,8 +104,10 @@ les jalons ci-dessus sans retarder les corrections et les tests utilisateurs.
 
 ## Qualité à maintenir
 
-- [ ] Budgets de performance et corpus de grands documents synthétiques.
-- [ ] Fuzzing des fichiers et patches JSON, limites de ressources et tests de corruption.
+- [x] Budgets initiaux du moteur et corpus synthétiques (branche de développement) : 1 000 blocs, cinq pages et 12 mégapixels ; mesures et seuils en CI. Voir [la qualité](docs/quality.md).
+- [ ] Mesures de cadence du canevas et latence des gestes sur petits écrans.
+- [x] Corpus déterministe de corruption des documents, patches et Mermaid, avec contrôle des sources et de l’atomicité (branche de développement).
+- [ ] Campagnes prolongées de fuzzing des fichiers et patches JSON.
 - [ ] Mesures d’accessibilité et tests de contraste, focus et navigation clavier.
 - [ ] Revue régulière des avis de sécurité, licences et ressources ajoutées.
 

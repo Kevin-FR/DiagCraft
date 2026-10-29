@@ -46,7 +46,7 @@ class NativeWindowTests(unittest.TestCase):
     def test_top_edge_reproduces_the_old_detector_failure(self):
         image = self.fixture(y=0)
         self.assertTrue(self.inspect(image)["visible"])
-        self.assertFalse(self.inspect(image, first_row=35)["visible"])
+        self.assertFalse(self.inspect(image, legacy=True)["visible"])
 
     def test_light_rectangle_without_a_title_is_not_accepted(self):
         self.assertFalse(self.inspect(self.fixture(title=False))["visible"])
@@ -64,6 +64,20 @@ class NativeWindowTests(unittest.TestCase):
     def test_inactive_light_header_still_requires_title_and_buttons(self):
         self.assertTrue(self.inspect(self.fixture(color=(250, 250, 250)))["visible"])
         self.assertFalse(self.inspect(self.fixture(color=(250, 250, 250), title=False))["visible"])
+
+    def test_fade_in_titlebar_is_recognized_at_the_window_edge(self):
+        result = self.inspect(self.fixture(color=(230, 230, 230)))
+        self.assertTrue(result["visible"])
+        self.assertEqual(result["header_color"], [230, 230, 230])
+
+    def test_text_and_icons_in_a_ribbon_row_are_not_a_native_titlebar(self):
+        image = self.fixture(title=False, buttons=False, color=(230, 230, 230))
+        draw = ImageDraw.Draw(image)
+        draw.rectangle((100, 268, 1540, 302), fill=(250, 250, 250))
+        draw.rectangle((730, 276, 910, 286), fill=(40, 40, 40))
+        draw.rectangle((1450, 277, 1505, 285), fill=(40, 40, 40))
+        self.assertTrue(self.inspect(image, legacy=True)["visible"])
+        self.assertFalse(self.inspect(image)["visible"])
 
 
 if __name__ == "__main__":

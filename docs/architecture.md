@@ -251,3 +251,17 @@ Les variantes détaillées des opérations agents portent un diagnostic structur
 les anciens retours texte restent des wrappers. CLI et MCP exposent le même contexte
 d’erreur. Les champs enregistrés du document, les opérations API 1, le confinement
 MCP et l’atomicité des patches ne dépendent pas de la présentation du diagnostic.
+
+## Outils de qualité hors du produit
+
+`crates/core/qa/corpus.rs` génère les jeux synthétiques partagés par les tests et
+l’exemple `quality_report`. Ils ne sont pas exportés par la bibliothèque de
+production. L’exemple mesure les chemins publics du moteur en profil release et
+produit un rapport JSON ; la CI conserve ses mesures séparément des paquets.
+Les tests de corruption restent déterministes, bornés et annulables.
+
+Le test de fenêtre Wayland conserve sa capture composée et ses traces dans un
+artifact dédié. Il vérifie le titre, les boutons et la transition depuis le bureau,
+puis répète l’ouverture dans trois sessions indépendantes. Le téléchargement des
+artifacts de release filtre les seuls paquets `diagcraft-*`, sans les rapports QA.
+Voir [quality.md](quality.md) pour les limites des mesures et le protocole humain.
