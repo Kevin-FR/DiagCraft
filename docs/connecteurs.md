@@ -73,3 +73,18 @@ L’inspection ajoute `routing_status` aux connecteurs : `clear`, `constrained`,
 `route_limited` fournissent la page et l’ID. `route` et `label_position` sont des
 valeurs dérivées : les agents modifient les extrémités, ports ou `waypoints`,
 pas ces résultats calculés. Voir [le guide agents](AGENTS-DRAW.md).
+
+## Insérer une étape directement sur une liaison
+
+Dans la branche de développement, choisissez une forme dans la bibliothèque,
+puis survolez une liaison : un trait bleu et un repère **+** indiquent la cible.
+Cliquez pour insérer le bloc à cet endroit. Le connecteur devient deux liaisons ;
+son libellé reste sur la première et les styles/extrémités sont conservés.
+Les points manuels sont répartis de part et d’autre du nouveau bloc.
+Cmd/Ctrl+Z annule l’insertion entière en une action.
+
+Si le segment manque de place, un message explique le refus ; aucun bloc isolé
+n’est créé. Éloignez les blocs voisins puis recommencez. Le texte seul et les
+symboles personnels gardent leur placement habituel ; les liaisons masquées ou
+verrouillées ne sont pas ciblées. Le menu contextuel conserve aussi sa commande
+d’insertion. Le placement au clavier avec Entrée garde son fonctionnement actuel.

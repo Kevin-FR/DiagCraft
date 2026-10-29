@@ -3,7 +3,11 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
-## Non publié — accueil multilingue
+## Non publié — insertion directe et accueil multilingue
+
+- Une forme choisie dans la bibliothèque peut être insérée en cliquant sur un connecteur : repère de survol, partage atomique et annulation unique.
+- En cas de manque de place, l’insertion est refusée sans créer de bloc isolé. Texte seul, symboles personnels et liaisons protégées gardent leur comportement actuel.
+- Feuille de route enrichie : mise en page automatique, arborescence, liens entre pages, conteneurs/couloirs, styles nommés, composants liés et comparaison visuelle IA.
 
 - Dessin d’accueil et modèle « De l’idée au diagramme » générés dans la langue de l’interface, dans les sept langues prises en charge.
 - Le titre, les blocs et les libellés des liens sont localisés à la création ; changer la langue ne traduit jamais un dessin existant ou un modèle personnel.

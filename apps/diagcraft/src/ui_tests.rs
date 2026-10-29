@@ -7691,3 +7691,40 @@ fn a_detour_segment_creates_only_one_manual_anchor_and_drag_is_reversible() {
     app.undo();
     assert_eq!(app.doc, before);
 }
+
+#[test]
+fn shape_click_inserts_on_connector_in_seven_languages_as_one_edit() {
+    for language in Language::ALL {
+        let ctx = egui::Context::default();
+        let mut doc = Document::default();
+        let a = doc.add_node(ShapeKind::Rectangle, [200., 300.]);
+        let b = doc.add_node(ShapeKind::Rectangle, [1000., 300.]);
+        doc.connect(a, b, ConnectorKind::Straight).unwrap();
+        let mut app = DrawApp::from_context(&ctx, doc.clone(), None, None);
+        app.set_language(Some(language));
+        app.show_quick_toolbar = false;
+        let size = vec2(1200., 680.);
+        stable_panel(&ctx, &mut app, size);
+        app.set_tool(Tool::Shape(ShapeKind::Diamond));
+        let pointer = app.screen([600., 300.]);
+        let before = app.doc.clone();
+        let output = panel_frame(
+            &ctx,
+            &mut app,
+            size,
+            vec![egui::Event::PointerMoved(pointer)],
+        );
+        assert!(output.shapes.iter().any(|s| matches!(&s.shape, egui::Shape::Circle(c) if c.center == pointer && c.radius == 9.)), "insertion marker must be painted");
+        assert_eq!(app.doc, before, "hover must remain a preview");
+        panel_click(&ctx, &mut app, size, pointer);
+        assert_eq!(app.doc.nodes.len(), 3, "{}", language.code());
+        assert_eq!(app.doc.connectors.len(), 2);
+        assert!(app.tool == Tool::Select);
+        let after = app.doc.clone();
+        app.undo();
+        assert_eq!(app.doc, doc);
+        app.redo();
+        assert_eq!(app.doc, after);
+    }
+    i18n::activate(Language::French);
+}

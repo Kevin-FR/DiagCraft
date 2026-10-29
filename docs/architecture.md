@@ -187,6 +187,12 @@ de document ; `finish_frame_edit` et la récupération ignorent le brouillon act
 répétitions sont ignorées jusqu’au relâchement. Les commandes de la palette
 utilisent le même chemin, avec validation immédiate si aucune flèche n’est maintenue.
 
+`connector_insert_ui.rs` détecte une liaison éditable sous le pointeur pendant
+le placement d’une forme standard. L’aperçu réutilise les routes mises en cache ;
+le clic appelle `insert_shape_on_connector`, déjà atomique dans le moteur.
+Un refus conserve le dessin et l’outil ; un succès crée une seule entrée
+d’historique. Texte seul et symboles personnels conservent le placement ordinaire.
+
 ## Organisation des objets
 
 `organization.rs` conserve des métadonnées facultatives propres à chaque page :

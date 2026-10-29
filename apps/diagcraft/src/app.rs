@@ -1775,6 +1775,7 @@ impl DrawApp {
                     self.paint_connection_buttons(&p);
                 }
                 self.paint_connection_preview(&p);
+                self.paint_connector_insertion(&p, response.hovered().then(|| ctx.input(|i| i.pointer.hover_pos())).flatten());
                 self.paint_marquee(&p);
                 self.paint_alignment_guides(&p);
                 self.paint_manipulation_hint(&p);
@@ -1806,7 +1807,13 @@ impl DrawApp {
                     }});
                 }
                 let hint = match self.tool {
-                    Tool::Shape(k) => i18n::render("Cliquez pour ajouter : {0} · Entrée pour insérer dans la vue", &[("0", t(k.label()))]),
+                    Tool::Shape(k) => {
+                        if response.hovered() && ctx.input(|i| i.pointer.hover_pos()).is_some_and(|p| self.insertion_target(k, self.world(p)).is_some()) {
+                            t("Insérer une forme sur le connecteur")
+                        } else {
+                            i18n::render("Cliquez pour ajouter : {0} · Entrée pour insérer dans la vue", &[("0", t(k.label()))])
+                        }
+                    },
                     Tool::Connect => {
                         if self.connect_from.is_some() {
                             "Choisissez le bloc d’arrivée · glissez ou cliquez · Échap pour annuler"
@@ -1952,6 +1959,9 @@ impl DrawApp {
                 Tool::Shape(kind) => {
                     if self.doc.object_count() >= 10_000 {
                         self.error = Some("Limite de 10 000 objets atteinte.".into());
+                        return;
+                    }
+                    if self.try_insert_on_connector(kind, world) {
                         return;
                     }
                     let id = self.add_node(kind, world);
@@ -2896,3 +2906,6 @@ mod image_tests;
 
 #[path = "mermaid_ui.rs"]
 mod mermaid_ui;
+
+#[path = "connector_insert_ui.rs"]
+mod connector_insert_ui;

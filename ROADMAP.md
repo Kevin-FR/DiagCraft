@@ -56,14 +56,49 @@ d’écran restent à effectuer.
 - [x] Tester les anciens fichiers et annoncer les limites de lecture dans les versions précédentes.
 - [x] Traduire les commandes dans les sept langues et vérifier les paquets sur les trois systèmes.
 
-### Fonctionnalités à explorer ensuite
+### Lots de développement proposés
 
-- [ ] Mise en page automatique d’organigrammes et de flux, avec aperçu et annulation.
-- [ ] Composants réutilisables liés : mise à jour des instances depuis une définition commune.
+Ces lots sont ordonnés par priorité ; leur numéro de version sera fixé à la
+publication. Ils accompagnent les validations 1.0, qui restent nécessaires.
+
+1. **Insertion directe sur connecteur** : choisir une forme, repérer la liaison
+   au survol et cliquer pour insérer une étape ; conserver les extrémités,
+   le style, les libellés et points manuels, avec une seule annulation.
+2. **Mise en page automatique** : flux horizontal/vertical et organigrammes,
+   aperçu avant application, conservation des blocs verrouillés et positions
+   imposées, sélection ou page entière, annulation atomique.
+3. **Navigation dans les grands documents** : arborescence pages → calques →
+   groupes → objets, recherche et sélection au clavier ; liens entre pages
+   activables avec retour à la page précédente.
+4. **Conteneurs et couloirs de processus** : regroupement par équipe/service,
+   déplacement du contenu avec le conteneur, limites et connexions cohérentes.
+5. **Styles nommés du document** : rôles Action/Décision/Alerte, définition
+   commune et propagation aux occurrences, surcharges locales explicites.
+6. **Composants réutilisables liés** : définition commune, instances, mise à jour
+   contrôlée et possibilité de détacher une instance.
+7. **Comparaison visuelle des modifications IA** : distinguer ajouts,
+   suppressions, déplacements et changements de texte avant validation du lot ;
+   révision vérifiée et une seule annulation après application.
+
+Pour chaque lot : contrôles clavier et noms accessibles, traductions dans les
+sept langues, tests moteur/interface et cohérence des exports. Les changements
+éventuels de format documentaire ou d’API agents devront être explicitement
+versionnés avec migration ; aucun numéro n’est promis ici.
+
+- [x] Insertion directe sur connecteur et repère de survol (branche de développement, non publié).
+- [ ] Mise en page automatique avec aperçu et annulation.
+- [ ] Arborescence des objets.
+- [ ] Liens de navigation entre pages.
+- [ ] Conteneurs et couloirs de processus.
+- [ ] Styles nommés avec propagation.
+- [ ] Composants réutilisables liés.
+- [ ] Comparaison visuelle des modifications IA.
 - [x] Mini-carte de navigation pour les grandes feuilles (0.12.1).
 
-Les explorations non cochées n’ont pas encore de numéro de version attribué.
-Elles complètent les jalons ci-dessus sans retarder les corrections et les tests utilisateurs.
+La préparation 1.0 garde ses critères : essais sur MacBook 13 pouces, clavier
+seul et lecteurs d’écran, fluidité et latence mesurées, relecture des langues,
+robustesse des fichiers et distribution signée. Les certificats éditeur restent
+à configurer pour les signatures et l’installation intégrée des mises à jour.
 
 ## 0.1 — première publication
 
