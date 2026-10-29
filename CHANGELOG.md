@@ -3,8 +3,12 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
-## En développement — préparation de la 1.0
+## 0.11.1 — navigation clavier et préparation de la 1.0
 
+- Parcours F6 / Maj+F6 entre ruban, bibliothèque, feuille, propriétés et pages, sans modifier la disposition.
+- Focus visible sur la feuille et les symboles ; le bouton du volet droit garde son focus en ouvrant/fermant le panneau.
+- Libellés accessibles traduits des contrôles à icône, titre du document à fermer et nom de la feuille.
+- Tests de saisie, placement, Tab/Entrée et noms AccessKit dans les sept langues, au format 1200 × 760.
 - Contrôle Wayland couvrant le haut de l’écran, les couleurs de transition et le bord de fenêtre, avec rejet d’une ligne du ruban.
 - Neuf régressions synthétiques, trois sessions natives par CI et conservation des captures/journaux/rapports.
 - Budgets release mesurés sur trois corpus originaux, rapports JSON par plateforme et échec CI en cas de dépassement.

@@ -12,7 +12,9 @@ impl DrawApp {
                 .resizable(false)
                 .frame(frame(true, false))
                 .show(ctx, |ui| {
-                    if panel_toggle(ui, false, true, "Afficher les propriétés").clicked() {
+                    let r = panel_toggle(ui, false, true, "Afficher les propriétés");
+                    self.focus_ui.anchor(ui, focus_ui::Region::Inspector, &r);
+                    if r.clicked() {
                         self.show_inspector = true;
                     }
                 });
@@ -22,6 +24,15 @@ impl DrawApp {
 
 pub(super) const MIN_CANVAS: f32 = 520.;
 pub(super) const RAIL_WIDTH: f32 = 48.;
+
+/// Symbol-only controls need an accessible name in addition to a tooltip.
+pub(super) fn icon_button(ui: &mut egui::Ui, icon: &str, label: &str) -> egui::Response {
+    let r = ui.button(icon).on_hover_text(t(label));
+    r.widget_info(|| {
+        egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), t(label))
+    });
+    r
+}
 
 pub(super) fn frame(right: bool, wide: bool) -> egui::Frame {
     egui::Frame::new()
@@ -66,19 +77,27 @@ pub(super) fn remember_width(ctx: &egui::Context, name: &str, rect: Rect, prefer
     }
 }
 
-pub(super) fn heading(ui: &mut egui::Ui, title: &str, open: Option<&mut bool>) {
-    ui.horizontal(|ui| {
+pub(super) fn heading(
+    ui: &mut egui::Ui,
+    title: &str,
+    open: Option<&mut bool>,
+) -> Option<egui::Response> {
+    let response = ui.horizontal(|ui| {
         ui.set_min_height(30.);
         ui.add(egui::Label::new(RichText::new(t(title)).size(15.).strong()).truncate());
-        if let Some(open) = open {
+        open.map(|open| {
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                if panel_toggle(ui, true, true, "Masquer les propriétés").clicked() {
+                let r = panel_toggle(ui, true, true, "Masquer les propriétés");
+                if r.clicked() {
                     *open = false;
                 }
-            });
-        }
+                r
+            })
+            .inner
+        })
     });
     ui.separator();
+    response.inner
 }
 pub(super) fn ribbon_toggle(ui: &mut egui::Ui, expanded: bool) -> egui::Response {
     let label = if expanded {
@@ -89,7 +108,9 @@ pub(super) fn ribbon_toggle(ui: &mut egui::Ui, expanded: bool) -> egui::Response
     let r = ui
         .add_sized([32., 30.], egui::Button::new(""))
         .on_hover_text(t(label));
-    r.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), label));
+    r.widget_info(|| {
+        egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), t(label))
+    });
     let c = r.rect.center();
     ui.painter().line_segment(
         [
@@ -113,9 +134,24 @@ pub(super) fn panel_toggle(
     right: bool,
     label: &str,
 ) -> egui::Response {
+    let (_, rect) = ui.allocate_space(vec2(32., 30.));
+    // The same control moves between the collapsed rail and the wide pane.
+    // Keep its ID across those parent UIs so keyboard focus survives Enter.
     let response = ui
-        .add_sized([32., 30.], egui::Button::new("").selected(open))
+        .interact(
+            rect,
+            egui::Id::new(("workspace_panel_toggle", right)),
+            Sense::click(),
+        )
         .on_hover_text(t(label));
+    let visuals = ui.style().interact_selectable(&response, open);
+    ui.painter().rect(
+        rect,
+        visuals.corner_radius,
+        visuals.weak_bg_fill,
+        visuals.bg_stroke,
+        StrokeKind::Inside,
+    );
     response.widget_info(|| {
         egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), t(label))
     });

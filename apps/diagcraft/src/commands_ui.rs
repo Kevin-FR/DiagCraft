@@ -72,6 +72,8 @@ pub(super) enum Command {
     PageSettings,
     AddPage,
     Validate,
+    NextRegion,
+    PreviousRegion,
 }
 
 pub(super) struct CommandSpec {
@@ -104,6 +106,8 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
     ),
     command!(Palette, "Rechercher une commande…", "Aide", "palette command search", Modifiers::COMMAND => K),
     command!(Help, "Raccourcis et gestes…", "Aide", "aide clavier trackpad help", Modifiers::NONE => F1),
+    command!(NextRegion, "Activer la zone suivante", "Affichage", "focus clavier navigation volet ribbon pane next", Modifiers::NONE => F6),
+    command!(PreviousRegion, "Activer la zone précédente", "Affichage", "focus clavier navigation volet ribbon pane previous", Modifiers::SHIFT => F6),
     command!(New, "Nouveau document", "Fichier", "créer new", Modifiers::COMMAND => N),
     command!(Open, "Ouvrir un document…", "Fichier", "charger open", Modifiers::COMMAND => O),
     command!(Save, "Enregistrer", "Fichier", "sauvegarder sauver save", Modifiers::COMMAND => S),
@@ -608,6 +612,8 @@ impl DrawApp {
                 }
                 Err(e) => self.error = Some(e),
             },
+            NextRegion => self.cycle_workspace_focus(ctx, false),
+            PreviousRegion => self.cycle_workspace_focus(ctx, true),
         }
     }
 
@@ -641,6 +647,8 @@ impl DrawApp {
                         | Command::SaveAs
                         | Command::ExportSvg
                         | Command::ExportPdf
+                        | Command::NextRegion
+                        | Command::PreviousRegion
                 )
             {
                 continue;

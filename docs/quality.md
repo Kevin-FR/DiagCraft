@@ -1,6 +1,6 @@
 # Préparation de la 1.0 : qualité mesurable
 
-Ces outils sont disponibles dans la branche de développement. Ils ne déclarent
+Ces outils sont disponibles depuis la 0.11.1. Ils ne déclarent
 pas DiagCraft stable et ne remplacent pas les essais avec de vrais utilisateurs.
 Les sources des corpus sont originales, sous MIT, sans dessin ni image externe.
 
@@ -86,6 +86,9 @@ Ce corpus complète les tests de limites d’images, de ressources et de révisi
 Il ne remplace pas une campagne prolongée avec un moteur de fuzzing.
 
 ## Essais utilisateurs restant à organiser
+
+Le [guide clavier](keyboard-navigation.md) décrit les accès F6, les noms accessibles
+et les scénarios automatisés. Ils ne remplacent pas les annonces réelles des lecteurs d’écran.
 
 Sur MacBook 13 pouces, Ubuntu X11/Wayland et Windows : créer deux blocs, saisir
 et formater leur texte, les relier, déplacer la vue, enregistrer, rouvrir et exporter.

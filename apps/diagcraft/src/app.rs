@@ -245,6 +245,7 @@ pub struct DrawApp {
     drag_snapshot: Option<gestures_ui::DragSnapshot>,
     keyboard_move: Option<keyboard_ui::Move>,
     keyboard_move_cancelled: bool,
+    focus_ui: focus_ui::State,
     move_guides: Vec<alignment_ui::Guide>,
     capture_alignment: bool,
     show_layers: bool,
@@ -834,6 +835,7 @@ impl DrawApp {
             drag_snapshot: None,
             keyboard_move: None,
             keyboard_move_cancelled: false,
+            focus_ui: Default::default(),
             move_guides: vec![],
             capture_alignment: false,
             show_layers: false,
@@ -1290,7 +1292,7 @@ impl DrawApp {
                 self.context_open = false;
                 return;
             }
-            if !ctx.wants_keyboard_input() {
+            if !self.ui_has_keyboard_focus(ctx) {
                 use context_menu::Action;
                 let action = ctx.input(|i| {
                     if i.modifiers.command {
@@ -1327,7 +1329,7 @@ impl DrawApp {
             }
             return;
         }
-        let editing_text = ctx.wants_keyboard_input();
+        let editing_text = self.ui_has_keyboard_focus(ctx);
         if !editing_text && ctx.input(|i| i.key_pressed(Key::F10) && i.modifiers.shift) {
             let screen = self
                 .selection_rect()
@@ -1369,7 +1371,9 @@ impl DrawApp {
         panels_ui::prepare_width(ctx, "inspector", self.inspector_width, 260., max_width);
         let panel = egui::SidePanel::right("inspector").default_width(self.inspector_width).width_range(260. ..=max_width).resizable(true).frame(panels_ui::frame(true, true)).show(ctx,|ui| {
             ui.spacing_mut().item_spacing.y=6.;ui.spacing_mut().interact_size.y=30.;ui.spacing_mut().button_padding.y=5.;
-            panels_ui::heading(ui, if self.selected.is_empty() { "Document" } else { "Propriétés" }, Some(&mut self.show_inspector));
+            if let Some(r) = panels_ui::heading(ui, if self.selected.is_empty() { "Document" } else { "Propriétés" }, Some(&mut self.show_inspector)) {
+                self.focus_ui.anchor(ui, focus_ui::Region::Inspector, &r);
+            }
             egui::ScrollArea::vertical().id_salt("inspector_scroll").auto_shrink([false, false]).show(ui,|ui| {
                 self.organization_inspector(ui);
                 self.routing_notice(ui);
@@ -1514,6 +1518,13 @@ impl DrawApp {
                 if self.show_inspector { hit_rect.max.x -= grip; }
                 if self.show_library && !self.rulers { hit_rect.min.x += grip; }
                 let response = ui.allocate_rect(hit_rect, Sense::click_and_drag());
+                response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Panel, interactive, t("Feuille de dessin")));
+                self.focus_ui.anchor(ui, focus_ui::Region::Canvas, &response);
+                if response.has_focus() {
+                    ctx.memory_mut(|m| m.set_focus_lock_filter(response.id, egui::EventFilter {
+                        horizontal_arrows: true, vertical_arrows: true, escape: true, ..Default::default()
+                    }));
+                }
                 self.canvas = rect;
                 if self.fit_next {
                     self.fit();
@@ -1843,6 +1854,7 @@ impl DrawApp {
                     }
                 }
                 self.inline_text(ui);
+                focus_ui::outline(ui, &response);
                 egui::Area::new("zoom_controls".into())
                     .order(egui::Order::Foreground)
                     .default_size(vec2(340., 40.))
@@ -1857,7 +1869,7 @@ impl DrawApp {
                             .inner_margin(egui::Margin::symmetric(8, 3))
                             .show(ui, |ui| {
                                 ui.horizontal(|ui| {
-                                    if ui.button("−").clicked() {
+                                    if panels_ui::icon_button(ui, "−", "Réduire le zoom").clicked() {
                                         self.set_zoom(self.zoom / 1.2, rect.center());
                                     }
                                     ui.label(
@@ -1867,7 +1879,7 @@ impl DrawApp {
                                         ))
                                         .size(12.),
                                     ).on_hover_text(t("Trackpad : deux doigts pour déplacer, pincer pour zoomer autour du pointeur. F pour recentrer la page."));
-                                    if ui.button("+").clicked() {
+                                    if panels_ui::icon_button(ui, "+", "Augmenter le zoom").clicked() {
                                         self.set_zoom(self.zoom * 1.2, rect.center());
                                     }
                                     ui.separator();
@@ -2808,6 +2820,9 @@ mod alignment_ui;
 mod gestures_ui;
 #[path = "keyboard_ui.rs"]
 mod keyboard_ui;
+
+#[path = "focus_ui.rs"]
+mod focus_ui;
 
 #[path = "commands_ui.rs"]
 mod commands_ui;

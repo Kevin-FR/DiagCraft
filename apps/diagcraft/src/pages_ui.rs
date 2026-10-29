@@ -106,20 +106,15 @@ impl DrawApp {
             )
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
-                    if ui
-                        .button(i18n::render(
-                            "Pages ({0})",
-                            &[("0", self.doc.page_count().to_string())],
-                        ))
-                        .clicked()
-                    {
+                    let pages = ui.button(i18n::render(
+                        "Pages ({0})",
+                        &[("0", self.doc.page_count().to_string())],
+                    ));
+                    self.focus_ui.anchor(ui, focus_ui::Region::Pages, &pages);
+                    if pages.clicked() {
                         self.show_pages = true;
                     }
-                    if ui
-                        .button("+")
-                        .on_hover_text(t("Ajouter une page"))
-                        .clicked()
-                    {
+                    if panels_ui::icon_button(ui, "+", "Ajouter une page").clicked() {
                         action = Some(PageAction::Add(false));
                     }
                     let names = self.doc.page_names();

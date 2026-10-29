@@ -143,6 +143,14 @@ saisie non traités sont rejoués avant la validation du texte.
 
 ## Déplacement au clavier
 
+`focus_ui.rs` conserve les ancres de focus des cinq zones du workspace. Les
+commandes F6 / Maj+F6 demandent le focus au contrôle réel lors de son rendu,
+y compris après fermeture de la palette. Le volet droit utilise un identifiant
+de bouton indépendant de son parent pour garder le focus entre rail et panneau.
+Le focus de la feuille autorise les commandes de dessin et retient ses flèches ;
+les champs et boutons conservent leurs touches. Les modales, gestes et saisies
+directes bloquent le changement de zone. Cet état ne participe pas au document.
+
 `keyboard_ui.rs` conserve un snapshot transitoire par pression continue des
 flèches. Une intersection de limites donne la même translation aux formes,
 graphiques, tracés et géométries libres sélectionnés. Les limites hors page

@@ -13,7 +13,9 @@ impl DrawApp {
                 } else {
                     "Réduire la bibliothèque"
                 };
-                if panels_ui::panel_toggle(ui, self.show_library, false, label).clicked() {
+                let r = panels_ui::panel_toggle(ui, self.show_library, false, label);
+                self.focus_ui.anchor(ui, focus_ui::Region::Library, &r);
+                if r.clicked() {
                     self.show_library = !self.show_library;
                 }
                 ui.add_space(10.);
@@ -34,7 +36,7 @@ impl DrawApp {
                                 egui::WidgetInfo::labeled(
                                     egui::WidgetType::Button,
                                     ui.is_enabled(),
-                                    label,
+                                    t(label),
                                 )
                             });
                             let r = Rect::from_center_size(response.rect.center(), vec2(23., 23.));
@@ -121,7 +123,7 @@ impl DrawApp {
             .frame(panels_ui::frame(false, true))
             .show(ctx, |ui| {
                 ui.spacing_mut().item_spacing.y = 6.;
-                panels_ui::heading(ui, match self.library_panel {
+                let _ = panels_ui::heading(ui, match self.library_panel {
                     LibraryPanel::Symbols => "Symboles",
                     LibraryPanel::Models => "Modèles",
                     LibraryPanel::Text => "Texte",
@@ -827,6 +829,7 @@ pub(super) fn symbol_tile(ui: &mut egui::Ui, kind: ShapeKind, active: bool) -> e
     } else {
         paint_geometry(ui.painter(), kind, r, Color32::TRANSPARENT, stroke);
     }
+    focus_ui::outline(ui, &response);
     response.on_hover_text(t(kind.label()))
 }
 fn template_card(ui: &mut egui::Ui, t: &Template, width: f32) -> egui::Response {
@@ -858,6 +861,7 @@ fn template_card(ui: &mut egui::Ui, t: &Template, width: f32) -> egui::Response 
         FontId::proportional(13.),
         INK,
     );
+    focus_ui::outline(ui, &response);
     response.on_hover_text(&t.title)
 }
 pub(super) fn paint_document_preview(p: &egui::Painter, d: &Document, r: Rect) {

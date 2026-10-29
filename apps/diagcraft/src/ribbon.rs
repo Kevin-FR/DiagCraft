@@ -365,11 +365,20 @@ impl DrawApp {
                                                             .color(Color32::from_rgb(245, 83, 83)),
                                                     );
                                                 }
-                                                if ui
+                                                let close_button = ui
                                                     .add(egui::Button::new("×").frame(false))
-                                                    .on_hover_text(t("Fermer ce document"))
-                                                    .clicked()
-                                                {
+                                                    .on_hover_text(t("Fermer ce document"));
+                                                close_button.widget_info(|| {
+                                                    egui::WidgetInfo::labeled(
+                                                        egui::WidgetType::Button,
+                                                        ui.is_enabled(),
+                                                        i18n::render(
+                                                            "Fermer le document : {0}",
+                                                            &[("0", tab.doc.title.clone())],
+                                                        ),
+                                                    )
+                                                });
+                                                if close_button.clicked() {
                                                     close = Some(i);
                                                 }
                                             });
@@ -377,11 +386,7 @@ impl DrawApp {
                                 }
                             });
                         });
-                    if ui
-                        .button("+")
-                        .on_hover_text(t("Nouveau document · Ctrl/⌘ N"))
-                        .clicked()
-                    {
+                    if panels_ui::icon_button(ui, "+", "Nouveau document · Ctrl/⌘ N").clicked() {
                         self.request(Pending::New);
                     }
                     if let Some(i) = switch {
@@ -403,7 +408,7 @@ impl DrawApp {
             )
             .show(ctx, |ui| {
                 ui.horizontal_centered(|ui| {
-                    ui.menu_button(RichText::new(t("Fichier")).size(14.), |ui| {
+                    let file_menu = ui.menu_button(RichText::new(t("Fichier")).size(14.), |ui| {
                         if ui.button(t("Nouveau document")).clicked() {
                             ui.close();
                             self.request(Pending::New);
@@ -473,6 +478,8 @@ impl DrawApp {
                             self.request(Pending::CloseTab(self.active_tab));
                         }
                     });
+                    self.focus_ui
+                        .anchor(ui, focus_ui::Region::Ribbon, &file_menu.response);
                     ui.separator();
                     if quick(
                         ui,

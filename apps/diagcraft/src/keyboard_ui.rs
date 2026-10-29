@@ -80,7 +80,7 @@ impl DrawApp {
             || self.show_help
             || self.command_palette.open
             || self.context_open
-            || ctx.wants_keyboard_input()
+            || self.ui_has_keyboard_focus(ctx)
             || movement.selected != self.selected
             || ctx.input(|i| !i.focused)
         {

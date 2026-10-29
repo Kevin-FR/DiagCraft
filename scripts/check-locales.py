@@ -23,7 +23,7 @@ def check():
         if path.name in {"main.rs", "i18n.rs"} or path.name.endswith("_tests.rs"):
             continue
         source = re.split(r"#\[cfg\(test\)\]\s*(?:#\[[^\]]+\]\s*)?mod\s", path.read_text(encoding="utf-8"), maxsplit=1)[0]
-        if path.name == "object_search_ui.rs":
+        if path.name in {"object_search_ui.rs", "focus_ui.rs"}:
             for match in re.finditer(r'fn label\(self\).*?\{(.*?)\n    \}', source, re.S):
                 required.update(json.loads(literal) for literal in re.findall(LITERAL, match[1]))
         for match in re.finditer(r'(?:\bt|i18n::render)\(\s*(' + LITERAL + ')', source):

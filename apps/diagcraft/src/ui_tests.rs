@@ -1,5 +1,8 @@
 use super::*;
 
+#[path = "focus_tests.rs"]
+mod focus_tests;
+
 fn nudge_key(key: Key, pressed: bool, repeat: bool, modifiers: egui::Modifiers) -> egui::Event {
     egui::Event::Key {
         key,

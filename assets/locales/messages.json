@@ -9691,5 +9691,86 @@
     "it": "Controlla posizioni e connettori prima di importare; la disposizione visiva Mermaid non viene conservata.",
     "pt": "Reveja as posições e os conectores antes de importar; a disposição visual Mermaid não é preservada.",
     "zh-Hans": "请在导入前检查位置和连线；不保留 Mermaid 的视觉布局。"
+  },
+  "Activer la zone précédente": {
+    "fr": "Activer la zone précédente",
+    "en": "Focus previous area",
+    "de": "Vorherigen Bereich fokussieren",
+    "es": "Enfocar la zona anterior",
+    "it": "Attiva l’area precedente",
+    "pt": "Focar a área anterior",
+    "zh-Hans": "聚焦上一区域"
+  },
+  "Activer la zone suivante": {
+    "fr": "Activer la zone suivante",
+    "en": "Focus next area",
+    "de": "Nächsten Bereich fokussieren",
+    "es": "Enfocar la siguiente zona",
+    "it": "Attiva l’area successiva",
+    "pt": "Focar a próxima área",
+    "zh-Hans": "聚焦下一区域"
+  },
+  "Augmenter le zoom": {
+    "fr": "Augmenter le zoom",
+    "en": "Zoom in",
+    "de": "Vergrößern",
+    "es": "Acercar",
+    "it": "Aumenta zoom",
+    "pt": "Aumentar zoom",
+    "zh-Hans": "放大"
+  },
+  "Fermer le document : {0}": {
+    "fr": "Fermer le document : {0}",
+    "en": "Close document: {0}",
+    "de": "Dokument schließen: {0}",
+    "es": "Cerrar documento: {0}",
+    "it": "Chiudi documento: {0}",
+    "pt": "Fechar documento: {0}",
+    "zh-Hans": "关闭文档：{0}"
+  },
+  "Feuille de dessin": {
+    "fr": "Feuille de dessin",
+    "en": "Drawing canvas",
+    "de": "Zeichenfläche",
+    "es": "Lienzo de dibujo",
+    "it": "Area di disegno",
+    "pt": "Área de desenho",
+    "zh-Hans": "绘图画布"
+  },
+  "Focus : {0} · F6 / Maj+F6 pour changer de zone": {
+    "fr": "Focus : {0} · F6 / Maj+F6 pour changer de zone",
+    "en": "Focus: {0} · F6 / Shift+F6 to switch areas",
+    "de": "Fokus: {0} · F6 / Umschalt+F6 zum Bereichswechsel",
+    "es": "Foco: {0} · F6 / Mayús+F6 para cambiar de zona",
+    "it": "Focus: {0} · F6 / Maiusc+F6 per cambiare area",
+    "pt": "Foco: {0} · F6 / Shift+F6 para mudar de área",
+    "zh-Hans": "焦点：{0} · 按 F6 / Shift+F6 切换区域"
+  },
+  "Pages": {
+    "fr": "Pages",
+    "en": "Pages",
+    "de": "Seiten",
+    "es": "Páginas",
+    "it": "Pagine",
+    "pt": "Páginas",
+    "zh-Hans": "页面"
+  },
+  "Ruban": {
+    "fr": "Ruban",
+    "en": "Ribbon",
+    "de": "Menüband",
+    "es": "Cinta de opciones",
+    "it": "Barra multifunzione",
+    "pt": "Faixa de opções",
+    "zh-Hans": "功能区"
+  },
+  "Réduire le zoom": {
+    "fr": "Réduire le zoom",
+    "en": "Zoom out",
+    "de": "Verkleinern",
+    "es": "Alejar",
+    "it": "Riduci zoom",
+    "pt": "Diminuir zoom",
+    "zh-Hans": "缩小"
   }
 }

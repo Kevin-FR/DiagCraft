@@ -21,7 +21,7 @@ Las aplicaciones y sus sumas de comprobación SHA-256 están en la
 | Windows x86_64 | ZIP portátil con la aplicación y la CLI |
 | Linux x86_64 | Paquete `.deb` para amd64 o archivo `.tar.gz`, con la aplicación y la CLI |
 
-**0.11.0 es experimental** y añade intercambio de diagramas de flujo Mermaid con vista previa y diagnósticos contextuales para agentes.
+**0.11.1 es experimental** y mejora la navegación con teclado, el foco visible y las comprobaciones automáticas de calidad.
 El paquete para Mac tiene firma ad hoc y no ha sido notarizado por Apple.
 Los paquetes de Windows no están firmados con un certificado de editor.
 Consulta la [guía de instalación](../installation.md).
@@ -29,6 +29,8 @@ Consulta la [guía de instalación](../installation.md).
 Las aplicaciones anteriores a 0.10.0 descartan las imágenes incrustadas al guardar. La [guía de imágenes y PNG](../images.md) describe formatos, atajos y límites.
 
 Consulta las guías de [Mermaid](../mermaid.md) y [diagnósticos de agentes](../diagnostics.md). Conserva `.draw` como fuente editable completa; Mermaid no mantiene todos los detalles visuales.
+
+Cambia de zona con F6 / Mayús+F6; consulta la [guía de teclado](../keyboard-navigation.md).
 
 ## Funciones
 
