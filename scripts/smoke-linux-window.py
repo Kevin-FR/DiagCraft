@@ -6,6 +6,7 @@ Weston compositor without server decorations exercises the same client frame
 as GNOME/Ubuntu. The built-in --screenshot captures only the client content.
 """
 import argparse
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -15,12 +16,16 @@ import time
 from PIL import Image
 
 
-def frame_is_visible(path):
+def inspect_frame(path, *, first_row=0):
     with Image.open(path) as image:
         pixels = image.convert("RGB")
     # The fixed light test desktop has no settings portal. The old fallback
     # frame is #3a3a3a, regardless of the desktop's appearance preference.
-    for y in range(35, min(300, pixels.height - 40)):
+    best = {"visible": False, "width": pixels.width, "height": pixels.height,
+            "first_row": first_row, "header_y": None, "title_pixels": 0, "button_pixels": 0}
+    # Weston may place a window directly beneath its desktop bar. The previous
+    # scan skipped its first 35 rows and could miss the title at y=0..34.
+    for y in range(first_row, min(300, pixels.height - 40)):
         row = [pixels.getpixel((x, y)) for x in range(pixels.width)]
         for color in ((235, 235, 235), (250, 250, 250)):
             positions = [x for x, pixel in enumerate(row) if pixel == color]
@@ -32,10 +37,25 @@ def frame_is_visible(path):
             # the native button icons at the right end of the header.
             title = pixels.crop((center - 220, y + 3, center + 220, y + 32))
             buttons = pixels.crop((right - 105, y + 3, right, y + 32))
-            dark = lambda image: sum(max(pixel) < 180 for pixel in image.getdata())
-            if dark(title) > 50 and dark(buttons) > 30:
-                return True
-    return False
+            def dark(image):
+                data = image.tobytes()
+                return sum(max(data[i:i + 3]) < 180 for i in range(0, len(data), 3))
+            title_pixels, button_pixels = dark(title), dark(buttons)
+            candidate = {"visible": title_pixels > 50 and button_pixels > 30,
+                         "width": pixels.width, "height": pixels.height, "first_row": first_row,
+                         "header_y": y, "header_left": left, "header_right": right,
+                         "header_color": list(color), "title_pixels": title_pixels,
+                         "button_pixels": button_pixels}
+            if min(title_pixels / 50, button_pixels / 30) > min(
+                    best["title_pixels"] / 50, best["button_pixels"] / 30):
+                best = candidate
+            if candidate["visible"]:
+                return candidate
+    return best
+
+
+def frame_is_visible(path):
+    return inspect_frame(path)["visible"]
 
 
 def stop(process):
@@ -55,6 +75,11 @@ def main():
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     screenshot = args.output.resolve() / "wayland-window.png"
+    report_path = args.output / "window-report.json"
+    report = {"status": "starting", "checks": [], "error": None}
+    def save_report():
+        report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    save_report()
     weston = app = None
     with tempfile.TemporaryDirectory(prefix="diagcraft-wayland-") as directory:
         runtime = Path(directory)
@@ -86,21 +111,34 @@ def main():
                 env["WAYLAND_DEBUG"] = "1"
                 app = subprocess.Popen([str(args.bin.resolve()), "--language", "en"],
                                        env=env, stdout=app_log, stderr=subprocess.STDOUT)
-                deadline = time.monotonic() + 25
+                started = time.monotonic()
+                deadline = started + 25
                 while time.monotonic() < deadline:
                     if app.poll() is not None:
                         raise RuntimeError("Application exited before its window was verified")
                     subprocess.run(["import", "-window", "root", str(screenshot)],
                                    check=True, timeout=5)
-                    if frame_is_visible(screenshot):
+                    check = inspect_frame(screenshot)
+                    check["elapsed_ms"] = round((time.monotonic() - started) * 1000)
+                    report["checks"].append(check)
+                    save_report()
+                    if check["visible"]:
                         trace = (args.output / "wayland.log").read_text()
                         if "xdg_toplevel" not in trace or "wl_subsurface" not in trace:
                             raise RuntimeError("Expected Wayland client decorations")
+                        # Retain whether the older y>=35 detector would have
+                        # rejected this exact image, rather than inferring why.
+                        report["legacy_visible"] = inspect_frame(screenshot, first_row=35)["visible"]
+                        report["status"] = "passed"
+                        save_report()
                         print("Wayland frame verified: light header, visible title and native buttons")
                         return
                     time.sleep(0.25)
                 raise RuntimeError("Wayland window still has the fallback frame or no visible title/buttons")
-            except Exception:
+            except Exception as error:
+                report["status"] = "failed"
+                report["error"] = str(error)
+                save_report()
                 for log in ("weston.log", "wayland.log"):
                     print(f"{log} (last 60 lines):", flush=True)
                     print("\n".join((args.output / log).read_text().splitlines()[-60:]), flush=True)
