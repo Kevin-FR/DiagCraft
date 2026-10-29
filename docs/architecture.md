@@ -151,6 +151,12 @@ Le focus de la feuille autorise les commandes de dessin et retient ses flèches 
 les champs et boutons conservent leurs touches. Les modales, gestes et saisies
 directes bloquent le changement de zone. Cet état ne participe pas au document.
 
+La palette mémorise sa zone d’origine avant de prendre le focus. Les cartes de
+bibliothèque demandent leur révélation au gain de focus ou si un redimensionnement
+de leur clip les coupe, sans combattre un défilement manuel ultérieur. Les contrôles de la modale Agents restent dans un
+corps défilant borné ; son titre et sa fermeture restent fixes pour les fenêtres
+de contenu à partir de 1200 × 680 points.
+
 `keyboard_ui.rs` conserve un snapshot transitoire par pression continue des
 flèches. Une intersection de limites donne la même translation aux formes,
 graphiques, tracés et géométries libres sélectionnés. Les limites hors page

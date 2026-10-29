@@ -255,12 +255,17 @@ impl DrawApp {
                     let items = self.library.symbols.clone();
                     ui.horizontal_wrapped(|ui| {
                         for n in items {
-                            if matches_search(&n.text, &self.symbol_search)
-                                && symbol_tile(ui, n.kind, false)
-                                    .on_hover_text(&n.text)
-                                    .clicked()
-                            {
-                                self.choose_symbol(n);
+                            if matches_search(&n.text, &self.symbol_search) {
+                                let label = if n.text.trim().is_empty() {
+                                    t(n.kind.label())
+                                } else {
+                                    format!("{} · {}", n.text.trim(), t(n.kind.label()))
+                                };
+                                let response = named_symbol_tile(ui, n.kind, false, &label)
+                                    .on_hover_text(&n.text);
+                                if response.clicked() {
+                                    self.choose_symbol(n);
+                                }
                             }
                         }
                     });
@@ -372,7 +377,7 @@ impl DrawApp {
                                 egui::WidgetInfo::labeled(
                                     egui::WidgetType::Button,
                                     ui.is_enabled(),
-                                    kind.label(),
+                                    t(kind.label()),
                                 )
                             });
                             ui.painter().rect(
@@ -389,6 +394,8 @@ impl DrawApp {
                             ui.add(
                                 egui::Label::new(RichText::new(t(kind.label())).size(11.)).wrap(),
                             );
+                            focus_ui::outline(ui, &response);
+                            reveal_on_focus(ui, &response);
                             if response.on_hover_text(t(kind.label())).clicked() {
                                 self.insert_chart(kind);
                             }
@@ -768,9 +775,17 @@ fn matches_search(text: &str, search: &str) -> bool {
         .all(|word| commands_ui::normalize(text).contains(word))
 }
 pub(super) fn symbol_tile(ui: &mut egui::Ui, kind: ShapeKind, active: bool) -> egui::Response {
+    named_symbol_tile(ui, kind, active, &t(kind.label()))
+}
+fn named_symbol_tile(
+    ui: &mut egui::Ui,
+    kind: ShapeKind,
+    active: bool,
+    label: &str,
+) -> egui::Response {
     let (r, response) = ui.allocate_exact_size(vec2(48., 56.), Sense::click());
     response.widget_info(|| {
-        egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), t(kind.label()))
+        egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), label)
     });
     ui.painter().rect_filled(
         r,
@@ -830,6 +845,7 @@ pub(super) fn symbol_tile(ui: &mut egui::Ui, kind: ShapeKind, active: bool) -> e
         paint_geometry(ui.painter(), kind, r, Color32::TRANSPARENT, stroke);
     }
     focus_ui::outline(ui, &response);
+    reveal_on_focus(ui, &response);
     response.on_hover_text(t(kind.label()))
 }
 fn template_card(ui: &mut egui::Ui, t: &Template, width: f32) -> egui::Response {
@@ -862,7 +878,29 @@ fn template_card(ui: &mut egui::Ui, t: &Template, width: f32) -> egui::Response 
         INK,
     );
     focus_ui::outline(ui, &response);
+    reveal_on_focus(ui, &response);
     response.on_hover_text(&t.title)
+}
+
+fn reveal_on_focus(ui: &egui::Ui, response: &egui::Response) {
+    // Tab traversal and accessibility Focus requests can reach clipped cards.
+    // A resize can also clip the focused card without changing its identity.
+    // Remember only its clip size, so pointer scrolling remains unrestricted.
+    if !response.has_focus() {
+        return;
+    }
+    let clip = ui.clip_rect();
+    let resized = ui.ctx().data_mut(|data| {
+        let key = egui::Id::new("library_focused_clip_size");
+        let previous = data.get_temp::<(egui::Id, Vec2)>(key);
+        data.insert_temp(key, (response.id, clip.size()));
+        previous.is_some_and(|(id, size)| {
+            id == response.id && (size - clip.size()).abs().max_elem() > 0.5
+        })
+    });
+    if response.gained_focus() || (resized && !clip.contains_rect(response.rect)) {
+        response.scroll_to_me(None);
+    }
 }
 pub(super) fn paint_document_preview(p: &egui::Painter, d: &Document, r: Rect) {
     p.rect_filled(r, 5, SURFACE);

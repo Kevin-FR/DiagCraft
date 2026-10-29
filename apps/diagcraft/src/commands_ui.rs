@@ -294,6 +294,7 @@ pub(super) struct PaletteState {
     pub query: String,
     pub selected: usize,
     focus: bool,
+    origin: Option<focus_ui::Region>,
 }
 
 #[derive(Default)]
@@ -388,6 +389,7 @@ impl DrawApp {
 
     fn close_command_palette(&mut self, ctx: &egui::Context) {
         self.command_palette.open = false;
+        self.command_palette.origin = None;
         ctx.memory_mut(|m| m.surrender_focus(egui::Id::new("command_query")));
     }
 
@@ -469,6 +471,15 @@ impl DrawApp {
     }
 
     pub(super) fn run_command(&mut self, command: Command, ctx: &egui::Context) {
+        self.run_command_with_origin(command, ctx, None);
+    }
+
+    fn run_command_with_origin(
+        &mut self,
+        command: Command,
+        ctx: &egui::Context,
+        origin: Option<focus_ui::Region>,
+    ) {
         if self.keyboard_move.is_some()
             && !matches!(
                 command,
@@ -612,8 +623,8 @@ impl DrawApp {
                 }
                 Err(e) => self.error = Some(e),
             },
-            NextRegion => self.cycle_workspace_focus(ctx, false),
-            PreviousRegion => self.cycle_workspace_focus(ctx, true),
+            NextRegion => self.cycle_workspace_focus(ctx, false, origin),
+            PreviousRegion => self.cycle_workspace_focus(ctx, true, origin),
         }
     }
 
@@ -682,6 +693,11 @@ impl DrawApp {
         {
             self.close_command_palette(ctx);
             return;
+        }
+        if self.command_palette.focus {
+            // Capture the real workspace widget before the query takes focus.
+            // The modal's position and its result/close buttons are not a zone.
+            self.command_palette.origin = Some(self.workspace_focus_region(ctx));
         }
         // Tab can move focus to a result or to Fermer. Let that widget own
         // Enter; search navigation must not execute a different row behind it.
@@ -797,11 +813,12 @@ impl DrawApp {
                 chosen = Some(spec.command);
             }
         });
+        let origin = self.command_palette.origin;
         if close || modal.should_close() || chosen.is_some() {
             self.close_command_palette(ctx);
         }
         if let Some(command) = chosen {
-            self.run_command(command, ctx);
+            self.run_command_with_origin(command, ctx, origin);
         }
     }
 

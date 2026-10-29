@@ -156,7 +156,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     [1440., 960.]
                 },
             )
-            .with_min_inner_size([1200., 760.])
+            .with_min_inner_size([1200., 680.])
             .with_app_id("org.diagcraft.editor")
             .with_icon({
                 let rgba = image::load_from_memory(include_bytes!(

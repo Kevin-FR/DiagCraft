@@ -70,18 +70,30 @@ impl DrawApp {
         ctx.wants_keyboard_input() && !self.focus_ui.canvas_focused(ctx)
     }
 
-    pub(super) fn cycle_workspace_focus(&mut self, ctx: &egui::Context, backwards: bool) {
+    pub(super) fn workspace_focus_region(&self, ctx: &egui::Context) -> Region {
         // A field or a button reached using Tab belongs to its surrounding zone,
         // rather than to the last F6 anchor. Hidden panes keep their rail anchor.
         let focused = ctx.memory(|m| m.focused());
-        let region = focused
+        focused
             .and_then(|id| {
                 Region::ALL
                     .into_iter()
                     .find(|region| self.focus_ui.anchors[*region as usize] == Some(id))
                     .or_else(|| {
                         ctx.read_response(id).map(|r| {
-                            let p = r.rect.center();
+                            // A newly focused scroll item can still have its
+                            // pre-scroll response here. Use its visible portion,
+                            // or the remaining clipped axis: vertical scrolling
+                            // keeps the sidebar column, horizontal scrolling
+                            // keeps the ribbon/page band. Its raw off-screen Y
+                            // must not turn a library card into a page control.
+                            let clip = r.interact_rect;
+                            let p = match (clip.width() > 0., clip.height() > 0.) {
+                                (true, true) => clip.center(),
+                                (true, false) => pos2(clip.center().x, self.canvas.center().y),
+                                (false, true) => pos2(self.canvas.center().x, clip.center().y),
+                                (false, false) => r.rect.center(),
+                            };
                             if p.y < self.canvas.top() {
                                 Region::Ribbon
                             } else if p.y > self.canvas.bottom() {
@@ -96,7 +108,16 @@ impl DrawApp {
                         })
                     })
             })
-            .unwrap_or(Region::Canvas);
+            .unwrap_or(Region::Canvas)
+    }
+
+    pub(super) fn cycle_workspace_focus(
+        &mut self,
+        ctx: &egui::Context,
+        backwards: bool,
+        origin: Option<Region>,
+    ) {
+        let region = origin.unwrap_or_else(|| self.workspace_focus_region(ctx));
         let next = Region::ALL[(region as usize + if backwards { 4 } else { 1 }) % 5];
         self.commit();
         // Applied when the real widget is rendered, including after a command

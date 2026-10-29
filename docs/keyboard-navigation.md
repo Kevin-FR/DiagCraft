@@ -1,6 +1,7 @@
 # Navigate the workspace with the keyboard
 
-Available in **0.11.1**. The drawing format remains v7 and the agent API remains v1.
+Workspace traversal is available since **0.11.1**, with library and shorter-window
+improvements in **0.11.2**. The drawing format remains v7 and the agent API remains v1.
 
 ## Move between areas
 
@@ -17,6 +18,25 @@ Within an area, **Tab / Shift+Tab** follow the interface controls. **Enter**
 activates the focused button. A panel toggle keeps focus when it opens or closes
 the panel. The command palette and F1 help also list the two area-navigation
 commands.
+
+Focus commands invoked through the palette retain the area from which you opened
+it, so they follow the same order as direct F6 / Shift+F6. Library cards scroll into
+view when reached with Tab, including later shapes, templates and charts. Personal
+symbols use their user text and shape type as their accessible name; chart names
+follow the selected interface language. A focused card is also revealed after a
+window or panel resize if it becomes clipped; later manual scrolling remains free.
+
+## Shorter windows
+
+The supported minimum content area is **1200 × 680 logical points**. The shorter
+height leaves more room for desktop bars on laptops. Width remains at least 1200;
+1024 × 640 is not a supported size in this version. Window frames and operating-system
+scaling affect how this relates to physical display pixels.
+
+The ribbon already compacts automatically in smaller windows. Collapsed side panels
+retain their opener and preferred widths; resizing back to a larger window restores
+those widths. The Agents dialog keeps its heading and Close button outside the
+scrolling content. Use the scroll area to reach its lower controls and reports.
 
 ## Create and edit a block
 
@@ -42,7 +62,9 @@ Moving between areas preserves the current drawing selection and undo history.
 The canvas, panel toggles, symbol tiles and common icon buttons expose names in
 the selected interface language. The document close button includes its title.
 Automated tests inspect these accessibility-tree names and keyboard focus in all
-seven languages at 1200 × 760 points.
+seven languages at 1200 × 760 points. Version 0.11.2 also tests primary dialogs at
+1200 × 680 and 1280 × 720, library scrolling and resizing, and focus commands
+invoked through the palette.
 
 These checks cover the underlying interface tree and simulated input. Human
 screen-reader tests, operating-system announcements, contrast across all states

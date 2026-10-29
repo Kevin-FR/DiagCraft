@@ -21,7 +21,7 @@ As aplicações e as respetivas somas de verificação SHA-256 estão disponíve
 | Windows x86_64 | ZIP portátil com a aplicação e a CLI |
 | Linux x86_64 | Pacote `.deb` para amd64 ou arquivo `.tar.gz`, com a aplicação e a CLI |
 
-**0.11.1 é experimental** e melhora a navegação por teclado, o foco visível e as verificações automáticas de qualidade. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
+**0.11.2 é experimental** e melhora as janelas de menor altura, as bibliotecas com teclado e os comandos de foco. O pacote Mac tem assinatura ad hoc e não foi notarizado pela Apple.
 Os pacotes Windows não estão assinados com um certificado de editor.
 Consulte o [guia de instalação](../installation.md).
 

@@ -21,7 +21,7 @@ Les applications et leurs empreintes SHA-256 sont sur la page des
 | Windows x86_64 | ZIP portable avec application et CLI |
 | Linux x86_64 | Paquet `.deb` amd64 ou archive `.tar.gz`, application et CLI |
 
-**0.11.1 est expérimentale** et améliore la navigation clavier, le focus visible et les contrôles de qualité automatisés. Le paquet
+**0.11.2 est expérimentale** et améliore les fenêtres de petite hauteur, les bibliothèques au clavier et les commandes de focus. Le paquet
 Mac est signé ad hoc et n’est pas notarié par Apple. Les paquets Windows ne
 sont pas signés avec un certificat éditeur. Voir [l’installation](../installation.md).
 

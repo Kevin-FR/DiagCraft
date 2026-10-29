@@ -3,6 +3,14 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## 0.11.2 — petites fenêtres et bibliothèques au clavier
+
+- Fenêtre de contenu à partir de 1200 × 680 points ; largeurs préférées des volets restaurées après agrandissement.
+- Corps du dialogue Agents défilant avec fermeture fixe ; matrice des modales dans les sept langues.
+- Cartes de bibliothèque révélées au gain de focus, noms personnels distincts et graphiques traduits avec focus visible.
+- Zone de départ conservée pour les commandes de focus exécutées depuis la palette.
+- Classification F6 des éléments clippés et visibilité des cartes après redimensionnement, sans combattre le défilement manuel.
+
 ## 0.11.1 — navigation clavier et préparation de la 1.0
 
 - Parcours F6 / Maj+F6 entre ruban, bibliothèque, feuille, propriétés et pages, sans modifier la disposition.

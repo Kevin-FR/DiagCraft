@@ -17,6 +17,15 @@ Les critères détaillés et l’avancement sont suivis dans les issues GitHub.
 | **0.11.0 — livrée** | Interopérabilité Mermaid et diagnostics CLI/MCP plus compréhensibles. | [#4](https://github.com/Kevin-FR/DiagCraft/issues/4) |
 | **1.0.0 — suivant** | Parcours utilisateurs validés, accessibilité, performances et distribution fiable. | [#5](https://github.com/Kevin-FR/DiagCraft/issues/5) |
 
+### Lot 0.11.2 — fenêtres courtes et clavier
+
+- [x] Fenêtres de 1200 × 680 points, contrôles principaux atteignables et préférences des volets conservées ([#6](https://github.com/Kevin-FR/DiagCraft/issues/6)).
+- [x] Cartes de bibliothèque révélées au clavier, focus visible et noms accessibles distincts/traduits ([#7](https://github.com/Kevin-FR/DiagCraft/issues/7)).
+- [x] Zone d’origine conservée pour les commandes de focus exécutées depuis la palette ([#8](https://github.com/Kevin-FR/DiagCraft/issues/8)).
+
+Ce lot prépare le jalon 1.0 ; les essais humains sur petits écrans et avec lecteurs
+d’écran restent à effectuer.
+
 ### Critères du lot 0.8.0
 
 - [x] Grouper et dégrouper une sélection ; déplacer et dupliquer un groupe entier.
@@ -111,6 +120,7 @@ les jalons ci-dessus sans retarder les corrections et les tests utilisateurs.
 - [x] Corpus déterministe de corruption des documents, patches et Mermaid, avec contrôle des sources et de l’atomicité (0.11.1).
 - [ ] Campagnes prolongées de fuzzing des fichiers et patches JSON.
 - [ ] Mesures d’accessibilité et tests de contraste, focus et navigation clavier.
+- [ ] Revue ciblée du contraste des textes informatifs, statuts et aides, avec critères par rôle ([#9](https://github.com/Kevin-FR/DiagCraft/issues/9)).
 - [ ] Revue régulière des avis de sécurité, licences et ressources ajoutées.
 
 - [ ] Résoudre les cinq avis de maintenance transitifs documentés dans [docs/maintenance.md](docs/maintenance.md), puis retirer les exceptions ciblées de deny.toml.

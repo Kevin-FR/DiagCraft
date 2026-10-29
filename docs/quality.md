@@ -89,6 +89,10 @@ Il ne remplace pas une campagne prolongée avec un moteur de fuzzing.
 
 Le [guide clavier](keyboard-navigation.md) décrit les accès F6, les noms accessibles
 et les scénarios automatisés. Ils ne remplacent pas les annonces réelles des lecteurs d’écran.
+La 0.11.2 ajoute une matrice de modales à 1200 × 680 et 1280 × 720 points,
+les préférences de volets après redimensionnement et le défilement des bibliothèques
+au clavier. Les dimensions physiques et les annonces des bureaux réels restent
+à valider avec les utilisateurs.
 
 Sur MacBook 13 pouces, Ubuntu X11/Wayland et Windows : créer deux blocs, saisir
 et formater leur texte, les relier, déplacer la vue, enregistrer, rouvrir et exporter.

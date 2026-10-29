@@ -57,12 +57,18 @@ impl DrawApp {
         let mut close = false;
         let mut apply = false;
         let modal=egui::Modal::new("agents_panel".into()).show(ctx,|ui| {
-            ui.set_width(1020.);
+            ui.set_width(1020_f32.min(ctx.content_rect().width()-64.));
             ui.horizontal(|ui|{ui.heading(t("Travailler avec un agent"));ui.with_layout(Layout::right_to_left(Align::Center),|ui|{if ui.button(t("Fermer")).clicked(){close=true;}});});
             ui.label(RichText::new(t("Claude, ChatGPT ou tout autre agent ayant accès à vos fichiers ou à MCP.")).color(MUTED));
             ui.add_space(12.);
             ui.horizontal(|ui|{for (tab,label) in [(0,"1  Partager le contexte"),(1,"2  Examiner le résultat"),(2,"CLI et connexion MCP")] {ui.selectable_value(&mut panel.tab,tab,t(label));}});
             ui.add_space(10.);ui.separator();ui.add_space(10.);
+            // Keep the title, tabs and Close button reachable on short screens.
+            // The body may contain JSON, reports or long diagnostics; its own
+            // scroll budget must include all controls rather than only editors.
+            egui::ScrollArea::vertical().id_salt(("agent_body_scroll",panel.tab))
+                .max_height((ctx.content_rect().height()-200.).clamp(180.,620.))
+                .auto_shrink([false,true]).show(ui,|ui| {
             if panel.tab==0 {
                 ui.label(t("Le contexte décrit toutes les pages, les objets, leurs textes, positions et connexions, y compris votre travail non enregistré."));
                 ui.horizontal(|ui| {
@@ -125,6 +131,7 @@ impl DrawApp {
                 egui::ScrollArea::vertical().id_salt("agent_guide_scroll").max_height(290.).show(ui,|ui|{ui.label(include_str!("../../../docs/AGENTS-DRAW.md"));});
             }
             if let Some(error)=&panel.error {ui.add_space(8.);ui.colored_label(Color32::from_rgb(190,50,50),error);}
+            });
         });
         close |= modal.should_close();
         if apply {

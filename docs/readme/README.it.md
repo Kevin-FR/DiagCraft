@@ -21,7 +21,7 @@ Le applicazioni e le relative somme di controllo SHA-256 sono disponibili nella
 | Windows x86_64 | ZIP portatile con applicazione e CLI |
 | Linux x86_64 | Pacchetto `.deb` per amd64 o archivio `.tar.gz`, con applicazione e CLI |
 
-**0.11.1 è sperimentale** e migliora la navigazione da tastiera, il focus visibile e i controlli automatici di qualità.
+**0.11.2 è sperimentale** e migliora le finestre meno alte, la navigazione delle librerie da tastiera e i comandi di focus.
 Il pacchetto Mac ha una firma ad hoc e non è stato autenticato da Apple tramite
 notarizzazione. I pacchetti Windows non sono firmati con un certificato dell’editore.
 Consulta la [guida all’installazione](../installation.md).
