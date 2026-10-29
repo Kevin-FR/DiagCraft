@@ -34,3 +34,5 @@ pub mod images;
 pub mod raster;
 
 pub mod mermaid;
+
+pub mod auto_layout;

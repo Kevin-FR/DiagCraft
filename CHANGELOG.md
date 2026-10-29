@@ -3,7 +3,12 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
-## Non publié — insertion directe et accueil multilingue
+## Non publié — mise en page, insertion directe et accueil multilingue
+
+- Première mise en page automatique des blocs de la sélection ou page active, horizontale/verticale, avec aperçu des positions et validation explicite.
+- Blocs protégés, masqués, groupés et textes laissés en place ; obstacles fixes évités, points de passage manuels conservés.
+- Flux cycliques acceptés, calcul déterministe borné à 500 blocs, page extensible et une seule annulation ; aperçu périmé refusé.
+- Commande dans Organiser et palette, interface traduite dans les sept langues.
 
 - Une forme choisie dans la bibliothèque peut être insérée en cliquant sur un connecteur : repère de survol, partage atomique et annulation unique.
 - En cas de manque de place, l’insertion est refusée sans créer de bloc isolé. Texte seul, symboles personnels et liaisons protégées gardent leur comportement actuel.

@@ -86,7 +86,8 @@ sept langues, tests moteur/interface et cohérence des exports. Les changements
 versionnés avec migration ; aucun numéro n’est promis ici.
 
 - [x] Insertion directe sur connecteur et repère de survol (branche de développement, non publié).
-- [ ] Mise en page automatique avec aperçu et annulation.
+- [x] Première mise en page automatique des blocs avec aperçu et annulation (branche de développement, non publié). Voir [le périmètre et les limites](docs/mise-en-page.md).
+- [ ] Affiner la mise en page : réduction des croisements, déplacement des groupes comme unités et réglage des espacements.
 - [ ] Arborescence des objets.
 - [ ] Liens de navigation entre pages.
 - [ ] Conteneurs et couloirs de processus.

@@ -193,6 +193,14 @@ le clic appelle `insert_shape_on_connector`, déjà atomique dans le moteur.
 Un refus conserve le dessin et l’outil ; un succès crée une seule entrée
 d’historique. Texte seul et symboles personnels conservent le placement ordinaire.
 
+`auto_layout.rs` produit un nouveau document à partir de la page active :
+composantes fortement connexes itératives, niveaux du graphe condensé et placement
+borné évitant les boîtes des blocs et graphiques fixes. Les objets sont ordonnés
+par ID pour un résultat déterministe ; seuls les blocs éligibles changent de
+position. `auto_layout_ui.rs` conserve le document source, la page et l’onglet,
+montre un aperçu simplifié et refuse une application périmée. La validation du
+lot utilise l’historique existant. Aucun champ documentaire ou API n’est ajouté.
+
 ## Organisation des objets
 
 `organization.rs` conserve des métadonnées facultatives propres à chaque page :

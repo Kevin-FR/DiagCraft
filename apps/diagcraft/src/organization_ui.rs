@@ -229,6 +229,7 @@ impl DrawApp {
             }
             ui.separator();
             self.command_button(ui, Command::Layers);
+            self.command_button(ui, Command::AutoLayout);
         });
     }
 

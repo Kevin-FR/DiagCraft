@@ -43,6 +43,7 @@ pub(super) enum Command {
     EditText,
     FindObject,
     PlaceShape,
+    AutoLayout,
     Select,
     Rectangle,
     Text,
@@ -91,6 +92,12 @@ macro_rules! command {
 }
 
 pub(super) const COMMANDS: &[CommandSpec] = &[
+    command!(
+        AutoLayout,
+        "Mise en page automatique…",
+        "Organisation",
+        "layout arrange flow organize horizontal vertical"
+    ),
     command!(
         Settings,
         "Langue et paramètres…",
@@ -370,6 +377,7 @@ impl DrawApp {
             || self.show_pdf_export
             || self.image_ui.png_open
             || self.mermaid_ui.is_some()
+            || self.auto_layout_ui.is_some()
             || self.show_pages
             || self.show_layers
             || self.page_draft.is_some()
@@ -595,6 +603,7 @@ impl DrawApp {
             EditText => self.open_node_text(self.selected[0]),
             FindObject => self.open_object_search(),
             PlaceShape => self.place_shape_in_view(ctx),
+            AutoLayout => self.open_auto_layout(),
             Select => self.set_tool(Tool::Select),
             Rectangle => self.set_tool(Tool::Shape(ShapeKind::Rectangle)),
             Text => self.set_tool(Tool::Shape(ShapeKind::Text)),

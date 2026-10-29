@@ -9889,5 +9889,104 @@
     "it": "Da perfezionare",
     "pt": "A aperfeiçoar",
     "zh-Hans": "待完善"
+  },
+  "Mise en page automatique…": {
+    "fr": "Mise en page automatique…",
+    "en": "Automatic layout…",
+    "de": "Automatisches Layout…",
+    "es": "Distribución automática…",
+    "it": "Disposizione automatica…",
+    "pt": "Disposição automática…",
+    "zh-Hans": "自动布局…"
+  },
+  "Horizontal": {
+    "fr": "Horizontal",
+    "en": "Horizontal",
+    "de": "Horizontal",
+    "es": "Horizontal",
+    "it": "Orizzontale",
+    "pt": "Horizontal",
+    "zh-Hans": "水平"
+  },
+  "Vertical": {
+    "fr": "Vertical",
+    "en": "Vertical",
+    "de": "Vertikal",
+    "es": "Vertical",
+    "it": "Verticale",
+    "pt": "Vertical",
+    "zh-Hans": "垂直"
+  },
+  "Sélection uniquement": {
+    "fr": "Sélection uniquement",
+    "en": "Selection only",
+    "de": "Nur Auswahl",
+    "es": "Solo la selección",
+    "it": "Solo selezione",
+    "pt": "Somente seleção",
+    "zh-Hans": "仅所选对象"
+  },
+  "Les groupes, textes et blocs protégés restent en place. Les points manuels sont conservés.": {
+    "fr": "Les groupes, textes et blocs protégés restent en place. Les points manuels sont conservés.",
+    "en": "Groups, text and protected blocks stay in place. Manual waypoints are preserved.",
+    "de": "Gruppen, Texte und geschützte Blöcke bleiben an ihrem Platz. Manuelle Wegpunkte bleiben erhalten.",
+    "es": "Los grupos, textos y bloques protegidos mantienen su posición. Se conservan los puntos manuales.",
+    "it": "Gruppi, testi e blocchi protetti restano in posizione. I punti manuali vengono conservati.",
+    "pt": "Grupos, textos e blocos protegidos permanecem no lugar. Os pontos manuais são preservados.",
+    "zh-Hans": "组、文本和受保护的块保持原位。保留手动路径点。"
+  },
+  "{0} blocs déplacés · {1} blocs conservés": {
+    "fr": "{0} blocs déplacés · {1} blocs conservés",
+    "en": "{0} blocks moved · {1} blocks kept",
+    "de": "{0} Blöcke verschoben · {1} Blöcke beibehalten",
+    "es": "{0} bloques movidos · {1} bloques conservados",
+    "it": "{0} blocchi spostati · {1} blocchi mantenuti",
+    "pt": "{0} blocos movidos · {1} blocos mantidos",
+    "zh-Hans": "移动 {0} 个块 · 保留 {1} 个块"
+  },
+  "La page peut s’agrandir. Vérifiez l’aperçu avant d’appliquer.": {
+    "fr": "La page peut s’agrandir. Vérifiez l’aperçu avant d’appliquer.",
+    "en": "The page may grow. Review the preview before applying.",
+    "de": "Die Seite kann größer werden. Prüfen Sie die Vorschau vor dem Anwenden.",
+    "es": "La página puede ampliarse. Revisa la vista previa antes de aplicar.",
+    "it": "La pagina può ingrandirsi. Controlla l’anteprima prima di applicare.",
+    "pt": "A página pode aumentar. Revise a prévia antes de aplicar.",
+    "zh-Hans": "页面可能扩大。请在应用前检查预览。"
+  },
+  "Aperçu des positions · liaisons simplifiées": {
+    "fr": "Aperçu des positions · liaisons simplifiées",
+    "en": "Position preview · simplified connections",
+    "de": "Positionsvorschau · vereinfachte Verbindungen",
+    "es": "Vista previa de posiciones · conexiones simplificadas",
+    "it": "Anteprima posizioni · collegamenti semplificati",
+    "pt": "Prévia das posições · conexões simplificadas",
+    "zh-Hans": "位置预览 · 简化连接线"
+  },
+  "Aucun bloc à organiser.": {
+    "fr": "Aucun bloc à organiser.",
+    "en": "No blocks to arrange.",
+    "de": "Keine Blöcke zum Anordnen.",
+    "es": "No hay bloques para organizar.",
+    "it": "Nessun blocco da disporre.",
+    "pt": "Nenhum bloco para organizar.",
+    "zh-Hans": "没有可排列的块。"
+  },
+  "Maximum de 500 blocs par mise en page.": {
+    "fr": "Maximum de 500 blocs par mise en page.",
+    "en": "Maximum 500 blocks per layout.",
+    "de": "Maximal 500 Blöcke pro Layout.",
+    "es": "Máximo de 500 bloques por distribución.",
+    "it": "Massimo 500 blocchi per disposizione.",
+    "pt": "Máximo de 500 blocos por disposição.",
+    "zh-Hans": "每次布局最多 500 个块。"
+  },
+  "La mise en page dépasse les dimensions autorisées.": {
+    "fr": "La mise en page dépasse les dimensions autorisées.",
+    "en": "The layout exceeds the allowed dimensions.",
+    "de": "Das Layout überschreitet die zulässigen Abmessungen.",
+    "es": "La distribución supera las dimensiones permitidas.",
+    "it": "La disposizione supera le dimensioni consentite.",
+    "pt": "A disposição excede as dimensões permitidas.",
+    "zh-Hans": "布局超出允许的尺寸。"
   }
 }
