@@ -204,6 +204,20 @@ impl DrawApp {
         self.normalize_selection();
         self.reveal_selection(ctx);
     }
+    fn reveal_outline_selection(&mut self) -> bool {
+        let view = self.doc.organization_view();
+        let Some(row) = rows(&self.doc).into_iter().find(|row| {
+            matches!(row.key, TreeKey::Object(id) if self.selected.contains(&id) && view.is_object_visible(id))
+        }) else {
+            return false;
+        };
+        self.outline_ui.query.clear();
+        for ancestor in row.ancestors {
+            self.outline_ui.collapsed.remove(&ancestor);
+        }
+        self.outline_ui.pending_focus = Some(row.key);
+        true
+    }
     pub(super) fn outline_panel(&mut self, ui: &mut egui::Ui) {
         let context = (self.active_tab, self.doc.page_index);
         if self.outline_ui.context != Some(context) {
@@ -239,6 +253,19 @@ impl DrawApp {
         ui.horizontal_wrapped(|ui| {
             if ui.small_button(t("Tout développer")).clicked() {
                 self.outline_ui.collapsed.clear();
+            }
+            let can_reveal = self
+                .selected
+                .iter()
+                .any(|&id| self.doc.organization_view().is_object_visible(id));
+            if ui
+                .add_enabled(
+                    can_reveal,
+                    egui::Button::new(t("Montrer la sélection")).small(),
+                )
+                .clicked()
+            {
+                self.reveal_outline_selection();
             }
             if ui.small_button(t("Calques…")).clicked() {
                 self.show_layers = true;
@@ -447,6 +474,36 @@ mod tests {
                     .show(ctx, |ui| app.outline_panel(ui));
             },
         )
+    }
+    #[test]
+    fn reveal_selection_clears_filter_and_expands_ancestors_without_changing_document() {
+        let (ctx, mut app, a, _, hidden) = fixture();
+        render(&ctx, &mut app, vec![]);
+        let ancestors = rows(&app.doc)
+            .into_iter()
+            .find(|r| r.key == TreeKey::Object(a))
+            .unwrap()
+            .ancestors;
+        app.outline_ui.collapsed.extend(ancestors.iter().copied());
+        app.outline_ui.query = "no match".into();
+        app.selected = vec![a];
+        let before = serde_json::to_string(&app.doc).unwrap();
+        assert!(app.reveal_outline_selection());
+        assert!(app.outline_ui.query.is_empty());
+        assert!(
+            ancestors
+                .iter()
+                .all(|key| !app.outline_ui.collapsed.contains(key))
+        );
+        assert_eq!(app.outline_ui.pending_focus, Some(TreeKey::Object(a)));
+        assert_eq!(app.selected, vec![a]);
+        assert_eq!(serde_json::to_string(&app.doc).unwrap(), before);
+        render(&ctx, &mut app, vec![]);
+        assert_eq!(app.outline_ui.pending_focus, None);
+        app.selected = vec![hidden];
+        app.outline_ui.query = "unchanged".into();
+        assert!(!app.reveal_outline_selection());
+        assert_eq!(app.outline_ui.query, "unchanged");
     }
     #[test]
     fn hierarchy_lists_each_object_once_and_search_reveals_folded_ancestors() {

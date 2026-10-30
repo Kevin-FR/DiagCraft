@@ -5,6 +5,8 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — structure du document
 
+- Commande pour retrouver un objet sélectionné dans l’arborescence, même si sa branche est repliée ou filtrée.
+
 - Nouveau navigateur dans le volet gauche et la palette : pages via sélecteur, calques, groupes et objets de la page active, avec noms, types et identifiants.
 - Recherche dans les aperçus des noms, types et IDs ; résultats visibles dans les branches repliées, états masqués/verrouillés explicités.
 - Sélection et révélation sur la feuille, ajout avec Maj, navigation clavier et rendu virtualisé ; aucun changement du dessin ou de son historique.

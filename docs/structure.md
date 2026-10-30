@@ -27,6 +27,8 @@ calques appartiennent à des espaces différents de ceux des objets.
 - Flèches Haut/Bas parcourent les lignes, même hors écran. Gauche replie une
   branche ou rejoint son parent ; Droite développe une branche. Dans la recherche,
   les touches restent celles d’un champ de texte.
+- **Montrer la sélection** efface le filtre, développe les branches parentes et
+  place le focus sur un objet sélectionné visible, sans modifier le dessin.
 - **Tout développer** réouvre les branches. La recherche conserve sa priorité tant
   qu’elle n’est pas effacée.
 

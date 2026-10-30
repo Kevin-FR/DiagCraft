@@ -10115,6 +10115,15 @@
     "pt": "Oculto",
     "zh-Hans": "已隐藏"
   },
+  "Montrer la sélection": {
+    "fr": "Montrer la sélection",
+    "en": "Show selection",
+    "de": "Auswahl anzeigen",
+    "es": "Mostrar selección",
+    "it": "Mostra selezione",
+    "pt": "Mostrar seleção",
+    "zh-Hans": "显示所选对象"
+  },
   "Tout développer": {
     "fr": "Tout développer",
     "en": "Expand all",
