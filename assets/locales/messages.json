@@ -10069,5 +10069,95 @@
     "it": "Sì",
     "pt": "Sim",
     "zh-Hans": "是"
+  },
+  "Structure du document": {
+    "fr": "Structure du document",
+    "en": "Document outline",
+    "de": "Dokumentstruktur",
+    "es": "Estructura del documento",
+    "it": "Struttura del documento",
+    "pt": "Estrutura do documento",
+    "zh-Hans": "文档结构"
+  },
+  "Calque": {
+    "fr": "Calque",
+    "en": "Layer",
+    "de": "Ebene",
+    "es": "Capa",
+    "it": "Livello",
+    "pt": "Camada",
+    "zh-Hans": "图层"
+  },
+  "Groupe": {
+    "fr": "Groupe",
+    "en": "Group",
+    "de": "Gruppe",
+    "es": "Grupo",
+    "it": "Gruppo",
+    "pt": "Grupo",
+    "zh-Hans": "组"
+  },
+  "Objets": {
+    "fr": "Objets",
+    "en": "Objects",
+    "de": "Objekte",
+    "es": "Objetos",
+    "it": "Oggetti",
+    "pt": "Objetos",
+    "zh-Hans": "对象"
+  },
+  "Masqué": {
+    "fr": "Masqué",
+    "en": "Hidden",
+    "de": "Ausgeblendet",
+    "es": "Oculto",
+    "it": "Nascosto",
+    "pt": "Oculto",
+    "zh-Hans": "已隐藏"
+  },
+  "Tout développer": {
+    "fr": "Tout développer",
+    "en": "Expand all",
+    "de": "Alle aufklappen",
+    "es": "Expandir todo",
+    "it": "Espandi tutto",
+    "pt": "Expandir tudo",
+    "zh-Hans": "全部展开"
+  },
+  "Cliquez pour sélectionner · Maj : ajouter": {
+    "fr": "Cliquez pour sélectionner · Maj : ajouter",
+    "en": "Click to select · Shift: add",
+    "de": "Klicken zum Auswählen · Umschalt: hinzufügen",
+    "es": "Clic para seleccionar · Mayús: añadir",
+    "it": "Clic per selezionare · Maiusc: aggiungi",
+    "pt": "Clique para selecionar · Shift: adicionar",
+    "zh-Hans": "点击选择 · Shift：添加"
+  },
+  "Affichez le calque pour sélectionner cet objet.": {
+    "fr": "Affichez le calque pour sélectionner cet objet.",
+    "en": "Show the layer to select this object.",
+    "de": "Blenden Sie die Ebene ein, um dieses Objekt auszuwählen.",
+    "es": "Muestra la capa para seleccionar este objeto.",
+    "it": "Mostra il livello per selezionare questo oggetto.",
+    "pt": "Mostre a camada para selecionar este objeto.",
+    "zh-Hans": "请显示图层后再选择此对象。"
+  },
+  "Replié": {
+    "fr": "Replié",
+    "en": "Collapsed",
+    "de": "Zugeklappt",
+    "es": "Contraído",
+    "it": "Compresso",
+    "pt": "Recolhido",
+    "zh-Hans": "已折叠"
+  },
+  "Développé": {
+    "fr": "Développé",
+    "en": "Expanded",
+    "de": "Aufgeklappt",
+    "es": "Expandido",
+    "it": "Espanso",
+    "pt": "Expandido",
+    "zh-Hans": "已展开"
   }
 }

@@ -44,6 +44,7 @@ pub(super) enum Command {
     FindObject,
     PlaceShape,
     AutoLayout,
+    Outline,
     Select,
     Rectangle,
     Text,
@@ -92,6 +93,12 @@ macro_rules! command {
 }
 
 pub(super) const COMMANDS: &[CommandSpec] = &[
+    command!(
+        Outline,
+        "Structure du document",
+        "Affichage",
+        "outline tree objects layers groups structure arborescence"
+    ),
     command!(
         AutoLayout,
         "Mise en page automatique…",
@@ -604,6 +611,10 @@ impl DrawApp {
             FindObject => self.open_object_search(),
             PlaceShape => self.place_shape_in_view(ctx),
             AutoLayout => self.open_auto_layout(),
+            Outline => {
+                self.library_panel = LibraryPanel::Outline;
+                self.show_library = true;
+            }
             Select => self.set_tool(Tool::Select),
             Rectangle => self.set_tool(Tool::Shape(ShapeKind::Rectangle)),
             Text => self.set_tool(Tool::Shape(ShapeKind::Text)),

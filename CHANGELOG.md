@@ -3,6 +3,13 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
+## Non publié — structure du document
+
+- Nouveau navigateur dans le volet gauche et la palette : pages via sélecteur, calques, groupes et objets de la page active, avec noms, types et identifiants.
+- Recherche dans les aperçus des noms, types et IDs ; résultats visibles dans les branches repliées, états masqués/verrouillés explicités.
+- Sélection et révélation sur la feuille, ajout avec Maj, navigation clavier et rendu virtualisé ; aucun changement du dessin ou de son historique.
+- Recherches et branches repliées transitoires ; la préférence existante reste lisible par les anciennes versions.
+
 ## 0.13.1 — mise en page et accueil entièrement localisé
 
 - Première publication du lot ; la candidate 0.13.0 reste non publiée, avec tag et paquets conservés.

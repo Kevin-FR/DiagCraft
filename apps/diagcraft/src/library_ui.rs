@@ -28,6 +28,7 @@ impl DrawApp {
                             (LibraryPanel::Text, "Texte"),
                             (LibraryPanel::Charts, "Graphiques"),
                             (LibraryPanel::Projects, "Travaux"),
+                            (LibraryPanel::Outline, "Structure du document"),
                         ] {
                             let active = self.show_library && self.library_panel == panel;
                             let response =
@@ -44,6 +45,24 @@ impl DrawApp {
                             let color = if active { ACCENT } else { INK };
                             let stroke = Stroke::new(1.7, color);
                             match panel {
+                                LibraryPanel::Outline => {
+                                    p.line_segment([r.left_top(), r.left_bottom()], stroke);
+                                    for y in [r.top() + 4., r.center().y, r.bottom() - 4.] {
+                                        p.line_segment(
+                                            [pos2(r.left(), y), pos2(r.left() + 8., y)],
+                                            stroke,
+                                        );
+                                        p.rect_stroke(
+                                            Rect::from_min_size(
+                                                pos2(r.left() + 8., y - 3.),
+                                                vec2(12., 6.),
+                                            ),
+                                            1,
+                                            stroke,
+                                            StrokeKind::Inside,
+                                        );
+                                    }
+                                }
                                 LibraryPanel::Models => {
                                     p.rect_stroke(r, 1, stroke, StrokeKind::Inside);
                                     p.vline(r.left() + 6., r.y_range(), stroke);
@@ -129,7 +148,12 @@ impl DrawApp {
                     LibraryPanel::Text => "Texte",
                     LibraryPanel::Charts => "Graphiques",
                     LibraryPanel::Projects => "Mes travaux",
+                    LibraryPanel::Outline => "Structure du document",
                 }, None);
+                if self.library_panel == LibraryPanel::Outline {
+                    self.outline_panel(ui);
+                    return;
+                }
                 ui.add(egui::TextEdit::singleline(&mut self.symbol_search)
                     .hint_text(t("Rechercher…")).desired_width(f32::INFINITY).char_limit(120));
                 ui.add_space(8.);
@@ -140,6 +164,7 @@ impl DrawApp {
                     .max_height(body_height)
                     .auto_shrink([false, false])
                     .show(ui, |ui| match self.library_panel {
+                        LibraryPanel::Outline => {},
                         LibraryPanel::Projects => {
                             if ui.button(t("Ouvrir mes travaux enregistrés")).clicked(){self.open_gallery();}
                             ui.add_space(12.);

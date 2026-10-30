@@ -3324,7 +3324,7 @@ fn document_panel_keeps_page_actions_visible_on_a_small_screen_and_title_edits_u
     assert_eq!(app.doc, before);
 }
 #[test]
-fn compact_rail_keeps_all_five_icons_and_symbols_reopens_in_one_click() {
+fn compact_rail_keeps_all_six_icons_and_symbols_reopens_in_one_click() {
     let (ctx, mut app, _) = panel_setup();
     app.show_library = false;
     let size = vec2(1280., 800.);
@@ -3347,7 +3347,7 @@ fn compact_rail_keeps_all_five_icons_and_symbols_reopens_in_one_click() {
             .collect::<Vec<_>>();
     }
     buttons.sort_by(|a, b| a.y.total_cmp(&b.y));
-    assert_eq!(buttons.len(), 5);
+    assert_eq!(buttons.len(), 6);
     assert!(app.canvas.left() < 75.);
     panel_click(&ctx, &mut app, size, buttons[1]);
     assert!(app.show_library);
@@ -7727,4 +7727,55 @@ fn shape_click_inserts_on_connector_in_seven_languages_as_one_edit() {
         assert_eq!(app.doc, after);
     }
     i18n::activate(Language::French);
+}
+
+#[test]
+fn outline_keyboard_navigation_does_not_move_canvas_objects() {
+    let (ctx, mut app, id) = panel_setup();
+    app.doc.node_mut(id).unwrap().text = "Outline keyboard target".into();
+    app.history = History::new(&app.doc);
+    let before = app.doc.clone();
+    app.run_command(commands_ui::Command::Outline, &ctx);
+    let size = vec2(1200., 680.);
+    let mut output = stable_panel(&ctx, &mut app, size);
+    for _ in 0..2 {
+        output = panel_frame(&ctx, &mut app, size, vec![]);
+    }
+    let point = output
+        .shapes
+        .iter()
+        .find_map(|s| {
+            if let egui::Shape::Text(text) = &s.shape
+                && text.galley.text() == "Outline keyboard target"
+                && text.pos.x < app.canvas.left()
+            {
+                Some(text.pos + text.galley.size() / 2.)
+            } else {
+                None
+            }
+        })
+        .expect("outline row must be visible");
+    panel_click(&ctx, &mut app, size, point);
+    assert_eq!(app.selected, vec![id]);
+    assert!(
+        ctx.wants_keyboard_input(),
+        "clicked outline row must keep keyboard focus"
+    );
+    assert!(!app.history.can_undo(), "click must not create an edit");
+    for key in [Key::ArrowUp, Key::ArrowDown] {
+        panel_frame(
+            &ctx,
+            &mut app,
+            size,
+            vec![nudge_key(key, true, false, egui::Modifiers::NONE)],
+        );
+        panel_frame(
+            &ctx,
+            &mut app,
+            size,
+            vec![nudge_key(key, false, false, egui::Modifiers::NONE)],
+        );
+    }
+    assert_eq!(app.doc, before);
+    assert!(!app.history.can_undo());
 }

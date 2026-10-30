@@ -100,6 +100,7 @@ enum LibraryPanel {
     Text,
     Charts,
     Projects,
+    Outline,
 }
 
 #[derive(Clone)]
@@ -189,6 +190,7 @@ pub struct DrawApp {
     language: Option<Language>,
     settings: settings_ui::Settings,
     symbol_search: String,
+    outline_ui: outline_ui::State,
     clipboard: Option<Document>,
     tabs: Vec<Session>,
     active_tab: usize,
@@ -260,6 +262,18 @@ pub struct DrawApp {
 
 impl DrawApp {
     pub fn capture_tab(&mut self, name: &str) {
+        if name == "structure" {
+            self.library_panel = LibraryPanel::Outline;
+            self.show_library = true;
+            self.show_inspector = false;
+            self.show_quick_toolbar = false;
+            self.doc.group_objects(&[3, 4]).unwrap();
+            self.saved = self.doc.clone();
+            self.history = History::new(&self.doc);
+            self.selected = vec![3, 4];
+            self.fit_next = true;
+            return;
+        }
         if name == "mise-en-page" {
             self.selected.clear();
             self.open_auto_layout();
@@ -802,6 +816,7 @@ impl DrawApp {
                 ..Default::default()
             },
             symbol_search: String::new(),
+            outline_ui: outline_ui::State::default(),
             clipboard: None,
             tabs: vec![],
             active_tab: 0,
@@ -2925,3 +2940,6 @@ mod connector_insert_ui;
 
 #[path = "auto_layout_ui.rs"]
 mod auto_layout_ui;
+
+#[path = "outline_ui.rs"]
+mod outline_ui;

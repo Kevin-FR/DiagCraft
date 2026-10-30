@@ -57,7 +57,13 @@ impl DrawApp {
             inspector_width: self.inspector_width,
             ribbon: self.ribbon_expanded,
             tab: self.ribbon_tab,
-            panel: self.library_panel,
+            // Outline is a transient navigator, so older app versions can still
+            // read the existing version-1 panel preference.
+            panel: if self.library_panel == LibraryPanel::Outline {
+                LibraryPanel::Symbols
+            } else {
+                self.library_panel
+            },
             floating_toolbar: self.show_quick_toolbar,
             ..Default::default()
         }

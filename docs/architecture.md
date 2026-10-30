@@ -159,6 +159,22 @@ La création et le texte gardent leurs annulations distinctes. Après fermeture
 d’une modale, une demande de focus refusée est réessayée ; les événements de
 saisie non traités sont rejoués avant la validation du texte.
 
+`outline_ui.rs` construit la structure de la page active à partir des IDs et de
+l’organisation existante. Les lignes portent des clés distinctes de calque,
+groupe et objet, sans décoder d’image ni calculer de route. Le modèle parcourt les
+métadonnées et les répartit par calques/groupes ; seuls les éléments visibles de la liste sont
+peints. Les noms sont bornés à 80 caractères pour limiter ce travail. Un sélecteur
+utilise `page_names()` sans copier les contenus des autres pages.
+
+Les branches repliées, la recherche et le focus sont transitoires. La recherche
+révèle les ancêtres et ignore le repli des branches pertinentes. Les flèches font
+défiler puis focalisent les lignes virtualisées ; la navigation spatiale egui est
+neutralisée pour ces événements. Un clic demande explicitement le focus afin de
+bloquer les raccourcis de déplacement du canevas. L’activation revalide la
+visibilité, développe les groupes sélectionnés et réutilise `reveal_selection`.
+Le choix de volet Outline est écrit comme Symbols dans les préférences v1 pour
+ne pas introduire de valeur d’énumération inconnue aux anciennes applications.
+
 ## Déplacement au clavier
 
 `focus_ui.rs` conserve les ancres de focus des cinq zones du workspace. Les
