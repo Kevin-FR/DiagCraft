@@ -19,6 +19,12 @@ calques appartiennent à des espaces différents de ceux des objets.
   et conserve les ancêtres des résultats, même s’ils étaient repliés. Un nom de
   calque ou de groupe correspondant révèle aussi ses descendants. Effacez le
   filtre avec **Effacer la recherche**.
+- **Chercher dans toutes les pages** lance une recherche explicite du filtre actuel.
+  Chaque résultat précise le numéro et le nom de sa page ; activez-le pour
+  rejoindre la page et l’objet, le calque ou le groupe. Les 300 premiers résultats
+  sont affichés au maximum : précisez la recherche si nécessaire. Les résultats
+  périmés après modification du document sont refusés. Le calcul se fait lors du
+  clic et peut prendre du temps pour un document très volumineux.
 - Cliquez sur un objet, ou focalisez-le puis appuyez sur Entrée, pour le sélectionner
   et le rendre visible sur la feuille. Maj ajoute à la sélection ; les membres
   d’un groupe restent sélectionnés ensemble. Les objets verrouillés visibles

@@ -5,6 +5,8 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — structure du document
 
+- Recherche de structure sur toutes les pages, avec accès à chaque résultat et distinction des identifiants par page.
+
 - Repli de tous les calques et groupes de l’arborescence en une action.
 - Correction de la notice de licence de `clipboard-win` 5.4.3 dans les paquets Windows.
 

@@ -10124,6 +10124,33 @@
     "pt": "Mostrar seleção",
     "zh-Hans": "显示所选对象"
   },
+  "Chercher dans toutes les pages": {
+    "fr": "Chercher dans toutes les pages",
+    "en": "Search all pages",
+    "de": "Alle Seiten durchsuchen",
+    "es": "Buscar en todas las páginas",
+    "it": "Cerca in tutte le pagine",
+    "pt": "Pesquisar em todas as páginas",
+    "zh-Hans": "搜索所有页面"
+  },
+  "Seuls les 300 premiers résultats sont affichés.": {
+    "fr": "Seuls les 300 premiers résultats sont affichés.",
+    "en": "Only the first 300 results are shown.",
+    "de": "Nur die ersten 300 Ergebnisse werden angezeigt.",
+    "es": "Solo se muestran los primeros 300 resultados.",
+    "it": "Sono mostrati solo i primi 300 risultati.",
+    "pt": "Apenas os primeiros 300 resultados são mostrados.",
+    "zh-Hans": "仅显示前 300 条结果。"
+  },
+  "Aucun résultat dans les pages.": {
+    "fr": "Aucun résultat dans les pages.",
+    "en": "No results in the pages.",
+    "de": "Keine Ergebnisse auf den Seiten.",
+    "es": "No hay resultados en las páginas.",
+    "it": "Nessun risultato nelle pagine.",
+    "pt": "Nenhum resultado nas páginas.",
+    "zh-Hans": "页面中没有结果。"
+  },
   "Tout replier": {
     "fr": "Tout replier",
     "en": "Collapse all",

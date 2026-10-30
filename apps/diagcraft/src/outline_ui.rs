@@ -23,6 +23,58 @@ pub(super) struct State {
     context: Option<(usize, usize)>,
     focused: Option<(TreeKey, egui::Id)>,
     pending_focus: Option<TreeKey>,
+    all_pages: Option<PageResults>,
+}
+const MAX_PAGE_RESULTS: usize = 300;
+#[derive(Clone)]
+struct PageHit {
+    page: usize,
+    key: TreeKey,
+    text: String,
+}
+struct PageResults {
+    hits: Vec<PageHit>,
+    truncated: bool,
+    revision: String,
+}
+fn search_pages(doc: &Document, query: &str) -> PageResults {
+    let words = commands_ui::normalize(query)
+        .split_whitespace()
+        .map(str::to_owned)
+        .collect::<Vec<_>>();
+    let mut hits = Vec::new();
+    let mut truncated = false;
+    if !words.is_empty() {
+        'pages: for page in 0..doc.page_count() {
+            let Some(page_doc) = doc.page_document(page) else {
+                continue;
+            };
+            for row in rows(&page_doc) {
+                if words.iter().all(|word| row.search.contains(word)) {
+                    if hits.len() == MAX_PAGE_RESULTS {
+                        truncated = true;
+                        break 'pages;
+                    }
+                    hits.push(PageHit {
+                        page,
+                        key: row.key,
+                        text: format!(
+                            "{} · {} · {} · {}",
+                            page + 1,
+                            short(&page_doc.page_name),
+                            row.label,
+                            row.detail
+                        ),
+                    });
+                }
+            }
+        }
+    }
+    PageResults {
+        hits,
+        truncated,
+        revision: diagcraft::agent::revision(doc),
+    }
 }
 fn short(text: &str) -> String {
     text.chars()
@@ -212,6 +264,7 @@ impl DrawApp {
             return false;
         };
         self.outline_ui.query.clear();
+        self.outline_ui.all_pages = None;
         for ancestor in row.ancestors {
             self.outline_ui.collapsed.remove(&ancestor);
         }
@@ -222,6 +275,7 @@ impl DrawApp {
         let context = (self.active_tab, self.doc.page_index);
         if self.outline_ui.context != Some(context) {
             self.outline_ui.collapsed.clear();
+            self.outline_ui.all_pages = None;
             self.outline_ui.focused = None;
             self.outline_ui.pending_focus = None;
             self.outline_ui.context = Some(context);
@@ -244,17 +298,32 @@ impl DrawApp {
                     }
                 }
             });
-        ui.add(
-            egui::TextEdit::singleline(&mut self.outline_ui.query)
-                .hint_text(t("Texte, type ou #identifiant…"))
-                .char_limit(120)
-                .desired_width(f32::INFINITY),
-        );
+        let search_changed = ui
+            .add(
+                egui::TextEdit::singleline(&mut self.outline_ui.query)
+                    .hint_text(t("Texte, type ou #identifiant…"))
+                    .char_limit(120)
+                    .desired_width(f32::INFINITY),
+            )
+            .changed();
+        if search_changed {
+            self.outline_ui.all_pages = None;
+        }
         ui.horizontal_wrapped(|ui| {
             if !self.outline_ui.query.is_empty()
                 && ui.small_button(t("Effacer la recherche")).clicked()
             {
                 self.outline_ui.query.clear();
+                self.outline_ui.all_pages = None;
+            }
+            if ui
+                .add_enabled(
+                    !self.outline_ui.query.trim().is_empty(),
+                    egui::Button::new(t("Chercher dans toutes les pages")).small(),
+                )
+                .clicked()
+            {
+                self.outline_ui.all_pages = Some(search_pages(&self.doc, &self.outline_ui.query));
             }
             if ui.small_button(t("Tout développer")).clicked() {
                 self.outline_ui.collapsed.clear();
@@ -288,6 +357,54 @@ impl DrawApp {
                 self.show_layers = true;
             }
         });
+        if let Some(results) = &self.outline_ui.all_pages {
+            let mut chosen: Option<PageHit> = None;
+            if results.truncated {
+                ui.label(t("Seuls les 300 premiers résultats sont affichés."));
+            }
+            if results.hits.is_empty() {
+                ui.label(t("Aucun résultat dans les pages."));
+            }
+            egui::ScrollArea::vertical()
+                .id_salt("outline_all_pages")
+                .show_rows(ui, 36., results.hits.len(), |ui, range| {
+                    for index in range {
+                        let hit = &results.hits[index];
+                        ui.push_id((hit.page, hit.key), |ui| {
+                            let response = ui.add_sized(
+                                [ui.available_width(), 36.],
+                                egui::Button::new(&hit.text).truncate(),
+                            );
+                            if response.clicked() {
+                                chosen = Some(hit.clone());
+                            }
+                        });
+                    }
+                });
+            if let Some(hit) = chosen {
+                if diagcraft::agent::revision(&self.doc) != results.revision {
+                    self.outline_ui.all_pages = None;
+                    self.status =
+                        t("Le document a changé. Actualisez l’aperçu avant de continuer.");
+                } else {
+                    if hit.page != self.doc.page_index {
+                        self.switch_page(hit.page);
+                    }
+                    self.outline_ui.query.clear();
+                    self.outline_ui.all_pages = None;
+                    self.outline_ui.collapsed.clear();
+                    self.outline_ui.context = Some((self.active_tab, self.doc.page_index));
+                    self.outline_ui.pending_focus = Some(hit.key);
+                    if let TreeKey::Object(id) = hit.key {
+                        self.outline_choose(id, false, ui.ctx());
+                    }
+                }
+            } else if let Some(page) = page {
+                self.outline_ui.all_pages = None;
+                self.switch_page(page);
+            }
+            return;
+        }
         ui.label(
             RichText::new(t("Cliquez pour sélectionner · Maj : ajouter"))
                 .small()
@@ -521,6 +638,122 @@ mod tests {
         app.outline_ui.query = "unchanged".into();
         assert!(!app.reveal_outline_selection());
         assert_eq!(app.outline_ui.query, "unchanged");
+    }
+    #[test]
+    fn search_across_pages_keeps_duplicate_ids_distinct_and_bounds_results() {
+        let mut doc = Document::default();
+        let first = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+        doc.node_mut(first).unwrap().text = "Équipe".into();
+        doc.add_page(false).unwrap();
+        let second = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+        doc.node_mut(second).unwrap().text = "Équipe".into();
+        assert_eq!(first, second);
+        let before = doc.clone();
+        let result = search_pages(&doc, "equipe");
+        assert_eq!(result.hits.len(), 2);
+        assert_eq!((result.hits[0].page, result.hits[1].page), (0, 1));
+        assert_eq!(result.hits[0].key, result.hits[1].key);
+        assert!(!result.truncated);
+        assert_eq!(doc, before);
+        for _ in 0..301 {
+            let id = doc.add_node(ShapeKind::Rectangle, [200., 200.]);
+            doc.node_mut(id).unwrap().text = "many".into();
+        }
+        let result = search_pages(&doc, "many");
+        assert_eq!(result.hits.len(), MAX_PAGE_RESULTS);
+        assert!(result.truncated);
+    }
+    #[test]
+    fn search_result_opens_the_right_page_and_selects_its_object() {
+        let ctx = egui::Context::default();
+        let mut doc = Document::default();
+        let id = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+        doc.node_mut(id).unwrap().text = "matching".into();
+        doc.add_page(false).unwrap();
+        let second = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+        doc.node_mut(second).unwrap().text = "matching".into();
+        doc.switch_page(0).unwrap();
+        let mut app = DrawApp::from_context(&ctx, doc, None, None);
+        render(&ctx, &mut app, vec![]);
+        app.outline_ui.query = "matching".into();
+        app.outline_ui.all_pages = Some(search_pages(&app.doc, "matching"));
+        let output = render(&ctx, &mut app, vec![]);
+        let point = output
+            .shapes
+            .iter()
+            .find_map(|shape| match &shape.shape {
+                egui::Shape::Text(text)
+                    if text.galley.text().starts_with("2 · Page 2 · matching") =>
+                {
+                    Some(text.pos + text.galley.size() / 2.)
+                }
+                _ => None,
+            })
+            .expect("second page result is visible");
+        for pressed in [true, false] {
+            render(
+                &ctx,
+                &mut app,
+                vec![
+                    egui::Event::PointerMoved(point),
+                    egui::Event::PointerButton {
+                        pos: point,
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+            );
+        }
+        assert_eq!(app.doc.page_index, 1);
+        assert_eq!(app.selected, vec![second]);
+        assert!(app.outline_ui.query.is_empty());
+        assert!(!app.history.can_undo());
+    }
+    #[test]
+    fn stale_page_result_does_not_navigate_or_select() {
+        let ctx = egui::Context::default();
+        let mut doc = Document::default();
+        let id = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+        doc.node_mut(id).unwrap().text = "stale target".into();
+        doc.add_page(false).unwrap();
+        doc.switch_page(0).unwrap();
+        let mut app = DrawApp::from_context(&ctx, doc, None, None);
+        render(&ctx, &mut app, vec![]);
+        app.outline_ui.query = "stale target".into();
+        app.outline_ui.all_pages = Some(search_pages(&app.doc, "stale target"));
+        app.doc.node_mut(id).unwrap().text = "changed".into();
+        let output = render(&ctx, &mut app, vec![]);
+        let point = output
+            .shapes
+            .iter()
+            .find_map(|shape| match &shape.shape {
+                egui::Shape::Text(text)
+                    if text.galley.text().starts_with("1 · Page 1 · stale target") =>
+                {
+                    Some(text.pos + text.galley.size() / 2.)
+                }
+                _ => None,
+            })
+            .expect("snapshot result is visible");
+        for pressed in [true, false] {
+            render(
+                &ctx,
+                &mut app,
+                vec![
+                    egui::Event::PointerMoved(point),
+                    egui::Event::PointerButton {
+                        pos: point,
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+            );
+        }
+        assert!(app.outline_ui.all_pages.is_none());
+        assert_eq!(app.doc.page_index, 0);
+        assert!(app.selected.is_empty());
     }
     #[test]
     fn collapse_all_button_hides_branches_without_editing_the_document() {
