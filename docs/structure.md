@@ -17,7 +17,8 @@ calques appartiennent à des espaces différents de ceux des objets.
 - Cliquez sur un calque ou un groupe pour replier/développer sa branche.
 - Cherchez un nom, un type ou un `#identifiant`. La recherche ignore les accents
   et conserve les ancêtres des résultats, même s’ils étaient repliés. Un nom de
-  calque ou de groupe correspondant révèle aussi ses descendants.
+  calque ou de groupe correspondant révèle aussi ses descendants. Effacez le
+  filtre avec **Effacer la recherche**.
 - Cliquez sur un objet, ou focalisez-le puis appuyez sur Entrée, pour le sélectionner
   et le rendre visible sur la feuille. Maj ajoute à la sélection ; les membres
   d’un groupe restent sélectionnés ensemble. Les objets verrouillés visibles

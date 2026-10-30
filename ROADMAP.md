@@ -92,6 +92,7 @@ versionnés avec migration ; aucun numéro n’est promis ici.
 - [x] Réduire les croisements estimés entre niveaux voisins : balayages bornés, meilleur ordre retenu et score dans l’aperçu (0.13.1).
 - [ ] Affiner la mise en page : déplacement des groupes comme unités et prise en compte des routes réelles/liaisons longues dans l’optimisation.
 - [x] Première arborescence : page active → calques → groupes → objets, sélecteur de page, filtre et navigation clavier (branche de développement, non publié).
+- [x] Retrouver la sélection et effacer le filtre dans l’arborescence (branche de développement, non publié).
 - [ ] Étendre la recherche de structure à plusieurs pages simultanément.
 - [ ] Liens de navigation entre pages.
 - [ ] Conteneurs et couloirs de processus.

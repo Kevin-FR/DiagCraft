@@ -5,6 +5,9 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — structure du document
 
+- Filtre de structure effaçable par un bouton dédié.
+- Dépendance Windows `clipboard-win` mise à jour en 5.4.3 pour remplacer la version retirée.
+
 - Commande pour retrouver un objet sélectionné dans l’arborescence, même si sa branche est repliée ou filtrée.
 
 - Nouveau navigateur dans le volet gauche et la palette : pages via sélecteur, calques, groupes et objets de la page active, avec noms, types et identifiants.

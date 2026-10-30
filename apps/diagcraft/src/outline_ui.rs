@@ -251,6 +251,11 @@ impl DrawApp {
                 .desired_width(f32::INFINITY),
         );
         ui.horizontal_wrapped(|ui| {
+            if !self.outline_ui.query.is_empty()
+                && ui.small_button(t("Effacer la recherche")).clicked()
+            {
+                self.outline_ui.query.clear();
+            }
             if ui.small_button(t("Tout développer")).clicked() {
                 self.outline_ui.collapsed.clear();
             }
@@ -504,6 +509,42 @@ mod tests {
         app.outline_ui.query = "unchanged".into();
         assert!(!app.reveal_outline_selection());
         assert_eq!(app.outline_ui.query, "unchanged");
+    }
+    #[test]
+    fn clear_filter_button_restores_rows_without_editing_the_document() {
+        let (ctx, mut app, _, _, _) = fixture();
+        let before = app.doc.clone();
+        app.outline_ui.query = "missing".into();
+        render(&ctx, &mut app, vec![]);
+        let output = render(&ctx, &mut app, vec![]);
+        let point = output
+            .shapes
+            .iter()
+            .find_map(|shape| match &shape.shape {
+                egui::Shape::Text(text) if text.galley.text() == t("Effacer la recherche") => {
+                    Some(text.pos + text.galley.size() / 2.)
+                }
+                _ => None,
+            })
+            .expect("clear filter button is visible");
+        for pressed in [true, false] {
+            render(
+                &ctx,
+                &mut app,
+                vec![
+                    egui::Event::PointerMoved(point),
+                    egui::Event::PointerButton {
+                        pos: point,
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+            );
+        }
+        assert!(app.outline_ui.query.is_empty());
+        assert_eq!(app.doc, before);
+        assert!(!app.history.can_undo());
     }
     #[test]
     fn hierarchy_lists_each_object_once_and_search_reveals_folded_ancestors() {
