@@ -21,7 +21,7 @@ Las aplicaciones y sus sumas de comprobación SHA-256 están en la
 | Windows x86_64 | ZIP portátil con la aplicación y la CLI |
 | Linux x86_64 | Paquete `.deb` para amd64 o archivo `.tar.gz`, con la aplicación y la CLI |
 
-**0.13.0 es experimental** e incorpora distribución automática con vista previa, inserción directa en conectores y un dibujo de bienvenida localizado. [Guía de distribución automática](../mise-en-page.md).
+**0.13.1 es experimental** e incorpora distribución automática con vista previa, inserción directa en conectores y un dibujo de bienvenida localizado. [Guía de distribución automática](../mise-en-page.md).
 El paquete para Mac tiene firma ad hoc y no ha sido notarizado por Apple.
 Los paquetes de Windows no están firmados con un certificado de editor.
 Consulta la [guía de instalación](../installation.md).

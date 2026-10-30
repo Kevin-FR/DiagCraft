@@ -3,7 +3,13 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
-## 0.13.0 — mise en page, insertion directe et accueil multilingue
+## 0.13.1 — mise en page et accueil entièrement localisé
+
+- Première publication du lot ; la candidate 0.13.0 reste non publiée, avec tag et paquets conservés.
+- Traduction du libellé « Oui » des connecteurs du dessin d’accueil dans les sept langues.
+- Régression renforcée : les libellés non vides des connecteurs ne peuvent pas conserver le texte français dans les autres langues.
+
+## 0.13.0 — candidate non publiée, mise en page et insertion directe
 
 - Réordonnancement déterministe des blocs par niveaux pour réduire les croisements estimés des liaisons entre niveaux voisins, avec au plus huit balayages.
 - L’ordre initial est conservé si aucun score strictement meilleur n’est trouvé ; compteur avant/après dans l’aperçu, avec limites du score précisées.

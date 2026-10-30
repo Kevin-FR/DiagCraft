@@ -10060,5 +10060,14 @@
     "it": "Confronto con la disposizione automatica iniziale. I percorsi finali possono differire.",
     "pt": "Comparação com a disposição automática inicial. Os trajetos finais podem diferir.",
     "zh-Hans": "与初始自动排列比较。最终连接路径可能不同。"
+  },
+  "Oui": {
+    "fr": "Oui",
+    "en": "Yes",
+    "de": "Ja",
+    "es": "Sí",
+    "it": "Sì",
+    "pt": "Sim",
+    "zh-Hans": "是"
   }
 }

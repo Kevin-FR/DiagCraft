@@ -67,6 +67,14 @@ mod tests {
             }
             for (link, source) in geometry.connectors.iter_mut().zip(&original.connectors) {
                 assert_eq!(link.label, t(&source.label));
+                if language != Language::French && !source.label.is_empty() {
+                    assert_ne!(
+                        link.label,
+                        source.label,
+                        "{}: connector label must be localized",
+                        language.code()
+                    );
+                }
                 link.label = source.label.clone();
             }
             assert_eq!(geometry, original);

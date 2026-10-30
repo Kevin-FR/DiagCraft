@@ -16,7 +16,7 @@ Les critères détaillés et l’avancement sont suivis dans les issues GitHub.
 | **0.10.0 — livrée** | Images embarquées, recadrage, collage et export PNG configurable. | [#3](https://github.com/Kevin-FR/DiagCraft/issues/3) |
 | **0.11.0 — livrée** | Interopérabilité Mermaid et diagnostics CLI/MCP plus compréhensibles. | [#4](https://github.com/Kevin-FR/DiagCraft/issues/4) |
 | **0.12.1 — livrée** | Mini-carte facultative et navigation sur les grandes feuilles. | [#10](https://github.com/Kevin-FR/DiagCraft/issues/10) |
-| **0.13.0 — livrée** | Mise en page automatique avec aperçu, insertion directe sur connecteur et accueil localisé. | [Guide](docs/mise-en-page.md) |
+| **0.13.1 — livrée** | Mise en page automatique avec aperçu, insertion directe sur connecteur et accueil localisé. | [Guide](docs/mise-en-page.md) |
 | **1.0.0 — suivant** | Parcours utilisateurs validés, accessibilité, performances et distribution fiable. | [#5](https://github.com/Kevin-FR/DiagCraft/issues/5) |
 
 ### Lot 0.12.1 — mini-carte
@@ -86,10 +86,10 @@ sept langues, tests moteur/interface et cohérence des exports. Les changements
 éventuels de format documentaire ou d’API agents devront être explicitement
 versionnés avec migration ; aucun numéro n’est promis ici.
 
-- [x] Insertion directe sur connecteur et repère de survol (0.13.0).
-- [x] Première mise en page automatique des blocs avec aperçu et annulation (0.13.0). Voir [le périmètre et les limites](docs/mise-en-page.md).
-- [x] Espacements indépendants entre niveaux et entre blocs, préréglages Compact/Normal/Aéré et aperçu recalculé (0.13.0).
-- [x] Réduire les croisements estimés entre niveaux voisins : balayages bornés, meilleur ordre retenu et score dans l’aperçu (0.13.0).
+- [x] Insertion directe sur connecteur et repère de survol (0.13.1).
+- [x] Première mise en page automatique des blocs avec aperçu et annulation (0.13.1). Voir [le périmètre et les limites](docs/mise-en-page.md).
+- [x] Espacements indépendants entre niveaux et entre blocs, préréglages Compact/Normal/Aéré et aperçu recalculé (0.13.1).
+- [x] Réduire les croisements estimés entre niveaux voisins : balayages bornés, meilleur ordre retenu et score dans l’aperçu (0.13.1).
 - [ ] Affiner la mise en page : déplacement des groupes comme unités et prise en compte des routes réelles/liaisons longues dans l’optimisation.
 - [ ] Arborescence des objets.
 - [ ] Liens de navigation entre pages.
@@ -143,7 +143,7 @@ robustesse des fichiers et distribution signée. Les certificats éditeur resten
 
 - [x] Interface en anglais, français, allemand, espagnol, italien, portugais et chinois simplifié (0.3.0).
 - [x] Police chinoise embarquée sous OFL pour l’interface et les exports PDF.
-- [x] Localisation du nouveau dessin d’accueil et de son modèle dans les sept langues (0.13.0).
+- [x] Localisation du nouveau dessin d’accueil et de son modèle dans les sept langues (0.13.1).
 - [ ] Relecture des traductions par des locuteurs natifs et localisation des autres contenus des modèles.
 - [ ] Chinois traditionnel et autres langues selon les contributions.
 
