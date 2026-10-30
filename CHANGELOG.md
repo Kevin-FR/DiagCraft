@@ -5,6 +5,9 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — structure du document
 
+- Repli de tous les calques et groupes de l’arborescence en une action.
+- Correction de la notice de licence de `clipboard-win` 5.4.3 dans les paquets Windows.
+
 - Filtre de structure effaçable par un bouton dédié.
 - Dépendance Windows `clipboard-win` mise à jour en 5.4.3 pour remplacer la version retirée.
 

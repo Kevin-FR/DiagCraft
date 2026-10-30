@@ -30,8 +30,9 @@ calques appartiennent à des espaces différents de ceux des objets.
   les touches restent celles d’un champ de texte.
 - **Montrer la sélection** efface le filtre, développe les branches parentes et
   place le focus sur un objet sélectionné visible, sans modifier le dessin.
-- **Tout développer** réouvre les branches. La recherche conserve sa priorité tant
-  qu’elle n’est pas effacée.
+- **Tout replier** ferme les calques et groupes ; **Tout développer** les réouvre.
+  Le repli global est désactivé pendant une recherche, qui affiche ses résultats
+  même dans les branches repliées.
 
 La liste peint seulement ses lignes visibles. Ses noms et filtres se limitent aux
 80 premiers caractères des noms/textes ; Cmd/Ctrl+F conserve la recherche complète

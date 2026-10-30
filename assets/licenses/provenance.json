@@ -317,9 +317,9 @@
     "sha256": "a94bf521d21b7db984c8b141b6f9341bbedbe24e617c1a55d952f8ef613ef1cd"
   },
   {
-    "crate": "clipboard-win 5.4.1",
-    "file": "assets/licenses/upstream/clipboard-win-5.4.1/LICENSE",
-    "url": "https://raw.githubusercontent.com/DoumanAsh/clipboard-win/3b27cf2bfd1adcfa6e0264eb51c1025ddaf0f342/LICENSE",
+    "crate": "clipboard-win 5.4.3",
+    "file": "assets/licenses/upstream/clipboard-win-5.4.3/LICENSE",
+    "url": "https://raw.githubusercontent.com/DoumanAsh/clipboard-win/ed27008ae5d1f10cfbb266de039f0fb35fd05a56/LICENSE",
     "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
   },
   {

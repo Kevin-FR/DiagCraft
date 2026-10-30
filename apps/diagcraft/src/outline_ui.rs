@@ -259,6 +259,18 @@ impl DrawApp {
             if ui.small_button(t("Tout développer")).clicked() {
                 self.outline_ui.collapsed.clear();
             }
+            if ui
+                .add_enabled(
+                    self.outline_ui.query.trim().is_empty(),
+                    egui::Button::new(t("Tout replier")).small(),
+                )
+                .clicked()
+            {
+                self.outline_ui.collapsed = rows(&self.doc)
+                    .into_iter()
+                    .filter_map(|row| (!matches!(row.key, TreeKey::Object(_))).then_some(row.key))
+                    .collect();
+            }
             let can_reveal = self
                 .selected
                 .iter()
@@ -511,6 +523,56 @@ mod tests {
         assert_eq!(app.outline_ui.query, "unchanged");
     }
     #[test]
+    fn collapse_all_button_hides_branches_without_editing_the_document() {
+        let (ctx, mut app, a, _, _) = fixture();
+        let before = app.doc.clone();
+        let ancestors = rows(&app.doc)
+            .into_iter()
+            .find(|row| row.key == TreeKey::Object(a))
+            .unwrap()
+            .ancestors;
+        render(&ctx, &mut app, vec![]);
+        let output = render(&ctx, &mut app, vec![]);
+        let point = output
+            .shapes
+            .iter()
+            .find_map(|shape| match &shape.shape {
+                egui::Shape::Text(text) if text.galley.text() == t("Tout replier") => {
+                    Some(text.pos + text.galley.size() / 2.)
+                }
+                _ => None,
+            })
+            .expect("collapse button is visible");
+        for pressed in [true, false] {
+            render(
+                &ctx,
+                &mut app,
+                vec![
+                    egui::Event::PointerMoved(point),
+                    egui::Event::PointerButton {
+                        pos: point,
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+            );
+        }
+        assert!(
+            ancestors
+                .iter()
+                .all(|key| app.outline_ui.collapsed.contains(key))
+        );
+        let rows = rows(&app.doc);
+        assert!(
+            !shown_rows(&rows, &app.outline_ui)
+                .iter()
+                .any(|i| rows[*i].key == TreeKey::Object(a))
+        );
+        assert_eq!(app.doc, before);
+        assert!(!app.history.can_undo());
+    }
+    #[test]
     fn clear_filter_button_restores_rows_without_editing_the_document() {
         let (ctx, mut app, _, _, _) = fixture();
         let before = app.doc.clone();
@@ -675,6 +737,11 @@ mod tests {
                 n.label()
                     .is_some_and(|s| s.contains("Équipe 中文") && s.contains(&format!("#{a}")))
             }));
+            assert!(
+                tree.nodes
+                    .iter()
+                    .any(|(_, n)| n.label() == Some(t("Tout replier").as_str()))
+            );
             assert_eq!(app.doc, before);
             app.doc.add_page(false).unwrap();
             let new = app.doc.add_node(ShapeKind::Rectangle, [300., 300.]);

@@ -10124,6 +10124,15 @@
     "pt": "Mostrar seleção",
     "zh-Hans": "显示所选对象"
   },
+  "Tout replier": {
+    "fr": "Tout replier",
+    "en": "Collapse all",
+    "de": "Alles einklappen",
+    "es": "Contraer todo",
+    "it": "Comprimi tutto",
+    "pt": "Recolher tudo",
+    "zh-Hans": "全部折叠"
+  },
   "Tout développer": {
     "fr": "Tout développer",
     "en": "Expand all",
