@@ -76,7 +76,7 @@ pas ces résultats calculés. Voir [le guide agents](AGENTS-DRAW.md).
 
 ## Insérer une étape directement sur une liaison
 
-Dans la branche de développement, choisissez une forme dans la bibliothèque,
+Depuis DiagCraft **0.13.0**, choisissez une forme dans la bibliothèque,
 puis survolez une liaison : un trait bleu et un repère **+** indiquent la cible.
 Cliquez pour insérer le bloc à cet endroit. Le connecteur devient deux liaisons ;
 son libellé reste sur la première et les styles/extrémités sont conservés.

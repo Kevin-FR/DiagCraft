@@ -1,6 +1,6 @@
 # Mise en page automatique des flux
 
-Fonction disponible dans la branche de développement, non encore distribuée.
+Disponible depuis DiagCraft **0.13.0**.
 Ouvrez **Organiser → Mise en page automatique…**, ou recherchez cette commande
 dans la palette Cmd/Ctrl+K. Choisissez Horizontal ou Vertical. Avec une sélection,
 la case « Sélection uniquement » est cochée ; décochez-la pour la page active.

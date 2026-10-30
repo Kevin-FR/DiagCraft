@@ -3,7 +3,7 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
-## Non publié — mise en page, insertion directe et accueil multilingue
+## 0.13.0 — mise en page, insertion directe et accueil multilingue
 
 - Réordonnancement déterministe des blocs par niveaux pour réduire les croisements estimés des liaisons entre niveaux voisins, avec au plus huit balayages.
 - L’ordre initial est conservé si aucun score strictement meilleur n’est trouvé ; compteur avant/après dans l’aperçu, avec limites du score précisées.

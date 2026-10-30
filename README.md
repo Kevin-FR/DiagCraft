@@ -21,7 +21,7 @@ Applications and their SHA-256 checksums are available on the
 | Windows x86_64 | Portable ZIP with the application and CLI |
 | Linux x86_64 | `.deb` package for amd64 or `.tar.gz` archive, with the application and CLI |
 
-**0.12.1 is experimental** and adds an optional mini-map for navigating large sheets.
+**0.13.0 is experimental** and adds automatic layout with preview, direct connector insertion and a localized welcome drawing. [Automatic layout guide](docs/mise-en-page.md).
 The Mac package is ad hoc signed and has not been notarized by Apple. Windows
 packages are not signed with a publisher certificate. See the
 [installation guide](docs/installation.md).
