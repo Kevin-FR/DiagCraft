@@ -5,6 +5,8 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — structure du document
 
+- Empaquetage macOS : nouvelles tentatives lorsque le volume temporaire est encore occupé.
+
 - Parcours clavier des résultats multipages hors écran avec les flèches et Entrée.
 
 - Recherche multipage exécutée en arrière-plan, avec progression et annulation lors d’un changement de filtre ou de page.

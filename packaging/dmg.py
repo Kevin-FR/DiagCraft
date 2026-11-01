@@ -5,12 +5,25 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def run(*args, **kwargs):
     return subprocess.run([str(x) for x in args], check=True, **kwargs)
+
+
+def detach(mount: Path):
+    """Retry only a busy temporary volume, allowing Finder to finish writing."""
+    for attempt in range(6):
+        try:
+            run("hdiutil", "detach", "-quiet", mount)
+            return
+        except subprocess.CalledProcessError as error:
+            if error.returncode != 16 or attempt == 5:
+                raise
+            time.sleep(min(0.5 * 2 ** attempt, 4))
 
 
 def create(app: Path, output: Path):
@@ -40,7 +53,7 @@ def create(app: Path, output: Path):
             run("osascript", ROOT / "packaging/dmg_layout.applescript", mount, timeout=60)
             run("sync")
         finally:
-            run("hdiutil", "detach", "-quiet", mount)
+            detach(mount)
         compressed = temp / "final.dmg"
         run("hdiutil", "convert", "-quiet", writable, "-format", "UDZO", "-o", compressed)
         run("hdiutil", "verify", "-quiet", compressed)
@@ -54,7 +67,7 @@ def create(app: Path, output: Path):
                 raise RuntimeError("Missing Finder layout or background")
             run("codesign", "--verify", "--deep", "--strict", inspect / app.name)
         finally:
-            run("hdiutil", "detach", "-quiet", inspect)
+            detach(inspect)
         with compressed.open("rb") as source_file, output.open("xb") as output_file:
             shutil.copyfileobj(source_file, output_file)
     return output
