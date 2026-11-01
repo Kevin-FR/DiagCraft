@@ -7,6 +7,8 @@ https://github.com/Kevin-FR/DiagCraft/releases
 
 Mac Apple Silicon (M1 ou ultérieur), macOS 13 minimum. Décompresser
 `diagcraft-<version>-macos-arm64.zip` et déplacer `DiagCraft.app` dans Applications.
+Pour une prochaine version proposant un DMG, ouvrir
+`diagcraft-<version>-macos-arm64.dmg` et glisser DiagCraft vers Applications.
 Le paquet contient uniquement arm64. La CLI est dans
 `DiagCraft.app/Contents/MacOS/diagcraft-cli` et dans un ZIP séparé.
 

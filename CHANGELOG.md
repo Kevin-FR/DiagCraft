@@ -5,6 +5,8 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — structure du document
 
+- Image disque macOS Apple Silicon avec installation par glisser-déposer vers Applications ; ZIP conservé.
+
 - Recherche de structure sur toutes les pages, avec accès à chaque résultat et distinction des identifiants par page.
 
 - Repli de tous les calques et groupes de l’arborescence en une action.

@@ -11,6 +11,7 @@ import tempfile
 import tomllib
 from licenses import collect
 from macos_audit import inspect
+from dmg import create as create_dmg
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -26,14 +27,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arm64", type=Path, default=ROOT / "target/release/diagcraft")
     parser.add_argument("--cli", type=Path, default=ROOT / "target/release/diagcraft-cli")
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "dist")
     args = parser.parse_args()
     for binary in (args.arm64, args.cli):
         if not binary.is_file() or run("lipo", "-archs", binary, capture_output=True, text=True, encoding="utf-8").stdout.strip() != "arm64":
             parser.error(f"An arm64-only executable is required: {binary}")
+    output_dir = args.output_dir.resolve()
     name = f"diagcraft-{version}-macos-arm64"
     cli_name = f"diagcraft-cli-{version}-macos-arm64"
-    stage, cli_stage = ROOT / "dist" / name, ROOT / "dist" / cli_name
-    for path in (stage, cli_stage, ROOT / "dist" / (name + ".zip"), ROOT / "dist" / (cli_name + ".zip")):
+    stage, cli_stage = output_dir / name, output_dir / cli_name
+    for path in (stage, cli_stage, output_dir / (name + ".zip"), output_dir / (cli_name + ".zip"), output_dir / (name + ".dmg")):
         if path.exists():
             parser.error(f"Refusing to replace an existing release: {path}")
     app = stage / "DiagCraft.app"
@@ -80,7 +83,7 @@ def main():
         run("codesign", "--force", "--sign", "-", binary)
     run("codesign", "--force", "--sign", "-", app)
     run("codesign", "--verify", "--deep", "--strict", app)
-    archive = ROOT / "dist" / (name + ".zip")
+    archive = output_dir / (name + ".zip")
     run("ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", app, archive)
     with tempfile.TemporaryDirectory(prefix="diagcraft-package-") as temp:
         run("ditto", "-x", "-k", archive, temp)
@@ -92,6 +95,8 @@ def main():
             assert run("lipo", "-archs", binary, capture_output=True, text=True, encoding="utf-8").stdout.strip() == "arm64"
             assert binary.read_bytes() == (macos / filename).read_bytes()
             assert version in run(binary, "--version", capture_output=True, text=True, encoding="utf-8").stdout
+    dmg_archive = output_dir / (name + ".dmg")
+    create_dmg(app, dmg_archive)
     cli_stage.mkdir()
     shutil.copy2(macos / "diagcraft-cli", cli_stage / "diagcraft-cli")
     shutil.copytree(resources / "Dependency-Licenses", cli_stage / "Dependency-Licenses")
@@ -99,15 +104,16 @@ def main():
         shutil.copy2(resources / filename, cli_stage / filename)
     shutil.copytree(agents, cli_stage / "Agents")
     shutil.copytree(ROOT / "assets/fonts", cli_stage / "Fonts")
-    cli_archive = ROOT / "dist" / (cli_name + ".zip")
+    cli_archive = output_dir / (cli_name + ".zip")
     run("ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", cli_stage, cli_archive)
     report = {"version": version, "target": "aarch64-apple-darwin", "minimum_macos": "13.0",
               "signature": "ad hoc; verified before and after extraction", "notarized": False,
               "native_architecture": native_audit,
               "dependency_notice_packages": len(manifest), "archive": archive.name,
+              "disk_image": dmg_archive.name, "disk_image_sha256": hashlib.sha256(dmg_archive.read_bytes()).hexdigest(),
               "sha256": hashlib.sha256(archive.read_bytes()).hexdigest()}
     (stage / "distribution-check.json").write_text(json.dumps(report, indent=2) + "\n")
-    print(f"App: {app}\nArchive: {archive}\nCLI: {cli_archive}\nNotices: {len(manifest)} packages")
+    print(f"App: {app}\nArchive: {archive}\nDMG: {dmg_archive}\nCLI: {cli_archive}\nNotices: {len(manifest)} packages")
 
 
 if __name__ == "__main__":

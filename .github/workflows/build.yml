@@ -131,6 +131,7 @@ jobs:
           name: diagcraft-${{ matrix.name }}
           path: |
             dist/*.zip
+            dist/*.dmg
             dist/*.tar.gz
             dist/*.deb
           if-no-files-found: error
