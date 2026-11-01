@@ -30,6 +30,8 @@ pub(super) struct State {
     pending_focus: Option<TreeKey>,
     all_pages: Option<PageResults>,
     page_job: Option<PageJob>,
+    result_focus: Option<(usize, egui::Id)>,
+    pending_result_focus: Option<usize>,
 }
 const MAX_PAGE_RESULTS: usize = 300;
 #[derive(Clone)]
@@ -337,6 +339,8 @@ impl DrawApp {
             self.outline_ui.page_job = None;
             self.outline_ui.focused = None;
             self.outline_ui.pending_focus = None;
+            self.outline_ui.result_focus = None;
+            self.outline_ui.pending_result_focus = None;
             self.outline_ui.context = Some(context);
         }
         if self
@@ -352,6 +356,8 @@ impl DrawApp {
                 Ok(result) => {
                     self.outline_ui.all_pages = Some(result);
                     self.outline_ui.page_job = None;
+                    self.outline_ui.result_focus = None;
+                    self.outline_ui.pending_result_focus = None;
                 }
                 Err(mpsc::TryRecvError::Empty) => {}
                 Err(mpsc::TryRecvError::Disconnected) => {
@@ -470,22 +476,60 @@ impl DrawApp {
             if results.hits.is_empty() {
                 ui.label(t("Aucun résultat dans les pages."));
             }
-            egui::ScrollArea::vertical()
-                .id_salt("outline_all_pages")
-                .show_rows(ui, 36., results.hits.len(), |ui, range| {
-                    for index in range {
-                        let hit = &results.hits[index];
-                        ui.push_id((hit.page, hit.key), |ui| {
-                            let response = ui.add_sized(
-                                [ui.available_width(), 36.],
-                                egui::Button::new(&hit.text).truncate(),
-                            );
-                            if response.clicked() {
-                                chosen = Some(hit.clone());
-                            }
-                        });
-                    }
+            if let Some((index, id)) = self.outline_ui.result_focus
+                && ui.memory(|memory| memory.focused()) == Some(id)
+                && index < results.hits.len()
+            {
+                let up = ui.input_mut(|input| {
+                    input.consume_key(egui::Modifiers::NONE, egui::Key::ArrowUp)
                 });
+                let down = ui.input_mut(|input| {
+                    input.consume_key(egui::Modifiers::NONE, egui::Key::ArrowDown)
+                });
+                if up || down {
+                    ui.memory_mut(|memory| memory.move_focus(egui::FocusDirection::None));
+                    self.outline_ui.pending_result_focus = Some(if up {
+                        index.saturating_sub(1)
+                    } else {
+                        (index + 1).min(results.hits.len() - 1)
+                    });
+                }
+            }
+            let scroll = egui::ScrollArea::vertical().id_salt("outline_all_pages");
+            let scroll = if let Some(index) = self
+                .outline_ui
+                .pending_result_focus
+                .filter(|&index| index < results.hits.len())
+            {
+                scroll.vertical_scroll_offset(index as f32 * (36. + ui.spacing().item_spacing.y))
+            } else {
+                scroll
+            };
+            scroll.show_rows(ui, 36., results.hits.len(), |ui, range| {
+                for index in range {
+                    let hit = &results.hits[index];
+                    ui.push_id((hit.page, hit.key), |ui| {
+                        let response = ui.add_sized(
+                            [ui.available_width(), 36.],
+                            egui::Button::new(&hit.text).truncate(),
+                        );
+                        focus_ui::outline(ui, &response);
+                        if self.outline_ui.pending_result_focus == Some(index) {
+                            response.request_focus();
+                            self.outline_ui.pending_result_focus = None;
+                        }
+                        if response.has_focus() {
+                            self.outline_ui.result_focus = Some((index, response.id));
+                        }
+                        if response.gained_focus() {
+                            response.scroll_to_me(None);
+                        }
+                        if response.clicked() {
+                            chosen = Some(hit.clone());
+                        }
+                    });
+                }
+            });
             if let Some(hit) = chosen {
                 if diagcraft::agent::revision(&self.doc) != results.revision {
                     self.outline_ui.all_pages = None;
@@ -1136,6 +1180,54 @@ mod tests {
         assert_eq!(app.selected, selected);
         assert_eq!(app.doc, before);
         assert!(app.history.can_redo());
+        assert!(!app.history.can_undo());
+    }
+    #[test]
+    fn virtual_multipage_results_can_be_navigated_and_selected_with_keyboard() {
+        let ctx = egui::Context::default();
+        let mut doc = Document::default();
+        let ids: Vec<_> = (0..300)
+            .map(|index| {
+                if index == 150 {
+                    doc.add_page(false).unwrap();
+                }
+                let id = doc.add_node(ShapeKind::Rectangle, [300., 300.]);
+                doc.node_mut(id).unwrap().text = format!("target {index}");
+                id
+            })
+            .collect();
+        doc.switch_page(0).unwrap();
+        assert_eq!(ids[0], ids[150]);
+        let mut app = DrawApp::from_context(&ctx, doc.clone(), None, None);
+        for _ in 0..3 {
+            render(&ctx, &mut app, vec![]);
+        }
+        app.outline_ui.query = "target".into();
+        app.outline_ui.all_pages = Some(search_pages(&app.doc, "target"));
+        app.outline_ui.pending_result_focus = Some(299);
+        for _ in 0..2 {
+            render(&ctx, &mut app, vec![]);
+        }
+        let (index, id) = app.outline_ui.result_focus.unwrap();
+        assert_eq!(index, 299);
+        assert_eq!(ctx.memory(|memory| memory.focused()), Some(id));
+        let event = |key, pressed| egui::Event::Key {
+            key,
+            physical_key: None,
+            pressed,
+            repeat: false,
+            modifiers: egui::Modifiers::NONE,
+        };
+        render(&ctx, &mut app, vec![event(egui::Key::ArrowUp, true)]);
+        render(&ctx, &mut app, vec![event(egui::Key::ArrowUp, false)]);
+        assert_eq!(app.outline_ui.result_focus.unwrap().0, 298);
+        render(&ctx, &mut app, vec![event(egui::Key::Enter, true)]);
+        render(&ctx, &mut app, vec![event(egui::Key::Enter, false)]);
+        assert_eq!(app.doc.page_index, 1);
+        assert_eq!(app.selected, vec![ids[298]]);
+        let mut restored = app.doc.clone();
+        restored.switch_page(0).unwrap();
+        assert_eq!(restored, doc);
         assert!(!app.history.can_undo());
     }
     #[test]

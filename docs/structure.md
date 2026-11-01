@@ -22,7 +22,9 @@ calques appartiennent à des espaces différents de ceux des objets.
 - **Chercher dans toutes les pages** lance une recherche explicite du filtre actuel.
   Chaque résultat précise le numéro et le nom de sa page ; activez-le pour
   rejoindre la page et l’objet, le calque ou le groupe. Les 300 premiers résultats
-  sont affichés au maximum : précisez la recherche si nécessaire. Les résultats
+  sont affichés au maximum : précisez la recherche si nécessaire. Dans les
+  résultats, utilisez Tab pour atteindre une ligne, les flèches Haut/Bas pour
+  parcourir la liste, puis Entrée pour l’ouvrir, y compris hors écran. Les résultats
   périmés après modification du document sont refusés. Le calcul se poursuit en
   arrière-plan ; il peut être annulé, et un changement de filtre ou de page
   abandonne la recherche précédente. Une copie du document est prise au lancement.
