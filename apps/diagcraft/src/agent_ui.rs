@@ -4,14 +4,46 @@ use diagcraft::agent;
 pub(super) struct AgentPanel {
     context: String,
     patch: String,
-    preview: Option<agent::Preview>,
+    preview: Option<Comparison>,
     error: Option<String>,
     tab: u8,
-    page: usize,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum PreviewView {
+    Before,
+    After,
+}
+
+struct Comparison {
+    source: Document,
+    result: agent::Preview,
+    view: PreviewView,
+    before_page: usize,
+    after_page: usize,
+}
+impl Comparison {
+    fn new(source: &Document, result: agent::Preview) -> Self {
+        let before_page = source.page_index;
+        let after_page = result.document.page_index;
+        Self {
+            source: source.clone(),
+            result,
+            view: PreviewView::After,
+            before_page,
+            after_page,
+        }
+    }
 }
 impl DrawApp {
     pub(super) fn open_agent_panel(&mut self) {
-        self.commit();
+        let was_editing = self.rich_editor.is_some();
+        if !self.commit_inline_if_needed() {
+            return;
+        }
+        if !was_editing {
+            self.commit();
+        }
         match context_for_agent(&self.doc) {
             Ok(context) => {
                 self.agent_panel = Some(AgentPanel {
@@ -20,7 +52,6 @@ impl DrawApp {
                     preview: None,
                     error: None,
                     tab: 0,
-                    page: self.doc.page_index,
                 })
             }
             Err(e) => self.error = Some(e),
@@ -28,8 +59,14 @@ impl DrawApp {
         self.context_open = false;
     }
     pub(super) fn apply_agent_patch(&mut self, text: &str) -> Result<(), String> {
-        // Recompute against the current in-memory document, including unsaved edits.
-        self.commit();
+        // Preserve the inline draft before revalidating against the current document.
+        let was_editing = self.rich_editor.is_some();
+        if !self.commit_inline_if_needed() {
+            return Err(t("Corrigez la saisie avant de continuer."));
+        }
+        if !was_editing {
+            self.commit();
+        }
         let patch = agent::parse_patch(text)?;
         let preview = agent::preview(&self.doc, &patch)?;
         self.doc = preview.document;
@@ -87,18 +124,28 @@ impl DrawApp {
                 ui.horizontal(|ui| {
                     if ui.button(t("Charger un patch…")).clicked() && let Some(path)=rfd::FileDialog::new().add_filter(t("Patch JSON"),&["json"]).pick_file(){match agent::read_patch(&path){Ok(p)=>{panel.patch=serde_json::to_string_pretty(&p).unwrap();panel.preview=None;panel.error=None;},Err(e)=>panel.error=Some(e)}}
                     if ui.button(t("Exemple sur ce document")).clicked(){panel.patch=example_patch(&self.doc);panel.preview=None;panel.error=None;}
-                    if ui.button(RichText::new(t("Vérifier et prévisualiser")).strong()).clicked(){match agent::parse_patch(&panel.patch).and_then(|p|agent::preview(&self.doc,&p)){Ok(p)=>{panel.preview=Some(p);panel.error=None;},Err(e)=>{panel.preview=None;panel.error=Some(e);}}}
+                    if ui.button(RichText::new(t("Vérifier et prévisualiser")).strong()).clicked(){match agent::parse_patch(&panel.patch).and_then(|p|agent::preview(&self.doc,&p)){Ok(p)=>{panel.preview=Some(Comparison::new(&self.doc,p));panel.error=None;},Err(e)=>{panel.preview=None;panel.error=Some(e);}}}
                 });
                 ui.add_space(10.);
                 ui.columns(2,|cols| {
                     cols[0].label(RichText::new(t("PATCH JSON")).strong().color(INFO_TEXT));
                     egui::ScrollArea::vertical().id_salt("agent_patch_scroll").max_height(390.).show(&mut cols[0],|ui|{if ui.add(egui::TextEdit::multiline(&mut panel.patch).font(egui::TextStyle::Monospace).desired_width(f32::INFINITY).desired_rows(24).char_limit(document::MAX_FILE_BYTES as usize).hint_text("{\n  \"api_version\": 1,\n  \"expected_revision\": \"sha256:…\",\n  \"operations\": […]\n}")).changed(){panel.preview=None;panel.error=None;}});
                     let ui=&mut cols[1];
-                    if let Some(preview)=&panel.preview {
-                        panel.page=panel.page.min(preview.document.page_count()-1);
-                        ui.horizontal(|ui|{ui.label(RichText::new(t("APERÇU DU RÉSULTAT")).strong().color(ACTION_TEXT));egui::ComboBox::from_id_salt("agent_preview_page").selected_text(i18n::render("Page {0}", &[("0", format!("{}", panel.page+1))])).show_ui(ui,|ui|{for (i,name) in preview.document.page_names().iter().enumerate(){ui.selectable_value(&mut panel.page,i,*name);}});});
+                    if let Some(comparison)=&mut panel.preview {
+                        ui.horizontal_wrapped(|ui|{
+                            ui.selectable_value(&mut comparison.view,PreviewView::Before,t("Avant"));
+                            ui.selectable_value(&mut comparison.view,PreviewView::After,t("Après"));
+                        });
+                        ui.small(t("Les pages sont indépendantes et peuvent être réordonnées. Chaque vue est ajustée séparément ; les différences ne sont pas surlignées."));
+                        let (document,page)=match comparison.view {
+                            PreviewView::Before => (&comparison.source,&mut comparison.before_page),
+                            PreviewView::After => (&comparison.result.document,&mut comparison.after_page),
+                        };
+                        *page=(*page).min(document.page_count()-1);
+                        ui.horizontal(|ui|{ui.label(RichText::new(t("APERÇU")).strong().color(ACTION_TEXT));egui::ComboBox::from_id_salt(("agent_preview_page",comparison.view == PreviewView::Before)).selected_text(i18n::render("Page {0}", &[("0", format!("{}", *page+1))])).show_ui(ui,|ui|{for (i,name) in document.page_names().iter().enumerate(){ui.selectable_value(page,i,*name);}});});
                         let (r,_)=ui.allocate_exact_size(vec2(ui.available_width(),230.),Sense::hover());
-                        library_ui::paint_document_preview(ui.painter(),&preview.document.page_document(panel.page).unwrap(),r);
+                        library_ui::paint_document_preview(ui.painter(),&document.page_document(*page).unwrap(),r);
+                        let preview=&comparison.result;
                         ui.label(RichText::new(i18n::render("{0} opérations · {1} pages · {2} objets", &[("0", format!("{}", preview.report["changes"].as_array().unwrap().len())),("1", format!("{}", preview.document.page_count())),("2", format!("{}", preview.document.object_count()))])).strong());
                         egui::ScrollArea::vertical().id_salt("agent_report_scroll").max_height(125.).show(ui,|ui|{
                             for c in preview.report["changes"].as_array().unwrap() {
@@ -117,7 +164,9 @@ impl DrawApp {
                     }
                 });
                 ui.add_space(12.);
-                ui.horizontal(|ui|{apply=ui.add_enabled(panel.preview.is_some(),egui::Button::new(RichText::new(t("Appliquer les modifications")).strong().color(Color32::WHITE)).fill(ACTION_FILL).stroke(Stroke::NONE)).clicked();ui.label(t("Un seul ⌘ Z annule tout le lot."));});
+                let preview_current=panel.preview.as_ref().is_some_and(|comparison| comparison.source == self.doc);
+                if panel.preview.is_some() && !preview_current { ui.colored_label(WARNING_TEXT,t("Le document a changé. Actualisez l’aperçu avant de continuer.")); }
+                ui.horizontal(|ui|{apply=ui.add_enabled(preview_current,egui::Button::new(RichText::new(t("Appliquer les modifications")).strong().color(Color32::WHITE)).fill(ACTION_FILL).stroke(Stroke::NONE)).clicked();ui.label(t("Un seul ⌘ Z annule tout le lot."));});
             } else {
                 ui.heading(t("Vos outils, votre modèle"));
                 ui.label(t("Un agent peut utiliser le binaire de l’app sans ouvrir de fenêtre. L’accès MCP est limité au dossier que vous choisissez dans la configuration de votre client."));
@@ -151,10 +200,11 @@ impl DrawApp {
         self.open_agent_panel();
         let patch = example_patch(&self.doc);
         let preview = agent::preview(&self.doc, &agent::parse_patch(&patch).unwrap()).unwrap();
+        let comparison = Comparison::new(&self.doc, preview);
         if let Some(panel) = &mut self.agent_panel {
             panel.tab = 1;
             panel.patch = patch;
-            panel.preview = Some(preview);
+            panel.preview = Some(comparison);
         }
     }
 }
@@ -171,4 +221,200 @@ pub(super) fn context_for_agent(doc: &Document) -> Result<String, String> {
     let mut context = agent::inspect(doc)?;
     context["agent_contract"] = serde_json::json!({"patch_schema":agent::schema(),"guide":include_str!("../../../docs/AGENTS-DRAW.md")});
     serde_json::to_string_pretty(&context).map_err(|e| e.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn app_with_pages() -> (egui::Context, DrawApp) {
+        let ctx = egui::Context::default();
+        let mut doc = Document::default();
+        doc.add_node(ShapeKind::Rectangle, [200., 200.]);
+        doc.add_page(false).unwrap();
+        doc.add_node(ShapeKind::Diamond, [300., 300.]);
+        doc.switch_page(0).unwrap();
+        let app = DrawApp::from_context(&ctx, doc, None, None);
+        (ctx, app)
+    }
+
+    fn reorder_patch(doc: &Document) -> String {
+        serde_json::json!({"api_version":1,"expected_revision":agent::revision(doc),"operations":[{"op":"move_page","from":0,"to":1}]}).to_string()
+    }
+
+    #[test]
+    fn comparison_preserves_snapshot_and_independent_page_choices_after_reorder() {
+        let (_, app) = app_with_pages();
+        let original = app.doc.clone();
+        let patch = agent::parse_patch(&reorder_patch(&original)).unwrap();
+        let result = agent::preview(&original, &patch).unwrap();
+        let mut comparison = Comparison::new(&original, result);
+        assert_eq!(comparison.source, original);
+        assert_eq!(
+            comparison.source.page(0).unwrap().nodes[0].kind,
+            ShapeKind::Rectangle
+        );
+        assert_eq!(
+            comparison.result.document.page(0).unwrap().nodes[0].kind,
+            ShapeKind::Diamond
+        );
+        comparison.before_page = 1;
+        comparison.after_page = 0;
+        comparison.view = PreviewView::Before;
+        assert_eq!(comparison.before_page, 1);
+        comparison.view = PreviewView::After;
+        assert_eq!(comparison.after_page, 0);
+        assert_eq!(app.doc, original);
+    }
+
+    #[test]
+    fn opening_agent_preserves_valid_inline_edit_and_rejects_invalid_edit() {
+        let (_, mut app) = app_with_pages();
+        let id = app.doc.nodes[0].id;
+        let original = app.doc.nodes[0].text.clone();
+        app.open_node_text(id);
+        app.rich_editor.as_mut().unwrap().draft.text = "Pending change".into();
+        app.open_agent_panel();
+        assert!(app.agent_panel.is_some());
+        assert!(app.rich_editor.is_none());
+        assert_eq!(app.doc.nodes[0].text, "Pending change");
+        assert!(
+            app.agent_panel
+                .as_ref()
+                .unwrap()
+                .context
+                .contains("Pending change")
+        );
+        app.undo();
+        assert_eq!(app.doc.nodes[0].text, original);
+        assert!(!app.history.can_undo());
+
+        let (_, mut app) = app_with_pages();
+        let original = app.doc.clone();
+        let id = app.doc.nodes[0].id;
+        app.open_node_text(id);
+        app.rich_editor.as_mut().unwrap().draft.font_size = 201.;
+        app.open_agent_panel();
+        assert!(app.agent_panel.is_none());
+        assert!(app.rich_editor.is_some());
+        assert_eq!(app.doc, original);
+        assert!(!app.history.can_undo());
+    }
+
+    #[test]
+    fn applying_agent_patch_revalidates_valid_draft_and_keeps_invalid_draft() {
+        let (_, mut app) = app_with_pages();
+        let patch = reorder_patch(&app.doc);
+        let id = app.doc.nodes[0].id;
+        app.open_node_text(id);
+        app.rich_editor.as_mut().unwrap().draft.text = "Newer text".into();
+        assert!(app.apply_agent_patch(&patch).is_err());
+        assert!(app.rich_editor.is_none());
+        assert_eq!(app.doc.nodes[0].text, "Newer text");
+        assert_eq!(app.doc.page(0).unwrap().nodes[0].kind, ShapeKind::Rectangle);
+        app.undo();
+        assert_ne!(app.doc.nodes[0].text, "Newer text");
+        assert!(!app.history.can_undo());
+
+        let (_, mut app) = app_with_pages();
+        let patch = reorder_patch(&app.doc);
+        let before = app.doc.clone();
+        let id = app.doc.nodes[0].id;
+        app.open_node_text(id);
+        app.rich_editor.as_mut().unwrap().draft.font_size = 201.;
+        assert!(app.apply_agent_patch(&patch).is_err());
+        assert!(app.rich_editor.is_some());
+        assert_eq!(app.doc, before);
+        assert!(!app.history.can_undo());
+    }
+
+    #[test]
+    fn unchanged_inline_draft_allows_patch_with_one_undo_step() {
+        let (_, mut app) = app_with_pages();
+        let original = app.doc.clone();
+        let patch = reorder_patch(&original);
+        let id = app.doc.nodes[0].id;
+        app.open_node_text(id);
+        app.apply_agent_patch(&patch).unwrap();
+        assert!(app.rich_editor.is_none());
+        assert_eq!(app.doc.page(0).unwrap().nodes[0].kind, ShapeKind::Diamond);
+        app.undo();
+        assert_eq!(app.doc, original);
+        assert!(!app.history.can_undo());
+    }
+
+    #[test]
+    fn comparison_controls_are_accessible_and_switch_views_in_seven_languages() {
+        for language in Language::ALL {
+            let (ctx, mut app) = app_with_pages();
+            ctx.enable_accesskit();
+            app.set_language(Some(language));
+            app.open_agent_panel();
+            let patch = reorder_patch(&app.doc);
+            let result = agent::preview(&app.doc, &agent::parse_patch(&patch).unwrap()).unwrap();
+            let comparison = Comparison::new(&app.doc, result);
+            let panel = app.agent_panel.as_mut().unwrap();
+            panel.tab = 1;
+            panel.patch = patch;
+            panel.preview = Some(comparison);
+            let frame = |app: &mut DrawApp, events| {
+                ctx.run(
+                    egui::RawInput {
+                        screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1500., 1000.))),
+                        events,
+                        focused: true,
+                        ..Default::default()
+                    },
+                    |ctx| app.agent_dialog(ctx),
+                )
+            };
+            frame(&mut app, vec![]);
+            let output = frame(&mut app, vec![]);
+            let tree = output.platform_output.accesskit_update.unwrap();
+            for label in [t("Avant"), t("Après")] {
+                assert!(
+                    tree.nodes
+                        .iter()
+                        .any(|(_, node)| node.label() == Some(label.as_str())),
+                    "missing {label} in {language:?}"
+                );
+            }
+            let before = t("Avant");
+            let point = output
+                .shapes
+                .iter()
+                .find_map(|shape| match &shape.shape {
+                    egui::Shape::Text(text) if text.galley.text() == before => {
+                        Some(text.pos + text.galley.size() / 2.)
+                    }
+                    _ => None,
+                })
+                .expect("Before button must be visible");
+            for pressed in [true, false] {
+                frame(
+                    &mut app,
+                    vec![
+                        egui::Event::PointerMoved(point),
+                        egui::Event::PointerButton {
+                            pos: point,
+                            button: egui::PointerButton::Primary,
+                            pressed,
+                            modifiers: egui::Modifiers::NONE,
+                        },
+                    ],
+                );
+            }
+            assert_eq!(
+                app.agent_panel
+                    .as_ref()
+                    .unwrap()
+                    .preview
+                    .as_ref()
+                    .unwrap()
+                    .view,
+                PreviewView::Before
+            );
+        }
+        i18n::activate(Language::French);
+    }
 }

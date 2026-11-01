@@ -13,6 +13,11 @@
 MCP et l’interface Agents / IA appellent `agent.rs`. Un lot vérifie la révision,
 valide le résultat complet, puis peut être prévisualisé avant application.
 La CLI écrit un nouveau fichier ; l’interface conserve le lot comme une annulation.
+L’interface propose un aperçu avant/après à partir du document vérifié et du
+résultat simulé, avec un choix indépendant des pages dans chaque vue. Les pages
+peuvent avoir été réordonnées et les vues sont ajustées séparément ; les changements
+ne sont pas encore surlignés. Un aperçu périmé ne peut pas être appliqué et la
+saisie directe est validée avant l’ouverture du panneau ou l’application du lot.
 
 `pages.rs` est la sérialisation canonique. Les pages sont enregistrées dans un
 ordre stable indépendamment de la page affichée. Ne pas ajouter une seconde

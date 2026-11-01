@@ -10240,5 +10240,50 @@
     "it": "Espanso",
     "pt": "Expandido",
     "zh-Hans": "已展开"
+  },
+  "APERÇU": {
+    "fr": "APERÇU",
+    "en": "PREVIEW",
+    "de": "VORSCHAU",
+    "es": "VISTA PREVIA",
+    "it": "ANTEPRIMA",
+    "pt": "PRÉ-VISUALIZAÇÃO",
+    "zh-Hans": "预览"
+  },
+  "Après": {
+    "fr": "Après",
+    "en": "After",
+    "de": "Nachher",
+    "es": "Después",
+    "it": "Dopo",
+    "pt": "Depois",
+    "zh-Hans": "之后"
+  },
+  "Avant": {
+    "fr": "Avant",
+    "en": "Before",
+    "de": "Vorher",
+    "es": "Antes",
+    "it": "Prima",
+    "pt": "Antes",
+    "zh-Hans": "之前"
+  },
+  "Corrigez la saisie avant de continuer.": {
+    "fr": "Corrigez la saisie avant de continuer.",
+    "en": "Correct the text before continuing.",
+    "de": "Korrigiere die Eingabe, bevor du fortfährst.",
+    "es": "Corrige el texto antes de continuar.",
+    "it": "Correggi il testo prima di continuare.",
+    "pt": "Corrija o texto antes de continuar.",
+    "zh-Hans": "请先修正输入内容。"
+  },
+  "Les pages sont indépendantes et peuvent être réordonnées. Chaque vue est ajustée séparément ; les différences ne sont pas surlignées.": {
+    "fr": "Les pages sont indépendantes et peuvent être réordonnées. Chaque vue est ajustée séparément ; les différences ne sont pas surlignées.",
+    "en": "Pages are independent and may be reordered. Each view is fitted separately; differences are not highlighted.",
+    "de": "Seiten sind unabhängig und können neu angeordnet werden. Jede Ansicht wird separat angepasst; Unterschiede werden nicht hervorgehoben.",
+    "es": "Las páginas son independientes y pueden cambiar de orden. Cada vista se ajusta por separado; las diferencias no se resaltan.",
+    "it": "Le pagine sono indipendenti e possono essere riordinate. Ogni vista viene adattata separatamente; le differenze non sono evidenziate.",
+    "pt": "As páginas são independentes e podem ser reordenadas. Cada vista é ajustada separadamente; as diferenças não são destacadas.",
+    "zh-Hans": "页面相互独立，顺序可能改变。每个视图单独缩放；差异不会高亮显示。"
   }
 }

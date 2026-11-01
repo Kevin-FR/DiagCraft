@@ -5,6 +5,9 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — navigation, accessibilité et distribution
 
+- Aperçu des modifications IA avant/après, avec sélection indépendante des pages et refus d’un aperçu périmé ; la saisie directe est préservée.
+- Une opération de page refusée conserve la sélection, l’outil et la vue.
+
 - La saisie directe est validée avant navigation ou modification des pages ; un brouillon invalide conserve l’éditeur et le contexte de recherche.
 - Les SVG exposent les descriptions des images incluses et visibles, sans celles des images masquées ou hors zone exportée.
 

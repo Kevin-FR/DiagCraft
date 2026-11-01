@@ -123,6 +123,7 @@ impl DrawApp {
             PageAction::Fit => {
                 if let Err(e) = self.doc.fit_page_to_drawing() {
                     self.error = Some(e);
+                    return;
                 }
                 self.fit_next = true;
                 self.commit();
@@ -133,6 +134,7 @@ impl DrawApp {
                 }
                 if let Err(e) = self.doc.add_page(duplicate) {
                     self.error = Some(e);
+                    return;
                 }
                 self.selected.clear();
                 self.set_tool(Tool::Select);
@@ -145,6 +147,7 @@ impl DrawApp {
                 }
                 if let Err(e) = self.doc.remove_page(self.doc.page_index) {
                     self.error = Some(e);
+                    return;
                 }
                 self.selected.clear();
                 self.fit_next = true;
@@ -156,6 +159,7 @@ impl DrawApp {
                 }
                 if let Err(e) = self.doc.move_page(self.doc.page_index, to) {
                     self.error = Some(e);
+                    return;
                 }
                 self.commit();
             }
@@ -555,6 +559,63 @@ mod tests {
         app.undo();
         assert_eq!(app.doc.page(0).unwrap().nodes[0].text, original);
         assert!(!app.history.can_undo());
+    }
+
+    #[test]
+    fn refusing_last_page_deletion_preserves_selection_tool_view_and_history() {
+        let ctx = egui::Context::default();
+        let mut doc = Document::default();
+        let id = doc.add_node(ShapeKind::Rectangle, [300., 300.]);
+        let mut app = DrawApp::from_context(&ctx, doc.clone(), None, None);
+        app.doc.title = "Redo branch".into();
+        app.commit();
+        app.undo();
+        assert!(app.history.can_redo());
+        app.selected = vec![id];
+        app.tool = Tool::Shape(ShapeKind::Diamond);
+        app.fit_next = false;
+        app.zoom = 1.25;
+        app.pan = vec2(42., 27.);
+        app.page_action(PageAction::Remove);
+        assert!(app.error.is_some());
+        assert_eq!(app.doc, doc);
+        assert_eq!(app.selected, vec![id]);
+        assert!(matches!(app.tool, Tool::Shape(ShapeKind::Diamond)));
+        assert!(!app.fit_next);
+        assert_eq!(app.zoom, 1.25);
+        assert_eq!(app.pan, vec2(42., 27.));
+        assert!(!app.history.can_undo());
+        assert!(app.history.can_redo());
+    }
+
+    #[test]
+    fn refusing_101st_page_preserves_selection_tool_view_and_history() {
+        let ctx = egui::Context::default();
+        let mut doc = Document::default();
+        for _ in 1..100 {
+            doc.add_page(false).unwrap();
+        }
+        let id = doc.add_node(ShapeKind::Rectangle, [300., 300.]);
+        let mut app = DrawApp::from_context(&ctx, doc.clone(), None, None);
+        app.doc.title = "Redo branch".into();
+        app.commit();
+        app.undo();
+        assert!(app.history.can_redo());
+        app.selected = vec![id];
+        app.tool = Tool::Shape(ShapeKind::Diamond);
+        app.fit_next = false;
+        app.zoom = 1.25;
+        app.pan = vec2(42., 27.);
+        app.page_action(PageAction::Add(false));
+        assert!(app.error.is_some());
+        assert_eq!(app.doc, doc);
+        assert_eq!(app.selected, vec![id]);
+        assert!(matches!(app.tool, Tool::Shape(ShapeKind::Diamond)));
+        assert!(!app.fit_next);
+        assert_eq!(app.zoom, 1.25);
+        assert_eq!(app.pan, vec2(42., 27.));
+        assert!(!app.history.can_undo());
+        assert!(app.history.can_redo());
     }
 
     #[test]

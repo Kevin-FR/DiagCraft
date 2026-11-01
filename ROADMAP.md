@@ -108,6 +108,7 @@ versionnés avec migration ; aucun numéro n’est promis ici.
 - [ ] Conteneurs et couloirs de processus.
 - [ ] Styles nommés avec propagation.
 - [ ] Composants réutilisables liés.
+- [x] Premier aperçu IA avant/après avec choix de pages indépendants (branche de développement, non publié).
 - [ ] Comparaison visuelle des modifications IA.
 - [x] Mini-carte de navigation pour les grandes feuilles (0.12.1).
 
