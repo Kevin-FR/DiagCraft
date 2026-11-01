@@ -42,6 +42,38 @@ pub(crate) fn export_view(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{w}\" height=\"{h}\" viewBox=\"{x} {y} {w} {h}\" role=\"img\">\n<title>{}</title>\n",
         escape(&doc.title)
     );
+    // The root is exposed as a single image to assistive technology, so nested
+    // image descriptions must also be included in the root description. Keep
+    // the same visibility, selection and viewport boundaries as the drawing.
+    let mut description_started = false;
+    for node in &doc.nodes {
+        if !organization.is_object_visible(node.id)
+            || selected.is_some_and(|ids| !ids.contains(&node.id))
+            || node.position[0] >= x + w
+            || node.position[1] >= y + h
+            || node.position[0] + node.size[0] <= x
+            || node.position[1] + node.size[1] <= y
+        {
+            continue;
+        }
+        let Some(image) = &node.image else {
+            continue;
+        };
+        let description = escape(image.alt.trim());
+        if description.trim().is_empty() {
+            continue;
+        }
+        if !description_started {
+            out.push_str("<desc>");
+            description_started = true;
+        } else {
+            out.push('\n');
+        }
+        out.push_str(&description);
+    }
+    if description_started {
+        out.push_str("</desc>\n");
+    }
     if background {
         let _ = writeln!(
             out,
@@ -499,5 +531,100 @@ fn styled_arrowhead(
             out,
             "<{tag} points=\"{coords}\" fill=\"{fill}\" stroke=\"{stroke}\" stroke-width=\"{width}\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/>"
         );
+    }
+}
+
+#[cfg(test)]
+mod accessibility_tests {
+    use super::*;
+    use crate::images::ImageAsset;
+    use std::collections::HashSet;
+
+    fn described_images() -> (Document, u64, u64, u64, u64) {
+        let asset = ImageAsset::from_rgba(2, 2, &[[40, 80, 120, 255]; 4].concat()).unwrap();
+        let mut doc = Document::default();
+        let visible = doc.add_image(asset.clone(), [100., 100.]).unwrap();
+        doc.node_mut(visible).unwrap().image.as_mut().unwrap().alt =
+            "Diagramme & <détail> \"中文\"\u{1}".into();
+        let second = doc.add_image(asset.clone(), [400., 100.]).unwrap();
+        doc.node_mut(second).unwrap().image.as_mut().unwrap().alt = "Deuxième image".into();
+        let hidden = doc.add_image(asset.clone(), [600., 100.]).unwrap();
+        doc.node_mut(hidden).unwrap().image.as_mut().unwrap().alt = "Secret masqué".into();
+        let layer = doc.create_layer("Privé".into()).unwrap();
+        doc.move_objects_to_layer(&[hidden], layer).unwrap();
+        doc.update_layer(layer, None, Some(false), None).unwrap();
+        let outside = doc.add_image(asset, [2000., 100.]).unwrap();
+        doc.node_mut(outside).unwrap().image.as_mut().unwrap().alt = "Hors cadre".into();
+        (doc, visible, second, hidden, outside)
+    }
+
+    #[test]
+    fn svg_describes_only_visible_images_inside_the_page() {
+        let (doc, _, _, _, _) = described_images();
+        let result = export(&doc).unwrap();
+        assert!(result.contains(
+            "<desc>Diagramme &amp; &lt;détail&gt; &quot;中文&quot;\nDeuxième image</desc>"
+        ));
+        assert!(!result.contains("Secret masqué"));
+        assert!(!result.contains("Hors cadre"));
+        assert!(!result.contains('\u{1}'));
+        assert!(result.contains("role=\"img\">\n<title>"));
+    }
+
+    #[test]
+    fn selected_and_cropped_exports_do_not_disclose_other_descriptions() {
+        let (doc, visible, second, hidden, _) = described_images();
+        let selected = HashSet::from([visible, hidden]);
+        let source = export_view(&doc, [0., 0., 1280., 900.], true, Some(&selected)).unwrap();
+        assert!(source.contains("Diagramme &amp; &lt;détail&gt;"));
+        assert!(!source.contains("Deuxième image"));
+        assert!(!source.contains("Secret masqué"));
+        let crop = export_view(&doc, [350., 0., 200., 300.], true, None).unwrap();
+        assert!(crop.contains("<desc>Deuxième image</desc>"));
+        assert!(!crop.contains("Diagramme &amp;"));
+        let empty = export_view(
+            &doc,
+            [0., 0., 1280., 900.],
+            true,
+            Some(&HashSet::from([hidden, second + 100_000])),
+        )
+        .unwrap();
+        assert!(!empty.contains("<desc>"));
+    }
+
+    #[test]
+    fn blank_or_xml_forbidden_descriptions_do_not_create_empty_metadata() {
+        let (mut doc, visible, second, hidden, outside) = described_images();
+        for id in [visible, second, hidden, outside] {
+            doc.node_mut(id).unwrap().image.as_mut().unwrap().alt = " \t\u{1} ".into();
+        }
+        let svg = export(&doc).unwrap();
+        assert!(!svg.contains("<desc>"));
+        assert!(!svg.contains('\u{1}'));
+    }
+
+    #[test]
+    fn image_descriptions_do_not_change_png_pixels_and_pdf_still_exports() {
+        let (mut doc, visible, second, hidden, outside) = described_images();
+        let options = crate::raster::PngOptions {
+            width: 128,
+            height: 90,
+            ..Default::default()
+        };
+        let with_descriptions = crate::raster::export(&doc, &options).unwrap();
+        for id in [visible, second, hidden, outside] {
+            doc.node_mut(id)
+                .unwrap()
+                .image
+                .as_mut()
+                .unwrap()
+                .alt
+                .clear();
+        }
+        let without_descriptions = crate::raster::export(&doc, &options).unwrap();
+        assert_eq!(with_descriptions, without_descriptions);
+        doc.node_mut(visible).unwrap().image.as_mut().unwrap().alt = "Accessible".into();
+        let pdf = crate::pdf::export_current(&doc, crate::pdf::PageFormat::Drawing).unwrap();
+        assert!(pdf.starts_with(b"%PDF-"));
     }
 }

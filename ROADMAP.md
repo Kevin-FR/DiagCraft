@@ -1,7 +1,10 @@
 # Feuille de route
 
-Les cases cochées décrivent des fonctions disponibles. Les autres sont des
-travaux prévus, sans promesse de date.
+Les cases cochées décrivent des fonctions réalisées ; leur version indiquée
+précise si elles sont publiées ou seulement présentes sur la branche de
+développement. Les autres sont des travaux prévus, sans promesse de date.
+La dernière version publiée est 0.13.1 ; la feuille de route et les validations
+1.0 restent ouvertes.
 
 ## Jalons et prochaines versions
 
@@ -96,6 +99,8 @@ versionnés avec migration ; aucun numéro n’est promis ici.
 - [x] Recherche explicite de structure sur toutes les pages, limitée aux 300 premiers résultats (branche de développement, non publié).
 - [x] Recherche multipage en arrière-plan, annulation et mesure sur 100 pages / 10 000 objets (branche de développement, non publié).
 - [x] Navigation clavier des résultats multipages, y compris hors écran (branche de développement, non publié).
+- [x] Validation de la saisie directe avant les opérations sur les pages et conservation du contexte si la validation échoue (branche de développement, non publié).
+- [x] Description SVG des images présentes dans la zone exportée et non masquées, à partir de leurs textes alternatifs (branche de développement, non publié).
 - [x] Mesure avec images sur Apple Silicon et optimisation de la vérification des résultats (branche de développement, non publié).
 - [ ] Mesurer la réactivité avec des images sur Windows et Linux.
 - [x] Retour entre les deux dernières pages visitées, indépendant par onglet et protégé si le document change (branche de développement, non publié).
@@ -110,6 +115,56 @@ La préparation 1.0 garde ses critères : essais sur MacBook 13 pouces, clavier
 seul et lecteurs d’écran, fluidité et latence mesurées, relecture des langues,
 robustesse des fichiers et distribution signée. Les certificats éditeur restent
 à configurer pour les signatures et l’installation intégrée des mises à jour.
+
+## Prochaines priorités après l’audit comparatif
+
+État examiné le 1er novembre 2026. Les fonctionnalités ci-dessous s’ajoutent
+aux lots déjà ouverts ; elles ne constituent ni une promesse de version ni une
+annonce de compatibilité complète. DiagCraft conserve son fonctionnement local,
+son approche agents et ses ressources originales. L’étude compare les usages,
+sans copier les bibliothèques, modèles ou marques des autres produits.
+
+1. **Navigation fiable et documents multipages** : définir des identifiants de
+   page stables et une migration explicitement versionnée, puis ajouter des liens
+   entre pages, la détection des destinations supprimées et un retour qui reste
+   correct après édition, copie, déplacement et annulation. Tester notamment les
+   pages strictement identiques et les modifications par agent. Le retour actuel
+   est volontairement conservateur tant que ces identifiants n’existent pas.
+   Référence d’usage : [pages et liens draw.io](https://www.drawio.com/docs/manual/pages/).
+2. **Données locales vers diagrammes** : importer un CSV local avec choix des
+   colonnes, identifiants et relations, aperçu, limites de taille et diagnostics ;
+   créer le résultat en une annulation. Étudier ensuite les mises à jour par clé
+   stable et l’import SQL, sans accès réseau implicite ni exécution du contenu.
+   Référence : [insertion CSV draw.io](https://www.drawio.com/docs/manual/insert/insert-from-csv/).
+3. **Interopérabilité progressive** : importer un sous-ensemble documenté des
+   fichiers `.drawio`, avec aperçu et avertissements de perte, limites de lecture
+   et absence de chargement automatique de ressources externes. Ne pas annoncer
+   la prise en charge de Visio ou d’autres formats avant tests dédiés.
+   Référence : [formats d’import draw.io](https://www.drawio.com/docs/manual/import/import-formats/).
+4. **Diagrammes présentables et accessibles** : compléter le titre SVG existant
+   par une description utile et contrôlable, préserver les alternatives des images
+   visibles, vérifier les exports et tester avec des lecteurs d’écran. Étudier un
+   mode présentation local avec navigation clavier et liens entre pages.
+   Référence : [métadonnées accessibles Mermaid](https://mermaid.js.org/config/accessibility).
+5. **Exports réouvrables facultatifs** : étudier l’intégration explicite d’une
+   scène éditable dans PNG/SVG, avec avertissement clair sur les données incluses
+   (pages, objets masqués et images), limites d’import et opt-in ; préserver les
+   exports actuels par défaut. Référence : [export de scène Excalidraw](https://docs.excalidraw.com/docs/@excalidraw/excalidraw/api/utils/export).
+6. **Retrouver et organiser** : étudier des étiquettes et notes d’objets,
+   filtres et recherche complète, en précisant ce qui est enregistré et exporté.
+   Compléter les conteneurs/couloirs, styles nommés et composants déjà prévus.
+   Référence : [liens, infobulles et étiquettes draw.io](https://www.drawio.com/docs/manual/links-tooltips-tags/).
+7. **Automatisation et 1.0** : compléter la comparaison visuelle IA et les
+   diagnostics CLI/MCP existants ; mesurer réactivité et mémoire sur les trois
+   systèmes, effectuer les parcours humains d’accessibilité et finaliser la
+   distribution signée. Étudier séparément toute collaboration réseau avant de
+   l’inscrire comme engagement : conflits, confidentialité et stockage local
+   doivent être définis et testés.
+
+Pour chaque lot, définir le périmètre d’import/export, les cas d’erreur, les
+migrations et les garanties de licence avant l’implémentation. Un résultat
+partiel reste marqué comme tel ; aucun contenu tiers n’est intégré sans provenance
+et licence vérifiées.
 
 ## 0.1 — première publication
 

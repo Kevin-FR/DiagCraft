@@ -25,8 +25,21 @@ enum PageAction {
     Fit,
 }
 impl DrawApp {
-    pub(super) fn switch_page(&mut self, index: usize) {
-        self.commit();
+    pub(super) fn switch_page(&mut self, index: usize) -> bool {
+        if index >= self.doc.page_count() {
+            return false;
+        }
+        let was_editing = self.rich_editor.is_some();
+        if !self.commit_inline_if_needed() {
+            return false;
+        }
+        if !was_editing {
+            self.commit();
+        }
+        self.switch_page_committed(index)
+    }
+    // The caller must have committed the inline editor or document before calling.
+    pub(super) fn switch_page_committed(&mut self, index: usize) -> bool {
         let previous = self.doc.page_index;
         if self.doc.switch_page(index).is_ok() {
             if previous != index {
@@ -48,6 +61,9 @@ impl DrawApp {
                     ("2", format!("{}", self.doc.page_count())),
                 ],
             );
+            true
+        } else {
+            false
         }
     }
     fn can_return_to_page(&self) -> bool {
@@ -58,17 +74,26 @@ impl DrawApp {
         })
     }
     fn return_to_page(&mut self) {
+        let was_editing = self.rich_editor.is_some();
         if !self.commit_inline_if_needed() {
             return;
         }
         if self.can_return_to_page() {
             let index = self.page_return.as_ref().unwrap().index;
-            self.switch_page(index);
+            if was_editing {
+                self.switch_page_committed(index);
+            } else {
+                self.switch_page(index);
+            }
         } else {
             self.status = t("Changez de page pour activer le retour.");
         }
     }
     pub(super) fn open_page_settings(&mut self) {
+        if !self.commit_inline_if_needed() {
+            self.show_pages = false;
+            return;
+        }
         let unit = self.doc.page_layout.unit;
         self.page_draft = Some(PageDraft {
             index: self.doc.page_index,
@@ -81,11 +106,19 @@ impl DrawApp {
         self.show_pages = false;
     }
     fn page_action(&mut self, action: PageAction) {
-        match action {
-            PageAction::Switch(index) => {
-                self.switch_page(index);
+        if let PageAction::Switch(index) = action {
+            if self.switch_page(index) || self.rich_editor.is_some() {
                 self.show_pages = false;
             }
+            return;
+        }
+        let was_editing = self.rich_editor.is_some();
+        if !self.commit_inline_if_needed() {
+            self.show_pages = false;
+            return;
+        }
+        match action {
+            PageAction::Switch(_) => unreachable!(),
             PageAction::Settings => self.open_page_settings(),
             PageAction::Fit => {
                 if let Err(e) = self.doc.fit_page_to_drawing() {
@@ -95,7 +128,9 @@ impl DrawApp {
                 self.commit();
             }
             PageAction::Add(duplicate) => {
-                self.commit();
+                if !was_editing {
+                    self.commit();
+                }
                 if let Err(e) = self.doc.add_page(duplicate) {
                     self.error = Some(e);
                 }
@@ -105,7 +140,9 @@ impl DrawApp {
                 self.commit();
             }
             PageAction::Remove => {
-                self.commit();
+                if !was_editing {
+                    self.commit();
+                }
                 if let Err(e) = self.doc.remove_page(self.doc.page_index) {
                     self.error = Some(e);
                 }
@@ -114,7 +151,9 @@ impl DrawApp {
                 self.commit();
             }
             PageAction::Move(to) => {
-                self.commit();
+                if !was_editing {
+                    self.commit();
+                }
                 if let Err(e) = self.doc.move_page(self.doc.page_index, to) {
                     self.error = Some(e);
                 }
@@ -409,6 +448,113 @@ mod tests {
         doc.switch_page(0).unwrap();
         let app = DrawApp::from_context(&ctx, doc, None, None);
         (ctx, app)
+    }
+
+    #[test]
+    fn page_switch_commits_inline_text_once_and_preserves_undo() {
+        let (_, mut app) = two_pages();
+        let id = app.doc.nodes[0].id;
+        let original = app.doc.nodes[0].text.clone();
+        app.open_node_text(id);
+        app.rich_editor.as_mut().unwrap().draft.text = "Modified before navigation".into();
+        assert!(app.switch_page(1));
+        assert!(app.rich_editor.is_none());
+        assert_eq!(app.doc.page_index, 1);
+        assert_eq!(
+            app.doc.page(0).unwrap().nodes[0].text,
+            "Modified before navigation"
+        );
+        app.undo();
+        assert_eq!(app.doc.page(0).unwrap().nodes[0].text, original);
+        assert!(!app.history.can_undo());
+        assert!(app.history.can_redo());
+    }
+
+    #[test]
+    fn nonexistent_page_does_not_commit_or_discard_the_inline_draft() {
+        let (_, mut app) = two_pages();
+        let id = app.doc.nodes[0].id;
+        let before = app.doc.clone();
+        app.open_node_text(id);
+        app.rich_editor.as_mut().unwrap().draft.text = "Pending".into();
+        assert!(!app.switch_page(99));
+        assert_eq!(app.doc, before);
+        assert_eq!(app.rich_editor.as_ref().unwrap().draft.text, "Pending");
+        assert!(!app.history.can_undo());
+    }
+
+    #[test]
+    fn unchanged_inline_draft_and_navigation_preserve_redo() {
+        let (_, mut app) = two_pages();
+        app.doc.title = "Undo branch".into();
+        app.commit();
+        app.undo();
+        assert!(app.history.can_redo());
+        let id = app.doc.nodes[0].id;
+        app.open_node_text(id);
+        assert!(app.switch_page(1));
+        assert!(app.rich_editor.is_none());
+        assert!(app.history.can_redo());
+        assert!(!app.history.can_undo());
+    }
+
+    #[test]
+    fn page_operations_refuse_invalid_inline_draft_without_changes() {
+        for action in [
+            PageAction::Switch(1),
+            PageAction::Add(false),
+            PageAction::Add(true),
+            PageAction::Remove,
+            PageAction::Move(1),
+            PageAction::Settings,
+            PageAction::Fit,
+        ] {
+            let (_, mut app) = two_pages();
+            let id = app.doc.nodes[0].id;
+            let before = app.doc.clone();
+            app.open_node_text(id);
+            app.rich_editor.as_mut().unwrap().draft.font_size = 201.;
+            app.show_pages = true;
+            app.page_action(action);
+            assert_eq!(app.doc, before);
+            assert_eq!(app.doc.page_index, 0);
+            assert!(app.rich_editor.is_some());
+            assert!(!app.show_pages);
+            assert!(!app.history.can_undo());
+            assert!(app.page_draft.is_none());
+        }
+    }
+
+    #[test]
+    fn direct_page_settings_refuse_invalid_inline_draft() {
+        let (_, mut app) = two_pages();
+        let id = app.doc.nodes[0].id;
+        let before = app.doc.clone();
+        app.open_node_text(id);
+        app.rich_editor.as_mut().unwrap().draft.font_size = 201.;
+        app.open_page_settings();
+        assert!(app.page_draft.is_none());
+        assert!(app.rich_editor.is_some());
+        assert_eq!(app.doc, before);
+        assert!(!app.history.can_undo());
+    }
+
+    #[test]
+    fn adding_a_page_after_inline_edit_has_separate_undo_steps() {
+        let (_, mut app) = two_pages();
+        let id = app.doc.nodes[0].id;
+        let original = app.doc.nodes[0].text.clone();
+        app.open_node_text(id);
+        app.rich_editor.as_mut().unwrap().draft.text = "Retained edit".into();
+        app.page_action(PageAction::Add(false));
+        assert_eq!(app.doc.page_count(), 3);
+        assert_eq!(app.doc.page(0).unwrap().nodes[0].text, "Retained edit");
+        app.undo();
+        assert_eq!(app.doc.page_count(), 2);
+        assert_eq!(app.doc.page(0).unwrap().nodes[0].text, "Retained edit");
+        app.undo();
+        assert_eq!(app.doc.page(0).unwrap().nodes[0].text, original);
+        assert!(!app.history.can_undo());
     }
 
     #[test]

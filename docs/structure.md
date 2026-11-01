@@ -15,6 +15,11 @@ Pour éviter toute confusion après une réorganisation, la flèche est désacti
 si le document a changé depuis la navigation ; changer à nouveau de page crée
 un nouveau retour. Cette navigation ne modifie ni le dessin ni son historique.
 
+Avant de changer de page ou d’en modifier la structure, la saisie directe en
+cours est validée. Si elle est invalide, l’éditeur reste ouvert et l’action est
+annulée. Une recherche multipage devenue périmée après validation doit être
+relancée avant de choisir un résultat.
+
 La liste montre les calques, les groupes
 et tous les objets de la page active : formes, textes, images, connecteurs,
 tracés et graphiques. Chaque objet possède un aperçu de nom, un type et son ID.

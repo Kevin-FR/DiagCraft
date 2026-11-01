@@ -295,6 +295,9 @@ fn shown_rows(rows: &[Row], state: &State) -> Vec<usize> {
 }
 impl DrawApp {
     fn outline_choose(&mut self, id: u64, additive: bool, ctx: &egui::Context) {
+        if !self.commit_inline_if_needed() {
+            return;
+        }
         if !self.doc.organization_view().is_object_visible(id) {
             self.status = t("Affichez le calque pour sélectionner cet objet.");
             return;
@@ -462,9 +465,10 @@ impl DrawApp {
                     self.outline_ui.page_job = None;
                 }
             });
-            if let Some(page) = page {
+            if let Some(page) = page
+                && self.switch_page(page)
+            {
                 self.outline_ui.page_job = None;
-                self.switch_page(page);
             }
             return;
         }
@@ -531,13 +535,24 @@ impl DrawApp {
                 }
             });
             if let Some(hit) = chosen {
-                if self.doc != results.snapshot {
+                let was_editing = self.rich_editor.is_some();
+                if !self.commit_inline_if_needed() {
+                    return;
+                }
+                if self.doc != self.outline_ui.all_pages.as_ref().unwrap().snapshot {
                     self.outline_ui.all_pages = None;
                     self.status =
                         t("Le document a changé. Actualisez l’aperçu avant de continuer.");
                 } else {
                     if hit.page != self.doc.page_index {
-                        self.switch_page(hit.page);
+                        let switched = if was_editing {
+                            self.switch_page_committed(hit.page)
+                        } else {
+                            self.switch_page(hit.page)
+                        };
+                        if !switched {
+                            return;
+                        }
                     }
                     self.outline_ui.query.clear();
                     self.outline_ui.all_pages = None;
@@ -548,9 +563,10 @@ impl DrawApp {
                         self.outline_choose(id, false, ui.ctx());
                     }
                 }
-            } else if let Some(page) = page {
+            } else if let Some(page) = page
+                && self.switch_page(page)
+            {
                 self.outline_ui.all_pages = None;
-                self.switch_page(page);
             }
             return;
         }
@@ -1074,6 +1090,191 @@ mod tests {
         assert_eq!(app.doc.page_index, 1);
         assert_eq!(app.selected, vec![second]);
         assert!(app.outline_ui.query.is_empty());
+        assert!(!app.history.can_undo());
+    }
+    #[test]
+    fn failed_page_selection_preserves_results_or_running_search() {
+        for running in [false, true] {
+            let ctx = egui::Context::default();
+            let mut doc = Document::default();
+            let first = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+            doc.node_mut(first).unwrap().text = "matching".into();
+            doc.add_page(false).unwrap();
+            doc.switch_page(0).unwrap();
+            let mut app = DrawApp::from_context(&ctx, doc.clone(), None, None);
+            render(&ctx, &mut app, vec![]);
+            app.outline_ui.query = "matching".into();
+            let (sender, receiver) = mpsc::channel();
+            let cancel = Arc::new(AtomicBool::new(false));
+            if running {
+                app.outline_ui.page_job = Some(PageJob {
+                    receiver,
+                    cancel: Arc::clone(&cancel),
+                    language: i18n::active(),
+                });
+            } else {
+                app.outline_ui.all_pages = Some(search_pages(&app.doc, "matching"));
+            }
+            app.open_node_text(first);
+            app.rich_editor.as_mut().unwrap().draft.font_size = 201.;
+            let find = |output: &egui::FullOutput, label: &str| {
+                output
+                    .shapes
+                    .iter()
+                    .find_map(|shape| match &shape.shape {
+                        egui::Shape::Text(text) if text.galley.text() == label => {
+                            Some(text.pos + text.galley.size() / 2.)
+                        }
+                        _ => None,
+                    })
+                    .unwrap_or_else(|| panic!("missing label {label}"))
+            };
+            let click = |app: &mut DrawApp, point| {
+                for pressed in [true, false] {
+                    render(
+                        &ctx,
+                        app,
+                        vec![
+                            egui::Event::PointerMoved(point),
+                            egui::Event::PointerButton {
+                                pos: point,
+                                button: egui::PointerButton::Primary,
+                                pressed,
+                                modifiers: egui::Modifiers::NONE,
+                            },
+                        ],
+                    );
+                }
+            };
+            let output = render(&ctx, &mut app, vec![]);
+            click(&mut app, find(&output, "Page 1"));
+            let output = render(&ctx, &mut app, vec![]);
+            click(&mut app, find(&output, "2 · Page 2"));
+            assert_eq!(app.doc.page_index, 0);
+            assert_eq!(app.doc, doc);
+            assert!(app.rich_editor.is_some());
+            assert_eq!(app.outline_ui.query, "matching");
+            assert_eq!(app.outline_ui.page_job.is_some(), running);
+            assert_eq!(app.outline_ui.all_pages.is_some(), !running);
+            assert!(!cancel.load(Ordering::Relaxed));
+            drop(sender);
+        }
+    }
+    #[test]
+    fn multipage_result_does_not_navigate_if_inline_draft_is_invalid_or_changes_snapshot() {
+        for valid in [false, true] {
+            let ctx = egui::Context::default();
+            let mut doc = Document::default();
+            let first = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+            doc.node_mut(first).unwrap().text = "matching".into();
+            doc.add_page(false).unwrap();
+            let second = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+            doc.node_mut(second).unwrap().text = "matching".into();
+            assert_eq!(first, second);
+            doc.switch_page(0).unwrap();
+            let mut app = DrawApp::from_context(&ctx, doc.clone(), None, None);
+            app.selected = vec![first];
+            render(&ctx, &mut app, vec![]);
+            app.outline_ui.query = "matching".into();
+            app.outline_ui.all_pages = Some(search_pages(&app.doc, "matching"));
+            app.open_node_text(first);
+            if valid {
+                app.rich_editor.as_mut().unwrap().draft.text = "Updated".into();
+            } else {
+                app.rich_editor.as_mut().unwrap().draft.font_size = 201.;
+            }
+            let output = render(&ctx, &mut app, vec![]);
+            let point = output
+                .shapes
+                .iter()
+                .find_map(|shape| match &shape.shape {
+                    egui::Shape::Text(text)
+                        if text.galley.text().starts_with("2 · Page 2 · matching") =>
+                    {
+                        Some(text.pos + text.galley.size() / 2.)
+                    }
+                    _ => None,
+                })
+                .expect("second page result is visible");
+            for pressed in [true, false] {
+                render(
+                    &ctx,
+                    &mut app,
+                    vec![
+                        egui::Event::PointerMoved(point),
+                        egui::Event::PointerButton {
+                            pos: point,
+                            button: egui::PointerButton::Primary,
+                            pressed,
+                            modifiers: egui::Modifiers::NONE,
+                        },
+                    ],
+                );
+            }
+            assert_eq!(app.doc.page_index, 0);
+            assert_eq!(app.selected, vec![first]);
+            if valid {
+                assert!(app.rich_editor.is_none());
+                assert!(app.outline_ui.all_pages.is_none());
+                assert_eq!(app.doc.nodes[0].text, "Updated");
+                app.undo();
+                assert_eq!(app.doc, doc);
+                assert!(!app.history.can_undo());
+            } else {
+                assert!(app.rich_editor.is_some());
+                assert!(app.outline_ui.all_pages.is_some());
+                assert_eq!(app.doc, doc);
+                assert!(!app.history.can_undo());
+            }
+        }
+    }
+    #[test]
+    fn multipage_result_accepts_an_unchanged_inline_draft_without_undo_entry() {
+        let ctx = egui::Context::default();
+        let mut doc = Document::default();
+        let first = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+        doc.node_mut(first).unwrap().text = "matching".into();
+        doc.add_page(false).unwrap();
+        let second = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+        doc.node_mut(second).unwrap().text = "matching".into();
+        doc.switch_page(0).unwrap();
+        let mut app = DrawApp::from_context(&ctx, doc.clone(), None, None);
+        render(&ctx, &mut app, vec![]);
+        app.outline_ui.query = "matching".into();
+        app.outline_ui.all_pages = Some(search_pages(&app.doc, "matching"));
+        app.open_node_text(first);
+        let output = render(&ctx, &mut app, vec![]);
+        let point = output
+            .shapes
+            .iter()
+            .find_map(|shape| match &shape.shape {
+                egui::Shape::Text(text)
+                    if text.galley.text().starts_with("2 · Page 2 · matching") =>
+                {
+                    Some(text.pos + text.galley.size() / 2.)
+                }
+                _ => None,
+            })
+            .expect("second page result is visible");
+        for pressed in [true, false] {
+            render(
+                &ctx,
+                &mut app,
+                vec![
+                    egui::Event::PointerMoved(point),
+                    egui::Event::PointerButton {
+                        pos: point,
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+            );
+        }
+        assert!(app.rich_editor.is_none());
+        assert_eq!(app.doc.page_index, 1);
+        assert_eq!(app.selected, vec![second]);
+        assert_eq!(app.doc, doc);
         assert!(!app.history.can_undo());
     }
     #[test]

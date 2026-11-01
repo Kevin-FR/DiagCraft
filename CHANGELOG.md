@@ -3,7 +3,10 @@
 Les versions de l’application suivent Semantic Versioning. Le format `.draw`
 et l’API agents sont versionnés indépendamment.
 
-## Non publié — structure du document
+## Non publié — navigation, accessibilité et distribution
+
+- La saisie directe est validée avant navigation ou modification des pages ; un brouillon invalide conserve l’éditeur et le contexte de recherche.
+- Les SVG exposent les descriptions des images incluses et visibles, sans celles des images masquées ou hors zone exportée.
 
 - Retour à la page précédente depuis la barre des pages, avec état propre à chaque onglet.
 

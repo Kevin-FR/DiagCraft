@@ -89,6 +89,15 @@ reste autonome et contient chaque occurrence. Les budgets globaux sont contrôl�
 avant décompression des images d’un document chargé. Une image malformée ou un
 lot trop grand est rejeté sans insertion partielle.
 
+## Accessibilité des exports SVG
+
+La branche de développement inclut dans la description accessible des SVG les
+textes alternatifs non vides des images présentes dans la zone exportée et, le
+cas échéant, dans la sélection. Les images sur des calques masqués ou hors de la
+zone sont exclues. Ces textes deviennent lisibles dans le fichier SVG : vérifiez
+leur contenu avant partage. Cette amélioration ne rend pas les PDF balisés ou
+accessibles à elle seule.
+
 ## Fichiers et agents
 
 Le format reste **v7**, l’API agents **v1**. Les anciens documents sans image
