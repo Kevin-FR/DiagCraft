@@ -8,7 +8,14 @@ vues de la bibliothèque.
 
 ![Structure de la page active](images/outline.png)
 
-Le sélecteur supérieur change de page. La liste montre les calques, les groupes
+Le sélecteur supérieur change de page. Après un changement, la flèche à gauche
+de la barre des pages permet de revenir à la page consultée précédemment ; un
+nouveau clic revient à l’autre page. Chaque onglet conserve son propre retour.
+Pour éviter toute confusion après une réorganisation, la flèche est désactivée
+si le document a changé depuis la navigation ; changer à nouveau de page crée
+un nouveau retour. Cette navigation ne modifie ni le dessin ni son historique.
+
+La liste montre les calques, les groupes
 et tous les objets de la page active : formes, textes, images, connecteurs,
 tracés et graphiques. Chaque objet possède un aperçu de nom, un type et son ID.
 Les états **Masqué** et **Verrouillé** sont indiqués. Les IDs de groupes et de

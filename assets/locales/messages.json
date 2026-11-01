@@ -10169,6 +10169,24 @@
     "pt": "A pesquisa falhou. Tente novamente.",
     "zh-Hans": "搜索失败，请重试。"
   },
+  "Changez de page pour activer le retour.": {
+    "fr": "Changez de page pour activer le retour.",
+    "en": "Change pages to enable going back.",
+    "de": "Wechsle die Seite, um die Rückkehr zu aktivieren.",
+    "es": "Cambia de página para activar el regreso.",
+    "it": "Cambia pagina per attivare il ritorno.",
+    "pt": "Mude de página para ativar o regresso.",
+    "zh-Hans": "切换页面以启用返回。"
+  },
+  "Retour à la page précédente": {
+    "fr": "Retour à la page précédente",
+    "en": "Back to previous page",
+    "de": "Zurück zur vorherigen Seite",
+    "es": "Volver a la página anterior",
+    "it": "Torna alla pagina precedente",
+    "pt": "Voltar à página anterior",
+    "zh-Hans": "返回上一页"
+  },
   "Tout replier": {
     "fr": "Tout replier",
     "en": "Collapse all",

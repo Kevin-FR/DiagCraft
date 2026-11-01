@@ -41,6 +41,12 @@ est consommé. Le résultat conserve la copie du document et la compare au docum
 courant avant toute navigation ; les données des images sont partagées en mémoire.
 Le format documentaire et l’historique ne sont pas modifiés.
 
+La barre des pages conserve, par onglet et seulement en mémoire, l’index de la
+page précédente et une copie du document au moment de la navigation. Le retour
+est désactivé si le document diffère de cette copie, car le format actuel ne
+fournit pas d’identifiants permanents de page. Il ne crée aucune modification
+ni entrée d’historique ; changer de page à nouveau remplace le retour.
+
 `interface_prefs.rs` conserve la disposition, la langue et les préférences de mise à jour dans un JSON local borné,
 avec écriture atomique. Les captures et tests n’accèdent pas aux préférences utilisateur.
 Les dimensions voulues restent distinctes des limites temporaires de fenêtre.

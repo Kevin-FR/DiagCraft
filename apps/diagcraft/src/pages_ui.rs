@@ -2,6 +2,12 @@ use super::library_ui::paint_document_preview;
 use super::*;
 use diagcraft::pages::{self, PageLayout, Unit};
 
+#[derive(Clone)]
+pub(super) struct PageReturn {
+    index: usize,
+    document: Document,
+}
+
 pub(super) struct PageDraft {
     index: usize,
     name: String,
@@ -21,7 +27,14 @@ enum PageAction {
 impl DrawApp {
     pub(super) fn switch_page(&mut self, index: usize) {
         self.commit();
+        let previous = self.doc.page_index;
         if self.doc.switch_page(index).is_ok() {
+            if previous != index {
+                self.page_return = Some(PageReturn {
+                    index: previous,
+                    document: self.doc.clone(),
+                });
+            }
             self.selected.clear();
             self.drag = None;
             self.set_tool(Tool::Select);
@@ -35,6 +48,24 @@ impl DrawApp {
                     ("2", format!("{}", self.doc.page_count())),
                 ],
             );
+        }
+    }
+    fn can_return_to_page(&self) -> bool {
+        self.page_return.as_ref().is_some_and(|previous| {
+            previous.index < self.doc.page_count()
+                && previous.index != self.doc.page_index
+                && previous.document == self.doc
+        })
+    }
+    fn return_to_page(&mut self) {
+        if !self.commit_inline_if_needed() {
+            return;
+        }
+        if self.can_return_to_page() {
+            let index = self.page_return.as_ref().unwrap().index;
+            self.switch_page(index);
+        } else {
+            self.status = t("Changez de page pour activer le retour.");
         }
     }
     pub(super) fn open_page_settings(&mut self) {
@@ -106,6 +137,17 @@ impl DrawApp {
             )
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
+                    let can_return = self.can_return_to_page();
+                    if ui
+                        .add_enabled_ui(can_return, |ui| {
+                            panels_ui::icon_button(ui, "←", "Retour à la page précédente")
+                        })
+                        .inner
+                        .on_disabled_hover_text(t("Changez de page pour activer le retour."))
+                        .clicked()
+                    {
+                        self.return_to_page();
+                    }
                     let pages = ui.button(i18n::render(
                         "Pages ({0})",
                         &[("0", self.doc.page_count().to_string())],
@@ -351,5 +393,155 @@ impl DrawApp {
                 self.page_draft = None;
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn two_pages() -> (egui::Context, DrawApp) {
+        let ctx = egui::Context::default();
+        let mut doc = Document::default();
+        doc.add_node(ShapeKind::Rectangle, [300., 300.]);
+        doc.add_page(false).unwrap();
+        doc.add_node(ShapeKind::Diamond, [300., 300.]);
+        doc.switch_page(0).unwrap();
+        let app = DrawApp::from_context(&ctx, doc, None, None);
+        (ctx, app)
+    }
+
+    #[test]
+    fn return_navigation_is_reversible_and_does_not_edit_the_document() {
+        let (_, mut app) = two_pages();
+        app.doc.title = "Undo branch".into();
+        app.commit();
+        app.undo();
+        assert!(app.history.can_redo());
+        let before = app.doc.clone();
+        app.switch_page(1);
+        assert!(app.can_return_to_page());
+        app.switch_page(1);
+        assert!(app.can_return_to_page());
+        app.return_to_page();
+        assert_eq!(app.doc.page_index, 0);
+        assert_eq!(app.doc, before);
+        assert!(app.can_return_to_page());
+        app.return_to_page();
+        assert_eq!(app.doc.page_index, 1);
+        assert_eq!(app.doc, before);
+        assert!(!app.history.can_undo());
+        assert!(app.history.can_redo());
+    }
+
+    #[test]
+    fn changed_document_does_not_return_to_a_potentially_wrong_page() {
+        let (_, mut app) = two_pages();
+        app.switch_page(1);
+        app.doc.move_page(0, 1).unwrap();
+        assert!(!app.can_return_to_page());
+        let current = app.doc.page_index;
+        app.return_to_page();
+        assert_eq!(app.doc.page_index, current);
+    }
+
+    #[test]
+    fn return_navigation_belongs_to_each_tab() {
+        let (_, mut app) = two_pages();
+        app.switch_page(1);
+        app.open_tab(Document::default(), None);
+        assert!(!app.can_return_to_page());
+        app.switch_tab(0);
+        assert!(app.can_return_to_page());
+        app.return_to_page();
+        assert_eq!(app.doc.page_index, 0);
+        app.switch_tab(1);
+        assert!(!app.can_return_to_page());
+        app.close_tab(1);
+        assert!(app.can_return_to_page());
+    }
+
+    #[test]
+    fn return_button_can_be_reached_and_activated_from_keyboard() {
+        let (ctx, mut app) = two_pages();
+        app.switch_page(1);
+        let frame = |app: &mut DrawApp, events| {
+            ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(600., 680.))),
+                    events,
+                    focused: true,
+                    ..Default::default()
+                },
+                |ctx| app.pages_bar(ctx),
+            )
+        };
+        frame(&mut app, vec![]);
+        let event = |key, pressed| egui::Event::Key {
+            key,
+            physical_key: None,
+            pressed,
+            repeat: false,
+            modifiers: egui::Modifiers::NONE,
+        };
+        frame(&mut app, vec![event(egui::Key::Tab, true)]);
+        frame(&mut app, vec![event(egui::Key::Tab, false)]);
+        frame(&mut app, vec![event(egui::Key::Enter, true)]);
+        frame(&mut app, vec![event(egui::Key::Enter, false)]);
+        assert_eq!(app.doc.page_index, 0);
+    }
+    #[test]
+    fn return_button_is_accessible_in_seven_languages_and_can_be_clicked() {
+        for language in Language::ALL {
+            let (ctx, mut app) = two_pages();
+            ctx.enable_accesskit();
+            app.set_language(Some(language));
+            app.switch_page(1);
+            let frame = |app: &mut DrawApp, events| {
+                ctx.run(
+                    egui::RawInput {
+                        screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1200., 680.))),
+                        events,
+                        focused: true,
+                        ..Default::default()
+                    },
+                    |ctx| app.pages_bar(ctx),
+                )
+            };
+            frame(&mut app, vec![]);
+            let output = frame(&mut app, vec![]);
+            let tree = output.platform_output.accesskit_update.unwrap();
+            assert!(
+                tree.nodes.iter().any(
+                    |(_, node)| node.label() == Some(t("Retour à la page précédente").as_str())
+                )
+            );
+            let point = output
+                .shapes
+                .iter()
+                .find_map(|shape| match &shape.shape {
+                    egui::Shape::Text(text) if text.galley.text() == "←" => {
+                        Some(text.pos + text.galley.size() / 2.)
+                    }
+                    _ => None,
+                })
+                .expect("return button must be visible");
+            for pressed in [true, false] {
+                frame(
+                    &mut app,
+                    vec![
+                        egui::Event::PointerMoved(point),
+                        egui::Event::PointerButton {
+                            pos: point,
+                            button: egui::PointerButton::Primary,
+                            pressed,
+                            modifiers: egui::Modifiers::NONE,
+                        },
+                    ],
+                );
+            }
+            assert_eq!(app.doc.page_index, 0);
+        }
+        i18n::activate(Language::French);
     }
 }

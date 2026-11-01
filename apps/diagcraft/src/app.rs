@@ -140,6 +140,7 @@ struct Session {
     margins: bool,
     page_breaks: bool,
     fit_next: bool,
+    page_return: Option<pages_ui::PageReturn>,
 }
 
 pub struct DrawApp {
@@ -180,6 +181,7 @@ pub struct DrawApp {
     rulers: bool,
     margins: bool,
     page_breaks: bool,
+    page_return: Option<pages_ui::PageReturn>,
     show_library: bool,
     show_inspector: bool,
     show_minimap: bool,
@@ -803,6 +805,7 @@ impl DrawApp {
             rulers: true,
             margins: false,
             page_breaks: false,
+            page_return: None,
             show_library: true,
             show_inspector: false,
             show_minimap: false,
@@ -1189,6 +1192,7 @@ impl DrawApp {
         self.saved = doc.clone();
         self.history = History::new(&doc);
         self.doc = doc;
+        self.page_return = None;
         self.reset_organization_view();
         self.path = path;
         self.selected.clear();
@@ -1214,6 +1218,7 @@ impl DrawApp {
             margins: self.margins,
             page_breaks: self.page_breaks,
             fit_next: self.fit_next,
+            page_return: self.page_return.clone(),
         }
     }
     fn stash_tab(&mut self) {
@@ -1244,6 +1249,7 @@ impl DrawApp {
         self.rulers = s.rulers;
         self.margins = s.margins;
         self.page_breaks = s.page_breaks;
+        self.page_return = s.page_return;
         self.context_open = false;
         self.paste_position = None;
         self.focus_text = None;
@@ -1307,6 +1313,7 @@ impl DrawApp {
         self.rulers = s.rulers;
         self.margins = s.margins;
         self.page_breaks = s.page_breaks;
+        self.page_return = s.page_return;
         self.active_tab = target;
         self.drag = None;
         self.tool = Tool::Select;

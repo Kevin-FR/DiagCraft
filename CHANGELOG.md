@@ -5,6 +5,8 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — structure du document
 
+- Retour à la page précédente depuis la barre des pages, avec état propre à chaque onglet.
+
 - CI macOS : migration vers le runner Apple Silicon macOS 15, avec contrôle de l’architecture.
 
 - Vérification plus rapide des résultats multipages pour les documents avec images, sans recalculer une empreinte à chaque ouverture.

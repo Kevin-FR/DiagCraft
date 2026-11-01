@@ -98,6 +98,7 @@ versionnés avec migration ; aucun numéro n’est promis ici.
 - [x] Navigation clavier des résultats multipages, y compris hors écran (branche de développement, non publié).
 - [x] Mesure avec images sur Apple Silicon et optimisation de la vérification des résultats (branche de développement, non publié).
 - [ ] Mesurer la réactivité avec des images sur Windows et Linux.
+- [x] Retour entre les deux dernières pages visitées, indépendant par onglet et protégé si le document change (branche de développement, non publié).
 - [ ] Liens de navigation entre pages.
 - [ ] Conteneurs et couloirs de processus.
 - [ ] Styles nommés avec propagation.
