@@ -5,6 +5,8 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — structure du document
 
+- Vérification plus rapide des résultats multipages pour les documents avec images, sans recalculer une empreinte à chaque ouverture.
+
 - Empaquetage macOS : nouvelles tentatives lorsque le volume temporaire est encore occupé.
 
 - Parcours clavier des résultats multipages hors écran avec les flèches et Entrée.

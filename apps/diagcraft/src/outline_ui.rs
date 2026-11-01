@@ -43,7 +43,7 @@ struct PageHit {
 struct PageResults {
     hits: Vec<PageHit>,
     truncated: bool,
-    revision: String,
+    snapshot: Document,
 }
 struct PageJob {
     receiver: mpsc::Receiver<PageResults>,
@@ -132,7 +132,7 @@ fn search_pages_cancel(doc: &Document, query: &str, cancel: &AtomicBool) -> Opti
     Some(PageResults {
         hits,
         truncated,
-        revision: diagcraft::agent::revision(doc),
+        snapshot: doc.clone(),
     })
 }
 fn short(text: &str) -> String {
@@ -531,7 +531,7 @@ impl DrawApp {
                 }
             });
             if let Some(hit) = chosen {
-                if diagcraft::agent::revision(&self.doc) != results.revision {
+                if self.doc != results.snapshot {
                     self.outline_ui.all_pages = None;
                     self.status =
                         t("Le document a changé. Actualisez l’aperçu avant de continuer.");
@@ -824,6 +824,64 @@ mod tests {
         assert!(results.hits.is_empty());
     }
     #[test]
+    #[ignore = "manual performance measurement"]
+    fn measure_multipage_search_with_images() {
+        use diagcraft::images::ImageAsset;
+        let mut seed = 0x1234_5678_u32;
+        let mut pixels = Vec::with_capacity(768 * 768 * 4);
+        for _ in 0..768 * 768 {
+            for _ in 0..3 {
+                seed ^= seed << 13;
+                seed ^= seed >> 17;
+                seed ^= seed << 5;
+                pixels.push(seed as u8);
+            }
+            pixels.push(255);
+        }
+        let asset = ImageAsset::from_rgba(768, 768, &pixels).unwrap();
+        let mut doc = Document::default();
+        for page in 0..2 {
+            if page > 0 {
+                doc.add_page(false).unwrap();
+            }
+            doc.add_image(asset.clone(), [100., 100.]).unwrap();
+            for index in 0..100 {
+                let id = doc.add_node(ShapeKind::Rectangle, [300., 300.]);
+                doc.node_mut(id).unwrap().text = format!("Object {page}-{index}");
+            }
+        }
+        doc.validate().unwrap();
+        let bytes = serde_json::to_vec(&doc).unwrap().len();
+        let start = std::time::Instant::now();
+        let snapshot = doc.clone();
+        let clone_time = start.elapsed();
+        let start = std::time::Instant::now();
+        let job = start_page_search(
+            snapshot,
+            "no matching object".into(),
+            Language::English,
+            egui::Context::default(),
+        )
+        .unwrap();
+        let results = job
+            .receiver
+            .recv_timeout(std::time::Duration::from_secs(30))
+            .unwrap();
+        let worker_time = start.elapsed();
+        let start = std::time::Instant::now();
+        let same_snapshot = doc == results.snapshot;
+        let validation_time = start.elapsed();
+        let start = std::time::Instant::now();
+        let revision = diagcraft::agent::revision(&doc);
+        let hashing_time = start.elapsed();
+        eprintln!(
+            "2 pages, 200 shapes, 2 images, {bytes} serialized bytes: snapshot {clone_time:?}, worker {worker_time:?}, comparison {validation_time:?}, SHA-256 baseline {hashing_time:?}"
+        );
+        assert!(results.hits.is_empty());
+        assert!(same_snapshot);
+        assert_eq!(revision, diagcraft::agent::revision(&results.snapshot));
+    }
+    #[test]
     fn search_button_runs_worker_and_displays_results() {
         let (ctx, mut app, _, _, _) = fixture();
         render(&ctx, &mut app, vec![]);
@@ -865,6 +923,45 @@ mod tests {
         assert!(app.outline_ui.page_job.is_none());
         assert!(!app.outline_ui.all_pages.as_ref().unwrap().hits.is_empty());
         assert_eq!(app.outline_ui.query, "Équipe");
+    }
+    #[test]
+    fn search_snapshot_detects_changes_on_inactive_pages_and_to_images() {
+        use diagcraft::images::ImageAsset;
+        let asset = ImageAsset::from_rgba(2, 2, &[[40, 80, 120, 255]; 4].concat()).unwrap();
+        let mut doc = Document::default();
+        let image = doc.add_image(asset, [100., 100.]).unwrap();
+        doc.add_page(false).unwrap();
+        let node = doc.add_node(ShapeKind::Rectangle, [200., 200.]);
+        let snapshot = search_pages(&doc, "no match").snapshot;
+        doc.switch_page(0).unwrap();
+        assert_eq!(doc, snapshot);
+        let original = doc
+            .node(image)
+            .unwrap()
+            .image
+            .as_ref()
+            .unwrap()
+            .asset
+            .clone();
+        let replacement = ImageAsset::from_rgba(2, 2, &[[41, 80, 120, 255]; 4].concat()).unwrap();
+        doc.node_mut(image).unwrap().image.as_mut().unwrap().asset = replacement;
+        assert_ne!(doc, snapshot);
+        doc.node_mut(image).unwrap().image.as_mut().unwrap().asset = original;
+        assert_eq!(doc, snapshot);
+        doc.node_mut(image).unwrap().image.as_mut().unwrap().alt = "updated".into();
+        assert_ne!(doc, snapshot);
+        doc.node_mut(image)
+            .unwrap()
+            .image
+            .as_mut()
+            .unwrap()
+            .alt
+            .clear();
+        assert_eq!(doc, snapshot);
+        doc.switch_page(1).unwrap();
+        doc.node_mut(node).unwrap().text = "changed".into();
+        doc.switch_page(0).unwrap();
+        assert_ne!(doc, snapshot);
     }
     #[test]
     fn worker_preserves_language_and_returns_results_without_changing_source() {

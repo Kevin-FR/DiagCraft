@@ -58,12 +58,23 @@ Les tests couvrent groupes, protections, sélection additive, recherche, changem
 de page, sept langues et parcours clavier d’une liste de 2 000 objets. Les essais
 avec lecteurs d’écran et utilisateurs restent prévus avant la 1.0.
 
-Mesure indicative sur Apple M2 Max, profil optimisé : avec 100 pages et 10 000
-formes sans images et sans résultat, la copie du document a pris environ 0,5 ms
-et le calcul en arrière-plan environ 23 ms. Il s’agit d’un scénario synthétique,
-pas d’une garantie de latence ; les documents avec images et les autres systèmes
-restent à mesurer. Pour reproduire :
+Mesure indicative sur Apple M2 Max en profil optimisé : avec 100 pages et
+10 000 formes sans images et sans résultat, la copie du document a pris environ
+0,5 ms et le calcul en arrière-plan environ 20 ms. Il s’agit d’un scénario
+synthétique, pas d’une garantie de latence ; d’autres tailles d’images et les
+autres systèmes restent à mesurer. Pour reproduire :
 
 ```sh
 CARGO_INCREMENTAL=0 cargo test --release --locked -p diagcraft measure_multipage_search_no_match -- --ignored --nocapture
+```
+
+Sur le même Mac, une mesure synthétique avec deux pages, 200 formes et deux
+images intégrées (6,36 Mo sérialisés) donne environ 0,05 ms pour la copie,
+4,2 ms de recherche en arrière-plan et 0,018 ms de comparaison avant ouverture.
+Le recalcul de l’empreinte SHA-256 sur ce même document prenait environ 28 ms.
+Ces valeurs sont indicatives ; la copie reste en mémoire tant que les résultats
+sont affichés, et les données des images sont partagées. Pour reproduire :
+
+```sh
+CARGO_INCREMENTAL=0 cargo test --release --locked -p diagcraft measure_multipage_search_with_images -- --ignored --nocapture
 ```
