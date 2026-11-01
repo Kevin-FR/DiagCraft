@@ -94,7 +94,8 @@ versionnés avec migration ; aucun numéro n’est promis ici.
 - [x] Première arborescence : page active → calques → groupes → objets, sélecteur de page, filtre et navigation clavier (branche de développement, non publié).
 - [x] Retrouver la sélection et effacer le filtre dans l’arborescence (branche de développement, non publié).
 - [x] Recherche explicite de structure sur toutes les pages, limitée aux 300 premiers résultats (branche de développement, non publié).
-- [ ] Mesurer la latence de la recherche multipage sur de grands documents et déplacer son calcul hors de l’interface si nécessaire.
+- [x] Recherche multipage en arrière-plan, annulation et mesure sur 100 pages / 10 000 objets (branche de développement, non publié).
+- [ ] Mesurer la réactivité avec des images et sur les trois plateformes, puis optimiser si nécessaire.
 - [ ] Liens de navigation entre pages.
 - [ ] Conteneurs et couloirs de processus.
 - [ ] Styles nommés avec propagation.

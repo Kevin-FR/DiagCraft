@@ -10151,6 +10151,24 @@
     "pt": "Nenhum resultado nas páginas.",
     "zh-Hans": "页面中没有结果。"
   },
+  "Recherche en cours…": {
+    "fr": "Recherche en cours…",
+    "en": "Searching…",
+    "de": "Suche läuft…",
+    "es": "Buscando…",
+    "it": "Ricerca in corso…",
+    "pt": "A pesquisar…",
+    "zh-Hans": "正在搜索…"
+  },
+  "La recherche a échoué. Réessayez.": {
+    "fr": "La recherche a échoué. Réessayez.",
+    "en": "Search failed. Try again.",
+    "de": "Die Suche ist fehlgeschlagen. Bitte erneut versuchen.",
+    "es": "La búsqueda ha fallado. Inténtalo de nuevo.",
+    "it": "Ricerca non riuscita. Riprova.",
+    "pt": "A pesquisa falhou. Tente novamente.",
+    "zh-Hans": "搜索失败，请重试。"
+  },
   "Tout replier": {
     "fr": "Tout replier",
     "en": "Collapse all",

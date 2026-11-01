@@ -1,6 +1,11 @@
 //! Page-local navigator. All state is transient; never mutates organization.
 use super::*;
 use std::collections::{BTreeMap, HashSet};
+use std::sync::{
+    Arc,
+    atomic::{AtomicBool, Ordering},
+    mpsc,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 enum TreeKey {
@@ -24,6 +29,7 @@ pub(super) struct State {
     focused: Option<(TreeKey, egui::Id)>,
     pending_focus: Option<TreeKey>,
     all_pages: Option<PageResults>,
+    page_job: Option<PageJob>,
 }
 const MAX_PAGE_RESULTS: usize = 300;
 #[derive(Clone)]
@@ -37,7 +43,49 @@ struct PageResults {
     truncated: bool,
     revision: String,
 }
+struct PageJob {
+    receiver: mpsc::Receiver<PageResults>,
+    cancel: Arc<AtomicBool>,
+    language: Language,
+}
+impl Drop for PageJob {
+    fn drop(&mut self) {
+        self.cancel.store(true, Ordering::Relaxed);
+    }
+}
+fn start_page_search(
+    doc: Document,
+    query: String,
+    language: Language,
+    ctx: egui::Context,
+) -> std::io::Result<PageJob> {
+    let (sender, receiver) = mpsc::channel();
+    let cancel = Arc::new(AtomicBool::new(false));
+    let worker_cancel = Arc::clone(&cancel);
+    std::thread::Builder::new()
+        .name("diagcraft-page-search".into())
+        .spawn(move || {
+            i18n::activate(language);
+            let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                search_pages_cancel(&doc, &query, &worker_cancel)
+            }));
+            if let Ok(Some(result)) = outcome {
+                let _ = sender.send(result);
+            }
+            drop(sender);
+            ctx.request_repaint();
+        })?;
+    Ok(PageJob {
+        receiver,
+        cancel,
+        language,
+    })
+}
+#[cfg(test)]
 fn search_pages(doc: &Document, query: &str) -> PageResults {
+    search_pages_cancel(doc, query, &AtomicBool::new(false)).unwrap()
+}
+fn search_pages_cancel(doc: &Document, query: &str, cancel: &AtomicBool) -> Option<PageResults> {
     let words = commands_ui::normalize(query)
         .split_whitespace()
         .map(str::to_owned)
@@ -46,10 +94,16 @@ fn search_pages(doc: &Document, query: &str) -> PageResults {
     let mut truncated = false;
     if !words.is_empty() {
         'pages: for page in 0..doc.page_count() {
+            if cancel.load(Ordering::Relaxed) {
+                return None;
+            }
             let Some(page_doc) = doc.page_document(page) else {
                 continue;
             };
             for row in rows(&page_doc) {
+                if cancel.load(Ordering::Relaxed) {
+                    return None;
+                }
                 if words.iter().all(|word| row.search.contains(word)) {
                     if hits.len() == MAX_PAGE_RESULTS {
                         truncated = true;
@@ -70,11 +124,14 @@ fn search_pages(doc: &Document, query: &str) -> PageResults {
             }
         }
     }
-    PageResults {
+    if cancel.load(Ordering::Relaxed) {
+        return None;
+    }
+    Some(PageResults {
         hits,
         truncated,
         revision: diagcraft::agent::revision(doc),
-    }
+    })
 }
 fn short(text: &str) -> String {
     text.chars()
@@ -265,6 +322,7 @@ impl DrawApp {
         };
         self.outline_ui.query.clear();
         self.outline_ui.all_pages = None;
+        self.outline_ui.page_job = None;
         for ancestor in row.ancestors {
             self.outline_ui.collapsed.remove(&ancestor);
         }
@@ -276,9 +334,31 @@ impl DrawApp {
         if self.outline_ui.context != Some(context) {
             self.outline_ui.collapsed.clear();
             self.outline_ui.all_pages = None;
+            self.outline_ui.page_job = None;
             self.outline_ui.focused = None;
             self.outline_ui.pending_focus = None;
             self.outline_ui.context = Some(context);
+        }
+        if self
+            .outline_ui
+            .page_job
+            .as_ref()
+            .is_some_and(|job| job.language != i18n::active())
+        {
+            self.outline_ui.page_job = None;
+        }
+        if let Some(job) = &self.outline_ui.page_job {
+            match job.receiver.try_recv() {
+                Ok(result) => {
+                    self.outline_ui.all_pages = Some(result);
+                    self.outline_ui.page_job = None;
+                }
+                Err(mpsc::TryRecvError::Empty) => {}
+                Err(mpsc::TryRecvError::Disconnected) => {
+                    self.outline_ui.page_job = None;
+                    self.status = t("La recherche a échoué. Réessayez.");
+                }
+            }
         }
         let mut page = None;
         egui::ComboBox::from_id_salt("outline_pages")
@@ -308,6 +388,7 @@ impl DrawApp {
             .changed();
         if search_changed {
             self.outline_ui.all_pages = None;
+            self.outline_ui.page_job = None;
         }
         ui.horizontal_wrapped(|ui| {
             if !self.outline_ui.query.is_empty()
@@ -315,15 +396,25 @@ impl DrawApp {
             {
                 self.outline_ui.query.clear();
                 self.outline_ui.all_pages = None;
+                self.outline_ui.page_job = None;
             }
             if ui
                 .add_enabled(
-                    !self.outline_ui.query.trim().is_empty(),
+                    !self.outline_ui.query.trim().is_empty() && self.outline_ui.page_job.is_none(),
                     egui::Button::new(t("Chercher dans toutes les pages")).small(),
                 )
                 .clicked()
             {
-                self.outline_ui.all_pages = Some(search_pages(&self.doc, &self.outline_ui.query));
+                self.outline_ui.all_pages = None;
+                match start_page_search(
+                    self.doc.clone(),
+                    self.outline_ui.query.clone(),
+                    i18n::active(),
+                    ui.ctx().clone(),
+                ) {
+                    Ok(job) => self.outline_ui.page_job = Some(job),
+                    Err(_) => self.status = t("La recherche a échoué. Réessayez."),
+                }
             }
             if ui.small_button(t("Tout développer")).clicked() {
                 self.outline_ui.collapsed.clear();
@@ -357,6 +448,20 @@ impl DrawApp {
                 self.show_layers = true;
             }
         });
+        if self.outline_ui.page_job.is_some() {
+            ui.horizontal(|ui| {
+                ui.spinner();
+                ui.label(t("Recherche en cours…"));
+                if ui.small_button(t("Annuler")).clicked() {
+                    self.outline_ui.page_job = None;
+                }
+            });
+            if let Some(page) = page {
+                self.outline_ui.page_job = None;
+                self.switch_page(page);
+            }
+            return;
+        }
         if let Some(results) = &self.outline_ui.all_pages {
             let mut chosen: Option<PageHit> = None;
             if results.truncated {
@@ -638,6 +743,126 @@ mod tests {
         app.outline_ui.query = "unchanged".into();
         assert!(!app.reveal_outline_selection());
         assert_eq!(app.outline_ui.query, "unchanged");
+    }
+    #[test]
+    #[ignore = "manual performance measurement"]
+    fn measure_multipage_search_no_match() {
+        let mut doc = Document::default();
+        for page in 0..100 {
+            if page > 0 {
+                doc.add_page(false).unwrap();
+            }
+            for index in 0..100 {
+                let id = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+                doc.node_mut(id).unwrap().text = format!("Object {page}-{index}");
+            }
+        }
+        let start = std::time::Instant::now();
+        let snapshot = doc.clone();
+        let clone_time = start.elapsed();
+        let start = std::time::Instant::now();
+        let job = start_page_search(
+            snapshot,
+            "no matching object".into(),
+            Language::English,
+            egui::Context::default(),
+        )
+        .unwrap();
+        let results = job
+            .receiver
+            .recv_timeout(std::time::Duration::from_secs(30))
+            .unwrap();
+        eprintln!(
+            "100 pages, 10000 objects, no match: snapshot {:?}, worker {:?}",
+            clone_time,
+            start.elapsed()
+        );
+        assert!(results.hits.is_empty());
+    }
+    #[test]
+    fn search_button_runs_worker_and_displays_results() {
+        let (ctx, mut app, _, _, _) = fixture();
+        render(&ctx, &mut app, vec![]);
+        app.outline_ui.query = "Équipe".into();
+        let output = render(&ctx, &mut app, vec![]);
+        let point = output
+            .shapes
+            .iter()
+            .find_map(|shape| match &shape.shape {
+                egui::Shape::Text(text)
+                    if text.galley.text() == t("Chercher dans toutes les pages") =>
+                {
+                    Some(text.pos + text.galley.size() / 2.)
+                }
+                _ => None,
+            })
+            .expect("search button visible");
+        for pressed in [true, false] {
+            render(
+                &ctx,
+                &mut app,
+                vec![
+                    egui::Event::PointerMoved(point),
+                    egui::Event::PointerButton {
+                        pos: point,
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+            );
+        }
+        assert!(app.outline_ui.page_job.is_some());
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        while app.outline_ui.page_job.is_some() && std::time::Instant::now() < deadline {
+            std::thread::sleep(std::time::Duration::from_millis(5));
+            render(&ctx, &mut app, vec![]);
+        }
+        assert!(app.outline_ui.page_job.is_none());
+        assert!(!app.outline_ui.all_pages.as_ref().unwrap().hits.is_empty());
+        assert_eq!(app.outline_ui.query, "Équipe");
+    }
+    #[test]
+    fn worker_preserves_language_and_returns_results_without_changing_source() {
+        let ctx = egui::Context::default();
+        let mut doc = Document::default();
+        let id = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+        doc.node_mut(id).unwrap().text = "worker-target".into();
+        let before = doc.clone();
+        for language in Language::ALL {
+            let job = start_page_search(doc.clone(), "worker-target".into(), language, ctx.clone())
+                .unwrap();
+            let result = job
+                .receiver
+                .recv_timeout(std::time::Duration::from_secs(5))
+                .unwrap();
+            assert_eq!(result.hits.len(), 1);
+            assert!(
+                result.hits[0]
+                    .text
+                    .contains(&i18n::translate(language, ShapeKind::Rectangle.label()))
+            );
+        }
+        assert_eq!(doc, before);
+    }
+    #[test]
+    fn cancelling_a_job_or_changing_pages_discards_its_result() {
+        let cancel = AtomicBool::new(true);
+        assert!(search_pages_cancel(&Document::default(), "anything", &cancel).is_none());
+        let (ctx, mut app, _, _, _) = fixture();
+        render(&ctx, &mut app, vec![]);
+        let (sender, receiver) = mpsc::channel();
+        let flag = Arc::new(AtomicBool::new(false));
+        app.outline_ui.page_job = Some(PageJob {
+            receiver,
+            cancel: Arc::clone(&flag),
+            language: i18n::active(),
+        });
+        app.doc.add_page(false).unwrap();
+        render(&ctx, &mut app, vec![]);
+        assert!(flag.load(Ordering::Relaxed));
+        assert!(app.outline_ui.page_job.is_none());
+        assert!(sender.send(search_pages(&app.doc, "something")).is_err());
     }
     #[test]
     fn search_across_pages_keeps_duplicate_ids_distinct_and_bounds_results() {

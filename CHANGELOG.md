@@ -5,6 +5,8 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — structure du document
 
+- Recherche multipage exécutée en arrière-plan, avec progression et annulation lors d’un changement de filtre ou de page.
+
 - Image disque macOS Apple Silicon avec installation par glisser-déposer vers Applications ; ZIP conservé.
 
 - Recherche de structure sur toutes les pages, avec accès à chaque résultat et distinction des identifiants par page.

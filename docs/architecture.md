@@ -34,6 +34,12 @@ ce catalogue et appellent les actions de l’application. Les saisies de texte e
 boîtes de dialogue gardent leurs touches ; une commande de dessin ne doit pas
 s’exécuter derrière une fenêtre modale.
 
+La recherche multipage de `outline_ui.rs` prend une copie du document puis
+s’exécute dans un thread dédié. Une annulation atomique abandonne le travail
+au changement de filtre ou de page ; seul le résultat du travail encore actif
+est consommé. Le résultat conserve la révision de sa copie, vérifiée avant toute
+navigation. Le format documentaire et l’historique ne sont pas modifiés.
+
 `interface_prefs.rs` conserve la disposition, la langue et les préférences de mise à jour dans un JSON local borné,
 avec écriture atomique. Les captures et tests n’accèdent pas aux préférences utilisateur.
 Les dimensions voulues restent distinctes des limites temporaires de fenêtre.

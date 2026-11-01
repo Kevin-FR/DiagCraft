@@ -23,8 +23,9 @@ calques appartiennent à des espaces différents de ceux des objets.
   Chaque résultat précise le numéro et le nom de sa page ; activez-le pour
   rejoindre la page et l’objet, le calque ou le groupe. Les 300 premiers résultats
   sont affichés au maximum : précisez la recherche si nécessaire. Les résultats
-  périmés après modification du document sont refusés. Le calcul se fait lors du
-  clic et peut prendre du temps pour un document très volumineux.
+  périmés après modification du document sont refusés. Le calcul se poursuit en
+  arrière-plan ; il peut être annulé, et un changement de filtre ou de page
+  abandonne la recherche précédente. Une copie du document est prise au lancement.
 - Cliquez sur un objet, ou focalisez-le puis appuyez sur Entrée, pour le sélectionner
   et le rendre visible sur la feuille. Maj ajoute à la sélection ; les membres
   d’un groupe restent sélectionnés ensemble. Les objets verrouillés visibles
@@ -54,3 +55,13 @@ Le format `.draw` reste v7 et l’API agents v1.
 Les tests couvrent groupes, protections, sélection additive, recherche, changements
 de page, sept langues et parcours clavier d’une liste de 2 000 objets. Les essais
 avec lecteurs d’écran et utilisateurs restent prévus avant la 1.0.
+
+Mesure indicative sur Apple M2 Max, profil optimisé : avec 100 pages et 10 000
+formes sans images et sans résultat, la copie du document a pris environ 0,5 ms
+et le calcul en arrière-plan environ 23 ms. Il s’agit d’un scénario synthétique,
+pas d’une garantie de latence ; les documents avec images et les autres systèmes
+restent à mesurer. Pour reproduire :
+
+```sh
+CARGO_INCREMENTAL=0 cargo test --release --locked -p diagcraft measure_multipage_search_no_match -- --ignored --nocapture
+```
