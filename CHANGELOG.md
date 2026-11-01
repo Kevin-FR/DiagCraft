@@ -5,6 +5,8 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — structure du document
 
+- CI macOS : migration vers le runner Apple Silicon macOS 15, avec contrôle de l’architecture.
+
 - Vérification plus rapide des résultats multipages pour les documents avec images, sans recalculer une empreinte à chaque ouverture.
 
 - Empaquetage macOS : nouvelles tentatives lorsque le volume temporaire est encore occupé.

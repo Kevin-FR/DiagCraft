@@ -46,7 +46,7 @@ jobs:
             name: linux-x86_64
           - os: windows-2022
             name: windows-x86_64
-          - os: macos-14
+          - os: macos-15
             name: macos-arm64
     runs-on: ${{ matrix.os }}
     env:
@@ -66,6 +66,9 @@ jobs:
         with:
           python-version: '3.12'
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Verify Apple Silicon runner
+        if: runner.os == 'macOS'
+        run: test "$(uname -m)" = arm64
       - name: Linux system libraries
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libegl1-mesa-dev libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev dpkg-dev desktop-file-utils shared-mime-info libglib2.0-bin xvfb xauth libgl1-mesa-dri weston imagemagick python3-pil
