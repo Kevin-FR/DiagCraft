@@ -97,6 +97,14 @@ pub fn region(doc: &Document, ids: &[u64]) -> Result<[f32; 4], String> {
             }
         }
     }
+    for drawing in &doc.drawings {
+        if ids.contains(&drawing.id) && !drawing.label.is_empty() {
+            let bounds =
+                crate::text_layout::line_label_bounds(&drawing.label, drawing.label_position());
+            include([bounds[0], bounds[1]]);
+            include([bounds[2], bounds[3]]);
+        }
+    }
     let routing = RoutingContext::new(doc);
     for e in &doc.connectors {
         if ids.contains(&e.id) {
@@ -107,10 +115,10 @@ pub fn region(doc: &Document, ids: &[u64]) -> Result<[f32; 4], String> {
                 include([p[0] + pad, p[1] + pad]);
             }
             if !e.label.is_empty() {
-                let at = r.label_position(e.label_t);
-                let half = e.label.chars().count() as f32 * 4. + 8.;
-                include([at[0] - half, at[1] - 20.]);
-                include([at[0] + half, at[1] + 8.]);
+                let bounds =
+                    crate::text_layout::line_label_bounds(&e.label, e.label_position(&r.points));
+                include([bounds[0], bounds[1]]);
+                include([bounds[2], bounds[3]]);
             }
         }
     }

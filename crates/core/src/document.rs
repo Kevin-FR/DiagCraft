@@ -77,10 +77,23 @@ pub struct Drawing {
     pub color: Color,
     pub width: f32,
     pub arrow: bool,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub label: String,
+    #[serde(default = "middle_label", skip_serializing_if = "is_middle_label")]
+    pub label_t: f32,
+    #[serde(default, skip_serializing_if = "zero_offset")]
+    pub label_offset: Point,
     #[serde(default, skip_serializing_if = "crate::appearance::Line::is_default")]
     pub appearance: crate::appearance::Line,
 }
 impl Drawing {
+    pub fn label_position(&self) -> Point {
+        let position = crate::routing::label_position(&self.points(), self.label_t);
+        [
+            position[0] + self.label_offset[0],
+            position[1] + self.label_offset[1],
+        ]
+    }
     pub fn controls(&self) -> [Point; 4] {
         let dx = self.end[0] - self.start[0];
         let dy = self.end[1] - self.start[1];
@@ -418,6 +431,18 @@ impl Port {
 fn middle_label() -> f32 {
     0.5
 }
+fn is_middle_label(value: &f32) -> bool {
+    *value == 0.5
+}
+fn zero_offset(value: &Point) -> bool {
+    *value == [0., 0.]
+}
+fn valid_label(label: &str, t: f32, offset: Point) -> bool {
+    label.len() <= 4096
+        && t.is_finite()
+        && (0. ..=1.).contains(&t)
+        && offset.iter().all(|v| v.is_finite() && v.abs() <= 100_000.)
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -450,6 +475,8 @@ pub struct Connector {
     pub waypoints: Vec<Point>,
     #[serde(default = "middle_label")]
     pub label_t: f32,
+    #[serde(default, skip_serializing_if = "zero_offset")]
+    pub label_offset: Point,
     #[serde(default)]
     pub pattern: crate::stroke_style::LinePattern,
     #[serde(default)]
@@ -458,6 +485,16 @@ pub struct Connector {
     pub end_head: crate::stroke_style::ArrowHead,
     #[serde(default, skip_serializing_if = "crate::appearance::Line::is_default")]
     pub appearance: crate::appearance::Line,
+}
+
+impl Connector {
+    pub fn label_position(&self, route: &[Point]) -> Point {
+        let position = crate::routing::label_position(route, self.label_t);
+        [
+            position[0] + self.label_offset[0],
+            position[1] + self.label_offset[1],
+        ]
+    }
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -581,28 +618,18 @@ impl Document {
     }
     pub fn add_node(&mut self, kind: ShapeKind, center: Point) -> u64 {
         let id = self.next_id();
-        let size = match kind {
-            ShapeKind::Diamond => [200., 120.],
-            ShapeKind::Text => [300., 48.],
-            _ => [220., 84.],
-        };
+        let size = crate::symbols::default_size(kind);
         self.nodes.push(Node {
             id,
             kind,
             position: [center[0] - size[0] / 2., center[1] - size[1] / 2.],
             size,
-            text: if ShapeKind::ARROWS.contains(&kind) {
-                String::new()
-            } else if kind == ShapeKind::Text {
-                "Votre texte".into()
-            } else {
-                kind.label().into()
-            },
+            text: crate::symbols::default_caption(kind).into(),
             fill: [233, 246, 241],
             stroke: [39, 128, 107],
             text_color: [32, 53, 64],
             stroke_width: 1.5,
-            font_size: 18.,
+            font_size: if kind == ShapeKind::Text { 18. } else { 12. },
             text_style: TextStyle::default(),
             text_runs: vec![],
             image: None,
@@ -634,6 +661,7 @@ impl Document {
             to_port: Port::Auto,
             waypoints: vec![],
             label_t: 0.5,
+            label_offset: [0., 0.],
             pattern: Default::default(),
             start_head: Default::default(),
             end_head: Default::default(),
@@ -710,6 +738,9 @@ impl Document {
             color: [70, 86, 105],
             width: 2.,
             arrow: false,
+            label: String::new(),
+            label_t: 0.5,
+            label_offset: [0., 0.],
             appearance: Default::default(),
         });
         id
@@ -918,6 +949,13 @@ impl Document {
                     max[a] = max[a].max(p[a]);
                 }
             }
+            if !d.label.is_empty() {
+                let bounds = crate::text_layout::line_label_bounds(&d.label, d.label_position());
+                for axis in 0..2 {
+                    min[axis] = min[axis].min(bounds[axis]);
+                    max[axis] = max[axis].max(bounds[axis + 2]);
+                }
+            }
         }
         for c in &self.charts {
             for a in 0..2 {
@@ -927,7 +965,18 @@ impl Document {
         }
         let routing = crate::routing::RoutingContext::new(self);
         for e in &self.connectors {
-            for p in routing.route(e).points {
+            let route = routing.route(e);
+            if !e.label.is_empty() {
+                let bounds = crate::text_layout::line_label_bounds(
+                    &e.label,
+                    e.label_position(&route.points),
+                );
+                for axis in 0..2 {
+                    min[axis] = min[axis].min(bounds[axis]);
+                    max[axis] = max[axis].max(bounds[axis + 2]);
+                }
+            }
+            for p in route.points {
                 for a in 0..2 {
                     min[a] = min[a].min(p[a]);
                     max[a] = max[a].max(p[a]);
@@ -1007,7 +1056,7 @@ impl Document {
             .map(|(_, c)| c.id)
     }
     pub fn edge_label_point(&self, edge: &Connector) -> Point {
-        crate::routing::label_position(&self.route(edge), edge.label_t)
+        edge.label_position(&self.route(edge))
     }
     pub fn validate(&self) -> Result<(), String> {
         self.validate_image_budget()?;
@@ -1097,6 +1146,7 @@ impl Document {
                 || d.bend.abs() > 10_000.
                 || !d.width.is_finite()
                 || !(0.5..=20.).contains(&d.width)
+                || !valid_label(&d.label, d.label_t, d.label_offset)
             {
                 return Err("Tracé invalide.".into());
             }
@@ -1116,8 +1166,7 @@ impl Document {
             if !c.width.is_finite() || !(0.5..=20.).contains(&c.width) || c.label.len() > 4096 {
                 return Err("Style de connecteur invalide.".into());
             }
-            if !c.label_t.is_finite()
-                || !(0.0..=1.0).contains(&c.label_t)
+            if !valid_label(&c.label, c.label_t, c.label_offset)
                 || c.waypoints.len() > 16
                 || c.waypoints
                     .iter()

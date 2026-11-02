@@ -15,6 +15,18 @@ mod contrast_tests;
 #[path = "minimap_tests.rs"]
 mod minimap_tests;
 
+#[path = "text_resize_tests.rs"]
+mod text_resize_tests;
+
+#[path = "line_label_editor_tests.rs"]
+mod line_label_editor_tests;
+
+#[path = "line_label_interaction_tests.rs"]
+mod line_label_interaction_tests;
+
+#[path = "shape_scale_tests.rs"]
+mod shape_scale_tests;
+
 fn nudge_key(key: Key, pressed: bool, repeat: bool, modifiers: egui::Modifiers) -> egui::Event {
     egui::Event::Key {
         key,
@@ -736,6 +748,122 @@ fn fit_text_command_handles_a_mixed_selection_and_undoes_once() {
 }
 
 #[test]
+fn shrinking_a_block_enables_wrapping_and_undo_restores_the_original_style() {
+    for cancel in [false, true] {
+        let (ctx, mut app) = setup();
+        app.snap = false;
+        app.show_quick_toolbar = false;
+        let id = app.doc.add_node(ShapeKind::Rectangle, [550., 350.]);
+        let node = app.doc.node_mut(id).unwrap();
+        node.size = [400., 160.];
+        node.text = "Ce texte doit revenir à la ligne lorsque le bloc devient plus étroit.".into();
+        node.text_style.wrap = false;
+        app.selected = vec![id];
+        app.commit();
+        let before = app.doc.clone();
+        let rect = app.node_screen_rect(app.doc.node(id).unwrap());
+        let (at, _) = resize_handles(rect)[3];
+        pointer(&ctx, &mut app, at, true, egui::Modifiers::NONE);
+        assert!(matches!(app.drag, Some(Drag::Resize { .. })));
+        frame(
+            &ctx,
+            &mut app,
+            vec![egui::Event::PointerMoved(at - vec2(280., 0.))],
+            egui::Modifiers::NONE,
+        );
+        let node = app.doc.node(id).unwrap();
+        assert!(node.text_style.wrap);
+        assert!(node.text_layout().lines.len() > 1);
+        assert_eq!(node.text, before.node(id).unwrap().text);
+        assert_eq!(node.size, [120., 160.]);
+        if cancel {
+            gesture_key(&ctx, &mut app, Key::Escape, egui::Modifiers::NONE);
+        } else {
+            pointer(
+                &ctx,
+                &mut app,
+                at - vec2(280., 0.),
+                false,
+                egui::Modifiers::NONE,
+            );
+            let resized = app.doc.clone();
+            app.undo();
+            assert_eq!(app.doc, before);
+            app.redo();
+            assert_eq!(app.doc, resized);
+            app.undo();
+        }
+        assert_eq!(app.doc, before);
+    }
+}
+
+#[test]
+fn overflowing_block_text_is_clipped_and_starts_at_the_top_at_every_zoom() {
+    for kind in [
+        ShapeKind::Rectangle,
+        ShapeKind::Diamond,
+        ShapeKind::Ellipse,
+        ShapeKind::Text,
+    ] {
+        for zoom in [0.5, 1., 2.] {
+            for align in [TextAlign::Left, TextAlign::Center, TextAlign::Right] {
+                let (ctx, mut app) = setup();
+                app.zoom = zoom;
+                let id = app.doc.add_node(kind, [150., 150.]);
+                let node = app.doc.node_mut(id).unwrap();
+                node.size = [96., 48.];
+                node.font_size = 32.;
+                node.text = "Première ligne 中文 puis la suite du contenu".into();
+                node.text_style.wrap = true;
+                node.text_style.monospace = true;
+                node.text_style.bold = true;
+                node.text_style.align = align;
+                let node = node.clone();
+                let source = app.doc.clone();
+                let (origin, size) = diagcraft::text_layout::area(&node);
+                let area = Rect::from_min_size(app.screen(origin), vec2(size[0], size[1]) * zoom);
+                let expected = node.display_text();
+                let output = ctx.run(
+                    egui::RawInput {
+                        screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1200., 800.))),
+                        ..Default::default()
+                    },
+                    |ctx| {
+                        egui::CentralPanel::default()
+                            .show(ctx, |ui| app.paint_node(ui.painter(), &node));
+                    },
+                );
+                let text_shapes: Vec<_> = output
+                    .shapes
+                    .iter()
+                    .filter_map(|shape| {
+                        if let Shape::Text(text) = &shape.shape {
+                            (text.galley.job.text == expected).then_some((shape.clip_rect, text))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+                assert_eq!(text_shapes.len(), 2, "normal and synthetic bold passes");
+                for (clip, text) in text_shapes {
+                    if kind == ShapeKind::Text {
+                        assert!(!area.contains_rect(clip));
+                    } else {
+                        assert!(area.contains_rect(clip));
+                        let top = text.pos.y + text.galley.rect.min.y;
+                        assert!(
+                            (top - area.top()).abs() < 0.01,
+                            "{kind:?} {zoom}: {top} vs {area:?}"
+                        );
+                    }
+                }
+                assert_eq!(app.doc, source);
+            }
+        }
+    }
+}
+
+#[test]
 fn manual_resize_turns_off_fitting_and_escape_restores_the_automatic_setting() {
     for cancel in [false, true] {
         let (ctx, mut app) = setup();
@@ -1364,8 +1492,8 @@ fn canvas_resize_updates_attached_route_and_preserves_undo() {
         false,
         egui::Modifiers::NONE,
     );
-    // The dragged bottom edge snaps to y=270; the fixed top remains at y=138.
-    assert_eq!(app.doc.node(a).unwrap().size, [300., 132.]);
+    // The dragged bottom edge snaps to y=260; the fixed top remains at y=150.
+    assert_eq!(app.doc.node(a).unwrap().size, [200., 110.]);
     assert_ne!(
         app.doc.route(&app.doc.connectors[0]),
         before.route(&before.connectors[0])
@@ -2631,8 +2759,14 @@ fn auto_page_size_grows_with_drag_and_undo_restores_size() {
         false,
         egui::Modifiers::NONE,
     );
-    assert!(app.doc.page_size[0] > 1000.);
-    assert!(app.doc.page_size[1] > 700.);
+    let node = app.doc.node(n).unwrap();
+    for axis in 0..2 {
+        assert!(app.doc.page_size[axis] > before.page_size[axis]);
+        assert!(
+            app.doc.page_size[axis]
+                >= node.position[axis] + node.size[axis] + app.doc.page_style.margin
+        );
+    }
     app.undo();
     assert_eq!(app.doc, before);
 }
@@ -6821,14 +6955,9 @@ fn inline_editor_stays_in_the_block_at_each_zoom_and_alignment_without_a_modal()
             assert!((expected - actual).abs() < 2.);
             assert!((bounds.center().y - editor.content_rect.center().y).abs() < 2.);
             assert_eq!(shape.galley.rect.min.x, 0.);
-            assert!(
-                shape
-                    .galley
-                    .job
-                    .sections
-                    .iter()
-                    .any(|s| (s.format.font_id.size - 18. * zoom).abs() < 0.01)
-            );
+            assert!(shape.galley.job.sections.iter().any(|s| {
+                (s.format.font_id.size - app.doc.node(id).unwrap().font_size * zoom).abs() < 0.01
+            }));
             assert!(app.canvas.shrink(7.).contains_rect(editor.toolbar_rect));
             assert!(!out.shapes.iter().any(
                 |s| matches!(&s.shape,Shape::Text(t) if t.galley.job.text=="Contenu du bloc")
@@ -7407,18 +7536,29 @@ fn object_search_virtualized_rows_follow_keyboard_and_tab_keeps_button_activatio
         object_key(&ctx, &mut app, Key::ArrowDown, egui::Modifiers::NONE);
     }
     let out = object_search_frame(&ctx, &mut app, vec![], vec2(1200., 760.));
+    // Find the results viewport from its detail row. Block text now has its own
+    // clip, which may also lie entirely beneath the search dialog.
+    let results_clip = out
+        .shapes
+        .iter()
+        .find_map(|shape| {
+            if let Shape::Text(text) = &shape.shape {
+                (text.galley.job.text == app.object_search.entries[35].detail)
+                    .then_some(shape.clip_rect)
+            } else {
+                None
+            }
+        })
+        .expect("selected result detail must be painted");
+    assert!(out.shapes.iter().any(|s| s.clip_rect == results_clip
+        && matches!(&s.shape,Shape::Text(t) if t.galley.job.text=="Objet 35")));
     assert!(
         out.shapes
             .iter()
-            .any(|s| matches!(&s.shape,Shape::Text(t) if t.galley.job.text=="Objet 35"))
-    );
-    assert!(
-        out.shapes
-            .iter()
-            .filter(
-                |s| app.object_search.rect.unwrap().contains_rect(s.clip_rect)
-                    && matches!(&s.shape,Shape::Text(t) if t.galley.job.text.starts_with("Objet "))
-            )
+            .filter(|s| s.clip_rect.left() == results_clip.left()
+                && s.clip_rect.right() == results_clip.right()
+                && app.object_search.rect.unwrap().contains_rect(s.clip_rect)
+                && matches!(&s.shape,Shape::Text(t) if t.galley.job.text.starts_with("Objet ")))
             .count()
             < 20
     );

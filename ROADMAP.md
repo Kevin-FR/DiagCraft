@@ -93,7 +93,8 @@ versionnés avec migration ; aucun numéro n’est promis ici.
 - [x] Première mise en page automatique des blocs avec aperçu et annulation (0.13.1). Voir [le périmètre et les limites](docs/mise-en-page.md).
 - [x] Espacements indépendants entre niveaux et entre blocs, préréglages Compact/Normal/Aéré et aperçu recalculé (0.13.1).
 - [x] Réduire les croisements estimés entre niveaux voisins : balayages bornés, meilleur ordre retenu et score dans l’aperçu (0.13.1).
-- [ ] Affiner la mise en page : déplacement des groupes comme unités et prise en compte des routes réelles/liaisons longues dans l’optimisation.
+- [x] Mise en page des groupes de blocs comme unités, avec disposition interne et points manuels des connecteurs internes groupés conservés (branche de développement, non publié). Les groupes mixtes restent fixes ; voir [le périmètre](docs/mise-en-page.md).
+- [ ] Affiner la mise en page : groupes mixtes contenant des graphiques ou dessins libres, et prise en compte des routes réelles/liaisons longues dans l’optimisation.
 - [x] Première arborescence : page active → calques → groupes → objets, sélecteur de page, filtre et navigation clavier (branche de développement, non publié).
 - [x] Retrouver la sélection et effacer le filtre dans l’arborescence (branche de développement, non publié).
 - [x] Recherche explicite de structure sur toutes les pages, limitée aux 300 premiers résultats (branche de développement, non publié).
@@ -216,6 +217,7 @@ et licence vérifiées.
   édition annulable, exports vectoriels et contrat agents Unicode.
 
 - [x] Groupes persistants, verrouillage et calques (0.8.0).
+- [x] Libellé unique éditable directement et déplaçable librement sur les connecteurs et traits droits/courbes ; exports et inspection cohérents (branche de développement, non publié). Voir [le guide des connecteurs](docs/connecteurs.md).
 - [ ] Rotation des objets, avec géométrie cohérente des liens et des exports.
 - [x] Routage évitant les obstacles, entre points manuels conservés, avec voies stables et calcul borné (0.9.0).
 - [x] Images PNG/JPEG embarquées, recadrage non destructif et export PNG page/sélection avec dimensions, DPI et transparence (0.10.0).

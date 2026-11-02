@@ -113,6 +113,40 @@ pub(crate) fn export_view(
     Ok(out)
 }
 
+fn line_label(out: &mut String, label: &str, center: crate::document::Point, color: Color) {
+    let layout = crate::text_layout::line_label(label);
+    let bounds = [
+        center[0] - layout.width / 2. - 4.,
+        center[1] - layout.height / 2. - 3.,
+        center[0] + layout.width / 2. + 4.,
+        center[1] + layout.height / 2. + 3.,
+    ];
+    let _ = writeln!(
+        out,
+        "<rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" rx=\"2\" fill=\"white\"/>",
+        bounds[0],
+        bounds[1],
+        bounds[2] - bounds[0],
+        bounds[3] - bounds[1]
+    );
+    let _ = write!(
+        out,
+        "<text text-anchor=\"middle\" xml:space=\"preserve\" font-family=\"'Source Sans 3','Noto Sans SC',Arial,sans-serif\" font-size=\"14\" fill=\"{}\">",
+        hex(color)
+    );
+    let baseline = layout.first_baseline(center[1]);
+    for (i, line) in layout.lines.iter().enumerate() {
+        let _ = write!(
+            out,
+            "<tspan x=\"{}\" y=\"{}\">{}</tspan>",
+            center[0],
+            baseline + i as f32 * layout.line_height,
+            escape(line)
+        );
+    }
+    out.push_str("</text>\n");
+}
+
 fn render_layer(
     doc: &Document,
     organization: &crate::organization::OrganizationView,
@@ -171,6 +205,9 @@ fn render_layer(
                 }
             }
         }
+        if !drawing.label.is_empty() {
+            line_label(out, &drawing.label, drawing.label_position(), drawing.color);
+        }
     }
     for edge in doc.connectors.iter().filter(|e| {
         organization.object_layer(e.id) == layer
@@ -225,23 +262,10 @@ fn render_layer(
             }
         }
         if !edge.label.is_empty() && points.len() >= 2 {
-            let pos = crate::routing::label_position(&points, edge.label_t);
-            let label_width = edge.label.chars().count() as f32 * 8. + 8.;
-            let _ = writeln!(
-                out,
-                "<rect x=\"{}\" y=\"{}\" width=\"{label_width}\" height=\"20\" rx=\"2\" fill=\"white\"/>",
-                pos[0] - label_width / 2.,
-                pos[1] - 15.
-            );
-            let _ = writeln!(
-                out,
-                "<text x=\"{}\" y=\"{}\" text-anchor=\"middle\" font-family=\"'Source Sans 3','Noto Sans SC',Arial,sans-serif\" font-size=\"14\" fill=\"{color}\">{}</text>",
-                pos[0],
-                pos[1],
-                escape(&edge.label)
-            );
+            line_label(out, &edge.label, edge.label_position(&points), edge.color);
         }
     }
+
     for n in doc.nodes.iter().filter(|n| {
         organization.object_layer(n.id) == layer
             && organization.is_object_visible(n.id)
@@ -335,7 +359,20 @@ fn render_layer(
         }
         let text = n.text_layout();
         let (text_origin, text_size) = crate::text_layout::area(n);
-        let start = text.first_baseline(c[1]);
+        let clip_text = n.kind != ShapeKind::Text;
+        let start = if clip_text && text.height > text_size[1] {
+            // Keep the beginning readable when a block is shorter than its text.
+            text_origin[1] + (text.line_height + text.ascent + text.descent) / 2.
+        } else {
+            text.first_baseline(c[1])
+        };
+        if clip_text {
+            let _ = writeln!(
+                out,
+                "<defs><clipPath id=\"diagcraft-text-{}\" clipPathUnits=\"userSpaceOnUse\"><rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\"/></clipPath></defs><g clip-path=\"url(#diagcraft-text-{})\">",
+                n.id, text_origin[0], text_origin[1], text_size[0], text_size[1], n.id
+            );
+        }
         let (anchor, text_x) = match n.text_style.align {
             TextAlign::Left => ("start", text_origin[0]),
             TextAlign::Center => ("middle", c[0]),
@@ -411,6 +448,9 @@ fn render_layer(
             out.push_str("</tspan>");
         }
         out.push_str("</text>\n");
+        if clip_text {
+            out.push_str("</g>\n");
+        }
     }
     for chart in doc.charts.iter().filter(|c| {
         organization.object_layer(c.id) == layer

@@ -101,7 +101,8 @@ mod tests {
         let (mut app, _) = setup();
         app.tool = Tool::Shape(ShapeKind::Diamond);
         let before = app.doc.clone();
-        assert!(app.try_insert_on_connector(ShapeKind::Diamond, [340., 300.]));
+        let near_source = before.nodes[0].position[0] + before.nodes[0].size[0] + 10.;
+        assert!(app.try_insert_on_connector(ShapeKind::Diamond, [near_source, 300.]));
         assert!(app.error.is_some());
         assert_eq!(app.doc, before);
         assert!(app.tool == Tool::Shape(ShapeKind::Diamond));

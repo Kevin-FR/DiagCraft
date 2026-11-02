@@ -128,12 +128,22 @@ et dimensions au canevas, au SVG et à l’inspection agents. Hack est explicite
 utilisée pour le texte monospace ; Noto Sans SC sert de repli pour le chinois.
 Le PDF consomme le même SVG avec les polices embarquées.
 
+Les dimensions initiales des nouveaux blocs sont exprimées en pixels à 96 dpi,
+indépendamment du zoom et de l’orientation de page : rectangle 120 × 60, losange
+160 × 120, texte de bloc 12 px. Les préréglages des symboles intégrés restent
+adaptés à leur type. Ces valeurs ne s’appliquent qu’à la création ; chargement,
+collage et symboles personnels conservent les dimensions et styles enregistrés.
+
 `TextStyle::auto_fit` est un champ optionnel v7, faux par défaut et omis dans ce cas.
 L’interface applique l’ajustement au commit d’un geste ; les patches l’appliquent
 uniquement aux nœuds modifiés, avant validation et calcul de la révision résultante.
 Une sélection est ajustée atomiquement. Les positions et IDs sont conservés ; les
 routes de connecteurs suivent leurs formes par le mécanisme existant. Un redimensionnement
-manuel désactive l’option dans le même geste annulable. Le moteur ne connaît pas egui.
+manuel désactive l’option dans le même geste annulable et active le retour à la
+ligne pour les blocs autres que Texte. Le rendu du canevas et du SVG limite leur
+texte à la zone de contenu calculée par le moteur ; le texte est centré s’il tient,
+sinon aligné en haut, sans réécriture du contenu enregistré. Le moteur ne connaît
+pas egui.
 
 ## Contenu enrichi des blocs
 
@@ -229,14 +239,24 @@ d’historique. Texte seul et symboles personnels conservent le placement ordina
 
 `auto_layout.rs` produit un nouveau document à partir de la page active :
 composantes fortement connexes itératives, niveaux du graphe condensé et placement
-borné évitant les boîtes des blocs et graphiques fixes. Les objets sont ordonnés
-par ID pour un résultat déterministe, puis réordonnés en huit balayages maximum
+borné évitant les boîtes des blocs et graphiques fixes. Les unités de placement
+sont des blocs isolés ou des groupes compatibles, ordonnés par leur plus petit ID
+d’objet pour un résultat déterministe, puis réordonnés en huit balayages maximum
 selon le barycentre des voisins des niveaux adjacents. Un comptage d’inversions
 par arbre de Fenwick exclut les extrémités partagées ; seul un score strictement
 meilleur remplace le meilleur ordre retenu. Ce score ignore les routes finales et
 les liaisons longues. Un curseur par niveau conserve l’ordre retenu autour des
-obstacles fixes, y compris pour des blocs de tailles différentes. Seuls les blocs
-éligibles changent de position. `auto_layout_ui.rs` conserve le document source, la page et l’onglet,
+obstacles fixes, y compris pour des unités de tailles différentes. Un groupe est
+compatible s’il contient au moins un nœud autre qu’un texte, uniquement des nœuds
+et éventuellement des connecteurs attachés entre ces nœuds, et si tous ses
+membres sont modifiables. La sélection d’un membre inclut l’unité entière.
+L’enveloppe comprend les nœuds et les points manuels des connecteurs membres ;
+une même translation préserve leur disposition interne. Les autres connecteurs
+conservent leurs points manuels. Les enveloppes des groupes sont mesurées aux
+coordonnées projetées pour stabiliser les niveaux et espacements malgré les
+arrondis flottants. Les groupes mixtes restent fixes. La limite de
+500 compte les nœuds éligibles individuels, comme les compteurs de l’aperçu.
+`auto_layout_ui.rs` conserve le document source, la page et l’onglet,
 montre un aperçu simplifié et refuse une application périmée. La validation du
 lot utilise l’historique existant. `Spacing` distingue les distances entre niveaux
 et entre blocs ; les valeurs finies de 20 à 300 px sont validées avant le calcul.
@@ -293,6 +313,14 @@ Le survol, les poignées et la sélection réutilisent ce cache ; la sélection 
 rectangle prépare le snapshot une seule fois pour tous ses connecteurs. SVG et
 inspection réutilisent un contexte de page. Les diagnostics agents exposent le
 statut calculé sans changer le contrat de patch API 1 ou la sérialisation v7.
+
+Les libellés de connecteurs et de tracés libres combinent une fraction de longueur
+`label_t` et un `label_offset` en coordonnées documentaires. Le décalage facultatif
+v7 est nul par défaut ; les tracés libres ajoutent aussi un `label` facultatif et
+une fraction par défaut de 0,5. Le canevas, le SVG, les bornes PNG et l’inspection
+utilisent la même position dérivée. Le déplacement du libellé n’altère pas les
+extrémités ni les points manuels. Son geste et sa saisie directe réutilisent les
+protections, la vérification du document source et l’historique atomique.
 
 ## Images embarquées et PNG
 

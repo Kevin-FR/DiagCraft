@@ -80,6 +80,12 @@ fn tight_facing_blocks_and_free_ends_keep_cardinal_attachments() {
     let mut d = Document::default();
     let a = d.add_node(ShapeKind::Rectangle, [250., 300.]);
     let b = d.add_node(ShapeKind::Rectangle, [490., 300.]);
+    // Keep a 20px gap: this routing case does not depend on creation defaults.
+    for (id, center_x) in [(a, 250.), (b, 490.)] {
+        let node = d.node_mut(id).unwrap();
+        node.size = [220., 84.];
+        node.position = [center_x - 110., 258.];
+    }
     d.connect(a, b, ConnectorKind::Elbow).unwrap();
     d.connectors[0].from_port = Port::Right;
     d.connectors[0].to_port = Port::Left;

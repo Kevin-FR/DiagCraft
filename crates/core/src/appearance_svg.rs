@@ -554,6 +554,7 @@ pub fn drawing_edge(d: &crate::document::Drawing) -> Connector {
         to_port: Default::default(),
         waypoints: vec![],
         label_t: 0.5,
+        label_offset: [0., 0.],
         pattern: d.appearance.pattern,
         start_head: Default::default(),
         end_head: Default::default(),

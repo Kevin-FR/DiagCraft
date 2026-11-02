@@ -232,3 +232,248 @@ fn fixed_obstacles_do_not_reverse_the_optimized_order_of_unequal_blocks() {
         0
     );
 }
+
+fn grouped_flow() -> (Document, Vec<u64>, u64) {
+    let mut doc = Document::default();
+    let a = doc.add_node(ShapeKind::Rectangle, [500., 400.]);
+    let b = doc.add_node(ShapeKind::Ellipse, [700., 550.]);
+    let text = doc.add_node(ShapeKind::Text, [600., 300.]);
+    let edge = doc.connect(a, b, ConnectorKind::Elbow).unwrap();
+    doc.connectors[0].waypoints = vec![[300., 220.], [900., 680.]];
+    doc.connectors[0].label = "Internal".into();
+    doc.group_objects(&[a, b, text, edge]).unwrap();
+    let tail = doc.add_node(ShapeKind::Rectangle, [1100., 800.]);
+    doc.connect(b, tail, ConnectorKind::Elbow).unwrap();
+    doc.connectors[1].waypoints = vec![[1100., 700.]];
+    (doc, vec![a, b, text, tail], edge)
+}
+
+#[test]
+fn groups_move_rigidly_and_external_connections_determine_levels_in_both_directions() {
+    let (doc, ids, internal) = grouped_flow();
+    for (axis, direction) in [(0, Direction::Horizontal), (1, Direction::Vertical)] {
+        let result = preview(&doc, None, direction).unwrap();
+        let next = &result.document;
+        let delta = [
+            next.node(ids[0]).unwrap().position[0] - doc.node(ids[0]).unwrap().position[0],
+            next.node(ids[0]).unwrap().position[1] - doc.node(ids[0]).unwrap().position[1],
+        ];
+        for id in &ids[..3] {
+            let original = doc.node(*id).unwrap();
+            let mut expected = original.clone();
+            for (axis, delta) in delta.iter().enumerate() {
+                expected.position[axis] += delta;
+            }
+            assert_eq!(next.node(*id).unwrap(), &expected);
+        }
+        let mut expected = doc.connectors[0].clone();
+        assert_eq!(expected.id, internal);
+        for p in &mut expected.waypoints {
+            for axis in 0..2 {
+                p[axis] += delta[axis];
+            }
+        }
+        assert_eq!(next.connectors[0], expected);
+        assert_eq!(next.connectors[1], doc.connectors[1]);
+        assert!(next.node(ids[3]).unwrap().position[axis] > [900., 680.][axis] + delta[axis]); // group's envelope includes the far waypoint
+        assert_eq!(next.organization, doc.organization);
+        assert_eq!(result.moved, 4);
+        assert_eq!(result.fixed, 0);
+        assert_eq!(preview(next, None, direction).unwrap().moved, 0);
+        assert_eq!(preview(&doc, None, direction).unwrap().document, *next);
+        let mut shuffled = doc.clone();
+        shuffled.nodes.reverse();
+        shuffled.connectors.reverse();
+        shuffled.organization.groups[0].members.reverse();
+        let reordered = preview(&shuffled, None, direction).unwrap();
+        for node in &next.nodes {
+            assert_eq!(reordered.document.node(node.id).unwrap(), node);
+        }
+    }
+}
+
+#[test]
+fn selecting_any_group_member_including_text_or_connector_expands_to_whole_group() {
+    let (doc, ids, internal) = grouped_flow();
+    for selected in [ids[0], ids[1], ids[2], internal] {
+        let result = preview(&doc, Some(&[selected]), Direction::Horizontal).unwrap();
+        assert_eq!(result.moved, 3);
+        assert_eq!(result.fixed, 1);
+        assert_eq!(result.document.node(ids[3]), doc.node(ids[3]));
+        for id in &ids[..3] {
+            assert_ne!(result.document.node(*id), doc.node(*id));
+        }
+        assert_ne!(result.document.connectors[0], doc.connectors[0]);
+        assert_eq!(result.document.connectors[1], doc.connectors[1]);
+    }
+}
+
+#[test]
+fn protection_of_any_member_or_layer_keeps_whole_group_fixed() {
+    let (doc, ids, internal) = grouped_flow();
+    for lock in [ids[0], ids[2], internal] {
+        let mut locked = doc.clone();
+        locked.set_objects_locked(&[lock], true).unwrap();
+        let next = preview(&locked, None, Direction::Horizontal)
+            .unwrap()
+            .document;
+        for id in &ids[..3] {
+            assert_eq!(next.node(*id), locked.node(*id));
+        }
+        assert_eq!(next.connectors, locked.connectors);
+        assert!(preview(&locked, Some(&[ids[0]]), Direction::Horizontal).is_err());
+    }
+    for (visible, locked) in [(false, false), (true, true)] {
+        let mut protected = doc.clone();
+        let layer = protected.create_layer("Group".into()).unwrap();
+        protected.move_objects_to_layer(&[ids[0]], layer).unwrap();
+        protected
+            .update_layer(layer, None, Some(visible), Some(locked))
+            .unwrap();
+        let next = preview(&protected, None, Direction::Horizontal)
+            .unwrap()
+            .document;
+        for id in &ids[..3] {
+            assert_eq!(next.node(*id), protected.node(*id));
+        }
+        assert_eq!(next.connectors, protected.connectors);
+    }
+}
+
+#[test]
+fn unsupported_mixed_external_free_and_text_only_groups_stay_fixed() {
+    use diagcraft::{chart::ChartKind, document::DrawingKind};
+    for variant in 0..5 {
+        let mut doc = Document::default();
+        let first_kind = if variant == 4 {
+            ShapeKind::Text
+        } else {
+            ShapeKind::Rectangle
+        };
+        let first = doc.add_node(first_kind, [400., 400.]);
+        let extra = match variant {
+            0 => doc.add_chart(ChartKind::Bars, [600., 400.]),
+            1 => doc.add_drawing(DrawingKind::Line, [500., 400.], [600., 500.]),
+            2 | 3 => {
+                let external = doc.add_node(ShapeKind::Rectangle, [700., 400.]);
+                let edge = doc.connect(first, external, ConnectorKind::Elbow).unwrap();
+                if variant == 3 {
+                    doc.connectors[0].to = 0;
+                    doc.connectors[0].free_end = Some([700., 400.]);
+                }
+                edge
+            }
+            _ => doc.add_node(ShapeKind::Text, [600., 400.]),
+        };
+        doc.group_objects(&[first, extra]).unwrap();
+        doc.add_node(ShapeKind::Rectangle, [1000., 800.]);
+        let result = preview(&doc, None, Direction::Horizontal).unwrap();
+        assert_eq!(result.document.node(first), doc.node(first));
+        assert_eq!(result.document.connectors, doc.connectors);
+        assert_eq!(result.document.charts, doc.charts);
+        assert_eq!(result.document.drawings, doc.drawings);
+        assert!(preview(&doc, Some(&[first]), Direction::Vertical).is_err());
+    }
+}
+
+#[test]
+fn group_envelope_avoids_obstacles_and_extends_page_for_internal_waypoints() {
+    let (mut doc, ids, _) = grouped_flow();
+    let obstacle = doc.add_node(ShapeKind::Rectangle, [90., 90.]);
+    doc.node_mut(obstacle).unwrap().position = [40., 40.];
+    doc.node_mut(obstacle).unwrap().size = [200., 200.];
+    let next = preview(&doc, Some(&[ids[0]]), Direction::Horizontal)
+        .unwrap()
+        .document;
+    // Min waypoint began at [300, 220], so its new coordinate is the envelope origin.
+    let envelope = next.connectors[0].waypoints[0];
+    assert_eq!(envelope[0], 40.);
+    assert_eq!(envelope[1], 300.);
+    assert_eq!(next.node(obstacle), doc.node(obstacle));
+    for p in &next.connectors[0].waypoints {
+        for (axis, coordinate) in p.iter().enumerate() {
+            assert!(*coordinate >= 0. && *coordinate + 40. <= next.page_size[axis]);
+        }
+    }
+    next.validate().unwrap();
+}
+
+#[test]
+fn large_groups_count_every_node_and_excessive_envelopes_fail_without_source_changes() {
+    let mut doc = Document::default();
+    let ids: Vec<_> = (0..501)
+        .map(|_| doc.add_node(ShapeKind::Rectangle, [500., 500.]))
+        .collect();
+    doc.group_objects(&ids).unwrap();
+    let before = doc.clone();
+    assert!(
+        preview(&doc, Some(&ids[..1]), Direction::Horizontal)
+            .err()
+            .unwrap()
+            .contains("500")
+    );
+    assert_eq!(doc, before);
+    let (mut doc, ids, _) = grouped_flow();
+    doc.connectors[0].waypoints = vec![[-100_000., 0.], [100_000., 0.]];
+    let before = doc.clone();
+    assert!(preview(&doc, Some(&ids[..1]), Direction::Horizontal).is_err());
+    assert_eq!(doc, before);
+}
+
+#[test]
+fn fractional_group_coordinates_and_negative_waypoints_are_idempotent() {
+    let (mut doc, ids, _) = grouped_flow();
+    doc.node_mut(ids[0]).unwrap().position = [210.1, -35.75];
+    doc.node_mut(ids[1]).unwrap().position = [357.37, 280.19];
+    doc.node_mut(ids[2]).unwrap().position = [-10.02, 123.45];
+    doc.connectors[0].waypoints = vec![[-780.23, -250.78], [950.51, 704.65]];
+    let image = doc
+        .add_image(
+            diagcraft::images::ImageAsset::from_rgba(1, 1, &[10, 20, 30, 255]).unwrap(),
+            [700.23, 510.48],
+        )
+        .unwrap();
+    let mut group = doc.organization.groups[0].members.clone();
+    group.push(image);
+    doc.group_objects(&group).unwrap();
+    let source = doc.clone();
+    for direction in [Direction::Horizontal, Direction::Vertical] {
+        let next = preview(&doc, None, direction).unwrap().document;
+        assert_eq!(
+            next.node(image).unwrap().image,
+            doc.node(image).unwrap().image
+        );
+        assert_eq!(next.organization, doc.organization);
+        let repeated = preview(&next, None, direction).unwrap();
+        assert_eq!(repeated.moved, 0);
+        assert_eq!(repeated.document, next);
+    }
+    assert_eq!(doc, source);
+}
+
+#[test]
+fn rounded_group_envelopes_do_not_shift_successors_on_a_second_layout() {
+    for (direction, connected) in [
+        (Direction::Horizontal, true),
+        (Direction::Vertical, true),
+        (Direction::Horizontal, false),
+        (Direction::Vertical, false),
+    ] {
+        let axis = usize::from(direction == Direction::Vertical);
+        let mut doc = Document::default();
+        let a = doc.add_node(ShapeKind::Rectangle, [0., 0.]);
+        let b = doc.add_node(ShapeKind::Rectangle, [0., 0.]);
+        let tail = doc.add_node(ShapeKind::Rectangle, [900., 900.]);
+        doc.node_mut(a).unwrap().position = [-50.23; 2];
+        doc.node_mut(b).unwrap().position = [310.13; 2];
+        doc.node_mut(b).unwrap().size = [99.7; 2];
+        doc.group_objects(&[a, b]).unwrap();
+        if connected {
+            doc.connect(b, tail, ConnectorKind::Elbow).unwrap();
+        }
+        let next = preview(&doc, None, direction).unwrap().document;
+        let repeated = preview(&next, None, direction).unwrap();
+        assert_eq!(repeated.moved, 0, "axis {axis}");
+        assert_eq!(repeated.document, next);
+    }
+}

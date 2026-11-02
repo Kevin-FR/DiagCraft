@@ -463,8 +463,12 @@ impl DrawApp {
             PlaceShape if self.doc.object_count() >= 10_000 => {
                 Some("Limite de 10 000 objets atteinte.")
             }
-            EditText if self.selected.len() != 1 || self.doc.node(self.selected[0]).is_none() => {
-                Some("Sélectionnez une forme ou un texte")
+            EditText
+                if self.selected.len() != 1
+                    || (self.doc.node(self.selected[0]).is_none()
+                        && !self.is_labelled_line(self.selected[0])) =>
+            {
+                Some("Sélectionnez une forme, un texte ou un trait")
             }
             Undo if !self.history.can_undo()
                 && !self.property_edit
@@ -607,7 +611,7 @@ impl DrawApp {
             Italic => self.change_text(|s| s.italic = !s.italic),
             Underline => self.change_text(|s| s.underline = !s.underline),
             FitText => self.fit_selection_text(),
-            EditText => self.open_node_text(self.selected[0]),
+            EditText => self.edit_selected_text(),
             FindObject => self.open_object_search(),
             PlaceShape => self.place_shape_in_view(ctx),
             AutoLayout => self.open_auto_layout(),

@@ -530,6 +530,7 @@ pub fn import(source: &str) -> Result<Import, Vec<Notice>> {
             to_port: Port::Auto,
             waypoints: vec![],
             label_t: 0.5,
+            label_offset: [0., 0.],
             pattern: edge.pattern,
             start_head: ArrowHead::Triangle,
             end_head: ArrowHead::Triangle,

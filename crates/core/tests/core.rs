@@ -267,8 +267,8 @@ fn rays_intersect_the_correct_shape_boundary() {
 fn straight_connector_tracks_moved_and_resized_shapes() {
     let (mut doc, a, b, _) = pair(ConnectorKind::Straight);
     let initial = doc.route(&doc.connectors[0]);
-    point_close(initial[0], [310., 200.]);
-    point_close(initial[1], [490., 200.]);
+    point_close(initial[0], [260., 200.]);
+    point_close(initial[1], [540., 200.]);
 
     let target = doc.node_mut(b).unwrap();
     target.position = [550., 320.];
@@ -564,17 +564,20 @@ fn svg_escapes_all_text_and_strips_invalid_xml_controls() {
     let escaped = "Été 日本語 &lt;script&gt; &amp; &quot;double&quot; &apos;simple&apos;\t\r";
     assert_eq!(
         out.matches(escaped).count(),
-        2,
-        "title and connector keep their whitespace"
+        1,
+        "title keeps its whitespace"
     );
-    assert!(
-        out.contains(&escaped.replace('\t', "    ").replace('\r', "")),
-        "node tabs are expanded and CR is a line break"
+    assert_eq!(
+        out.matches(&escaped.replace('\t', "    ").replace('\r', ""))
+            .count(),
+        2,
+        "node and connector tabs are expanded and CR is a line break"
     );
     assert_eq!(
         doc.nodes[0].text, text,
         "display normalization never edits the source"
     );
+    assert_eq!(doc.connectors[0].label, text);
     assert!(!out.contains("<script>"));
     for forbidden in ['\u{0}', '\u{1}', '\u{b}', '\u{1f}', '\u{fffe}', '\u{ffff}'] {
         assert!(!out.contains(forbidden));
@@ -618,7 +621,13 @@ fn svg_exports_page_shape_geometry_styles_and_multiline_text() {
         "<tspan x=\"110\" y=\"453.24\">Première</tspan><tspan x=\"110\" y=\"480.24\">Deuxième</tspan>"
     ));
     assert_eq!(
-        out.matches("<rect ").count(),
+        out.split("<rect ")
+            .skip(1)
+            .filter(|element| element
+                .split('>')
+                .next()
+                .is_some_and(|attributes| attributes.contains(" fill=")))
+            .count(),
         3,
         "text shape must have no filled rectangle"
     );

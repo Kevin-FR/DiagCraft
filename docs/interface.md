@@ -43,6 +43,26 @@ palette ⌘K / Ctrl+K, rétablit les réglages initiaux sans modifier le dessin.
 Les préférences illisibles ou d’une version inconnue sont préservées ; une
 réinitialisation explicite permet de recommencer leur enregistrement.
 
+## Taille des nouveaux blocs sur la page
+
+Sur la **branche de développement, non publiée**, les nouveaux blocs utilisent
+des dimensions plus compactes : un rectangle mesure par défaut **120 × 60 px**
+et un losange **160 × 120 px**, avec un texte de **12 px**. Un rectangle occupe
+ainsi **31,75 × 15,875 mm** sur le papier. Les nouveaux symboles intégrés utilisent
+des dimensions adaptées à leur type ; les conteneurs conservent davantage de place
+pour leur contenu. Les objets Texte indépendants gardent leurs dimensions et
+leur taille de police par défaut.
+
+Les coordonnées du dessin restent en pixels à 96 dpi. Une feuille A4 mesure
+toujours **210 × 297 mm**, soit environ **793,7 × 1 122,5 px** en portrait. Le zoom
+change seulement l’affichage ; passer en paysage ne redimensionne pas les blocs.
+Ces dimensions sont les valeurs initiales : elles restent modifiables dans les
+propriétés et avec les poignées. L’ajustement au texte peut agrandir un bloc.
+
+Les dessins et modèles enregistrés ainsi que les symboles personnels conservent
+leurs tailles et leur typographie. Ce changement n’effectue aucune migration ni
+remise à l’échelle des documents ouverts.
+
 ## Retrouver les formes
 
 Le bouton **+ Bibliothèques de symboles…** reste visible en bas du volet Symboles.

@@ -8,8 +8,9 @@ par un retour à la ligne. Le texte original reste intact dans le document.
 
 ![Ajustement du texte dans DiagCraft](images/text-fit.png)
 
-À gauche, un bloc aux dimensions fixes laisse déborder son libellé. À droite,
-l’option automatique adapte la hauteur en conservant la largeur et les connexions.
+Cette capture historique compare un bloc aux dimensions fixes, à gauche, et
+l’ajustement automatique de sa hauteur, à droite. Le débordement visible à gauche
+précède la correction décrite ci-dessous.
 
 ## Ajuster une fois
 
@@ -36,6 +37,22 @@ existants. Le coin supérieur gauche et les identifiants sont conservés ; les l
 suivent leurs points de connexion. Redimensionner manuellement une forme, avec
 ses poignées ou ses champs de dimensions, désactive l’option. Annuler ce geste
 restaure également le réglage automatique.
+
+## Redimensionner un bloc manuellement
+
+Sur la **branche de développement, non publiée**, redimensionner un bloc avec
+ses poignées ou ses champs de largeur et de hauteur active le retour à la ligne
+automatique et désactive l’adaptation automatique des dimensions. Le texte se
+répartit selon la nouvelle largeur, sans modifier le texte original ni ses styles.
+L’ensemble du changement s’annule en une fois. Les objets Texte indépendants
+conservent leur comportement.
+
+Le texte d’un bloc reste dans sa zone de contenu sur le canevas et dans les
+exports SVG, PNG et PDF. Il est centré verticalement lorsqu’il tient dans cette
+zone ; sinon, il commence en haut pour garder le début lisible. Si la hauteur
+disponible est insuffisante, la suite est masquée, mais reste enregistrée dans
+le document. Agrandir le bloc, utiliser **Ajuster la forme au texte** ou réactiver
+**Adapter automatiquement au texte** permet d’afficher le contenu complet.
 
 ## Exports et agents
 

@@ -9926,14 +9926,23 @@
     "pt": "Somente seleção",
     "zh-Hans": "仅所选对象"
   },
-  "Les groupes, textes et blocs protégés restent en place. Les points manuels sont conservés.": {
-    "fr": "Les groupes, textes et blocs protégés restent en place. Les points manuels sont conservés.",
-    "en": "Groups, text and protected blocks stay in place. Manual waypoints are preserved.",
-    "de": "Gruppen, Texte und geschützte Blöcke bleiben an ihrem Platz. Manuelle Wegpunkte bleiben erhalten.",
-    "es": "Los grupos, textos y bloques protegidos mantienen su posición. Se conservan los puntos manuales.",
-    "it": "Gruppi, testi e blocchi protetti restano in posizione. I punti manuali vengono conservati.",
-    "pt": "Grupos, textos e blocos protegidos permanecem no lugar. Os pontos manuais são preservados.",
-    "zh-Hans": "组、文本和受保护的块保持原位。保留手动路径点。"
+  "Les groupes compatibles se déplacent ensemble, avec leurs points internes. Textes isolés et blocs protégés restent fixes.": {
+    "fr": "Les groupes compatibles se déplacent ensemble, avec leurs points internes. Textes isolés et blocs protégés restent fixes.",
+    "en": "Compatible groups move together, including their internal waypoints. Standalone text and protected blocks stay fixed.",
+    "de": "Geeignete Gruppen werden mit ihren internen Wegpunkten gemeinsam verschoben. Einzelne Texte und geschützte Blöcke bleiben fest.",
+    "es": "Los grupos compatibles se mueven juntos, con sus puntos internos. Los textos aislados y bloques protegidos permanecen fijos.",
+    "it": "I gruppi compatibili si spostano insieme, con i loro punti interni. Testi isolati e blocchi protetti restano fissi.",
+    "pt": "Os grupos compatíveis movem-se juntos, com os seus pontos internos. Textos isolados e blocos protegidos permanecem fixos.",
+    "zh-Hans": "符合条件的组连同内部路径点一起移动。独立文本和受保护的块保持原位。"
+  },
+  "Groupes de blocs et de connecteurs internes uniquement. Un membre sélectionné entraîne tout le groupe ; les autres points manuels restent fixes.": {
+    "fr": "Groupes de blocs et de connecteurs internes uniquement. Un membre sélectionné entraîne tout le groupe ; les autres points manuels restent fixes.",
+    "en": "Only groups of blocks and internal connectors. Selecting one member moves the whole group; other manual waypoints stay fixed.",
+    "de": "Nur Gruppen aus Blöcken und internen Verbindungen. Die Auswahl eines Mitglieds bewegt die ganze Gruppe; andere manuelle Wegpunkte bleiben fest.",
+    "es": "Solo grupos de bloques y conectores internos. Seleccionar un miembro mueve todo el grupo; los demás puntos manuales permanecen fijos.",
+    "it": "Solo gruppi di blocchi e connettori interni. Selezionare un membro sposta tutto il gruppo; gli altri punti manuali restano fissi.",
+    "pt": "Apenas grupos de blocos e conectores internos. Selecionar um membro move todo o grupo; os outros pontos manuais permanecem fixos.",
+    "zh-Hans": "仅支持由块和内部连接线组成的组。选择任一成员会移动整个组；其他手动路径点保持原位。"
   },
   "{0} blocs déplacés · {1} blocs conservés": {
     "fr": "{0} blocs déplacés · {1} blocs conservés",
@@ -10285,5 +10294,77 @@
     "it": "Le pagine sono indipendenti e possono essere riordinate. Ogni vista viene adattata separatamente; le differenze non sono evidenziate.",
     "pt": "As páginas são independentes e podem ser reordenadas. Cada vista é ajustada separadamente; as diferenças não são destacadas.",
     "zh-Hans": "页面相互独立，顺序可能改变。每个视图单独缩放；差异不会高亮显示。"
+  },
+  "Le document a changé. Fermez l’éditeur puis rouvrez l’objet.": {
+    "fr": "Le document a changé. Fermez l’éditeur puis rouvrez l’objet.",
+    "en": "The document has changed. Close the editor, then reopen the object.",
+    "de": "Das Dokument wurde geändert. Schließen Sie den Editor und öffnen Sie das Objekt erneut.",
+    "es": "El documento ha cambiado. Cierra el editor y vuelve a abrir el objeto.",
+    "it": "Il documento è cambiato. Chiudi l’editor e riapri l’oggetto.",
+    "pt": "O documento foi alterado. Feche o editor e volte a abrir o objeto.",
+    "zh-Hans": "文档已更改。请关闭编辑器，然后重新打开该对象。"
+  },
+  "Libellé introuvable.": {
+    "fr": "Libellé introuvable.",
+    "en": "Label not found.",
+    "de": "Beschriftung nicht gefunden.",
+    "es": "Etiqueta no encontrada.",
+    "it": "Etichetta non trovata.",
+    "pt": "Rótulo não encontrado.",
+    "zh-Hans": "找不到标签。"
+  },
+  "Libellé mis à jour": {
+    "fr": "Libellé mis à jour",
+    "en": "Label updated",
+    "de": "Beschriftung aktualisiert",
+    "es": "Etiqueta actualizada",
+    "it": "Etichetta aggiornata",
+    "pt": "Rótulo atualizado",
+    "zh-Hans": "标签已更新"
+  },
+  "Cliquez sur un trait puis saisissez son texte · Glissez le libellé pour le déplacer": {
+    "fr": "Cliquez sur un trait puis saisissez son texte · Glissez le libellé pour le déplacer",
+    "en": "Click a line, then type its text · Drag the label to move it",
+    "de": "Klicken Sie auf eine Linie und geben Sie Text ein · Ziehen Sie die Beschriftung zum Verschieben",
+    "es": "Haz clic en un trazo y escribe su texto · Arrastra la etiqueta para moverla",
+    "it": "Fai clic su un tratto e digita il testo · Trascina l’etichetta per spostarla",
+    "pt": "Clique num traço e escreva o texto · Arraste o rótulo para o mover",
+    "zh-Hans": "单击线条后输入文字 · 拖动标签以移动"
+  },
+  "Déplacer le libellé · Échap : annuler": {
+    "fr": "Déplacer le libellé · Échap : annuler",
+    "en": "Move label · Escape: cancel",
+    "de": "Beschriftung verschieben · Esc: abbrechen",
+    "es": "Mover etiqueta · Esc: cancelar",
+    "it": "Sposta etichetta · Esc: annulla",
+    "pt": "Mover rótulo · Esc: cancelar",
+    "zh-Hans": "移动标签 · Esc：取消"
+  },
+  "Sélectionnez une forme, un texte ou un trait": {
+    "fr": "Sélectionnez une forme, un texte ou un trait",
+    "en": "Select a shape, text or line",
+    "de": "Wählen Sie eine Form, einen Text oder eine Linie aus",
+    "es": "Selecciona una forma, un texto o un trazo",
+    "it": "Seleziona una forma, un testo o un tratto",
+    "pt": "Selecione uma forma, um texto ou um traço",
+    "zh-Hans": "请选择形状、文本或线条"
+  },
+  "Cliquer en dehors du libellé ou ⌘Entrée / Ctrl+Entrée pour terminer.": {
+    "fr": "Cliquer en dehors du libellé ou ⌘Entrée / Ctrl+Entrée pour terminer.",
+    "en": "Click outside the label or press ⌘Enter / Ctrl+Enter to finish.",
+    "de": "Klicken Sie außerhalb der Beschriftung oder drücken Sie ⌘Enter / Strg+Enter zum Abschließen.",
+    "es": "Haz clic fuera de la etiqueta o pulsa ⌘Intro / Ctrl+Intro para terminar.",
+    "it": "Fai clic fuori dall’etichetta o premi ⌘Invio / Ctrl+Invio per terminare.",
+    "pt": "Clique fora do rótulo ou prima ⌘Enter / Ctrl+Enter para terminar.",
+    "zh-Hans": "单击标签外部或按 ⌘Enter / Ctrl+Enter 完成。"
+  },
+  "Écrire un libellé · Entrée : nouvelle ligne": {
+    "fr": "Écrire un libellé · Entrée : nouvelle ligne",
+    "en": "Write a label · Enter: new line",
+    "de": "Beschriftung eingeben · Enter: neue Zeile",
+    "es": "Escribir etiqueta · Intro: nueva línea",
+    "it": "Scrivi un’etichetta · Invio: nuova riga",
+    "pt": "Escrever um rótulo · Enter: nova linha",
+    "zh-Hans": "输入标签 · Enter：换行"
   }
 }

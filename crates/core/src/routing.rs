@@ -58,6 +58,38 @@ pub fn label_position(route: &[Point], t: f32) -> Point {
     }
     route.last().copied().unwrap_or([0., 0.])
 }
+/// Nearest position along the polyline, expressed as a fraction of its length.
+/// Equal-distance candidates keep the first segment; degenerate routes use 0.5.
+pub fn project_label(route: &[Point], point: Point) -> f32 {
+    if !point.iter().all(|v| v.is_finite()) {
+        return 0.5;
+    }
+    let total: f32 = route.windows(2).map(|p| distance(p[0], p[1])).sum();
+    if !total.is_finite() || total <= f32::EPSILON {
+        return 0.5;
+    }
+    let mut traversed = 0.;
+    let mut closest = f32::INFINITY;
+    let mut result = 0.5;
+    for p in route.windows(2) {
+        let vector = [p[1][0] - p[0][0], p[1][1] - p[0][1]];
+        let squared = vector[0] * vector[0] + vector[1] * vector[1];
+        let length = squared.sqrt();
+        if length > f32::EPSILON {
+            let t = (((point[0] - p[0][0]) * vector[0] + (point[1] - p[0][1]) * vector[1])
+                / squared)
+                .clamp(0., 1.);
+            let projected = [p[0][0] + vector[0] * t, p[0][1] + vector[1] * t];
+            let error = (point[0] - projected[0]).powi(2) + (point[1] - projected[1]).powi(2);
+            if error < closest {
+                closest = error;
+                result = ((traversed + length * t) / total).clamp(0., 1.);
+            }
+        }
+        traversed += length;
+    }
+    result
+}
 fn bounds(n: &Node) -> Bounds {
     rect(n.position, n.size)
 }

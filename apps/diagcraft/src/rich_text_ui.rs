@@ -11,8 +11,15 @@ struct Finish {
     open: Option<PathBuf>,
 }
 
+#[derive(Clone, Copy)]
+enum Target {
+    Node,
+    Line { label_t: f32, anchor: Point },
+}
+
 pub(super) struct Editor {
     pub draft: Node,
+    target: Target,
     revision: String,
     page: usize,
     selection: CCursorRange,
@@ -66,6 +73,9 @@ impl Editor {
         result
     }
     fn format(&mut self, style: Option<&InlineStyle>) {
+        if matches!(self.target, Target::Line { .. }) {
+            return;
+        }
         let before = self.draft.clone();
         if let Err(e) = self
             .draft
@@ -275,6 +285,7 @@ impl DrawApp {
             let node_rect = self.node_screen_rect(&draft);
             self.rich_editor = Some(Editor {
                 draft,
+                target: Target::Node,
                 revision: diagcraft::agent::revision(&self.doc),
                 page: self.doc.page_index,
                 selection: CCursorRange::two(CCursor::new(0), CCursor::new(count)),
@@ -295,6 +306,94 @@ impl DrawApp {
         }
     }
 
+    pub(super) fn editing_line_label(&self, id: u64) -> bool {
+        self.rich_editor.as_ref().is_some_and(|editor| {
+            editor.draft.id == id && matches!(editor.target, Target::Line { .. })
+        })
+    }
+
+    pub(super) fn open_line_label_at(&mut self, id: u64, at: Option<Point>) {
+        if self.rich_editor.is_some() {
+            return;
+        }
+        let view = self.doc.organization_view();
+        if !view.can_edit_object(id) {
+            self.status = "La sélection est verrouillée".into();
+            return;
+        }
+        self.commit();
+        let (text, label_t, anchor, color) =
+            if let Some(edge) = self.doc.connectors.iter().find(|edge| edge.id == id) {
+                let route = self.doc.route(edge);
+                let mut edge = edge.clone();
+                if edge.label.is_empty()
+                    && let Some(at) = at
+                {
+                    edge.label_t = diagcraft::routing::project_label(&route, at);
+                }
+                (
+                    edge.label.clone(),
+                    edge.label_t,
+                    edge.label_position(&route),
+                    edge.color,
+                )
+            } else if let Some(line) = self.doc.drawings.iter().find(|line| line.id == id) {
+                let mut line = line.clone();
+                if line.label.is_empty()
+                    && let Some(at) = at
+                {
+                    let route = line.points();
+                    line.label_t = diagcraft::routing::project_label(&route, at);
+                }
+                (
+                    line.label.clone(),
+                    line.label_t,
+                    line.label_position(),
+                    line.color,
+                )
+            } else {
+                return;
+            };
+        let mut temporary = Document::default();
+        let temporary_id = temporary.add_node(ShapeKind::Text, [0., 0.]);
+        let mut draft = temporary.node(temporary_id).unwrap().clone();
+        draft.id = id;
+        draft.text = text;
+        draft.font_size = 14.;
+        draft.text_color = color;
+        draft.text_style.wrap = false;
+        draft.text_style.auto_fit = true;
+        draft.text_style.align = TextAlign::Center;
+        let _ = draft.fit_to_text();
+        draft.size = [draft.size[0].max(96.), draft.size[1].max(40.)];
+        draft.position = [
+            anchor[0] - draft.size[0] / 2.,
+            anchor[1] - draft.size[1] / 2.,
+        ];
+        let count = draft.text.chars().count();
+        let node_rect = self.node_screen_rect(&draft);
+        self.rich_editor = Some(Editor {
+            draft,
+            target: Target::Line { label_t, anchor },
+            revision: diagcraft::agent::revision(&self.doc),
+            page: self.doc.page_index,
+            selection: CCursorRange::two(CCursor::new(0), CCursor::new(count)),
+            focus: true,
+            undo: vec![],
+            redo: vec![],
+            error: None,
+            click: None,
+            reset_scroll: true,
+            finish: None,
+            node_rect,
+            content_rect: Rect::NOTHING,
+            toolbar_rect: Rect::NOTHING,
+        });
+        self.context_open = false;
+        self.focus_text = None;
+        self.clear_connection();
+    }
+
     pub(super) fn apply_node_text(&mut self) -> Result<(), String> {
         let Some(editor) = self.rich_editor.as_ref() else {
             return Ok(());
@@ -302,24 +401,44 @@ impl DrawApp {
         if editor.page != self.doc.page_index
             || editor.revision != diagcraft::agent::revision(&self.doc)
         {
-            return Err("Le document a changé. Fermez l’éditeur puis rouvrez le bloc.".into());
+            return Err(t(
+                "Le document a changé. Fermez l’éditeur puis rouvrez l’objet.",
+            ));
         }
         if !self.doc.can_edit_object(editor.draft.id) {
             return Err(t("La sélection est verrouillée"));
         }
-        let mut draft = editor.draft.clone();
-        draft.validate_text_runs()?;
-        if draft.text_style.auto_fit {
-            draft.fit_to_text()?;
-        }
         let mut result = self.doc.clone();
-        let id = draft.id;
-        *result.node_mut(id).ok_or("Bloc introuvable.")? = draft;
+        let id = editor.draft.id;
+        let status = match editor.target {
+            Target::Node => {
+                let mut draft = editor.draft.clone();
+                draft.validate_text_runs()?;
+                if draft.text_style.auto_fit {
+                    draft.fit_to_text()?;
+                }
+                *result.node_mut(id).ok_or("Bloc introuvable.")? = draft;
+                "Contenu du bloc mis à jour"
+            }
+            Target::Line { label_t, .. } => {
+                if let Some(edge) = result.connectors.iter_mut().find(|edge| edge.id == id) {
+                    edge.label = editor.draft.text.clone();
+                    edge.label_t = label_t;
+                } else if let Some(line) = result.drawings.iter_mut().find(|line| line.id == id) {
+                    line.label = editor.draft.text.clone();
+                    line.label_t = label_t;
+                } else {
+                    return Err(t("Libellé introuvable."));
+                }
+                "Libellé mis à jour"
+            }
+        };
         result.validate()?;
+        self.doc.check_locked_changes(&result)?;
         self.doc = result;
         self.rich_editor = None;
         self.commit();
-        self.status = "Contenu du bloc mis à jour".into();
+        self.status = status.into();
         Ok(())
     }
 
@@ -432,7 +551,11 @@ impl DrawApp {
             }
             apply = i.consume_key(egui::Modifiers::COMMAND, Key::Enter);
             cancel = i.consume_key(egui::Modifiers::NONE, Key::Escape);
-            if !editor.selection.as_sorted_char_range().is_empty() {
+            if matches!(editor.target, Target::Line { .. }) {
+                for key in [Key::B, Key::I, Key::U] {
+                    i.consume_key(egui::Modifiers::COMMAND, key);
+                }
+            } else if !editor.selection.as_sorted_char_range().is_empty() {
                 let current = editor.selected_style();
                 if i.consume_key(egui::Modifiers::COMMAND, Key::B) {
                     style.bold = Some(!current.text_style.bold);
@@ -485,7 +608,7 @@ impl DrawApp {
 
     pub(super) fn inline_preview_document(&self) -> Option<Document> {
         let editor = self.rich_editor.as_ref()?;
-        if editor.page != self.doc.page_index {
+        if editor.page != self.doc.page_index || matches!(editor.target, Target::Line { .. }) {
             return None;
         }
         let mut doc = self.doc.clone();
@@ -504,6 +627,14 @@ impl DrawApp {
         let mut preview = editor.draft.clone();
         if preview.text_style.auto_fit {
             let _ = preview.fit_to_text();
+        }
+        if let Target::Line { anchor, .. } = editor.target {
+            // Keep empty and short labels large enough to show a caret and accept clicks.
+            preview.size = [preview.size[0].max(96.), preview.size[1].max(40.)];
+            preview.position = [
+                anchor[0] - preview.size[0] / 2.,
+                anchor[1] - preview.size[1] / 2.,
+            ];
         }
         let node_rect = self.node_screen_rect(&preview);
         let (origin, size) = diagcraft::text_layout::area(&preview);
@@ -585,7 +716,11 @@ impl DrawApp {
                     .min_size(content_rect.size())
                     .horizontal_align(align)
                     .vertical_align(Align::Center)
-                    .char_limit(65_536)
+                    .char_limit(if matches!(editor.target, Target::Line { .. }) {
+                        4096
+                    } else {
+                        65_536
+                    })
                     .layouter(&mut layouter)
                     .show(ui);
                 if let Some(range) = output.cursor_range {
@@ -672,9 +807,12 @@ impl DrawApp {
         let Some(editor) = &self.rich_editor else {
             return;
         };
+        let is_line = matches!(editor.target, Target::Line { .. });
         let node = editor.node_rect;
         let canvas = self.canvas.shrink(8.);
-        let width = canvas.width().clamp(240., 640.);
+        let width = canvas
+            .width()
+            .clamp(240., if is_line { 480. } else { 640. });
         let last_height = editor.toolbar_rect.height().max(64.);
         let x = node.center().x - width / 2.;
         let y = if node.top() - last_height - 8. >= canvas.top() {
@@ -697,6 +835,7 @@ impl DrawApp {
                 egui::Frame::new().fill(Color32::WHITE).stroke(Stroke::new(1.,BORDER)).corner_radius(8).inner_margin(8).show(ui, |ui| {
                     ui.set_width(width-16.);
                     ui.horizontal_wrapped(|ui| {
+                        if !is_line {
                         let current = editor.selected_style();
                         let mut patch = InlineStyle::default();
                         let mut changed = false;
@@ -741,10 +880,11 @@ impl DrawApp {
                             editor.record(before);
                         });
                         ui.separator();
+                        }
                         cancel = ui.button(t("Annuler")).on_hover_text(t("Échap : annuler la saisie")).clicked();
-                        apply = ui.button(RichText::new(t("Terminer")).strong()).on_hover_text(t("Cliquer en dehors du bloc ou ⌘Entrée / Ctrl+Entrée pour terminer.")).clicked();
+                        apply = ui.button(RichText::new(t("Terminer")).strong()).on_hover_text(t(if is_line { "Cliquer en dehors du libellé ou ⌘Entrée / Ctrl+Entrée pour terminer." } else { "Cliquer en dehors du bloc ou ⌘Entrée / Ctrl+Entrée pour terminer." })).clicked();
                     });
-                    ui.label(RichText::new(t("Écrire dans le bloc · Entrée : nouvelle ligne")).small().color(INFO_TEXT));
+                    ui.label(RichText::new(t(if is_line { "Écrire un libellé · Entrée : nouvelle ligne" } else { "Écrire dans le bloc · Entrée : nouvelle ligne" })).small().color(INFO_TEXT));
                     if let Some(error)=&editor.error {ui.colored_label(ERROR_TEXT,error);}
                 });
             });

@@ -58,6 +58,9 @@ impl DrawApp {
             && let Some(pos) = response.interact_pointer_pos()
         {
             self.open_context(pos, true);
+            if let Some(id) = self.hit_line_label(ui.ctx(), pos) {
+                self.selected = self.doc.expand_groups(&[id]);
+            }
         }
         let mut open = self.context_open;
         let mut action = None;
@@ -136,6 +139,11 @@ impl DrawApp {
             });
         }
         ui.add_enabled_ui(self.selection_editable(), |ui| {
+            if (edge.is_some() || path.is_some())
+                && menu_item(ui, "Modifier le texte…", Some("F2"), true)
+            {
+                action = Some(Action::Text);
+            }
             if node.is_some() {
                 ui.separator();
                 if menu_item(ui, "Modifier le texte…", None, true) {
@@ -542,14 +550,12 @@ impl DrawApp {
                     return;
                 }
                 if let Some(id) = id
-                    && (self.doc.node(id).is_some()
-                        || self.doc.connectors.iter().any(|e| e.id == id))
+                    && (self.doc.node(id).is_some() || self.is_labelled_line(id))
                 {
                     if self.doc.node(id).is_some() {
                         self.open_node_text(id);
                     } else {
-                        self.focus_text = Some(id);
-                        self.show_inspector = true;
+                        self.open_line_label_at(id, Some(self.context_position));
                     }
                 } else if self.selected.is_empty() && self.doc.object_count() < 10_000 {
                     let id = self.add_node(ShapeKind::Text, self.context_position);
@@ -567,6 +573,8 @@ impl DrawApp {
                 if let Some(id) = id {
                     match self.doc.add_linked_shape(id, kind, port) {
                         Ok(id) => {
+                            let node = self.doc.node_mut(id).unwrap();
+                            node.text = t(&node.text);
                             self.selected = vec![id];
                             self.fit_next = true;
                         }
@@ -580,7 +588,12 @@ impl DrawApp {
                         .doc
                         .insert_shape_on_connector(id, kind, self.context_position)
                     {
-                        Ok(id) => self.selected = vec![id],
+                        Ok(id) => {
+                            let node = self.doc.node_mut(id).unwrap();
+                            node.text = t(&node.text);
+                            node.text_style.wrap = true;
+                            self.selected = vec![id];
+                        }
                         Err(e) => self.error = Some(e),
                     }
                 }
@@ -651,8 +664,17 @@ impl DrawApp {
         }
         for e in &self.doc.connectors {
             if self.selected.contains(&e.id) {
-                for p in self.cached_route(e.id) {
-                    rect.extend_with(self.screen(p));
+                let route = self.cached_route(e.id);
+                for p in &route {
+                    rect.extend_with(self.screen(*p));
+                }
+                if !e.label.is_empty() {
+                    let [x0, y0, x1, y1] = diagcraft::text_layout::line_label_bounds(
+                        &e.label,
+                        e.label_position(&route),
+                    );
+                    rect.extend_with(self.screen([x0, y0]));
+                    rect.extend_with(self.screen([x1, y1]));
                 }
             }
         }
@@ -660,6 +682,12 @@ impl DrawApp {
             if self.selected.contains(&d.id) {
                 for p in d.points() {
                     rect.extend_with(self.screen(p));
+                }
+                if !d.label.is_empty() {
+                    let [x0, y0, x1, y1] =
+                        diagcraft::text_layout::line_label_bounds(&d.label, d.label_position());
+                    rect.extend_with(self.screen([x0, y0]));
+                    rect.extend_with(self.screen([x1, y1]));
                 }
             }
         }

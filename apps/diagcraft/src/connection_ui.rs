@@ -166,6 +166,7 @@ impl DrawApp {
             to_port: target.map_or(Port::Auto, |t| t.port),
             waypoints: vec![],
             label_t: 0.5,
+            label_offset: [0., 0.],
             pattern: LinePattern::Solid,
             start_head: ArrowHead::Triangle,
             end_head: ArrowHead::Triangle,

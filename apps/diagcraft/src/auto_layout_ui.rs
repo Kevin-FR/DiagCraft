@@ -84,7 +84,7 @@ impl DrawApp {
                 ui.add(egui::DragValue::new(&mut panel.spacing.blocks).range(20. ..=300.).speed(1.).suffix(" px")).labelled_by(blocks.id);
             });
             if panel.spacing != previous { panel.refresh(); }
-            ui.label(t("Les groupes, textes et blocs protégés restent en place. Les points manuels sont conservés."));
+            ui.label(t("Les groupes compatibles se déplacent ensemble, avec leurs points internes. Textes isolés et blocs protégés restent fixes.")).on_hover_text(t("Groupes de blocs et de connecteurs internes uniquement. Un membre sélectionné entraîne tout le groupe ; les autres points manuels restent fixes."));
             if !panel.current(self) {
                 ui.colored_label(theme_ui::ERROR_TEXT, t("Le document a changé. Actualisez l’aperçu avant de continuer."));
                 if ui.button(t("Actualiser")).clicked() {
@@ -172,6 +172,79 @@ fn paint_preview(p: &egui::Painter, doc: &Document, rect: Rect) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn grouped_flow() -> (Document, [u64; 4]) {
+        let mut doc = Document::default();
+        let a = doc.add_node(ShapeKind::Rectangle, [750., 500.]);
+        let b = doc.add_node(ShapeKind::Ellipse, [1000., 700.]);
+        let fixed = doc.add_node(ShapeKind::Rectangle, [1600., 900.]);
+        let edge = doc.connect(a, b, ConnectorKind::Elbow).unwrap();
+        doc.connectors[0].waypoints = vec![[950., 650.]];
+        doc.group_objects(&[a, b, edge]).unwrap();
+        (doc, [a, b, edge, fixed])
+    }
+
+    #[test]
+    fn selected_group_member_previews_and_applies_as_one_undoable_translation() {
+        for direction in [Direction::Horizontal, Direction::Vertical] {
+            for member in [0, 2] {
+                let ctx = egui::Context::default();
+                let (doc, ids) = grouped_flow();
+                let before = doc.clone();
+                let mut app = DrawApp::from_context(&ctx, doc, None, None);
+                app.selected = vec![ids[member]];
+                app.open_auto_layout();
+                let mut panel = app.auto_layout_ui.take().unwrap();
+                assert!(panel.selection_only);
+                panel.direction = direction;
+                panel.refresh();
+                let preview = panel.preview.as_ref().unwrap();
+                assert_eq!(preview.moved, 2);
+                assert_eq!(preview.fixed, 1);
+                let expected = preview.document.clone();
+                let a = expected.node(ids[0]).unwrap();
+                let source_a = before.node(ids[0]).unwrap();
+                let delta = [
+                    a.position[0] - source_a.position[0],
+                    a.position[1] - source_a.position[1],
+                ];
+                for id in &ids[..2] {
+                    let source = before.node(*id).unwrap();
+                    assert_eq!(
+                        expected.node(*id).unwrap().position,
+                        [source.position[0] + delta[0], source.position[1] + delta[1]]
+                    );
+                }
+                assert_eq!(
+                    expected.connectors[0].waypoints,
+                    vec![[950. + delta[0], 650. + delta[1]]]
+                );
+                assert_eq!(expected.node(ids[3]), before.node(ids[3]));
+                assert_eq!(expected.organization, before.organization);
+                assert_eq!(app.doc, before);
+                assert!(!app.history.can_undo());
+
+                // A change inside the group invalidates the entire proposal.
+                app.doc.node_mut(ids[1]).unwrap().text = "Changed after preview".into();
+                let stale_source = app.doc.clone();
+                assert!(!app.apply_auto_layout(&panel));
+                assert_eq!(app.doc, stale_source);
+                assert!(!app.history.can_undo());
+                app.doc = before.clone();
+
+                assert!(app.apply_auto_layout(&panel));
+                assert_eq!(app.doc, expected);
+                assert!(app.fit_next);
+                app.undo();
+                assert_eq!(app.doc, before);
+                assert!(!app.history.can_undo());
+                app.redo();
+                assert_eq!(app.doc, expected);
+                assert!(!app.history.can_redo());
+            }
+        }
+    }
+
     #[test]
     fn preview_is_read_only_apply_is_one_undo_and_stale_state_is_rejected() {
         let ctx = egui::Context::default();
@@ -198,7 +271,9 @@ mod tests {
     fn seven_language_modal_fits_short_windows_without_editing_the_drawing() {
         for language in Language::ALL {
             let ctx = egui::Context::default();
-            let mut app = DrawApp::from_context(&ctx, Document::demo(), None, None);
+            let (doc, ids) = grouped_flow();
+            let mut app = DrawApp::from_context(&ctx, doc, None, None);
+            app.selected = vec![ids[0]];
             app.set_language(Some(language));
             let before = app.doc.clone();
             app.open_auto_layout();
@@ -211,16 +286,37 @@ mod tests {
                     |ctx| app.auto_layout_dialog(ctx),
                 );
                 let mut buttons = 0;
+                let mut group_help = false;
                 for shape in output.shapes {
-                    if let egui::Shape::Text(text) = shape.shape
-                        && [t("Appliquer"), t("Annuler")].contains(&text.galley.text().to_owned())
-                    {
-                        buttons += 1;
-                        assert!(text.pos.y >= 0. && text.pos.y + text.galley.size().y <= 680.);
+                    if let egui::Shape::Text(text) = shape.shape {
+                        if [t("Appliquer"), t("Annuler")].contains(&text.galley.text().to_owned()) {
+                            buttons += 1;
+                            assert!(text.pos.y >= 0. && text.pos.y + text.galley.size().y <= 680.);
+                        }
+                        if text.galley.text()
+                            == t(
+                                "Les groupes compatibles se déplacent ensemble, avec leurs points internes. Textes isolés et blocs protégés restent fixes.",
+                            )
+                        {
+                            group_help = true;
+                            assert!(text.pos.x >= 0. && text.pos.x + text.galley.size().x <= 1200.);
+                            assert!(text.pos.y >= 0. && text.pos.y + text.galley.size().y <= 680.);
+                        }
                     }
                 }
                 if frame == 2 {
                     assert_eq!(buttons, 2);
+                    assert!(group_help);
+                    assert_eq!(
+                        app.auto_layout_ui
+                            .as_ref()
+                            .unwrap()
+                            .preview
+                            .as_ref()
+                            .unwrap()
+                            .moved,
+                        2
+                    );
                 }
             }
             assert_eq!(app.doc, before);

@@ -1,4 +1,4 @@
-# Connecteurs et obstacles
+# Connecteurs, traits et libellés
 
 Depuis DiagCraft 0.9.0, les connecteurs **à angle droit** contournent les enveloppes
 rectangulaires des blocs et graphiques visibles. Le canevas, l’aperçu de création,
@@ -31,6 +31,33 @@ Les côtés explicitement choisis, les points manuels, les extrémités libres e
 texte du lien ne sont jamais déplacés ou réécrits par le routage. La position du
 libellé suit la même fraction de longueur du nouveau tracé ; elle n’est pas
 figée à une coordonnée absolue. Les lignes directes restent directes.
+
+## Écrire et déplacer un libellé
+
+Sur la **branche de développement, non publiée**, les connecteurs et les traits
+libres, droits ou courbes, disposent chacun d’un libellé. Avec l’outil Sélection,
+cliquez sur le trait pour le sélectionner, puis tapez pour commencer la saisie
+directement sur la feuille. Un double-clic, F2 ou Entrée ouvre aussi l’éditeur.
+Le texte se valide au clic extérieur ou avec Cmd/Ctrl+Entrée ; Échap
+annule le brouillon. Entrée ajoute une ligne ; le libellé ne se coupe pas
+automatiquement selon la longueur du trait. Les textes des blocs conservent leur
+édition habituelle.
+
+Faites glisser le libellé pour le placer librement près du trait, y compris en
+dehors de son trajet. Sa position combine une ancre sur le trajet et un décalage
+en pixels : si le trajet change, l’ancre le suit et le décalage reste conservé.
+Le déplacement du libellé ne change ni le trait ni ses points manuels. La saisie
+validée et chaque déplacement constituent des modifications annulables distinctes.
+Les objets masqués ou protégés ne sont pas modifiés.
+
+Le canevas et les exports SVG, PNG et PDF utilisent cette même position. Le texte
+reste présent dans le fichier `.draw`. Ce premier lot fournit **un seul libellé
+par trait ou connecteur**, sans styles par portions ni libellés multiples.
+
+Le format reste v7 : les nouveaux décalages de libellés et les libellés des
+traits libres sont facultatifs. Une ancienne application ignore ces champs et
+les perd si elle réenregistre le fichier. Les libellés existants des connecteurs
+restent lisibles, mais leur décalage manuel nécessite la nouvelle version.
 
 Les calques masqués ne créent pas d’obstacles. Les objets Texte, Cadre et Couloir
 sont des annotations ou conteneurs et n’obstruent pas les liens. Le contour réel

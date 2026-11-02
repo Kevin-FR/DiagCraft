@@ -32,6 +32,144 @@ pub struct Preview {
     pub crossings_after: u64,
 }
 
+// A group is placed using one envelope while retaining all internal offsets.
+// Group IDs and object IDs have separate namespaces; the sorting key is a member ID.
+struct Unit {
+    nodes: Vec<u64>,
+    connectors: Vec<u64>,
+    position: Point,
+    size: Point,
+    geometry: Vec<(Point, Point)>,
+}
+impl Unit {
+    // Measure the actual f32 result rather than translating the old envelope.
+    // Otherwise rounding a member can change the next level/cursor on repetition.
+    fn placed_extent(&self, axis: usize, origin: f32) -> f32 {
+        if self.nodes.len() == 1 || origin == self.position[axis] {
+            return self.size[axis];
+        }
+        self.geometry
+            .iter()
+            .map(|(point, size)| {
+                translated_coordinate(point[axis], self.position[axis], origin) + size[axis]
+            })
+            .fold(origin, f32::max)
+            - origin
+    }
+    fn placed_size(&self, position: Point) -> Point {
+        [
+            self.placed_extent(0, position[0]),
+            self.placed_extent(1, position[1]),
+        ]
+    }
+}
+fn translated_coordinate(value: f32, from: f32, to: f32) -> f32 {
+    if from == to {
+        value
+    } else {
+        to + (value - from)
+    }
+}
+
+fn placement_units(
+    doc: &Document,
+    view: &crate::organization::OrganizationView,
+    selection: Option<&BTreeSet<u64>>,
+) -> Vec<Unit> {
+    let nodes: BTreeMap<_, _> = doc.nodes.iter().map(|n| (n.id, n)).collect();
+    let connectors: BTreeMap<_, _> = doc.connectors.iter().map(|e| (e.id, e)).collect();
+    let mut units: BTreeMap<u64, Unit> = nodes
+        .values()
+        .filter(|n| {
+            n.kind != ShapeKind::Text
+                && view.can_edit_object(n.id)
+                && view.group_for_object(n.id).is_none()
+                && selection.is_none_or(|ids| ids.contains(&n.id))
+        })
+        .map(|n| {
+            (
+                n.id,
+                Unit {
+                    nodes: vec![n.id],
+                    connectors: vec![],
+                    position: n.position,
+                    size: n.size,
+                    geometry: vec![(n.position, n.size)],
+                },
+            )
+        })
+        .collect();
+    for group in &doc.organization.groups {
+        if group.members.iter().any(|id| !view.can_edit_object(*id))
+            || selection.is_some_and(|ids| !group.members.iter().any(|id| ids.contains(id)))
+        {
+            continue;
+        }
+        let member_nodes: BTreeSet<_> = group
+            .members
+            .iter()
+            .copied()
+            .filter(|id| nodes.contains_key(id))
+            .collect();
+        if !member_nodes
+            .iter()
+            .any(|id| nodes[id].kind != ShapeKind::Text)
+        {
+            continue;
+        }
+        // Charts, drawings, and connectors with an external/free endpoint are
+        // deliberately fixed until their complete geometry can be translated.
+        if group.members.iter().any(|id| {
+            !member_nodes.contains(id)
+                && !connectors.get(id).is_some_and(|edge| {
+                    member_nodes.contains(&edge.from)
+                        && member_nodes.contains(&edge.to)
+                        && edge.free_start.is_none()
+                        && edge.free_end.is_none()
+                })
+        }) {
+            continue;
+        }
+        let member_connectors: Vec<_> = group
+            .members
+            .iter()
+            .copied()
+            .filter(|id| connectors.contains_key(id))
+            .collect();
+        let mut geometry = Vec::new();
+        let mut min = [f32::INFINITY; 2];
+        let mut max = [f32::NEG_INFINITY; 2];
+        for id in &member_nodes {
+            let node = nodes[id];
+            geometry.push((node.position, node.size));
+            for axis in 0..2 {
+                min[axis] = min[axis].min(node.position[axis]);
+                max[axis] = max[axis].max(node.position[axis] + node.size[axis]);
+            }
+        }
+        for id in &member_connectors {
+            for point in &connectors[id].waypoints {
+                geometry.push((*point, [0.; 2]));
+                for axis in 0..2 {
+                    min[axis] = min[axis].min(point[axis]);
+                    max[axis] = max[axis].max(point[axis]);
+                }
+            }
+        }
+        units.insert(
+            *group.members.iter().min().unwrap(),
+            Unit {
+                nodes: member_nodes.into_iter().collect(),
+                connectors: member_connectors,
+                position: min,
+                size: [max[0] - min[0], max[1] - min[1]],
+                geometry,
+            },
+        );
+    }
+    units.into_values().collect()
+}
+
 pub fn preview(
     doc: &Document,
     selection: Option<&[u64]>,
@@ -55,39 +193,35 @@ pub fn preview_with_spacing(
     doc.validate()?;
     let view = doc.organization_view();
     let selection = selection.map(|ids| ids.iter().copied().collect::<BTreeSet<_>>());
-    let nodes: BTreeMap<_, _> = doc
-        .nodes
-        .iter()
-        .filter(|n| {
-            n.kind != ShapeKind::Text
-                && view.can_edit_object(n.id)
-                && view.group_for_object(n.id).is_none()
-                && selection.as_ref().is_none_or(|ids| ids.contains(&n.id))
-        })
-        .map(|n| (n.id, n))
-        .collect();
-    if nodes.is_empty() {
+    let units = placement_units(doc, &view, selection.as_ref());
+    if units.is_empty() {
         return Err("Aucun bloc à organiser.".into());
     }
-    if nodes.len() > 500 {
+    if units.iter().map(|unit| unit.nodes.len()).sum::<usize>() > 500 {
         return Err("Maximum de 500 blocs par mise en page.".into());
     }
-    let indices: BTreeMap<_, _> = nodes.keys().enumerate().map(|(i, id)| (*id, i)).collect();
-    let mut graph = vec![vec![]; nodes.len()];
+    let indices: BTreeMap<_, _> = units
+        .iter()
+        .enumerate()
+        .flat_map(|(i, unit)| unit.nodes.iter().map(move |id| (*id, i)))
+        .collect();
+    let mut graph = vec![vec![]; units.len()];
     let mut reverse = graph.clone();
     for edge in &doc.connectors {
         if !view.is_object_visible(edge.id) {
             continue;
         }
-        if let (Some(&a), Some(&b)) = (indices.get(&edge.from), indices.get(&edge.to)) {
+        if let (Some(&a), Some(&b)) = (indices.get(&edge.from), indices.get(&edge.to))
+            && a != b
+        {
             graph[a].push(b);
             reverse[b].push(a);
         }
     }
     // Iterative Kosaraju avoids recursion for long chains and preserves cycles.
-    let mut seen = vec![false; nodes.len()];
+    let mut seen = vec![false; units.len()];
     let mut order = vec![];
-    for start in 0..nodes.len() {
+    for start in 0..units.len() {
         if seen[start] {
             continue;
         }
@@ -107,7 +241,7 @@ pub fn preview_with_spacing(
             }
         }
     }
-    let mut component = vec![usize::MAX; nodes.len()];
+    let mut component = vec![usize::MAX; units.len()];
     let mut count = 0;
     for &start in order.iter().rev() {
         if component[start] != usize::MAX {
@@ -153,25 +287,25 @@ pub fn preview_with_spacing(
     }
     let crossings_before = crossing_count(&levels, &node_rank, &graph);
     let (levels, crossings_after) = reduce_crossings(levels, &node_rank, &graph, &reverse);
-    let ids: Vec<_> = nodes.keys().copied().collect();
-    let placement_order: Vec<_> = levels.iter().flatten().map(|index| ids[*index]).collect();
+    let placement_order: Vec<_> = levels.iter().flatten().copied().collect();
     let axis = usize::from(direction == Direction::Vertical);
     let cross = 1 - axis;
     let mut gaps = [spacing.blocks; 2];
     gaps[axis] = spacing.levels;
-    let mut extents = vec![0_f32; count];
-    for (&id, node) in &nodes {
-        let r = rank[component[indices[&id]]];
-        extents[r] = extents[r].max(node.size[axis]);
-    }
     let mut origins = vec![40.; count];
-    for r in 1..count {
-        origins[r] = origins[r - 1] + extents[r - 1] + spacing.levels;
+    for level in 0..count {
+        let extent = levels[level]
+            .iter()
+            .map(|index| units[*index].placed_extent(axis, origins[level]))
+            .fold(0., f32::max);
+        if level + 1 < count {
+            origins[level + 1] = origins[level] + extent + spacing.levels;
+        }
     }
     let mut occupied: Vec<(Point, Point)> = doc
         .nodes
         .iter()
-        .filter(|n| !nodes.contains_key(&n.id) && view.is_object_visible(n.id))
+        .filter(|n| !indices.contains_key(&n.id) && view.is_object_visible(n.id))
         .map(|n| (n.position, n.size))
         .chain(
             doc.charts
@@ -182,21 +316,24 @@ pub fn preview_with_spacing(
         .collect();
     let mut next = doc.clone();
     let mut moved = 0;
+    let mut connector_placements = BTreeMap::new();
     let mut cursors = vec![40.; levels.len()];
-    for id in placement_order {
-        let node = nodes[&id];
+    for index in placement_order {
+        let unit = &units[index];
         let mut position = [40.; 2];
-        let level = node_rank[indices[&id]];
+        let level = node_rank[index];
         position[axis] = origins[level];
         position[cross] = cursors[level];
+        let mut size;
         // Skip fixed obstacles and previous placements, with bounded monotone progress.
         loop {
+            size = unit.placed_size(position);
             let after = occupied
                 .iter()
-                .filter(|(p, size)| {
+                .filter(|(p, obstacle_size)| {
                     (0..2).all(|a| {
-                        position[a] < p[a] + size[a] + gaps[a]
-                            && position[a] + node.size[a] + gaps[a] > p[a]
+                        position[a] < p[a] + obstacle_size[a] + gaps[a]
+                            && position[a] + size[a] + gaps[a] > p[a]
                     })
                 })
                 .map(|(p, size)| p[cross] + size[cross] + spacing.blocks)
@@ -205,25 +342,46 @@ pub fn preview_with_spacing(
                 break;
             }
             position[cross] = after;
-            if position[cross] + node.size[cross] > 100_000. {
+            if position[cross] + size[cross] > 100_000. {
                 return Err("La mise en page dépasse les dimensions autorisées.".into());
             }
         }
         if position
             .iter()
-            .zip(node.size)
+            .zip(size)
             .any(|(p, size)| p + size > 100_000.)
         {
             return Err("La mise en page dépasse les dimensions autorisées.".into());
         }
-        if position != node.position {
-            moved += 1;
+        if position != unit.position {
+            for id in &unit.nodes {
+                let node = next.node_mut(*id).unwrap();
+                for (axis, coordinate) in position.iter().enumerate() {
+                    node.position[axis] = translated_coordinate(
+                        node.position[axis],
+                        unit.position[axis],
+                        *coordinate,
+                    );
+                }
+                moved += 1;
+            }
+            for id in &unit.connectors {
+                connector_placements.insert(*id, (unit.position, position));
+            }
         }
-        next.node_mut(id).unwrap().position = position;
-        occupied.push((position, node.size));
-        cursors[level] = position[cross] + node.size[cross] + spacing.blocks;
+        occupied.push((position, size));
+        cursors[level] = position[cross] + size[cross] + spacing.blocks;
         for (a, coordinate) in position.iter().enumerate() {
-            next.page_size[a] = next.page_size[a].max(coordinate + node.size[a] + 40.);
+            next.page_size[a] = next.page_size[a].max(coordinate + size[a] + 40.);
+        }
+    }
+    for edge in &mut next.connectors {
+        if let Some((origin, position)) = connector_placements.get(&edge.id) {
+            for point in &mut edge.waypoints {
+                for (axis, coordinate) in position.iter().enumerate() {
+                    point[axis] = translated_coordinate(point[axis], origin[axis], *coordinate);
+                }
+            }
         }
     }
     next.validate()?;

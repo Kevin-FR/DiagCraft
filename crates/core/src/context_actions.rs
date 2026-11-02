@@ -219,6 +219,7 @@ impl Document {
         second.free_start = None;
         second.from_port = Port::Auto;
         second.label.clear();
+        second.label_offset = [0., 0.];
         second.arrow_start = false;
         if !original.waypoints.is_empty() {
             first.waypoints = route[1..=segment]
@@ -405,6 +406,7 @@ impl Document {
             to_port: Port::Auto,
             waypoints: vec![],
             label_t: 0.5,
+            label_offset: [0., 0.],
             pattern: Default::default(),
             start_head: Default::default(),
             end_head: Default::default(),

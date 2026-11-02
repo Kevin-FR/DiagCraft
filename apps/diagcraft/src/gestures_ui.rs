@@ -217,7 +217,12 @@ impl DrawApp {
     pub(super) fn manipulation_cursor(&self, pos: Option<Pos2>) -> egui::CursorIcon {
         match self.drag {
             Some(Drag::Resize { handle, .. }) => return resize_cursor(handle),
-            Some(Drag::Move { .. } | Drag::FreeConnector { .. } | Drag::Pan { .. }) => {
+            Some(
+                Drag::Move { .. }
+                | Drag::FreeConnector { .. }
+                | Drag::LineLabel { .. }
+                | Drag::Pan { .. },
+            ) => {
                 return egui::CursorIcon::Grabbing;
             }
             Some(
@@ -336,6 +341,7 @@ impl DrawApp {
             Some(Drag::FreeConnector { .. }) => {
                 "Déplacer le lien · ⌥ : libre · Échap : annuler".into()
             }
+            Some(Drag::LineLabel { .. }) => t("Déplacer le libellé · Échap : annuler"),
             Some(Drag::Waypoint { .. }) => "Déplacer le coude · ⌥ : libre · Échap : annuler".into(),
             Some(Drag::DrawPath { .. }) => "Dessiner le tracé · Échap : annuler".into(),
             _ if self.keyboard_move.is_some() => self.keyboard_move_hint().unwrap(),

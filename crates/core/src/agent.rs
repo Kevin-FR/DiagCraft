@@ -65,6 +65,7 @@ pub struct EdgeChanges {
     pub arrow_start: Option<bool>,
     pub waypoints: Option<Vec<Point>>,
     pub label_t: Option<f32>,
+    pub label_offset: Option<Point>,
     pub pattern: Option<LinePattern>,
     pub start_head: Option<ArrowHead>,
     pub end_head: Option<ArrowHead>,
@@ -159,6 +160,13 @@ pub enum Operation {
         end: Point,
         #[serde(default)]
         appearance: Option<crate::appearance::Line>,
+
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        label: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        label_t: Option<f32>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        label_offset: Option<Point>,
     },
     UpdateDrawing {
         page: usize,
@@ -168,6 +176,13 @@ pub enum Operation {
         bend: f32,
         #[serde(default)]
         appearance: Option<crate::appearance::Line>,
+
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        label: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        label_t: Option<f32>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        label_offset: Option<Point>,
     },
     Delete {
         page: usize,
@@ -390,7 +405,7 @@ pub fn inspect(doc: &Document) -> Result<Value, String> {
                 let routed = routing.route(c);
                 v["route"] = json!(routed.points);
                 v["routing_status"] = json!(routed.status);
-                v["label_position"] = json!(routed.label_position(c.label_t));
+                v["label_position"] = json!(c.label_position(&routed.points));
                 v
             })
             .collect();
@@ -408,6 +423,7 @@ pub fn inspect(doc: &Document) -> Result<Value, String> {
             .iter()
             .map(|d| {
                 let mut v = serde_json::to_value(d).unwrap();
+                v["label_position"] = json!(d.label_position());
                 inspect_organization(&mut v, &organization, d.id);
                 v
             })
@@ -480,7 +496,14 @@ pub fn diagnostics(doc: &Document) -> Vec<Value> {
                 ],
             )
         }));
-        objects.extend(d.drawings.iter().map(|x| (x.id, x.controls().to_vec())));
+        objects.extend(d.drawings.iter().map(|x| {
+            let mut points = x.controls().to_vec();
+            if !x.label.is_empty() {
+                let bounds = crate::text_layout::line_label_bounds(&x.label, x.label_position());
+                points.extend([[bounds[0], bounds[1]], [bounds[2], bounds[3]]]);
+            }
+            (x.id, points)
+        }));
         let routing = crate::routing::RoutingContext::new(&d);
         for edge in &d.connectors {
             let route = routing.route(edge);
@@ -492,7 +515,15 @@ pub fn diagnostics(doc: &Document) -> Vec<Value> {
             if let Some(code) = code {
                 warnings.push(json!({"code":code,"severity":"warning","page":page,"id":edge.id,"message":"Connector constraints block routing; manual anchors are preserved.","hint":"Move the conflicting block, endpoint or waypoint, then inspect the computed route again."}));
             }
-            objects.push((edge.id, route.points));
+            let mut points = route.points;
+            if !edge.label.is_empty() {
+                let bounds = crate::text_layout::line_label_bounds(
+                    &edge.label,
+                    edge.label_position(&points),
+                );
+                points.extend([[bounds[0], bounds[1]], [bounds[2], bounds[3]]]);
+            }
+            objects.push((edge.id, points));
         }
         for (id, points) in objects {
             if points
@@ -603,6 +634,7 @@ fn edge_changes(
         arrow_start,
         waypoints,
         label_t,
+        label_offset,
         pattern,
         start_head,
         appearance,
@@ -878,15 +910,24 @@ fn execute(
             start,
             end,
             appearance,
+            label,
+            label_t,
+            label_offset,
             ..
         } => {
             let id = doc.add_drawing(*kind, *start, *end);
+            let drawing = doc.drawings.iter_mut().find(|d| d.id == id).unwrap();
             if let Some(style) = appearance {
-                doc.drawings
-                    .iter_mut()
-                    .find(|d| d.id == id)
-                    .unwrap()
-                    .appearance = style.clone();
+                drawing.appearance = style.clone();
+            }
+            if let Some(label) = label {
+                drawing.label = label.clone();
+            }
+            if let Some(t) = label_t {
+                drawing.label_t = *t;
+            }
+            if let Some(offset) = label_offset {
+                drawing.label_offset = *offset;
             }
             created = Some(id);
             "Ajouter un trait ou une courbe"
@@ -897,6 +938,9 @@ fn execute(
             end,
             bend,
             appearance,
+            label,
+            label_t,
+            label_offset,
             ..
         } => {
             let id = resolve(target, doc.page_index, aliases)?;
@@ -910,6 +954,15 @@ fn execute(
             d.bend = *bend;
             if let Some(style) = appearance {
                 d.appearance = style.clone();
+            }
+            if let Some(label) = label {
+                d.label = label.clone();
+            }
+            if let Some(t) = label_t {
+                d.label_t = *t;
+            }
+            if let Some(offset) = label_offset {
+                d.label_offset = *offset;
             }
             created = Some(id);
             "Modifier un trait ou une courbe"
@@ -1082,6 +1135,7 @@ pub fn catalog() -> Value {
         "shapes":crate::symbols::all_kinds().iter().map(|k|json!({"kind":k,"label":k.label()})).collect::<Vec<_>>(),
         "chart_kinds":ChartKind::ALL,"page_presets":crate::pages::presets().iter().map(|p|json!({"name":p.label,"size_px":p.size})).collect::<Vec<_>>(),
         "organization":{"base_layer":0,"max_layers":crate::organization::MAX_LAYERS,"max_groups":crate::organization::MAX_GROUPS,"groups":"flat, same-layer; IDs page-local in a separate namespace","layer_order":"bottom-to-top; base layer first","hidden_layers":"omitted from rendering/exports, retained in saved files and agent inspection","locks":"protect stored fields; unlock in a separate operation before editing"},
+        "line_labels":{"objects":["connector","drawing"],"max_utf8_bytes":4096,"anchor":"label_t in [0,1] follows the current route; label_offset in document pixels is added to its default position","offset_limit_px":100000,"format":"plain unwrapped text; explicit newlines preserved","inspection":"label_position is the current centre, including label_offset"},
         "routing":{"orthogonal":"avoids visible block/chart envelopes; text, frames and swimlanes do not obstruct","waypoints":"immutable ordered anchors, maximum 16; detours between anchors","status":"inspection routing_status: clear, constrained, limited, direct; diagnostics are non-blocking","deterministic":true},
         "images":{"format":"embedded normalized PNG; file import accepts PNG/JPEG","max_input_bytes":crate::images::MAX_INPUT_BYTES,"max_input_pixels":crate::images::MAX_INPUT_PIXELS,"import_resize":"alpha-aware reduction to pixel/PNG limits; source file unchanged","max_png_bytes":crate::images::MAX_PNG_BYTES,"max_pixels":crate::images::MAX_PIXELS,"document_pixels":crate::images::MAX_DOCUMENT_PIXELS,"crop":"normalized [x,y,width,height] inside [0,1]; non-destructive","inspection":"payload omitted; SHA-256 and dimensions retained","operations":["add_image","update_image"]},
         "diagnostics":{"envelope":"error string plus diagnostic object; MCP errors use structuredContent and isError:true","operation_index":"zero_based; human display is one_based","page_index":"zero_based","source_location":"line and byte column one_based; schema errors locate the operation start","fields":["code","severity","message","hint","operation","operation_name","page","target","id","line","column"],"codes":["patch_too_large","patch_json","patch_schema","unsupported_api","revision_conflict","operation_limit","page_not_found","object_locked","alias_not_found","object_not_found","invalid_geometry","resource_limit","invalid_alias","invalid_endpoint","invalid_operation","invalid_document","input_read","output_write","invalid_arguments","path_outside_root","outside_page","route_constrained","route_limited"]},

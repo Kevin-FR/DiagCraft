@@ -60,6 +60,11 @@ enum Drag {
         start: Point,
         original: document::Connector,
     },
+    LineLabel {
+        id: u64,
+        start: Point,
+        offset: Point,
+    },
     Move {
         start: Point,
         original: Vec<(u64, Point)>,
@@ -218,6 +223,7 @@ pub struct DrawApp {
     focus_text: Option<u64>,
     rich_editor: Option<rich_text_ui::Editor>,
     text_click: Option<(u64, Pos2, f64)>,
+    line_label_click: Option<line_label_ui::Click>,
     replay_input: Vec<egui::Event>,
     capture_menu: Option<String>,
     show_symbol_manager: bool,
@@ -845,6 +851,7 @@ impl DrawApp {
             focus_text: None,
             rich_editor: None,
             text_click: None,
+            line_label_click: None,
             replay_input: vec![],
             capture_menu: None,
             show_symbol_manager: false,
@@ -1379,6 +1386,9 @@ impl DrawApp {
             return;
         }
         let editing_text = self.ui_has_keyboard_focus(ctx);
+        if !editing_text && self.begin_line_label_typing(ctx) {
+            return;
+        }
         if !editing_text && ctx.input(|i| i.key_pressed(Key::F10) && i.modifiers.shift) {
             let screen = self
                 .selection_rect()
@@ -1726,6 +1736,7 @@ impl DrawApp {
                             p.circle(pt, 4., Color32::WHITE, Stroke::new(1.5, ACCENT));
                         }
                     }
+                    self.paint_line_label(&p, d.id, &d.label, d.label_position(), color);
                 }
                 for edge in edges.get(&layer).into_iter().flatten() {
                     let routed = &routes[&edge.id];
@@ -1774,17 +1785,7 @@ impl DrawApp {
                         );
                     }
                     }
-                    if !edge.label.is_empty() && pts.len() >= 2 {
-                        let pos = self.screen(routed.label_position(edge.label_t));
-                        let galley = p.layout_no_wrap(
-                            edge.label.clone(),
-                            FontId::proportional(14. * self.zoom),
-                            color,
-                        );
-                        let text_rect = Rect::from_center_size(pos, galley.size());
-                        p.rect_filled(text_rect.expand(3. * self.zoom), 2, Color32::WHITE);
-                        p.galley(text_rect.min, galley, color);
-                    }
+                    self.paint_line_label(&p, edge.id, &edge.label, edge.label_position(&routed.points), color);
                 }
                 for node in nodes.get(&layer).into_iter().flatten() { self.paint_node(&p,node); }
                 for chart in charts.get(&layer).into_iter().flatten() {
@@ -1832,7 +1833,11 @@ impl DrawApp {
                     } else { match self.tool {
                         Tool::Shape(_) | Tool::Connect | Tool::Line | Tool::Bezier => egui::CursorIcon::Crosshair,
                         Tool::Pan => egui::CursorIcon::Grab,
-                        _ => self.manipulation_cursor(ui.input(|i| i.pointer.hover_pos())),
+                        _ => {
+                            if let Some(id) = ui.input(|i| i.pointer.hover_pos()).and_then(|pos| self.hit_line_label(ctx, pos)) {
+                                if self.doc.can_edit_object(id) { egui::CursorIcon::Grab } else { egui::CursorIcon::NotAllowed }
+                            } else { self.manipulation_cursor(ui.input(|i| i.pointer.hover_pos())) }
+                        },
                     }});
                 }
                 let hint = match self.tool {
@@ -1858,8 +1863,9 @@ impl DrawApp {
                         "Glissez pour dessiner une courbe · Réglez la courbure dans Propriétés"
                             .into()
                     }
-                    _ => "Glisser dans le vide : sélectionner · Deux doigts : déplacer · Pincer : zoomer"
-                        .into(),
+                    _ if self.selected.len() == 1 && self.is_labelled_line(self.selected[0]) =>
+                        "Cliquez sur un trait puis saisissez son texte · Glissez le libellé pour le déplacer".into(),
+                    _ => "Glisser dans le vide : sélectionner · Deux doigts : déplacer · Pincer : zoomer".into(),
                 };
                 let hint = ui.painter().layout(t(hint), FontId::proportional(11.), INFO_TEXT, (rect.width()-40.).max(1.));
                 let hint_position = rect.min + vec2(20., 19.);
@@ -2052,6 +2058,9 @@ impl DrawApp {
                 }
                 Tool::Select => {
                     let top_hit = self.organized_hit(world);
+                    if self.start_line_label_drag(ui.ctx(), pos, ui.input(|i| i.modifiers.shift)) {
+                        return;
+                    }
                     if let Some((id, port)) = self.connection_handle_at(pos) {
                         self.begin_connection(id, port, None, Some(pos));
                         return;
@@ -2237,6 +2246,18 @@ impl DrawApp {
             let world = self.world(pos);
             let page = self.doc.edit_bounds();
             match drag {
+                Drag::LineLabel { id, start, offset } => {
+                    let moved = [
+                        (offset[0] + (world[0] - start[0])).clamp(-100_000., 100_000.),
+                        (offset[1] + (world[1] - start[1])).clamp(-100_000., 100_000.),
+                    ];
+                    if let Some(edge) = self.doc.connectors.iter_mut().find(|e| e.id == *id) {
+                        edge.label_offset = moved;
+                    } else if let Some(drawing) = self.doc.drawings.iter_mut().find(|d| d.id == *id)
+                    {
+                        drawing.label_offset = moved;
+                    }
+                }
                 Drag::Marquee { .. } => {}
                 Drag::Move {
                     start,
@@ -2324,6 +2345,9 @@ impl DrawApp {
                     if let Some(n) = self.doc.node_mut(*id) {
                         n.position = position;
                         n.size = extent;
+                        if extent != *size && n.kind != ShapeKind::Text {
+                            n.text_style.wrap = true;
+                        }
                     } else if let Some(c) = self.doc.charts.iter_mut().find(|c| c.id == *id) {
                         c.position = position;
                         c.size = extent;
@@ -2447,6 +2471,7 @@ impl DrawApp {
             self.drag = None;
             self.commit();
         }
+        self.line_label_clicked(ui, response, pos);
         if response.clicked() {
             let previous = self.text_click.take();
             if text_click
@@ -2522,6 +2547,15 @@ impl DrawApp {
         if !editing {
             let text = n.text_layout();
             let (text_origin, text_size) = diagcraft::text_layout::area(n);
+            let text_rect = Rect::from_min_size(
+                self.screen(text_origin),
+                vec2(text_size[0], text_size[1]) * self.zoom,
+            );
+            let text_painter = if n.kind == ShapeKind::Text {
+                p.clone()
+            } else {
+                p.with_clip_rect(text_rect)
+            };
             let job = rich_text_ui::document_job(n, self.zoom, false);
             let galley = p.layout_job(job);
             let x = match n.text_style.align {
@@ -2531,7 +2565,12 @@ impl DrawApp {
                     self.screen([text_origin[0] + text_size[0], 0.]).x - galley.size().x
                 }
             };
-            let pos = pos2(x, r.center().y - galley.size().y / 2.) - galley.rect.min.to_vec2();
+            let y = if n.kind == ShapeKind::Text {
+                r.center().y - galley.size().y / 2.
+            } else {
+                text_rect.top() + ((text_rect.height() - galley.size().y) / 2.).max(0.)
+            };
+            let pos = pos2(x, y) - galley.rect.min.to_vec2();
             if text
                 .runs
                 .iter()
@@ -2539,9 +2578,9 @@ impl DrawApp {
                 .any(|run| run.style.text_style.monospace && run.style.text_style.bold)
             {
                 let bold = p.layout_job(rich_text_ui::document_job(n, self.zoom, true));
-                p.galley(pos + vec2(self.zoom * 0.6, 0.), bold, rgb(n.text_color));
+                text_painter.galley(pos + vec2(self.zoom * 0.6, 0.), bold, rgb(n.text_color));
             }
-            p.galley(pos, galley, rgb(n.text_color));
+            text_painter.galley(pos, galley, rgb(n.text_color));
         }
         if editing {
             p.rect_stroke(
@@ -2919,6 +2958,8 @@ mod recovery;
 #[path = "recovery_ui.rs"]
 mod recovery_ui;
 
+#[path = "line_label_ui.rs"]
+mod line_label_ui;
 #[path = "object_search_ui.rs"]
 mod object_search_ui;
 #[path = "rich_text_ui.rs"]

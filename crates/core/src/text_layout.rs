@@ -180,6 +180,36 @@ fn break_paragraph(units: &[Unit], max_width: f32, wrap: bool, output: &mut Vec<
     }
 }
 
+/// Unwrapped plain labels use the same bundled fonts in SVG, PDF and PNG.
+pub fn line_label(label: &str) -> Layout {
+    layout(&Node {
+        id: 1,
+        kind: ShapeKind::Text,
+        position: [0.; 2],
+        size: [24.; 2],
+        text: label.to_owned(),
+        image: None,
+        text_runs: vec![],
+        fill: [255; 3],
+        stroke: [0; 3],
+        text_color: [0; 3],
+        stroke_width: 0.,
+        font_size: 14.,
+        text_style: TextStyle::default(),
+        appearance: Default::default(),
+    })
+}
+/// Includes the white backing margin, in document coordinates.
+pub fn line_label_bounds(label: &str, center: Point) -> [f32; 4] {
+    let layout = line_label(label);
+    [
+        center[0] - layout.width / 2. - 4.,
+        center[1] - layout.height / 2. - 3.,
+        center[0] + layout.width / 2. + 4.,
+        center[1] + layout.height / 2. + 3.,
+    ]
+}
+
 pub fn layout(node: &Node) -> Layout {
     let units = units(node);
     let base = node.resolved_style_at(0);

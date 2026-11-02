@@ -353,6 +353,9 @@ pub(super) fn node_inspector(
             }
         }
         n.text_style.auto_fit = false;
+        if n.kind != ShapeKind::Text {
+            n.text_style.wrap = true;
+        }
     }
     ui.add_space(8.);
     (

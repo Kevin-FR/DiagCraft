@@ -109,70 +109,81 @@ pub fn all_kinds() -> Vec<ShapeKind> {
     }
     kinds
 }
+/// New-object dimensions in document pixels (96 dpi), shared by every insertion path.
+/// Page format and interface zoom never rescale these defaults or existing objects.
+pub(crate) fn default_size(kind: ShapeKind) -> crate::document::Point {
+    match kind {
+        Text => [300., 48.],
+        Diamond => [160., 120.],
+        Hexagon | Document | Data | Terminator | Database | Trapezoid | ManualInput
+        | ManualOperation | Delay | Display | Note | Callout => [120., 90.],
+        OffPage => [150., 90.],
+        Triangle | RightTriangle | Pentagon | Octagon | Plus | Cross | Heart | Shield | Drop
+        | Star | Star4 | Star8 | Gear | Cube | Cone | Pyramid | Cloud => [80., 80.],
+        BraceLeft | BraceRight => [30., 90.],
+        Lightning => [50., 80.],
+        UmlClass => [180., 120.],
+        Component => [140., 80.],
+        Package => [160., 100.],
+        Actor => [54., 90.],
+        Lifeline => [100., 160.],
+        Fork => [140., 24.],
+        InitialState | FinalState => [32., 32.],
+        UseCase => [160., 90.],
+        Frame | Swimlane | TitleBlock => [300., 180.],
+        _ => [120., 60.],
+    }
+}
+/// Decorative shapes begin without a caption in both direct and palette creation.
+/// Explicit text in files, agent operations and personal symbols is unaffected.
+pub(crate) fn default_caption(kind: ShapeKind) -> &'static str {
+    if ShapeKind::ARROWS.contains(&kind) {
+        return "";
+    }
+    match kind {
+        Triangle | RightTriangle | Pentagon | Octagon | Plus | Cross | Heart | Shield | Drop
+        | Star | Star4 | Star8 | Gear | Cube | Cone | Pyramid | Cloud | BraceLeft | BraceRight
+        | Lightning | Actor | Lifeline | Fork | InitialState | FinalState | Frame | Swimlane
+        | TitleBlock => "",
+        Text => "Votre texte",
+        _ => kind.label(),
+    }
+}
 pub fn preset(kind: ShapeKind) -> Node {
     let mut d = Document::default();
     let id = d.add_node(kind, [0., 0.]);
     let mut n = d.node(id).unwrap().clone();
     n.text_style.wrap = true;
     match kind {
-        Triangle | RightTriangle | Pentagon | Octagon | Plus | Cross | Heart | Shield | Drop
-        | Star4 | Star8 | Gear | Cube | Cone | Pyramid | Cloud => {
-            n.size = [140., 140.];
-            n.text.clear();
-        }
-        BraceLeft | BraceRight => {
-            n.size = [50., 150.];
-            n.text.clear();
-        }
         Lightning => {
-            n.size = [90., 140.];
-            n.text.clear();
             n.fill = [255, 223, 80];
         }
         UmlClass => {
-            n.size = [240., 150.];
             n.text = "Classe\n\n+ attribut : Type\n\n+ méthode()".into();
-            n.font_size = 18.;
+            n.font_size = 12.;
             n.text_style.monospace = true;
         }
         Component => {
-            n.size = [230., 120.];
             n.text = "Composant".into();
         }
         Package => {
-            n.size = [240., 150.];
             n.text = "Paquet".into();
         }
-        Actor => {
-            n.size = [90., 150.];
-            n.text.clear();
-        }
-        Lifeline => {
-            n.size = [160., 250.];
-            n.text.clear();
-        }
         Fork => {
-            n.size = [240., 24.];
             n.fill = [35, 51, 65];
-            n.text.clear();
         }
         InitialState | FinalState => {
-            n.size = [48., 48.];
             n.fill = if kind == InitialState {
                 [35, 51, 65]
             } else {
                 [255, 255, 255]
             };
-            n.text.clear();
         }
         UseCase => {
-            n.size = [240., 100.];
             n.text = "Cas d’utilisation".into();
         }
         Frame | Swimlane | TitleBlock => {
-            n.size = [360., 220.];
             n.fill = [255, 255, 255];
-            n.text.clear();
         }
         _ => {}
     }

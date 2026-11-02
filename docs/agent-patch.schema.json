@@ -317,6 +317,40 @@
                     "type": "null"
                   }
                 ]
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 4096
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "At most 4096 UTF-8 bytes; the engine validates the byte limit."
+              },
+              "label_t": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "label_offset": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/labelOffset"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -356,6 +390,40 @@
                 "anyOf": [
                   {
                     "$ref": "#/$defs/appearanceLine"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 4096
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "At most 4096 UTF-8 bytes; the engine validates the byte limit."
+              },
+              "label_t": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "label_offset": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/labelOffset"
                   },
                   {
                     "type": "null"
@@ -1488,6 +1556,16 @@
               "type": "null"
             }
           ]
+        },
+        "label_offset": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/labelOffset"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": []
@@ -1835,6 +1913,16 @@
         "end",
         "style"
       ]
+    },
+    "labelOffset": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": -100000,
+        "maximum": 100000
+      },
+      "minItems": 2,
+      "maxItems": 2
     }
   }
 }

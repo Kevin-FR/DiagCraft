@@ -145,6 +145,28 @@ et `update_drawing` acceptent aussi `appearance` pour les traits et courbes.
 Les nœuds texte utilisent leur typographie. Les ombres portent sur la forme,
 avec son alpha ; le texte reste séparé et sélectionnable dans le PDF.
 
+### Libellés des traits et connecteurs
+
+Sur la branche de développement, non publiée, `add_connector.style` et
+`update_connector.changes` acceptent `label_offset: [x,y]` en plus de `label` et
+`label_t`. `add_drawing` et `update_drawing` acceptent ces trois champs directement
+dans l’opération. `update_drawing` conserve ses champs géométriques obligatoires
+`start`, `end` et `bend` : reprendre leurs valeurs inspectées pour ne changer que
+le libellé. Un champ facultatif omis conserve sa valeur lors d’une mise à jour.
+
+Chaque objet dispose d’un seul libellé brut, limité à 4 096 octets UTF-8.
+`label_t` est une fraction de longueur du trajet entre 0 et 1, avec 0,5 par défaut
+pour un nouveau tracé libre. `label_offset` est ajouté à cette ancre ; chaque
+coordonnée finie est comprise entre -100 000 et 100 000 px et vaut zéro par défaut.
+`label: ""` efface le texte ; `label_offset: [0,0]` recentre le libellé sur son ancre.
+L’inspection fournit `label_position`, une position dérivée à ne pas envoyer dans
+un patch. Aucun segment, point manuel ou bloc n’est déplacé par ces réglages.
+
+Ces ajouts restent facultatifs dans le format v7 et l’API 1. Les anciennes
+applications ignorent les décalages et les libellés des tracés libres, puis les
+perdent à l’enregistrement. Les anciens clients de l’API peuvent refuser ces
+champs additionnels ; vérifier le schéma du binaire utilisé.
+
 ## MCP local sur stdin/stdout
 
 Serveur MCP stdio, protocole négocié 2025-11-25 (aussi 2025-06-18 et 2024-11-05).
