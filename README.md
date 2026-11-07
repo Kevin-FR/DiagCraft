@@ -60,12 +60,12 @@ Interface contrast targets, automated checks and remaining manual checks: [reada
 - Automatic local recovery copies after a crash, without overwriting original files.
 - Local CLI and MCP server: inspection, validation and atomic JSON patches.
 
-Organization is saved in optional v7 metadata. Earlier applications display hidden objects and discard groups, layers and locks when saving.
+Organization is saved in optional v8 metadata. Earlier applications display hidden objects and discard groups, layers and locks when saving.
 
 [organization guide](docs/organisation.md).
 
-The **v7** document format and **v1** agent API have their own version numbers,
-independent of the application. Files in formats v1–v6 are migrated in memory
+The **v8** document format and **v1** agent API have their own version numbers,
+independent of the application. Files in formats v1–v7 are migrated in memory
 when opened. The source file stays unchanged until you save.
 
 No account or API key is needed to draw. The MCP server works inside a local

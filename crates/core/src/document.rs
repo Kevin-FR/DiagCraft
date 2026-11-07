@@ -3,7 +3,7 @@ use std::{collections::HashSet, fs, io::Write, path::Path};
 
 pub type Point = [f32; 2];
 pub type Color = [u8; 3];
-pub const FORMAT_VERSION: u32 = 7;
+pub const FORMAT_VERSION: u32 = 8;
 pub const MAX_FILE_BYTES: u64 = 16 * 1024 * 1024;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -497,32 +497,25 @@ impl Connector {
     }
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug)]
 pub struct Document {
     pub format_version: u32,
     pub title: String,
-    #[serde(default = "default_page_name")]
     pub page_name: String,
-    #[serde(default)]
     pub page_layout: crate::pages::PageLayout,
-    #[serde(default)]
     pub pages: Vec<crate::pages::Page>,
-    #[serde(skip)]
     pub page_index: usize,
     pub page_size: Point,
     pub nodes: Vec<Node>,
     pub connectors: Vec<Connector>,
-    #[serde(default)]
     pub drawings: Vec<Drawing>,
-    #[serde(default)]
     pub page_style: PageStyle,
-    #[serde(default)]
     pub charts: Vec<crate::chart::Chart>,
-    #[serde(default)]
     pub organization: crate::organization::Organization,
+    pub page_id: u64,
 }
 
-fn default_page_name() -> String {
+pub(crate) fn default_page_name() -> String {
     "Page 1".into()
 }
 impl Default for Document {
@@ -541,6 +534,7 @@ impl Default for Document {
             page_style: PageStyle::default(),
             charts: vec![],
             organization: Default::default(),
+            page_id: 1,
         }
     }
 }
@@ -615,6 +609,30 @@ impl Document {
         (1..u64::MAX)
             .find(|id| !ids.contains(id))
             .expect("available document ID")
+    }
+    /// Next stable page ID unique among all pages (active page and secondary pages).
+    /// Page IDs live in their own namespace, separate from object IDs.
+    pub fn next_page_id(&self) -> u64 {
+        let used: HashSet<_> = self
+            .pages
+            .iter()
+            .map(|p| p.id)
+            .chain(std::iter::once(self.page_id))
+            .filter(|id| *id != 0)
+            .collect();
+        if let Some(next) = used
+            .iter()
+            .max()
+            .copied()
+            .unwrap_or(0)
+            .checked_add(1)
+            .filter(|id| *id < u64::MAX)
+        {
+            return next.max(1);
+        }
+        (1..u64::MAX)
+            .find(|id| !used.contains(id))
+            .expect("available page ID")
     }
     pub fn add_node(&mut self, kind: ShapeKind, center: Point) -> u64 {
         let id = self.next_id();
@@ -1069,6 +1087,15 @@ impl Document {
         if self.pages.len() >= 100 || self.page_index >= self.page_count() {
             return Err("Liste de pages invalide.".into());
         }
+        let mut page_ids = HashSet::new();
+        if self.page_id == 0 || !page_ids.insert(self.page_id) {
+            return Err("Identifiant de page invalide ou dupliqué.".into());
+        }
+        for page in &self.pages {
+            if page.id == 0 || !page_ids.insert(page.id) {
+                return Err("Identifiant de page invalide ou dupliqué.".into());
+            }
+        }
         if self.page_name.trim().is_empty() || self.page_name.len() > 800 {
             return Err("Nom de page invalide.".into());
         }
@@ -1180,9 +1207,35 @@ impl Document {
         Ok(())
     }
     pub fn upgrade_legacy(&mut self) {
-        if matches!(self.format_version, 1..=6) {
-            self.format_version = FORMAT_VERSION;
+        if self.format_version > 8 {
+            return;
         }
+        // Versions 1..=7 (et tout document sans identifiants de page stables)
+        // sont migrés vers v8 avec des identifiants de page uniques.
+        let mut used: HashSet<u64> = self
+            .pages
+            .iter()
+            .map(|p| p.id)
+            .chain(std::iter::once(self.page_id))
+            .filter(|id| *id != 0)
+            .collect();
+        let mut next_page_id = || -> u64 {
+            let mut candidate = 1u64;
+            while used.contains(&candidate) {
+                candidate += 1;
+            }
+            used.insert(candidate);
+            candidate
+        };
+        for p in &mut self.pages {
+            if p.id == 0 {
+                p.id = next_page_id();
+            }
+        }
+        if self.page_id == 0 {
+            self.page_id = next_page_id();
+        }
+        self.format_version = FORMAT_VERSION;
     }
     pub fn load(path: &Path) -> Result<Self, String> {
         use std::io::Read;

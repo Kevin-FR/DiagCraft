@@ -63,8 +63,8 @@ Die Organisation wird in optionalen v7-Metadaten gespeichert. Ältere Anwendunge
 
 [Gruppen und Ebenen](../organisation.md) (FR).
 
-Das Dokumentformat **v7** und die Agenten-API **v1** haben eigene Versionsnummern,
-unabhängig von der Anwendung. Dateien der Formate v1–v6 werden beim Öffnen im
+Das Dokumentformat **v8** und die Agenten-API **v1** haben eigene Versionsnummern,
+unabhängig von der Anwendung. Dateien der Formate v1–v7 werden beim Öffnen im
 Arbeitsspeicher migriert. Die Quelldatei bleibt bis zum Speichern unverändert.
 
 Zum Zeichnen sind weder Konto noch API-Schlüssel nötig. Der MCP-Server arbeitet

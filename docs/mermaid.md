@@ -19,7 +19,7 @@ sert de référence. Aucun code ni ressource Mermaid n’est incorporé.
   notation après les autres liens). Chaînes `A --> B --> C`.
 - Instructions séparées par retour à la ligne ou point-virgule, commentaires `%%`.
 - Au maximum 256 Kio de source, 200 nœuds, 400 liens et 4096 caractères par libellé.
-  Le format v7 limite en plus les libellés de liens à 4096 octets UTF-8.
+  Le format v8 limite en plus les libellés de liens à 4096 octets UTF-8.
 
 Les types autres que flowchart, sous-graphes, styles/classes, clics, directives,
 front matter, HTML autre que les retours à la ligne, Markdown enrichi, formes
@@ -46,7 +46,7 @@ Un rapport préalable expose les objets omis et les conversions : autres formes
 vers rectangle, images/texte enrichi vers texte brut, graphiques/tracés et liens
 libres omis, groupes/calques/styles et géométrie non conservés. La sortie n’est
 écrite qu’après validation explicite de ces pertes. Le `.draw` source reste intact.
-Le format `.draw` reste v7 et l’API de patches reste v1.
+Le format `.draw` reste v8 et l’API de patches reste v1.
 
 ![Aperçu avant import](images/mermaid-import.png)
 

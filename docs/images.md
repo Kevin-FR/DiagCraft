@@ -100,7 +100,7 @@ accessibles à elle seule.
 
 ## Fichiers et agents
 
-Le format reste **v7**, l’API agents **v1**. Les anciens documents sans image
+Le format reste **v8**, l’API agents **v1**. Les anciens documents sans image
 conservent leur sérialisation et leur révision. Les applications antérieures à
 0.10.0 ignorent les images et les perdent au réenregistrement : utilisez une
 version récente pour modifier un document illustré.

@@ -55,7 +55,7 @@ Le paquet Debian installe ces dépendances automatiquement. AppImage et RPM rest
 
 Les fichiers `.draw` sont des documents JSON éditables. Les préférences et
 versions de la galerie restent locales ; aucun service cloud n’est requis.
-Le format de document v7 est indépendant du numéro de l’application.
+Le format de document v8 est indépendant du numéro de l’application.
 
 Pour vérifier un téléchargement sur macOS : `shasum -a 256 <archive>` ;
 sur Linux : `sha256sum <archive>` ; sous PowerShell :

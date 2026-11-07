@@ -67,7 +67,7 @@ avant le calcul de la révision de résultat. L’inspection fournit `text_layou
 avec les lignes, la taille calculée, la zone de texte et l’indicateur de débordement.
 Voir [le contrat agents](AGENTS-DRAW.md).
 
-Le document reste au format **v7**, l’API agents en **v1**. Les anciennes applications
+Le document reste au format **v8**, l’API agents en **v1**. Les anciennes applications
 peuvent lire les dimensions enregistrées mais ignorent l’option automatique.
 L’ajustement refuse un texte nécessitant une dimension supérieure à 20 000 px :
 réduire son contenu, sa taille de police ou le répartir entre plusieurs blocs.

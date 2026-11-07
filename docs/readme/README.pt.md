@@ -63,8 +63,8 @@ A organização é guardada em metadados v7 opcionais. As aplicações anteriore
 
 [Grupos e camadas](../organisation.md) (FR).
 
-O formato de documento **v7** e a API para agentes **v1** têm números de versão
-próprios, independentes da aplicação. Os ficheiros dos formatos v1–v6 são migrados
+O formato de documento **v8** e a API para agentes **v1** têm números de versão
+próprios, independentes da aplicação. Os ficheiros dos formatos v1–v7 são migrados
 em memória ao abrir. O ficheiro original permanece inalterado até guardar.
 
 Não é necessária uma conta nem uma chave API para desenhar. O servidor MCP trabalha

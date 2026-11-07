@@ -2,7 +2,7 @@
 
 Depuis 0.11.0, les erreurs de patches conservent le champ texte `error` et ajoutent
 un objet `diagnostic` exploitable par une CLI ou un agent. L’API reste **v1** et le
-format `.draw` reste **v7** ; la réponse est enrichie sans modifier les opérations.
+format `.draw` reste **v8** ; la réponse est enrichie sans modifier les opérations.
 
 ## Comprendre le contexte
 

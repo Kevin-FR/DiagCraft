@@ -64,9 +64,9 @@ La organización se guarda en metadatos v7 opcionales. Las aplicaciones anterior
 
 [Grupos y capas](../organisation.md) (FR).
 
-El formato de documento **v7** y la API para agentes **v1** tienen sus propios
+El formato de documento **v8** y la API para agentes **v1** tienen sus propios
 números de versión, independientes de la aplicación. Los archivos de los formatos
-v1–v6 se migran en memoria al abrirlos. El archivo original no cambia hasta que se guarda.
+v1–v7 se migran en memoria al abrirlos. El archivo original no cambia hasta que se guarda.
 
 No necesitas una cuenta ni una clave API para dibujar. El servidor MCP trabaja
 en una carpeta local elegida por ti; la aplicación no contacta con ningún modelo de IA.

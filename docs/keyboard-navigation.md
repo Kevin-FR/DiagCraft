@@ -1,7 +1,7 @@
 # Navigate the workspace with the keyboard
 
 Workspace traversal is available since **0.11.1**, with library and shorter-window
-improvements in **0.11.2**. The drawing format remains v7 and the agent API remains v1.
+improvements in **0.11.2**. The drawing format remains v8 and the agent API remains v1.
 
 ## Move between areas
 

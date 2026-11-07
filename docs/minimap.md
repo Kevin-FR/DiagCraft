@@ -36,7 +36,7 @@ to the overview bounds. Switching pages or documents shows the new active page.
 
 Mini-map navigation does not edit the diagram, selection, saved/modified state,
 or undo/redo history. Its visibility is not saved in `.draw`, and it does not
-appear in SVG, PDF or PNG exports. The drawing format remains **v7**, the agent
+appear in SVG, PDF or PNG exports. The drawing format remains **v8**, the agent
 patch API remains **v1**, and no dependency is added.
 
 The overview temporarily disappears while a drawing gesture, arrow-key object

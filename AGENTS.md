@@ -18,7 +18,7 @@ Validation :
 - `cargo deny check licenses sources advisories`
 - `python3 scripts/check-publication.py`
 
-Le format `.draw` reste v7 ; la sérialisation canonique est dans
+Le format `.draw` est v8 ; la sérialisation canonique est dans
 `crates/core/src/pages.rs`. Préserver les migrations et les fichiers source.
 Ne pas confondre version d’application, de format et d’API.
 

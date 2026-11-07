@@ -42,6 +42,8 @@ fn default_name() -> String {
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Page {
+    #[serde(default)]
+    pub id: u64,
     #[serde(default = "default_name")]
     pub page_name: String,
     pub page_size: Point,
@@ -63,6 +65,7 @@ pub struct Page {
 }
 #[derive(Serialize, PartialEq)]
 struct PageRef<'a> {
+    id: u64,
     page_name: &'a str,
     page_size: Point,
     nodes: &'a [Node],
@@ -77,6 +80,7 @@ struct PageRef<'a> {
 impl<'a> From<&'a Page> for PageRef<'a> {
     fn from(p: &'a Page) -> Self {
         Self {
+            id: p.id,
             page_name: &p.page_name,
             page_size: p.page_size,
             nodes: &p.nodes,
@@ -93,6 +97,7 @@ impl Document {
     fn page_ref(&self, index: usize) -> PageRef<'_> {
         if index == self.page_index {
             PageRef {
+                id: self.page_id,
                 page_name: &self.page_name,
                 page_size: self.page_size,
                 nodes: &self.nodes,
@@ -122,6 +127,7 @@ impl Document {
         }
         let p = self.page_ref(index);
         Some(Page {
+            id: p.id,
             page_name: p.page_name.into(),
             page_size: p.page_size,
             nodes: p.nodes.to_vec(),
@@ -139,6 +145,7 @@ impl Document {
     pub fn from_page(p: Page, title: &str) -> Self {
         Self {
             title: title.into(),
+            page_id: p.id,
             page_name: p.page_name,
             page_size: p.page_size,
             nodes: p.nodes,
@@ -198,6 +205,7 @@ impl Document {
             format!("Page {}", self.page_count() + 1)
         };
         p.page_name = p.page_name.chars().take(200).collect();
+        p.id = self.next_page_id();
         let index = self.page_index + 1;
         pages.insert(index, p);
         let mut next = self.clone();
@@ -333,6 +341,54 @@ impl Serialize for Document {
             pages: (1..self.page_count()).map(|i| self.page_ref(i)).collect(),
         }
         .serialize(s)
+    }
+}
+impl<'de> Deserialize<'de> for Document {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        struct Raw {
+            format_version: u32,
+            title: String,
+            #[serde(default = "crate::document::default_page_name")]
+            page_name: String,
+            #[serde(default)]
+            page_layout: PageLayout,
+            #[serde(default)]
+            pages: Vec<Page>,
+            page_size: Point,
+            nodes: Vec<Node>,
+            connectors: Vec<Connector>,
+            #[serde(default)]
+            drawings: Vec<Drawing>,
+            #[serde(default)]
+            page_style: PageStyle,
+            #[serde(default)]
+            charts: Vec<crate::chart::Chart>,
+            #[serde(default)]
+            organization: crate::organization::Organization,
+            // Identifiant stable de la page 0 (champ racine 'id' produit par
+            // la sérialisation canonique v8). La page active après chargement
+            // étant toujours l'index 0, cet identifiant est celui de la page 0.
+            #[serde(default)]
+            id: u64,
+        }
+        let raw = Raw::deserialize(d)?;
+        Ok(Document {
+            format_version: raw.format_version,
+            title: raw.title,
+            page_name: raw.page_name,
+            page_layout: raw.page_layout,
+            pages: raw.pages,
+            page_index: 0,
+            page_size: raw.page_size,
+            nodes: raw.nodes,
+            connectors: raw.connectors,
+            drawings: raw.drawings,
+            page_style: raw.page_style,
+            charts: raw.charts,
+            organization: raw.organization,
+            page_id: raw.id,
+        })
     }
 }
 

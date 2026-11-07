@@ -14,8 +14,26 @@ on ne recommence pas la numérotation et on ne remplace pas un téléchargement.
 
 La version de référence est `workspace.package.version` dans `Cargo.toml`.
 Les trois packages, `Cargo.lock`, le tag `v<version>` et
-`docs/releases/<version>.md` doivent correspondre. Le format `.draw` **v7** et
+`docs/releases/<version>.md` doivent correspondre. Le format `.draw` **v8** et
 l’API agents **v1** restent indépendants.
+
+## Format `.draw` et migration
+
+Le format de fichier `.draw` est indépendant de la version de l’application. Il
+évolue par versions entières gérées explicitement dans `upgrade_legacy()` en
+`crates/core/src/document.rs`.
+
+- **v8 (actuelle)** : chaque page porte un identifiant numérique unique et non
+  nul (`id` sur la page racine et sur chaque élément de `pages`). Ces
+  identifiants sont les références permanentes utilisées pour les liens entre
+  pages. Les nouveaux documents démarrent avec `page_id = 1`.
+- **v7→v8** : migration automatique et déterministe à l’ouverture. Un document
+  v7 reçoit des identifiants de page uniques (1, 2, 3… dans l’ordre des pages
+  plus la page active), puis passe à v8. Cela change la révision canonique d’un
+  document v7 chargé : c’est un comportement attendu, car la normalisation
+  ajoute des identifiants. Les fichiers d’exemples legacy restent en v7 pour
+  exercer cette migration, et les recharger produit toujours les mêmes
+  identifiants.
 
 ## Procédure
 

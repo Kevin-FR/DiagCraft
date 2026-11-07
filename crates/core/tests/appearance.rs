@@ -66,7 +66,7 @@ fn appearance_round_trips_on_multiple_pages_and_exports() {
     let loaded = Document::load(&path).unwrap();
     assert_eq!(loaded, d);
     let value: serde_json::Value = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
-    assert_eq!(value["format_version"], 7);
+    assert_eq!(value["format_version"], 8);
     assert!(svg::export(&loaded).unwrap().contains("-inner"));
     assert!(
         pdf::export(&loaded, pdf::PageFormat::Drawing)

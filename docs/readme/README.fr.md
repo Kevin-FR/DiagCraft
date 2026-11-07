@@ -63,8 +63,8 @@ L’organisation est enregistrée dans des métadonnées v7 facultatives. Les an
 
 [Groupes et calques](../organisation.md) (FR).
 
-Le format de document **v7** et l’API agents **v1** ont leurs propres numéros,
-indépendants de la version de l’application. Les fichiers des formats v1 à v6
+Le format de document **v8** et l’API agents **v1** ont leurs propres numéros,
+indépendants de la version de l’application. Les fichiers des formats v1 à v7
 sont migrés en mémoire à l’ouverture. La source reste intacte jusqu’à l’enregistrement.
 
 Aucun compte ni clé API n’est nécessaire pour dessiner. Le serveur MCP travaille

@@ -130,7 +130,7 @@ fn opt_in_round_trips_on_multiple_pages_and_default_styles_keep_legacy_serializa
     let path = dir.path().join("text.draw");
     doc.save(&path).unwrap();
     assert_eq!(Document::load(&path).unwrap(), doc);
-    assert_eq!(doc.format_version, 7);
+    assert_eq!(doc.format_version, 8);
     assert!(doc.page_document(0).unwrap().nodes[0].text_style.auto_fit);
     assert!(doc.page_document(1).unwrap().nodes[0].text_style.auto_fit);
 }

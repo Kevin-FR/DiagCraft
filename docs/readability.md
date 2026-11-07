@@ -1,7 +1,7 @@
 # Interface readability
 
 DiagCraft 0.11.3 separates informational text from muted decoration. The drawing
-format remains v7 and the agent API remains v1. Document text, fills, strokes,
+format remains v8 and the agent API remains v1. Document text, fills, strokes,
 previews and exported colours remain under the author's control.
 
 ## Roles and criteria

@@ -63,7 +63,7 @@ sélection. Un agent doit explicitement afficher ou déverrouiller les élément
 protégés avant d’en modifier le contenu. Un lot invalide est entièrement rejeté.
 Voir le [guide des agents](AGENTS-DRAW.md).
 
-Le format reste `.draw` v7, avec un champ facultatif `organization`. Les fichiers
+Le format reste `.draw` v8, avec un champ facultatif `organization`. Les fichiers
 sans organisation conservent leur comportement et leur sérialisation habituels.
 Les versions antérieures à 0.8.0 ignorent ce champ : elles affichent les objets
 masqués et ne conservent pas groupes, calques ou verrouillages au réenregistrement.

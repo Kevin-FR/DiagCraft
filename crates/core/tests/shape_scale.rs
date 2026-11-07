@@ -178,7 +178,7 @@ fn saved_geometry_custom_symbols_and_explicit_templates_keep_their_sizes() {
     let decoded: Document =
         serde_json::from_str(&serde_json::to_string(&template).unwrap()).unwrap();
     assert_eq!(decoded, template);
-    assert_eq!(doc.format_version, 7);
+    assert_eq!(doc.format_version, 8);
 }
 
 #[test]

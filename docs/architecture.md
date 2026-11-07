@@ -48,9 +48,12 @@ Le format documentaire et l’historique ne sont pas modifiés.
 
 La barre des pages conserve, par onglet et seulement en mémoire, l’index de la
 page précédente et une copie du document au moment de la navigation. Le retour
-est désactivé si le document diffère de cette copie, car le format actuel ne
-fournit pas d’identifiants permanents de page. Il ne crée aucune modification
-ni entrée d’historique ; changer de page à nouveau remplace le retour.
+est désactivé si le document diffère de cette copie. Il ne crée aucune
+modification ni entrée d’historique ; changer de page à nouveau remplace le
+retour. Depuis le format v8, chaque page porte un identifiant numérique
+permanent (`Page.id`, voir `pages.rs`) ; son exploitation pour un retour
+robuste (liens entre pages) est traitée par le lot « Liens entre pages » du
+README.
 
 `interface_prefs.rs` conserve la disposition, la langue et les préférences de mise à jour dans un JSON local borné,
 avec écriture atomique. Les captures et tests n’accèdent pas aux préférences utilisateur.
@@ -89,7 +92,7 @@ sont détaillés dans [dependencies.md](dependencies.md).
 ## Langues et mises à jour
 
 `i18n.rs` et `assets/locales/messages.json` traduisent les libellés de l’interface.
-Les identifiants du moteur, l’API v1, le format v7 et les textes des documents
+Les identifiants du moteur, l’API v1, le format v8 et les textes des documents
 ne passent pas par le catalogue. Exception à la création : `welcome_ui.rs`
 localise une nouvelle copie du dessin d’accueil original et son entrée de catalogue.
 Cette génération utilise la langue restaurée ou `--language` ; les fichiers chargés,
@@ -108,7 +111,7 @@ La recherche automatique est facultative et ne bloque pas le dessin.
 ## Récupération
 
 `recovery.rs` conserve une copie canonique des documents modifiés dans une
-enveloppe locale v1 distincte du format `.draw` v7. Un worker borné écrit un seul
+enveloppe locale v1 distincte du format `.draw` v8. Un worker borné écrit un seul
 checkpoint atomique par instance ; les documents validés et terminés sont transmis
 par `recovery_ui.rs` toutes les dix secondes. Les onglets récupérés restent marqués
 non enregistrés indépendamment de leur historique et n’ont pas de chemin source.
@@ -270,7 +273,7 @@ documentaire ou API agents n’est ajouté.
 calques ordonnés, groupes plats et états des objets indexés par leurs IDs existants.
 Les identifiants de groupe et de calque ont des espaces distincts de ceux des objets.
 Le calque de base 0 reste implicite, visible et déverrouillé. Un groupe ne traverse
-pas les calques. La sérialisation canonique v7 omet le champ quand il est vide.
+pas les calques. La sérialisation canonique v8 omet le champ quand il est vide.
 
 Un `OrganizationView` calculé par page fournit les ensembles de visibilité,
 verrouillage et sélection. Il n’est jamais sérialisé ; les chemins de rendu,
@@ -312,7 +315,7 @@ Le canevas utilise le même tracé pour la ligne, les styles et le libellé.
 Le survol, les poignées et la sélection réutilisent ce cache ; la sélection par
 rectangle prépare le snapshot une seule fois pour tous ses connecteurs. SVG et
 inspection réutilisent un contexte de page. Les diagnostics agents exposent le
-statut calculé sans changer le contrat de patch API 1 ou la sérialisation v7.
+statut calculé sans changer le contrat de patch API 1 ou la sérialisation v8.
 
 Les libellés de connecteurs et de tracés libres combinent une fraction de longueur
 `label_t` et un `label_offset` en coordonnées documentaires. Le décalage facultatif

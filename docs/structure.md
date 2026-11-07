@@ -64,7 +64,7 @@ Sélection, navigation et repli ne modifient ni le dessin ni son historique, y
 compris une branche de rétablissement. Les recherches et replis ne sont pas
 sauvegardés. Au prochain lancement, le navigateur revient à la vue Symboles ;
 les préférences existantes restent compatibles avec les anciennes versions.
-Le format `.draw` reste v7 et l’API agents v1.
+Le format `.draw` reste v8 et l’API agents v1.
 
 Les tests couvrent groupes, protections, sélection additive, recherche, changements
 de page, sept langues et parcours clavier d’une liste de 2 000 objets. Les essais

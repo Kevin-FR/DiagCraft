@@ -105,6 +105,7 @@ versionnés avec migration ; aucun numéro n’est promis ici.
 - [x] Mesure avec images sur Apple Silicon et optimisation de la vérification des résultats (branche de développement, non publié).
 - [ ] Mesurer la réactivité avec des images sur Windows et Linux.
 - [x] Retour entre les deux dernières pages visitées, indépendant par onglet et protégé si le document change (branche de développement, non publié).
+- [x] Identifiants de page permanents et uniques dans le format `.draw` v8, avec migration explicite et déterministe v7→v8 (branche de développement, non publié).
 - [ ] Liens de navigation entre pages.
 - [ ] Conteneurs et couloirs de processus.
 - [ ] Styles nommés avec propagation.
@@ -127,11 +128,11 @@ son approche agents et ses ressources originales. L’étude compare les usages,
 sans copier les bibliothèques, modèles ou marques des autres produits.
 
 1. **Navigation fiable et documents multipages** : définir des identifiants de
-   page stables et une migration explicitement versionnée, puis ajouter des liens
-   entre pages, la détection des destinations supprimées et un retour qui reste
-   correct après édition, copie, déplacement et annulation. Tester notamment les
-   pages strictement identiques et les modifications par agent. Le retour actuel
-   est volontairement conservateur tant que ces identifiants n’existent pas.
+   page stables et une migration explicitement versionnée (fait : format `.draw`
+   v8 avec `Page.id` permanent, migration v7→v8 déterministe), puis ajouter des
+   liens entre pages, la détection des destinations supprimées et un retour qui
+   reste correct après édition, copie, déplacement et annulation. Tester
+   notamment les pages strictement identiques et les modifications par agent.
    Référence d’usage : [pages et liens draw.io](https://www.drawio.com/docs/manual/pages/).
 2. **Données locales vers diagrammes** : importer un CSV local avec choix des
    colonnes, identifiants et relations, aperçu, limites de taille et diagnostics ;

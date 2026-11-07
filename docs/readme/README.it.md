@@ -64,8 +64,8 @@ L'organizzazione è salvata in metadati v7 facoltativi. Le applicazioni preceden
 
 [Gruppi e livelli](../organisation.md) (FR).
 
-Il formato dei documenti **v7** e l’API per agenti **v1** hanno numeri di versione
-propri, indipendenti dall’applicazione. I file nei formati v1–v6 vengono migrati
+Il formato dei documenti **v8** e l’API per agenti **v1** hanno numeri di versione
+propri, indipendenti dall’applicazione. I file nei formati v1–v7 vengono migrati
 in memoria all’apertura. Il file originale rimane invariato fino al salvataggio.
 
 Per disegnare non servono account né chiavi API. Il server MCP lavora in una

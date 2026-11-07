@@ -5,6 +5,12 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — navigation, accessibilité et distribution
 
+- Le format `.draw` passe en **v8** : chaque page porte désormais un identifiant
+  numérique permanent et unique (`Page.id`), base des futurs liens entre pages.
+  Les documents v7 sont migrés automatiquement et de façon déterministe à
+  l’ouverture (identifiants 1, 2, 3… dans l’ordre des pages) ; un v7 rechargé
+  obtient ainsi une révision canonique v8 stable.
+
 - Aperçu des modifications IA avant/après, avec sélection indépendante des pages et refus d’un aperçu périmé ; la saisie directe est préservée.
 - Une opération de page refusée conserve la sélection, l’outil et la vue.
 

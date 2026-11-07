@@ -1,7 +1,7 @@
 # DiagCraft — interface pour les agents (API 1)
 
 Le binaire `diagcraft-cli` fournit les outils MCP `draw_catalog`, `draw_inspect`,
-`draw_validate` et `draw_apply`. L’API 1 et le format `.draw` v7 sont indépendants
+`draw_validate` et `draw_apply`. L’API 1 et le format `.draw` v8 sont indépendants
 de la version de l’application.
 
 Toutes les positions sont en pixels de document à 96 dpi, indépendantes du zoom.
@@ -40,7 +40,7 @@ La CLI renvoie du JSON sur stdout, les erreurs sur stderr (code de sortie non
 nul). Le dry-run ne crée aucun fichier. Le résultat exige un chemin nouveau :
 l’original et les fichiers existants sont préservés. Ouvrir le résultat dans
 l’app, ou utiliser l’import de patch pour modifier le document déjà ouvert.
-Le format .draw v7 reste compatible avec les précédentes versions du dessin.
+Le format .draw v8 reste compatible avec les précédentes versions du dessin.
 
 ## Patch
 
@@ -162,7 +162,7 @@ coordonnée finie est comprise entre -100 000 et 100 000 px et vaut zéro par d�
 L’inspection fournit `label_position`, une position dérivée à ne pas envoyer dans
 un patch. Aucun segment, point manuel ou bloc n’est déplacé par ces réglages.
 
-Ces ajouts restent facultatifs dans le format v7 et l’API 1. Les anciennes
+Ces ajouts restent facultatifs dans le format v8 et l’API 1. Les anciennes
 applications ignorent les décalages et les libellés des tracés libres, puis les
 perdent à l’enregistrement. Les anciens clients de l’API peuvent refuser ces
 champs additionnels ; vérifier le schéma du binaire utilisé.
@@ -243,7 +243,7 @@ omis du canevas et des exports SVG/PDF. Le masquage d’une forme masque aussi l
 connecteurs qui lui sont attachés. La protection porte sur les champs enregistrés ;
 une route calculée peut suivre les formes auxquelles elle est attachée.
 
-Le format reste v7 grâce au champ facultatif `organization`. Les applications
+Le format actuel v8 conserve le champ facultatif `organization`. Les applications
 antérieures à 0.8.0 ignorent ce champ, affichent les éléments masqués et perdent
 l’organisation au réenregistrement. Voir [organisation.md](organisation.md).
 

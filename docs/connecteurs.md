@@ -54,7 +54,7 @@ Le canevas et les exports SVG, PNG et PDF utilisent cette même position. Le tex
 reste présent dans le fichier `.draw`. Ce premier lot fournit **un seul libellé
 par trait ou connecteur**, sans styles par portions ni libellés multiples.
 
-Le format reste v7 : les nouveaux décalages de libellés et les libellés des
+Le format reste v8 : les nouveaux décalages de libellés et les libellés des
 traits libres sont facultatifs. Une ancienne application ignore ces champs et
 les perd si elle réenregistre le fichier. Les libellés existants des connecteurs
 restent lisibles, mais leur décalage manuel nécessite la nouvelle version.
@@ -90,7 +90,7 @@ de libellés ne sont pas évités dans cette version.
 
 ## Agents et fichiers
 
-Le format `.draw` reste v7 et l’API reste v1. Aucun champ de route calculée n’est
+Le format `.draw` reste v8 et l’API reste v1. Aucun champ de route calculée n’est
 ajouté aux fichiers ; les points manuels existants restent inchangés. Les anciennes
 versions ouvrent les fichiers mais calculent leurs anciens tracés, sans évitement
 des blocs. Utilisez 0.9.0 ou plus pour retrouver le même rendu.

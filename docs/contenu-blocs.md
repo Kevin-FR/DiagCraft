@@ -56,7 +56,7 @@ copie de blocs dans DiagCraft conserve leurs styles.
 ## Enregistrement, exports et agents
 
 Les portions mises en forme sont enregistrées dans le champ facultatif `text_runs`
-du nœud, en complément du texte brut. Le format reste **v7** et l’API agents **v1**.
+du nœud, en complément du texte brut. Le format reste **v8** et l’API agents **v1**.
 Les anciens dessins restent inchangés. Une application plus ancienne ignore ces
 portions et affiche le texte avec le style de base ; réenregistrer avec elle perd
 les styles par portions.

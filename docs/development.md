@@ -46,7 +46,8 @@ Voir [la politique de versions](versioning.md) avant de créer une release.
 Les fonctions de capture lancent une fenêtre isolée et ne sauvegardent pas
 la bibliothèque personnelle : `target/release/diagcraft --screenshot capture.png compact`.
 
-Le format `.draw` v7, l’API agents v1 et leurs migrations doivent rester testés.
+Le format `.draw` v8, l’API agents v1 et leurs migrations (y compris la lecture
+des anciens formats v1→v7) doivent rester testés.
 Les exemples utilisent des données de démonstration, sans documents personnels.
 
 Les catalogues sont contrôlés avec `python3 scripts/check-locales.py`. Les tests

@@ -199,7 +199,7 @@ fn rich_text_round_trips_on_multiple_pages_and_old_documents_keep_plain_text() {
     let second = doc.add_node(ShapeKind::Rectangle, [200., 200.]);
     assert!(doc.node(second).unwrap().text_runs.is_empty());
     let value = serde_json::to_value(&doc).unwrap();
-    assert_eq!(value["format_version"], 7);
+    assert_eq!(value["format_version"], 8);
     let loaded: Document = serde_json::from_value(value).unwrap();
     loaded.validate().unwrap();
     assert_eq!(loaded.page_document(0).unwrap().nodes[0], first);

@@ -85,4 +85,4 @@ activation des préréglages dans les sept langues à
 1200 × 680 points. Ils couvrent aussi la translation des groupes, leurs protections,
 les groupes non compatibles, les points manuels et les limites de taille.
 Ils ne remplacent pas les essais utilisateurs.
-Le format `.draw` reste v7 et l’API agents v1, sans dépendance ajoutée.
+Le format `.draw` reste v8 et l’API agents v1, sans dépendance ajoutée.

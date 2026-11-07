@@ -244,3 +244,71 @@ fn multipage_pdf_contains_each_page_and_current_page_export_remains_single() {
     let single = pdf::export_current(&d, pdf::PageFormat::Drawing).unwrap();
     assert!(String::from_utf8_lossy(&single).contains("/Count 1"));
 }
+#[test]
+fn page_ids_survive_creation_reorder_delete_and_canonical_round_trip() {
+    let mut d = Document::default();
+    let first = d.page_id;
+    assert_ne!(first, 0);
+    d.add_page(false).unwrap();
+    let second = d.page_id;
+    assert_ne!(second, first);
+    d.add_page(true).unwrap();
+    let third = d.page_id;
+    assert_ne!(third, first);
+    assert_ne!(third, second);
+    let mut ids: Vec<u64> = d.pages.iter().map(|p| p.id).collect();
+    ids.push(d.page_id);
+    let unique: std::collections::HashSet<_> = ids.iter().copied().collect();
+    assert_eq!(unique.len(), ids.len());
+
+    // La sauvegarde vers v8 puis la lecture préservent chaque identifiant.
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("ids.draw");
+    d.save(&path).unwrap();
+    let loaded = Document::load(&path).unwrap();
+    assert_eq!(loaded, d);
+    // Au chargement la page active revient à l'index 0 ; son identifiant doit
+    // correspondre à celui de la page d'index 0 du document d'origine, et
+    // chaque identifiant logique de page est préservé par le round-trip.
+    assert_eq!(loaded.page_id, d.page(0).unwrap().id);
+    for i in 0..d.page_count() {
+        assert_eq!(loaded.page(i).unwrap().id, d.page(i).unwrap().id);
+    }
+    let value: serde_json::Value = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+    assert_eq!(value["format_version"], 8);
+
+    // Réordonner et supprimer préservent l'identifiant des pages restantes.
+    let page_zero_id = d.page(0).unwrap().id;
+    d.move_page(1, 0).unwrap();
+    assert!(d.pages.iter().any(|p| p.id == page_zero_id) || d.page_id == page_zero_id);
+    d.remove_page(0).unwrap();
+    assert_ne!(d.page_id, 0);
+    assert!(d.pages.iter().all(|p| p.id != 0));
+}
+#[test]
+fn legacy_v7_documents_migrate_to_v8_with_stable_page_ids() {
+    let d = Document::load(std::path::Path::new(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../examples/dossier-v7.draw"
+    )))
+    .unwrap();
+    // Charger un document v7 le migre vers v8 en assignant des identifiants
+    // de page uniques et non nuls, sans perdre de page.
+    assert_eq!(d.format_version, FORMAT_VERSION);
+    assert!(d.page_count() >= 2);
+    assert_ne!(d.page_id, 0);
+    let mut ids: Vec<u64> = d.pages.iter().map(|p| p.id).collect();
+    ids.push(d.page_id);
+    let unique: std::collections::HashSet<_> = ids.iter().copied().collect();
+    assert_eq!(unique.len(), ids.len());
+    // Un second chargement produit les mêmes identifiants (migration déterministe).
+    let again = Document::load(std::path::Path::new(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../examples/dossier-v7.draw"
+    )))
+    .unwrap();
+    assert_eq!(again.page_id, d.page_id);
+    for (a, b) in again.pages.iter().zip(d.pages.iter()) {
+        assert_eq!(a.id, b.id);
+    }
+}
