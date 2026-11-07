@@ -10609,5 +10609,131 @@
     "it": "Termina la modifica in corso prima di importare un CSV.",
     "pt": "Conclua a edição atual antes de importar um CSV.",
     "zh-Hans": "导入 CSV 前请先结束当前编辑。"
+  },
+  "draw.io import": {
+    "fr": "draw.io import",
+    "en": "draw.io import",
+    "de": "draw.io-Import",
+    "es": "importación de draw.io",
+    "it": "importazione draw.io",
+    "pt": "importação do draw.io",
+    "zh-Hans": "draw.io 导入"
+  },
+  "Fichier draw.io trop volumineux : maximum 512 Kio.": {
+    "fr": "Fichier draw.io trop volumineux : maximum 512 Kio.",
+    "en": "draw.io file too large: 512 KiB maximum.",
+    "de": "draw.io-Datei zu groß: maximal 512 KiB.",
+    "es": "Archivo draw.io demasiado grande: máximo 512 KiB.",
+    "it": "File draw.io troppo grande: massimo 512 KiB.",
+    "pt": "Arquivo draw.io muito grande: máximo 512 KiB.",
+    "zh-Hans": "draw.io 文件过大：最大 512 KiB。"
+  },
+  "Le fichier draw.io doit être en UTF-8.": {
+    "fr": "Le fichier draw.io doit être en UTF-8.",
+    "en": "The draw.io file must be UTF-8.",
+    "de": "Die draw.io-Datei muss UTF-8 sein.",
+    "es": "El archivo draw.io debe estar en UTF-8.",
+    "it": "Il file draw.io deve essere in UTF-8.",
+    "pt": "O arquivo draw.io deve estar em UTF-8.",
+    "zh-Hans": "draw.io 文件必须是 UTF-8 编码。"
+  },
+  "Prévisualisez le draw.io avant de l’importer.": {
+    "fr": "Prévisualisez le draw.io avant de l’importer.",
+    "en": "Preview the draw.io before importing it.",
+    "de": "Zeigen Sie das draw.io vor dem Importieren an.",
+    "es": "Obtenga una vista previa del draw.io antes de importarlo.",
+    "it": "Mostra l'anteprima del draw.io prima di importarlo.",
+    "pt": "Visualize o draw.io antes de importá-lo.",
+    "zh-Hans": "导入前先预览 draw.io。"
+  },
+  "Importer un draw.io local": {
+    "fr": "Importer un draw.io local",
+    "en": "Import a local draw.io",
+    "de": "Lokales draw.io importieren",
+    "es": "Importar un draw.io local",
+    "it": "Importa un draw.io locale",
+    "pt": "Importar um draw.io local",
+    "zh-Hans": "导入本地 draw.io"
+  },
+  "Charger un fichier draw.io…": {
+    "fr": "Charger un fichier draw.io…",
+    "en": "Load a draw.io file…",
+    "de": "draw.io-Datei laden…",
+    "es": "Cargar un archivo draw.io…",
+    "it": "Carica un file draw.io…",
+    "pt": "Carregar um arquivo draw.io…",
+    "zh-Hans": "加载 draw.io 文件…"
+  },
+  "Exemple draw.io": {
+    "fr": "Exemple draw.io",
+    "en": "draw.io example",
+    "de": "draw.io-Beispiel",
+    "es": "Ejemplo draw.io",
+    "it": "Esempio draw.io",
+    "pt": "Exemplo draw.io",
+    "zh-Hans": "draw.io 示例"
+  },
+  "Seule la page sélectionnée est importée ; les autres sont signalées comme non reprises.": {
+    "fr": "Seule la page sélectionnée est importée ; les autres sont signalées comme non reprises.",
+    "en": "Only the selected page is imported; the others are reported as not taken up.",
+    "de": "Nur die ausgewählte Seite wird importiert; die übrigen werden als nicht übernommen gemeldet.",
+    "es": "Solo se importa la página seleccionada; las demás se señalan como no incluidas.",
+    "it": "Viene importata solo la pagina selezionata; le altre vengono segnalate come non riprese.",
+    "pt": "Somente a página selecionada é importada; as demais são sinalizadas como não incluídas.",
+    "zh-Hans": "仅导入所选页面；其他页面将标记为未纳入。"
+  },
+  "Un sous-ensemble de .drawio est lu : fichiers locaux, aucun accès réseau, images externes jamais chargées.": {
+    "fr": "Un sous-ensemble de .drawio est lu : fichiers locaux, aucun accès réseau, images externes jamais chargées.",
+    "en": "A subset of .drawio is read: local files, no network access, external images never loaded.",
+    "de": "Eine Teilmenge von .drawio wird gelesen: lokale Dateien, kein Netzwerkzugriff, externe Bilder werden nie geladen.",
+    "es": "Se lee un subconjunto de .drawio: archivos locales, sin acceso a la red, imágenes externas nunca cargadas.",
+    "it": "Viene letto un sottoinsieme di .drawio: file locali, nessun accesso di rete, immagini esterne mai caricate.",
+    "pt": "É lido um subconjunto de .drawio: arquivos locais, sem acesso à rede, imagens externas nunca carregadas.",
+    "zh-Hans": "仅读取 .drawio 的一个子集：本地文件，无网络访问，从不加载外部图片。"
+  },
+  "draw.io importé sur une nouvelle page. Une annulation retire l’import.": {
+    "fr": "draw.io importé sur une nouvelle page. Une annulation retire l’import.",
+    "en": "draw.io imported onto a new page. One undo removes the import.",
+    "de": "draw.io auf einer neuen Seite importiert. Ein Rückgängig macht den Import rückgängig.",
+    "es": "draw.io importado en una nueva página. Una deshecho elimina la importación.",
+    "it": "draw.io importato su una nuova pagina. Un annulla rimuove l'importazione.",
+    "pt": "draw.io importado em uma nova página. Um desfazer remove a importação.",
+    "zh-Hans": "draw.io 已导入到新页面。撤销一次即可移除导入。"
+  },
+  "Terminez l’édition en cours avant d’importer un draw.io.": {
+    "fr": "Terminez l’édition en cours avant d’importer un draw.io.",
+    "en": "Finish the current editing session before importing a draw.io.",
+    "de": "Schließen Sie die laufende Bearbeitung ab, bevor Sie ein draw.io importieren.",
+    "es": "Termine la edición en curso antes de importar un draw.io.",
+    "it": "Termina la modifica in corso prima di importare un draw.io.",
+    "pt": "Conclua a edição atual antes de importar um draw.io.",
+    "zh-Hans": "导入 draw.io 前请先结束当前编辑。"
+  },
+  "Importer un draw.io…": {
+    "fr": "Importer un draw.io…",
+    "en": "Import a draw.io…",
+    "de": "draw.io importieren…",
+    "es": "Importar un draw.io…",
+    "it": "Importa un draw.io…",
+    "pt": "Importar um draw.io…",
+    "zh-Hans": "导入 draw.io…"
+  },
+  "Choix de la page": {
+    "fr": "Choix de la page",
+    "en": "Page choice",
+    "de": "Seitenauswahl",
+    "es": "Elección de página",
+    "it": "Scelta della pagina",
+    "pt": "Escolha da página",
+    "zh-Hans": "页面选择"
+  },
+  "Page {0} — {1}": {
+    "fr": "Page {0} — {1}",
+    "en": "Page {0} — {1}",
+    "de": "Seite {0} — {1}",
+    "es": "Página {0} — {1}",
+    "it": "Pagina {0} — {1}",
+    "pt": "Página {0} — {1}",
+    "zh-Hans": "第 {0} 页 — {1}"
   }
 }

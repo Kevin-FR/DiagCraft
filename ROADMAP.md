@@ -145,6 +145,8 @@ sans copier les bibliothèques, modèles ou marques des autres produits.
    fichiers `.drawio`, avec aperçu et avertissements de perte, limites de lecture
    et absence de chargement automatique de ressources externes. Ne pas annoncer
    la prise en charge de Visio ou d’autres formats avant tests dédiés.
+   Le contrat du sous-ensemble est défini dans [drawio.md](docs/drawio.md) et la
+   préparation du lot dans [sprint-drawio.md](docs/sprint-drawio.md).
    Référence : [formats d’import draw.io](https://www.drawio.com/docs/manual/import/import-formats/).
 4. **Diagrammes présentables et accessibles** : compléter le titre SVG existant
    par une description utile et contrôlable, préserver les alternatives des images
@@ -226,6 +228,7 @@ et licence vérifiées.
 - [x] Images PNG/JPEG embarquées, recadrage non destructif et export PNG page/sélection avec dimensions, DPI et transparence (0.10.0).
 - [ ] Bibliothèques métier originales avec provenance et critères de contribution.
 - [x] Import/export d’un sous-ensemble flowchart Mermaid, aperçu et confirmation des pertes (0.11.0).
+- [x] Import d’un sous-ensemble documenté `.drawio` (fichiers locaux, pages, formes, styles, images embarquées), aperçu, avertissements de perte et nouvelle page en une annulation ; jamais de chargement automatique de ressources externes. Voir [le contrat](docs/drawio.md) et [la préparation du lot](docs/sprint-drawio.md).
 - [ ] Meilleure interopérabilité SVG.
 
 ## Distribution

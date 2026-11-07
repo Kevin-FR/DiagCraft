@@ -256,6 +256,7 @@ pub struct DrawApp {
     image_ui: image_ui::State,
     mermaid_ui: Option<mermaid_ui::Panel>,
     csv_ui: Option<csv_ui::Panel>,
+    drawio_ui: Option<drawio_ui::Panel>,
     auto_layout_ui: Option<auto_layout_ui::Panel>,
     property_edit: bool,
     drag_snapshot: Option<gestures_ui::DragSnapshot>,
@@ -886,6 +887,7 @@ impl DrawApp {
             image_ui: Default::default(),
             mermaid_ui: None,
             csv_ui: None,
+            drawio_ui: None,
             auto_layout_ui: None,
             property_edit: false,
             drag_snapshot: None,
@@ -2708,6 +2710,7 @@ impl eframe::App for DrawApp {
             && !self.image_ui.png_open
             && self.mermaid_ui.is_none()
             && self.csv_ui.is_none()
+            && self.drawio_ui.is_none()
             && self.auto_layout_ui.is_none()
         {
             if dropped.len() == 1
@@ -2749,6 +2752,7 @@ impl eframe::App for DrawApp {
                 && !self.image_ui.png_open
                 && self.mermaid_ui.is_none()
                 && self.csv_ui.is_none()
+                && self.drawio_ui.is_none()
                 && self.auto_layout_ui.is_none()
                 && !self.show_pages
                 && !self.show_layers
@@ -2771,6 +2775,7 @@ impl eframe::App for DrawApp {
         self.png_dialog(ctx);
         self.mermaid_dialog(ctx);
         self.csv_dialog(ctx);
+        self.drawio_dialog(ctx);
         self.auto_layout_dialog(ctx);
         self.agent_dialog(ctx);
         self.inline_text_toolbar(ctx);
@@ -2996,6 +3001,9 @@ mod mermaid_ui;
 
 #[path = "csv_ui.rs"]
 mod csv_ui;
+
+#[path = "drawio_ui.rs"]
+mod drawio_ui;
 
 #[path = "connector_insert_ui.rs"]
 mod connector_insert_ui;

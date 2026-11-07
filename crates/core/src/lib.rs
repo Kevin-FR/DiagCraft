@@ -37,4 +37,6 @@ pub mod mermaid;
 
 pub mod csv;
 
+pub mod drawio;
+
 pub mod auto_layout;

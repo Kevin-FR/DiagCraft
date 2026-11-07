@@ -15,6 +15,7 @@ pub(super) enum Command {
     ExportPng,
     ImportMermaid,
     ImportCsv,
+    ImportDrawio,
     ExportMermaid,
     ImportImage,
     PasteImage,
@@ -146,6 +147,12 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
         "Importer un CSV…",
         "Fichier",
         "csv données tableur import données colonnes lignes"
+    ),
+    command!(
+        ImportDrawio,
+        "Importer un draw.io…",
+        "Fichier",
+        "drawio xml diagramme import fichier pages"
     ),
     command!(
         ExportMermaid,
@@ -399,6 +406,7 @@ impl DrawApp {
             || self.image_ui.png_open
             || self.mermaid_ui.is_some()
             || self.csv_ui.is_some()
+            || self.drawio_ui.is_some()
             || self.auto_layout_ui.is_some()
             || self.show_pages
             || self.show_layers
@@ -561,6 +569,7 @@ impl DrawApp {
             ExportPng => self.open_png_export(),
             ImportMermaid => self.open_mermaid(false),
             ImportCsv => self.open_csv_import(),
+            ImportDrawio => self.open_drawio_import(),
             ExportMermaid => self.open_mermaid(true),
             ImportImage => self.import_image(),
             PasteImage => {
