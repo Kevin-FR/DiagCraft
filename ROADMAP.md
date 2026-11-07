@@ -150,8 +150,15 @@ sans copier les bibliothèques, modèles ou marques des autres produits.
    Référence : [formats d’import draw.io](https://www.drawio.com/docs/manual/import/import-formats/).
 4. **Diagrammes présentables et accessibles** : compléter le titre SVG existant
    par une description utile et contrôlable, préserver les alternatives des images
-   visibles, vérifier les exports et tester avec des lecteurs d’écran. Étudier un
-   mode présentation local avec navigation clavier et liens entre pages.
+   visibles et vérifier les exports. Fait : une **description de document**
+   contrôlable, éditée à l’interface, émise dans le `<desc>` SVG en tête et en
+   métadonnée PDF (`/Subject`), rétrocompatible avec le format `.draw` v8 (champ
+   vide non écrit, fichiers existants inchangés). Le contrat du sous-ensemble est
+   défini dans [accessibilite.md](docs/accessibilite.md) et la préparation du lot
+   dans [sprint-accessibilite.md](docs/sprint-accessibilite.md). Études séparées,
+   non implémentées et non annoncées : balisage PDF structuré accessible (`/Tag`),
+   lecteurs d’écran dans le canvas d’édition, description par page/objet, et mode
+   présentation local avec navigation clavier et liens entre pages.
    Référence : [métadonnées accessibles Mermaid](https://mermaid.js.org/config/accessibility).
 5. **Exports réouvrables facultatifs** : étudier l’intégration explicite d’une
    scène éditable dans PNG/SVG, avec avertissement clair sur les données incluses
@@ -229,6 +236,7 @@ et licence vérifiées.
 - [ ] Bibliothèques métier originales avec provenance et critères de contribution.
 - [x] Import/export d’un sous-ensemble flowchart Mermaid, aperçu et confirmation des pertes (0.11.0).
 - [x] Import d’un sous-ensemble documenté `.drawio` (fichiers locaux, pages, formes, styles, images embarquées), aperçu, avertissements de perte et nouvelle page en une annulation ; jamais de chargement automatique de ressources externes. Voir [le contrat](docs/drawio.md) et [la préparation du lot](docs/sprint-drawio.md).
+- [x] Accessibilité des exports : description de document contrôlable, éditée à l’interface, émise dans le `<desc>` du SVG en tête (échappée, même en recadrage/sélection) et en métadonnée PDF (`/Subject`) ; champ rétrocompatible dans le format `.draw` v8 et budget de 4096 caractères. Voir [le contrat](docs/accessibilite.md) et [la préparation du lot](docs/sprint-accessibilite.md).
 - [ ] Meilleure interopérabilité SVG.
 
 ## Distribution

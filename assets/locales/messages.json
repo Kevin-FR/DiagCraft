@@ -4616,6 +4616,15 @@
     "pt": "NOME DO DIAGRAMA",
     "zh-Hans": "图表名称"
   },
+  "DESCRIPTION": {
+    "fr": "DESCRIPTION",
+    "en": "DESCRIPTION",
+    "de": "BESCHREIBUNG",
+    "es": "DESCRIPCIÓN",
+    "it": "DESCRIZIONE",
+    "pt": "DESCRIÇÃO",
+    "zh-Hans": "描述"
+  },
   "Ne pas enregistrer": {
     "fr": "Ne pas enregistrer",
     "en": "Don’t save",

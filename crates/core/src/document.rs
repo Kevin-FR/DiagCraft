@@ -530,6 +530,7 @@ fn default_page_link_arrow() -> bool {
 pub struct Document {
     pub format_version: u32,
     pub title: String,
+    pub description: String,
     pub page_name: String,
     pub page_layout: crate::pages::PageLayout,
     pub pages: Vec<crate::pages::Page>,
@@ -553,6 +554,7 @@ impl Default for Document {
         Self {
             format_version: FORMAT_VERSION,
             title: "Sans titre".into(),
+            description: String::new(),
             page_name: default_page_name(),
             page_layout: Default::default(),
             pages: vec![],
@@ -1272,6 +1274,9 @@ impl Document {
         }
         if self.title.len() > 4096 {
             return Err("Titre trop long.".into());
+        }
+        if self.description.len() > 4096 {
+            return Err("Description trop longue.".into());
         }
         if !self.page_style.grid_spacing.is_finite()
             || !(5.0..=200.0).contains(&self.page_style.grid_spacing)

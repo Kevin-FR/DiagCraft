@@ -1,5 +1,6 @@
 //! Portable vector PDF export. Fonts are bundled; no browser or printer is required.
 use crate::{document::Document, svg};
+use pdf_writer::{Pdf, Ref, TextStr};
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum PageFormat {
     #[default]
@@ -71,14 +72,51 @@ fn tree(doc: &Document, format: PageFormat) -> Result<(svg2pdf::usvg::Tree, [f32
     Ok((tree, size))
 }
 pub fn export_current(doc: &Document, format: PageFormat) -> Result<Vec<u8>, String> {
+    doc.validate()?;
+    use pdf_writer::{Content, Finish, Name, Pdf, Rect, Ref};
+    let mut pdf = Pdf::new();
+    let mut alloc = Ref::new(1);
+    let catalog = alloc.bump();
+    let pages = alloc.bump();
+    let page_id = alloc.bump();
+    let content_id = alloc.bump();
+    pdf.catalog(catalog).pages(pages);
     let (tree, size) = tree(doc, format)?;
+    let (chunk, xobject) =
+        svg2pdf::to_chunk(&tree, conversion_options(&tree)).map_err(|e| e.to_string())?;
+    let mut map = std::collections::HashMap::new();
+    let chunk = chunk.renumber(|old| *map.entry(old).or_insert_with(|| alloc.bump()));
+    let xobject = map[&xobject];
+    pdf.extend(&chunk);
     let dpi = 96_f32.max(size[0].max(size[1]) * 72. / 14400.);
-    svg2pdf::to_pdf(
-        &tree,
-        conversion_options(&tree),
-        svg2pdf::PageOptions { dpi },
-    )
-    .map_err(|e| e.to_string())
+    let [w, h] = size.map(|v| v * 72. / dpi);
+    let mut page = pdf.page(page_id);
+    page.parent(pages)
+        .media_box(Rect::new(0., 0., w, h))
+        .contents(content_id);
+    page.resources().x_objects().pair(Name(b"Drawing"), xobject);
+    page.finish();
+    let mut content = Content::new();
+    content
+        .transform([w, 0., 0., h, 0., 0.])
+        .x_object(Name(b"Drawing"));
+    pdf.stream(content_id, &content.finish());
+    pdf.pages(pages).kids([page_id]).count(1);
+    write_document_info(doc, &mut pdf, &mut alloc);
+    Ok(pdf.finish())
+}
+fn write_document_info(doc: &Document, pdf: &mut Pdf, alloc: &mut Ref) {
+    let id = alloc.bump();
+    if doc.description.is_empty() {
+        pdf.document_info(id)
+            .title(TextStr(&doc.title))
+            .producer(TextStr("DiagCraft"));
+    } else {
+        pdf.document_info(id)
+            .title(TextStr(&doc.title))
+            .subject(TextStr(&doc.description))
+            .producer(TextStr("DiagCraft"));
+    }
 }
 fn conversion_options(tree: &svg2pdf::usvg::Tree) -> svg2pdf::ConversionOptions {
     fn visit(g: &svg2pdf::usvg::Group, scale: &mut f32) {
@@ -108,7 +146,7 @@ pub fn export(doc: &Document, format: PageFormat) -> Result<Vec<u8>, String> {
     if doc.page_count() == 1 {
         return export_current(doc, format);
     }
-    use pdf_writer::{Content, Finish, Name, Pdf, Rect, Ref, TextStr};
+    use pdf_writer::{Content, Finish, Name, Pdf, Rect, Ref};
     let mut pdf = Pdf::new();
     let mut alloc = Ref::new(1);
     let catalog = alloc.bump();
@@ -144,9 +182,7 @@ pub fn export(doc: &Document, format: PageFormat) -> Result<Vec<u8>, String> {
     pdf.pages(pages)
         .kids(kids.iter().copied())
         .count(kids.len() as i32);
-    pdf.document_info(alloc.bump())
-        .title(TextStr(&doc.title))
-        .producer(TextStr("DiagCraft"));
+    write_document_info(doc, &mut pdf, &mut alloc);
     Ok(pdf.finish())
 }
 

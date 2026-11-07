@@ -43,9 +43,17 @@ pub(crate) fn export_view(
         escape(&doc.title)
     );
     // The root is exposed as a single image to assistive technology, so nested
-    // image descriptions must also be included in the root description. Keep
-    // the same visibility, selection and viewport boundaries as the drawing.
+    // image descriptions must also be included in the root description. The
+    // user-provided document description comes first, followed by the image
+    // descriptions. Keep the same visibility, selection and viewport
+    // boundaries as the drawing.
     let mut description_started = false;
+    let document_description = escape(doc.description.trim());
+    if !document_description.is_empty() {
+        out.push_str("<desc>");
+        out.push_str(&document_description);
+        description_started = true;
+    }
     for node in &doc.nodes {
         if !organization.is_object_visible(node.id)
             || selected.is_some_and(|ids| !ids.contains(&node.id))
@@ -666,5 +674,89 @@ mod accessibility_tests {
         doc.node_mut(visible).unwrap().image.as_mut().unwrap().alt = "Accessible".into();
         let pdf = crate::pdf::export_current(&doc, crate::pdf::PageFormat::Drawing).unwrap();
         assert!(pdf.starts_with(b"%PDF-"));
+    }
+
+    #[test]
+    fn document_description_is_escaped_and_leads_the_svg_desc() {
+        let doc = Document {
+            title: "Synthèse réseau".into(),
+            description: "Architecture <prod> & \"sécurité\" 中文\u{1}".into(),
+            ..Default::default()
+        };
+        let svg = export(&doc).unwrap();
+        assert!(
+            svg.contains(
+                "<desc>Architecture &lt;prod&gt; &amp; &quot;sécurité&quot; 中文\n</desc>"
+            ) || svg
+                .contains("<desc>Architecture &lt;prod&gt; &amp; &quot;sécurité&quot; 中文</desc>")
+        );
+        assert!(!svg.contains('\u{1}'));
+        assert!(svg.contains("<title>Synthèse réseau</title>"));
+    }
+
+    #[test]
+    fn empty_document_description_keeps_image_only_desc_and_no_empty_desc() {
+        let (mut doc, visible, second, hidden, outside) = described_images();
+        // No document description and no alt → no <desc> at all.
+        let svg = export(&doc).unwrap();
+        assert!(svg.contains(
+            "<desc>Diagramme &amp; &lt;détail&gt; &quot;中文&quot;\nDeuxième image</desc>"
+        ));
+        // All alts blank and no document description → no empty <desc>.
+        for id in [visible, second, hidden, outside] {
+            doc.node_mut(id)
+                .unwrap()
+                .image
+                .as_mut()
+                .unwrap()
+                .alt
+                .clear();
+        }
+        let svg = export(&doc).unwrap();
+        assert!(!svg.contains("<desc>"));
+        // A whitespace-only document description behaves as empty.
+        doc.description = "   ".into();
+        let svg = export(&doc).unwrap();
+        assert!(!svg.contains("<desc>"));
+    }
+
+    #[test]
+    fn document_description_is_always_emitted_including_cropped_exports() {
+        let doc = Document {
+            description: "Résumé global du diagramme".into(),
+            ..Default::default()
+        };
+        let crop = export_view(&doc, [0., 0., 200., 200.], true, None).unwrap();
+        assert!(crop.contains("<desc>Résumé global du diagramme</desc>"));
+    }
+
+    #[test]
+    fn overlong_document_description_is_rejected() {
+        let long = Document {
+            description: "x".repeat(4097),
+            ..Default::default()
+        };
+        assert_eq!(long.validate().unwrap_err(), "Description trop longue.");
+        let ok = Document {
+            description: "y".repeat(4096),
+            ..Default::default()
+        };
+        assert!(ok.validate().is_ok());
+    }
+
+    #[test]
+    fn pdf_subject_carries_the_document_description() {
+        let mut doc = Document {
+            description: "Processus d'achat étendu".into(),
+            ..Default::default()
+        };
+        let pdf = crate::pdf::export_current(&doc, crate::pdf::PageFormat::Drawing).unwrap();
+        assert!(pdf.starts_with(b"%PDF-"));
+        assert!(pdf.windows(b"/Subject".len()).any(|w| w == b"/Subject"));
+        // The drawing exports identically whether or not a description is set.
+        doc.description.clear();
+        let pdf2 = crate::pdf::export_current(&doc, crate::pdf::PageFormat::Drawing).unwrap();
+        assert!(pdf2.starts_with(b"%PDF-"));
+        assert!(!pdf2.windows(b"/Subject".len()).any(|w| w == b"/Subject"));
     }
 }

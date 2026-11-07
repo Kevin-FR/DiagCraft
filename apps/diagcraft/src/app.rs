@@ -1486,6 +1486,8 @@ impl DrawApp {
                 } else {
                     field_label(ui,"NOM DU DIAGRAMME");
                     ui.add(egui::TextEdit::singleline(&mut self.doc.title).id(egui::Id::new("inspector_document_title")).desired_width(f32::INFINITY).char_limit(200));
+                    field_label(ui,"DESCRIPTION");
+                    ui.add(egui::TextEdit::multiline(&mut self.doc.description).id(egui::Id::new("inspector_document_description")).desired_width(f32::INFINITY).desired_rows(3).char_limit(4096));
                     ui.add_space(12.);ui.separator();field_label(ui,"PAGE");
                     ui.label(format!("{} · {:.0} × {:.0} px",self.doc.page_name,self.doc.page_size[0],self.doc.page_size[1]));
                     if ui.button(t("Nom et dimensions de page…")).clicked(){self.open_page_settings();}
@@ -2893,6 +2895,10 @@ fn paint_arrow(p: &egui::Painter, points: &[Pos2], color: Color32, size: f32) {
 #[cfg(test)]
 #[path = "ui_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "accessibility_tests.rs"]
+mod accessibility_tests;
 
 #[path = "ribbon.rs"]
 mod ribbon;

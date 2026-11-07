@@ -346,6 +346,7 @@ impl PartialEq for Document {
     fn eq(&self, other: &Self) -> bool {
         self.format_version == other.format_version
             && self.title == other.title
+            && self.description == other.description
             && self.page_count() == other.page_count()
             && (0..self.page_count()).all(|i| self.page_ref(i) == other.page_ref(i))
     }
@@ -356,6 +357,8 @@ impl Serialize for Document {
         struct File<'a> {
             format_version: u32,
             title: &'a str,
+            #[serde(skip_serializing_if = "str::is_empty")]
+            description: &'a str,
             #[serde(flatten)]
             first: PageRef<'a>,
             pages: Vec<PageRef<'a>>,
@@ -363,6 +366,7 @@ impl Serialize for Document {
         File {
             format_version: self.format_version,
             title: &self.title,
+            description: &self.description,
             first: self.page_ref(0),
             pages: (1..self.page_count()).map(|i| self.page_ref(i)).collect(),
         }
@@ -375,6 +379,8 @@ impl<'de> Deserialize<'de> for Document {
         struct Raw {
             format_version: u32,
             title: String,
+            #[serde(default)]
+            description: String,
             #[serde(default = "crate::document::default_page_name")]
             page_name: String,
             #[serde(default)]
@@ -404,6 +410,7 @@ impl<'de> Deserialize<'de> for Document {
         Ok(Document {
             format_version: raw.format_version,
             title: raw.title,
+            description: raw.description,
             page_name: raw.page_name,
             page_layout: raw.page_layout,
             pages: raw.pages,

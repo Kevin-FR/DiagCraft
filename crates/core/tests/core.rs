@@ -501,6 +501,34 @@ fn save_load_round_trip_and_atomic_overwrite_preserve_all_fields() {
 }
 
 #[test]
+fn document_description_round_trips_and_stays_backward_compatible() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("desc.rdraw");
+    // Non-empty description: written, reloaded and preserved without error.
+    let mut doc = Document::demo();
+    doc.description = "Résumé exporté en <desc> et /Subject".into();
+    doc.save(&path).unwrap();
+    assert!(
+        fs::read_to_string(&path)
+            .unwrap()
+            .contains("\"description\"")
+    );
+    assert_eq!(Document::load(&path).unwrap(), doc);
+    // Empty description: absent from the canonical form (backward compatible),
+    // so existing v8 files without the field keep loading with an empty value.
+    doc.description.clear();
+    doc.save(&path).unwrap();
+    assert!(
+        !fs::read_to_string(&path)
+            .unwrap()
+            .contains("\"description\"")
+    );
+    let loaded = Document::load(&path).unwrap();
+    assert_eq!(loaded, doc);
+    assert_eq!(loaded.description, String::new());
+}
+
+#[test]
 fn atomic_write_replaces_existing_bytes_and_cleans_failed_temporary_files() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("export.svg");
