@@ -35,4 +35,6 @@ pub mod raster;
 
 pub mod mermaid;
 
+pub mod csv;
+
 pub mod auto_layout;

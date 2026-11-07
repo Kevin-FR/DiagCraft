@@ -199,6 +199,7 @@ impl Document {
             .iter()
             .map(|x| x.id)
             .chain(self.connectors.iter().map(|x| x.id))
+            .chain(self.links.iter().map(|x| x.id))
             .chain(self.drawings.iter().map(|x| x.id))
             .chain(self.charts.iter().map(|x| x.id))
             .collect()
@@ -206,6 +207,7 @@ impl Document {
     pub fn object_exists(&self, id: u64) -> bool {
         self.nodes.iter().any(|x| x.id == id)
             || self.connectors.iter().any(|x| x.id == id)
+            || self.links.iter().any(|x| x.id == id)
             || self.drawings.iter().any(|x| x.id == id)
             || self.charts.iter().any(|x| x.id == id)
     }

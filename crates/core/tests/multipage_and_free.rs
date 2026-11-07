@@ -312,3 +312,64 @@ fn legacy_v7_documents_migrate_to_v8_with_stable_page_ids() {
         assert_eq!(a.id, b.id);
     }
 }
+#[test]
+fn page_links_point_to_stable_page_ids_survive_reorder_and_cleanup() {
+    let mut d = Document::demo();
+    d.page_name = "Accueil".into();
+    let home_page_id = d.page_id;
+    let source = d.nodes[0].id;
+    // Crée une seconde page vierge et la rend active.
+    d.add_page(false).unwrap();
+    d.page_name = "Détails".into();
+    let details_page_id = d.page_id;
+    let target = d.add_node(ShapeKind::Diamond, [100., 100.]);
+    // Retour à la page source pour poser le lien.
+    d.switch_page(0).unwrap();
+    let link = d
+        .add_page_link(source, details_page_id, target, "Détails".into())
+        .unwrap();
+    let l = d.link(link).unwrap();
+    assert_eq!(l.target_page, details_page_id);
+    assert_eq!(l.from, source);
+    // Le lien est persistant dans un aller-retour de sérialisation.
+    let loaded: Document = serde_json::from_slice(&serde_json::to_vec(&d).unwrap()).unwrap();
+    loaded.validate().unwrap();
+    assert_eq!(loaded.link(link).unwrap().target_page, details_page_id);
+    // Réordonner les pages : l'identifiant permanent garde la cible valide.
+    d.move_page(0, 1).unwrap();
+    d.validate().unwrap();
+    assert_eq!(d.link(link).unwrap().target_page, details_page_id);
+    // Retour sur la page source (résolue par identifiant, non par index).
+    let home = d.page_index_by_id(home_page_id).unwrap();
+    d.switch_page(home).unwrap();
+    // Un lien doit viser une autre page que celle de départ.
+    assert!(
+        d.add_page_link(source, home_page_id, 0, "Moi".into())
+            .is_err()
+    );
+    // Supprimer l'objet source retire le lien orphelin.
+    d.try_remove(&[source]).unwrap();
+    assert!(d.link(link).is_none());
+    d.validate().unwrap();
+}
+#[test]
+fn deleting_a_target_page_removes_links_pointing_to_it() {
+    let mut d = Document::demo();
+    d.page_name = "Accueil".into();
+    let source = d.nodes[0].id;
+    let home_page_id = d.page_id;
+    d.add_page(false).unwrap();
+    d.page_name = "Détails".into();
+    let details_page_id = d.page_id;
+    d.switch_page(0).unwrap();
+    let link = d
+        .add_page_link(source, details_page_id, 0, "Détails".into())
+        .unwrap();
+    // La suppression de la page cible nettoie le lien qui pointait vers elle.
+    d.remove_page(d.page_index_by_id(details_page_id).unwrap())
+        .unwrap();
+    assert!(d.link(link).is_none());
+    d.validate().unwrap();
+    assert_eq!(d.page_count(), 1);
+    assert_eq!(d.page_id, home_page_id);
+}

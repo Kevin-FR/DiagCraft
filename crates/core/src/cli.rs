@@ -1,5 +1,7 @@
 //! Shared headless commands used by desktop and console entry points.
 use crate::{document::Document, svg};
+#[path = "csv_cli.rs"]
+mod csv_commands;
 #[path = "mermaid_cli.rs"]
 mod mermaid_commands;
 
@@ -19,6 +21,16 @@ pub fn run(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
         Some("--import-mermaid" | "--export-mermaid")
     ) {
         match mermaid_commands::run(args) {
+            Ok(report) => println!("{}", serde_json::to_string_pretty(&report)?),
+            Err(report) => {
+                eprintln!("{report}");
+                std::process::exit(1);
+            }
+        }
+        return Ok(true);
+    }
+    if args.first().map(String::as_str) == Some("--import-csv") {
+        match csv_commands::run(args) {
             Ok(report) => println!("{}", serde_json::to_string_pretty(&report)?),
             Err(report) => {
                 eprintln!("{report}");

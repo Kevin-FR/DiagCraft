@@ -50,6 +50,8 @@ pub struct Page {
     pub nodes: Vec<Node>,
     pub connectors: Vec<Connector>,
     #[serde(default)]
+    pub links: Vec<crate::document::PageLink>,
+    #[serde(default)]
     pub drawings: Vec<Drawing>,
     #[serde(default)]
     pub charts: Vec<crate::chart::Chart>,
@@ -70,6 +72,8 @@ struct PageRef<'a> {
     page_size: Point,
     nodes: &'a [Node],
     connectors: &'a [Connector],
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    links: &'a Vec<crate::document::PageLink>,
     drawings: &'a [Drawing],
     charts: &'a [crate::chart::Chart],
     page_style: &'a PageStyle,
@@ -85,6 +89,7 @@ impl<'a> From<&'a Page> for PageRef<'a> {
             page_size: p.page_size,
             nodes: &p.nodes,
             connectors: &p.connectors,
+            links: &p.links,
             drawings: &p.drawings,
             charts: &p.charts,
             page_style: &p.page_style,
@@ -102,6 +107,7 @@ impl Document {
                 page_size: self.page_size,
                 nodes: &self.nodes,
                 connectors: &self.connectors,
+                links: &self.links,
                 drawings: &self.drawings,
                 charts: &self.charts,
                 page_style: &self.page_style,
@@ -132,6 +138,7 @@ impl Document {
             page_size: p.page_size,
             nodes: p.nodes.to_vec(),
             connectors: p.connectors.to_vec(),
+            links: p.links.to_vec(),
             drawings: p.drawings.to_vec(),
             charts: p.charts.to_vec(),
             page_style: p.page_style.clone(),
@@ -150,6 +157,7 @@ impl Document {
             page_size: p.page_size,
             nodes: p.nodes,
             connectors: p.connectors,
+            links: p.links,
             drawings: p.drawings,
             charts: p.charts,
             page_style: p.page_style,
@@ -162,6 +170,17 @@ impl Document {
         (0..self.page_count())
             .map(|i| self.page_ref(i).page_name)
             .collect()
+    }
+    /// Index de la page portant l'identifiant permanent donné, ou `None`.
+    /// Les identifiants de page sont permanents (v8) : les index changent après
+    /// insertion, suppression ou réordonnancement, pas les identifiants. Les
+    /// liens inter-pages stockent la cible par identifiant et la résolvent en
+    /// index au moment de la navigation.
+    pub fn page_index_by_id(&self, id: u64) -> Option<usize> {
+        if id == 0 {
+            return None;
+        }
+        (0..self.page_count()).find(|&i| self.page_ref(i).id == id)
     }
     fn replace_pages(&mut self, mut pages: Vec<Page>, active: usize) {
         let title = self.title.clone();
@@ -223,6 +242,7 @@ impl Document {
             return Err("Page introuvable.".into());
         }
         let page = self.page_document(index).unwrap();
+        let removed_id = page.page_id;
         if page.organization_view().editable_ids.len() < page.object_ids().len() {
             return Err(
                 "Déverrouillez les objets et affichez leur calque avant de les modifier.".into(),
@@ -232,6 +252,12 @@ impl Document {
             .map(|i| self.page(i).unwrap())
             .collect::<Vec<_>>();
         pages.remove(index);
+        // Les liens qui pointaient vers la page supprimée deviennent orphelins :
+        // on les retire de toutes les pages restantes, car la navigation vers
+        // une destination disparue serait invalide.
+        for p in &mut pages {
+            p.links.retain(|l| l.target_page != removed_id);
+        }
         let active = if self.page_index > index {
             self.page_index - 1
         } else if self.page_index == index {
@@ -359,6 +385,8 @@ impl<'de> Deserialize<'de> for Document {
             nodes: Vec<Node>,
             connectors: Vec<Connector>,
             #[serde(default)]
+            links: Vec<crate::document::PageLink>,
+            #[serde(default)]
             drawings: Vec<Drawing>,
             #[serde(default)]
             page_style: PageStyle,
@@ -383,6 +411,7 @@ impl<'de> Deserialize<'de> for Document {
             page_size: raw.page_size,
             nodes: raw.nodes,
             connectors: raw.connectors,
+            links: raw.links,
             drawings: raw.drawings,
             page_style: raw.page_style,
             charts: raw.charts,

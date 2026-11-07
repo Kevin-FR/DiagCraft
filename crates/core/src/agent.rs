@@ -184,6 +184,25 @@ pub enum Operation {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         label_offset: Option<Point>,
     },
+    AddPageLink {
+        page: usize,
+        alias: String,
+        from: ObjectRef,
+        target_page: usize,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        target: Option<u64>,
+        #[serde(default)]
+        label: String,
+    },
+    UpdatePageLink {
+        page: usize,
+        target: ObjectRef,
+        target_page: usize,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        target_object: Option<u64>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        label: Option<String>,
+    },
     Delete {
         page: usize,
         target: ObjectRef,
@@ -428,7 +447,19 @@ pub fn inspect(doc: &Document) -> Result<Value, String> {
                 v
             })
             .collect();
-        pages.push(json!({"index":index,"name":page.page_name,"size":page.page_size,"layout":page.page_layout,"style":page.page_style,"nodes":nodes,"connectors":connectors,"charts":charts,"drawings":drawings,"organization":page.organization}));
+        let links: Vec<Value> = page
+            .links
+            .iter()
+            .map(|l| {
+                let mut v = serde_json::to_value(l).unwrap();
+                v["object_type"] = json!("page_link");
+                v["ref"] = json!(format!("page:{index}/object:{}", l.id));
+                v["target_page_id"] = json!(l.target_page);
+                v["target_page_index"] = json!(doc.page_index_by_id(l.target_page));
+                v
+            })
+            .collect();
+        pages.push(json!({"index":index,"name":page.page_name,"size":page.page_size,"layout":page.page_layout,"style":page.page_style,"nodes":nodes,"connectors":connectors,"charts":charts,"drawings":drawings,"links":links,"organization":page.organization}));
     }
     Ok(
         json!({"api_version":API_VERSION,"revision":revision(doc),"title":doc.title,
@@ -744,6 +775,8 @@ fn execute(
         | UpdateChart { page, .. }
         | AddDrawing { page, .. }
         | UpdateDrawing { page, .. }
+        | AddPageLink { page, .. }
+        | UpdatePageLink { page, .. }
         | Delete { page, .. }
         | UpdatePage { page, .. }
         | DeletePage { page }
@@ -766,7 +799,8 @@ fn execute(
         | AddImage { alias, .. }
         | AddConnector { alias, .. }
         | AddChart { alias, .. }
-        | AddDrawing { alias, .. } => Some(alias),
+        | AddDrawing { alias, .. }
+        | AddPageLink { alias, .. } => Some(alias),
         _ => None,
     };
     if let Some(alias) = alias
@@ -967,12 +1001,45 @@ fn execute(
             created = Some(id);
             "Modifier un trait ou une courbe"
         }
+        AddPageLink {
+            from,
+            target_page,
+            target,
+            label,
+            ..
+        } => {
+            let from_id = resolve(from, doc.page_index, aliases)?;
+            let tp = doc.page(*target_page).ok_or("Page cible introuvable.")?.id;
+            let id = doc.add_page_link(from_id, tp, target.unwrap_or(0), label.clone())?;
+            created = Some(id);
+            "Ajouter un lien de page"
+        }
+        UpdatePageLink {
+            target,
+            target_page,
+            target_object,
+            label,
+            ..
+        } => {
+            let id = resolve(target, doc.page_index, aliases)?;
+            let tp = doc.page(*target_page).ok_or("Page cible introuvable.")?.id;
+            let cur = doc.link(id).map(|l| l.label.clone()).unwrap_or_default();
+            doc.update_page_link(
+                id,
+                tp,
+                target_object.unwrap_or(0),
+                label.clone().unwrap_or(cur),
+            )?;
+            created = Some(id);
+            "Modifier un lien de page"
+        }
         Delete { target, .. } => {
             let id = resolve(target, doc.page_index, aliases)?;
             if !doc.nodes.iter().any(|n| n.id == id)
                 && !doc.connectors.iter().any(|n| n.id == id)
                 && !doc.charts.iter().any(|n| n.id == id)
                 && !doc.drawings.iter().any(|n| n.id == id)
+                && !doc.links.iter().any(|n| n.id == id)
             {
                 return Err("Objet introuvable.".into());
             }

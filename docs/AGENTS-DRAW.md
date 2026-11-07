@@ -264,6 +264,38 @@ Pour importer un fichier sans mettre des octets dans le contexte, utiliser
 avec `--width`, `--height`, `--dpi`, `--page`, `--selection` et `--transparent`.
 Voir [le guide images](images.md) pour les limites et la compatibilité.
 
+## Liens entre pages (0.13.1)
+
+Un lien de page relie un objet source d’une page à une page cible, pour une
+navigation d’une page à l’autre dans l’interface (double-clic sur le badge `⧉`).
+La cible est un identifiant permanent de page (`Page.id`), jamais un index
+positionnel : la navigation reste robuste au réordonnancement des onglets.
+L’inspection expose chaque lien sous `links` de sa page, avec
+`object_type: "page_link"` et `target_page_id` / `target_page_index`.
+
+Opérations supplémentaires, toujours en API 1 :
+
+| Opération | Champs |
+| --- | --- |
+| `add_page_link` | `page`, `alias`, `from` (objet source, ou 0 = page entière), `target_page` (index de page), `target` (objet cible, facultatif, 0 = page entière), `label` (facultatif) |
+| `update_page_link` | `page`, `target` (lien existant), `target_page`, `target_object` (facultatif), `label` (facultatif) |
+
+`from` est un ID numérique, l’alias d’un objet créé plus tôt dans le lot, ou `0`
+pour lier la page entière. `target_page` est un index de page existant. Remplacer
+`target_page` change la destination ; fournir `target_object` précise un objet de
+cette page. Sur `update_page_link`, un `label` omis conserve le libellé actuel.
+Supprimer l’objet source ou la page cible nettoie les liens devenus invalides.
+
+Exemple de corps `operations` :
+
+```json
+[
+  {"op":"add_node","page":0,"alias":"fiche","kind":"rounded","position":[80,100],"size":[220,84],"text":"Détails"},
+  {"op":"add_page","page":0},
+  {"op":"add_page_link","page":0,"alias":"lien","from":"fiche","target_page":1,"label":"Détails"}
+]
+```
+
 ## Diagnostics et Mermaid (0.11.0)
 
 Les erreurs conservent `error` et ajoutent `diagnostic` : code, gravité, message,

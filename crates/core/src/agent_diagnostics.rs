@@ -171,6 +171,10 @@ fn context(op: &Operation) -> (&'static str, Option<usize>, Option<Value>) {
         UpdateDrawing { page, target, .. } => {
             ("update_drawing", Some(*page), Some(reference(target)))
         }
+        AddPageLink { page, from, .. } => ("add_page_link", Some(*page), Some(reference(from))),
+        UpdatePageLink { page, target, .. } => {
+            ("update_page_link", Some(*page), Some(reference(target)))
+        }
         Delete { page, target } => ("delete", Some(*page), Some(reference(target))),
         GroupObjects { page, targets } => (
             "group_objects",

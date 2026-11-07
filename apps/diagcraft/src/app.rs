@@ -241,6 +241,7 @@ pub struct DrawApp {
     pdf_all_pages: bool,
     show_pages: bool,
     page_draft: Option<pages_ui::PageDraft>,
+    link_draft: Option<page_link_ui::LinkDraft>,
     logo: Option<egui::TextureHandle>,
     toolbar_pinned: bool,
     toolbar_position: Option<Pos2>,
@@ -254,6 +255,7 @@ pub struct DrawApp {
     route_cache: std::cell::RefCell<routing_ui::Cache>,
     image_ui: image_ui::State,
     mermaid_ui: Option<mermaid_ui::Panel>,
+    csv_ui: Option<csv_ui::Panel>,
     auto_layout_ui: Option<auto_layout_ui::Panel>,
     property_edit: bool,
     drag_snapshot: Option<gestures_ui::DragSnapshot>,
@@ -869,6 +871,7 @@ impl DrawApp {
             pdf_all_pages: true,
             show_pages: false,
             page_draft: None,
+            link_draft: None,
             logo: None,
             toolbar_pinned: false,
             toolbar_position: None,
@@ -882,6 +885,7 @@ impl DrawApp {
             route_cache: Default::default(),
             image_ui: Default::default(),
             mermaid_ui: None,
+            csv_ui: None,
             auto_layout_ui: None,
             property_edit: false,
             drag_snapshot: None,
@@ -1800,6 +1804,7 @@ impl DrawApp {
                 }
                 }
                 self.paint_group_selection(&p);
+                self.paint_page_links(&p);
                 if self.rich_editor.is_none() && !matches!(self.drag, Some(Drag::Marquee { .. })) {
                     self.paint_connector_handles(&p);
                     self.paint_connection_buttons(&p);
@@ -2472,6 +2477,7 @@ impl DrawApp {
             self.commit();
         }
         self.line_label_clicked(ui, response, pos);
+        self.page_links_clicked(ui, response, pos);
         if response.clicked() {
             let previous = self.text_click.take();
             if text_click
@@ -2701,6 +2707,7 @@ impl eframe::App for DrawApp {
         if !dropped.is_empty()
             && !self.image_ui.png_open
             && self.mermaid_ui.is_none()
+            && self.csv_ui.is_none()
             && self.auto_layout_ui.is_none()
         {
             if dropped.len() == 1
@@ -2741,10 +2748,12 @@ impl eframe::App for DrawApp {
                 && !self.show_pdf_export
                 && !self.image_ui.png_open
                 && self.mermaid_ui.is_none()
+                && self.csv_ui.is_none()
                 && self.auto_layout_ui.is_none()
                 && !self.show_pages
                 && !self.show_layers
                 && self.page_draft.is_none()
+                && self.link_draft.is_none()
                 && self.agent_panel.is_none()
                 && self.rich_editor.is_none(),
         );
@@ -2757,9 +2766,11 @@ impl eframe::App for DrawApp {
         self.library_dialogs(ctx);
         self.workspace_dialogs(ctx);
         self.pages_dialogs(ctx);
+        self.page_links_dialog(ctx);
         self.layers_dialog(ctx);
         self.png_dialog(ctx);
         self.mermaid_dialog(ctx);
+        self.csv_dialog(ctx);
         self.auto_layout_dialog(ctx);
         self.agent_dialog(ctx);
         self.inline_text_toolbar(ctx);
@@ -2983,6 +2994,9 @@ mod image_tests;
 #[path = "mermaid_ui.rs"]
 mod mermaid_ui;
 
+#[path = "csv_ui.rs"]
+mod csv_ui;
+
 #[path = "connector_insert_ui.rs"]
 mod connector_insert_ui;
 
@@ -2991,3 +3005,6 @@ mod auto_layout_ui;
 
 #[path = "outline_ui.rs"]
 mod outline_ui;
+
+#[path = "page_link_ui.rs"]
+mod page_link_ui;

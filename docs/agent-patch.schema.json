@@ -445,6 +445,105 @@
             "additionalProperties": false,
             "properties": {
               "op": {
+                "const": "add_page_link"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "alias": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "from": {
+                "$ref": "#/$defs/ref"
+              },
+              "target_page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "target": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 4096
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "alias",
+              "from",
+              "target_page"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "update_page_link"
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "target": {
+                "$ref": "#/$defs/ref"
+              },
+              "target_page": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99
+              },
+              "target_object": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 4096
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "op",
+              "page",
+              "target",
+              "target_page"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
                 "const": "delete"
               },
               "page": {

@@ -10366,5 +10366,248 @@
     "it": "Scrivi un’etichetta · Invio: nuova riga",
     "pt": "Escrever um rótulo · Enter: nova linha",
     "zh-Hans": "输入标签 · Enter：换行"
+  },
+  "Modifier le lien": {
+    "fr": "Modifier le lien",
+    "en": "Edit link",
+    "de": "Link bearbeiten",
+    "es": "Editar enlace",
+    "it": "Modifica collegamento",
+    "pt": "Editar ligação",
+    "zh-Hans": "编辑链接"
+  },
+  "Créer un lien vers une page": {
+    "fr": "Créer un lien vers une page",
+    "en": "Create a page link",
+    "de": "Link zu einer Seite erstellen",
+    "es": "Crear un enlace a una página",
+    "it": "Crea un collegamento a una pagina",
+    "pt": "Criar uma ligação para uma página",
+    "zh-Hans": "创建指向页面的链接"
+  },
+  "Ajoutez d'abord une autre page.": {
+    "fr": "Ajoutez d'abord une autre page.",
+    "en": "Add another page first.",
+    "de": "Fügen Sie zuerst eine weitere Seite hinzu.",
+    "es": "Añada primero otra página.",
+    "it": "Aggiungi prima un'altra pagina.",
+    "pt": "Adicione primeiro outra página.",
+    "zh-Hans": "请先添加另一个页面。"
+  },
+  "Étiquette facultative": {
+    "fr": "Étiquette facultative",
+    "en": "Optional label",
+    "de": "Optionale Beschriftung",
+    "es": "Etiqueta opcional",
+    "it": "Etichetta facoltativa",
+    "pt": "Etiqueta opcional",
+    "zh-Hans": "可选的标签"
+  },
+  "Créer le lien": {
+    "fr": "Créer le lien",
+    "en": "Create the link",
+    "de": "Link erstellen",
+    "es": "Crear el enlace",
+    "it": "Crea il collegamento",
+    "pt": "Criar a ligação",
+    "zh-Hans": "创建链接"
+  },
+  "Créer un lien vers une page…": {
+    "fr": "Créer un lien vers une page…",
+    "en": "Create a page link…",
+    "de": "Link zu einer Seite erstellen…",
+    "es": "Crear un enlace a una página…",
+    "it": "Crea un collegamento a una pagina…",
+    "pt": "Criar uma ligação para uma página…",
+    "zh-Hans": "创建指向页面的链接…"
+  },
+  "Modifier le lien vers une page…": {
+    "fr": "Modifier le lien vers une page…",
+    "en": "Edit the page link…",
+    "de": "Seitenlink bearbeiten…",
+    "es": "Editar el enlace a una página…",
+    "it": "Modifica il collegamento alla pagina…",
+    "pt": "Editar a ligação para a página…",
+    "zh-Hans": "编辑指向页面的链接…"
+  },
+  "Ajoutez d'abord une autre page": {
+    "fr": "Ajoutez d'abord une autre page",
+    "en": "Add another page first",
+    "de": "Fügen Sie zuerst eine weitere Seite hinzu",
+    "es": "Añada primero otra página",
+    "it": "Aggiungi prima un'altra pagina",
+    "pt": "Adicione primeiro outra página",
+    "zh-Hans": "请先添加另一个页面"
+  },
+  "Page {0} · {1}": {
+    "fr": "Page {0} · {1}",
+    "en": "Page {0} · {1}",
+    "de": "Seite {0} · {1}",
+    "es": "Página {0} · {1}",
+    "it": "Pagina {0} · {1}",
+    "pt": "Página {0} · {1}",
+    "zh-Hans": "第 {0} 页 · {1}"
+  },
+  "Ajoutez d'abord une forme à la page.": {
+    "fr": "Ajoutez d'abord une forme à la page.",
+    "en": "Add a shape to the page first.",
+    "de": "Fügen Sie zuerst eine Form zur Seite hinzu.",
+    "es": "Añada primero una forma a la página.",
+    "it": "Aggiungi prima una forma alla pagina.",
+    "pt": "Adicione primeiro uma forma à página.",
+    "zh-Hans": "请先在页面上添加一个形状。"
+  },
+  "Aucune (libellé utilisé)": {
+    "fr": "Aucune (libellé utilisé)",
+    "en": "None (label used)",
+    "de": "Keine (Beschriftung verwendet)",
+    "es": "Ninguna (etiqueta utilizada)",
+    "it": "Nessuna (etichetta usata)",
+    "pt": "Nenhuma (rótulo usado)",
+    "zh-Hans": "无（使用标签）"
+  },
+  "CSV importé sur une nouvelle page. Une annulation retire l’import.": {
+    "fr": "CSV importé sur une nouvelle page. Une annulation retire l’import.",
+    "en": "CSV imported onto a new page. One undo removes the import.",
+    "de": "CSV auf einer neuen Seite importiert. Ein Rückgängig macht den Import rückgängig.",
+    "es": "CSV importado en una nueva página. Una deshecho elimina la importación.",
+    "it": "CSV importato su una nuova pagina. Un annulla rimuove l'importazione.",
+    "pt": "CSV importado em uma nova página. Um desfazer remove a importação.",
+    "zh-Hans": "CSV 已导入到新页面。撤销一次即可移除导入。"
+  },
+  "Chaque ligne devient une forme ; une colonne d’identité relie les formes par valeurs.": {
+    "fr": "Chaque ligne devient une forme ; une colonne d’identité relie les formes par valeurs.",
+    "en": "Each row becomes a shape; an identity column links shapes by value.",
+    "de": "Jede Zeile wird zu einer Form; eine Identitätsspalte verbindet Formen über Werte.",
+    "es": "Cada fila se convierte en una forma; una columna de identidad une las formas por valores.",
+    "it": "Ogni riga diventa una forma; una colonna di identità collega le forme per valori.",
+    "pt": "Cada linha vira uma forma; uma coluna de identidade liga as formas por valores.",
+    "zh-Hans": "每行变成一个形状；身份列按值连接形状。"
+  },
+  "Charger un fichier CSV…": {
+    "fr": "Charger un fichier CSV…",
+    "en": "Load a CSV file…",
+    "de": "CSV-Datei laden…",
+    "es": "Cargar un archivo CSV…",
+    "it": "Carica un file CSV…",
+    "pt": "Carregar um arquivo CSV…",
+    "zh-Hans": "加载 CSV 文件…"
+  },
+  "Choix des colonnes": {
+    "fr": "Choix des colonnes",
+    "en": "Column selection",
+    "de": "Spaltenauswahl",
+    "es": "Selección de columnas",
+    "it": "Selezione colonne",
+    "pt": "Seleção de colunas",
+    "zh-Hans": "选择列"
+  },
+  "Colonnes de relation (valeurs séparées par |) :": {
+    "fr": "Colonnes de relation (valeurs séparées par |) :",
+    "en": "Relation columns (values separated by |):",
+    "de": "Beziehungsspalten (Werte durch | getrennt):",
+    "es": "Columnas de relación (valores separados por |):",
+    "it": "Colonne di relazione (valori separati da |):",
+    "pt": "Colunas de relação (valores separados por |):",
+    "zh-Hans": "关系列（值以 | 分隔）："
+  },
+  "Configurez les colonnes puis prévisualisez le résultat.": {
+    "fr": "Configurez les colonnes puis prévisualisez le résultat.",
+    "en": "Configure the columns, then preview the result.",
+    "de": "Konfigurieren Sie die Spalten und zeigen Sie dann das Ergebnis an.",
+    "es": "Configure las columnas y luego obtenga una vista previa del resultado.",
+    "it": "Configura le colonne, poi mostra l'anteprima del risultato.",
+    "pt": "Configure as colunas e depois visualize o resultado.",
+    "zh-Hans": "先配置列，然后预览结果。"
+  },
+  "Exemple CSV": {
+    "fr": "Exemple CSV",
+    "en": "CSV example",
+    "de": "CSV-Beispiel",
+    "es": "Ejemplo CSV",
+    "it": "Esempio CSV",
+    "pt": "Exemplo CSV",
+    "zh-Hans": "CSV 示例"
+  },
+  "Fichier CSV trop volumineux : maximum 256 Kio.": {
+    "fr": "Fichier CSV trop volumineux : maximum 256 Kio.",
+    "en": "CSV file too large: 256 KiB maximum.",
+    "de": "CSV-Datei zu groß: maximal 256 KiB.",
+    "es": "Archivo CSV demasiado grande: máximo 256 KiB.",
+    "it": "File CSV troppo grande: massimo 256 KiB.",
+    "pt": "Arquivo CSV muito grande: máximo 256 KiB.",
+    "zh-Hans": "CSV 文件过大：最大 256 KiB。"
+  },
+  "Identité : {0}": {
+    "fr": "Identité : {0}",
+    "en": "Identity: {0}",
+    "de": "Identität: {0}",
+    "es": "Identidad: {0}",
+    "it": "Identità: {0}",
+    "pt": "Identidade: {0}",
+    "zh-Hans": "身份：{0}"
+  },
+  "Import CSV": {
+    "fr": "Import CSV",
+    "en": "Import CSV",
+    "de": "CSV importieren",
+    "es": "Importar CSV",
+    "it": "Importa CSV",
+    "pt": "Importar CSV",
+    "zh-Hans": "导入 CSV"
+  },
+  "Importer un CSV local": {
+    "fr": "Importer un CSV local",
+    "en": "Import a local CSV",
+    "de": "Lokale CSV importieren",
+    "es": "Importar un CSV local",
+    "it": "Importa un CSV locale",
+    "pt": "Importar um CSV local",
+    "zh-Hans": "导入本地 CSV"
+  },
+  "Importer un CSV…": {
+    "fr": "Importer un CSV…",
+    "en": "Import a CSV…",
+    "de": "CSV importieren…",
+    "es": "Importar un CSV…",
+    "it": "Importa un CSV…",
+    "pt": "Importar um CSV…",
+    "zh-Hans": "导入 CSV…"
+  },
+  "Le fichier CSV doit être en UTF-8.": {
+    "fr": "Le fichier CSV doit être en UTF-8.",
+    "en": "The CSV file must be UTF-8.",
+    "de": "Die CSV-Datei muss UTF-8 sein.",
+    "es": "El archivo CSV debe estar en UTF-8.",
+    "it": "Il file CSV deve essere in UTF-8.",
+    "pt": "O arquivo CSV deve estar em UTF-8.",
+    "zh-Hans": "CSV 文件必须是 UTF-8 编码。"
+  },
+  "Libellé : {0}": {
+    "fr": "Libellé : {0}",
+    "en": "Label: {0}",
+    "de": "Beschriftung: {0}",
+    "es": "Etiqueta: {0}",
+    "it": "Etichetta: {0}",
+    "pt": "Rótulo: {0}",
+    "zh-Hans": "标签：{0}"
+  },
+  "Prévisualisez le CSV avant de l’importer.": {
+    "fr": "Prévisualisez le CSV avant de l’importer.",
+    "en": "Preview the CSV before importing it.",
+    "de": "Zeigen Sie das CSV vor dem Importieren an.",
+    "es": "Obtenga una vista previa del CSV antes de importarlo.",
+    "it": "Mostra l'anteprima del CSV prima di importarlo.",
+    "pt": "Visualize o CSV antes de importá-lo.",
+    "zh-Hans": "导入前先预览 CSV。"
+  },
+  "Terminez l’édition en cours avant d’importer un CSV.": {
+    "fr": "Terminez l’édition en cours avant d’importer un CSV.",
+    "en": "Finish the current editing session before importing a CSV.",
+    "de": "Schließen Sie die laufende Bearbeitung ab, bevor Sie eine CSV importieren.",
+    "es": "Termine la edición en curso antes de importar un CSV.",
+    "it": "Termina la modifica in corso prima di importare un CSV.",
+    "pt": "Conclua a edição atual antes de importar um CSV.",
+    "zh-Hans": "导入 CSV 前请先结束当前编辑。"
   }
 }

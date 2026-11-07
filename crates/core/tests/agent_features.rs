@@ -323,3 +323,49 @@ fn patch_and_protocol_limits_are_enforced() {
     let error: Value = serde_json::from_slice(&output).unwrap();
     assert_eq!(error["error"]["code"], -32700);
 }
+#[test]
+fn page_links_can_be_added_updated_and_seen_in_inspection() {
+    let d = Document::default();
+    let p = patch(
+        &d,
+        json!([
+            add("accueil", 0, 80.),
+            {"op":"add_page","name":"Détails","size":[1280,900]},
+        ]),
+    );
+    let out1 = agent::preview(&d, &p).unwrap();
+    let doc = &out1.document;
+    let source_id = doc.nodes[0].id;
+    // Un lien depuis l'objet créé (page 0) vers la page Détails (index 1).
+    let p2 = patch(
+        doc,
+        json!([{"op":"add_page_link","page":0,"alias":"suivre","from":source_id,"target_page":1,"label":"Détails"}]),
+    );
+    let out2 = agent::preview(doc, &p2).unwrap();
+    let doc2 = &out2.document;
+    let link_id = out2.report["aliases"]["suivre"][1].as_u64().unwrap();
+    let link = doc2.link(link_id).unwrap();
+    // La cible est l'identifiant permanent de la page Détails, pas son index.
+    assert_eq!(link.target_page, doc2.page(1).unwrap().id);
+    assert_eq!(link.label, "Détails");
+    // Le lien apparaît dans l'inspection avec sa cible résolue.
+    let insp = agent::inspect(doc2).unwrap();
+    let links = insp["pages"][0]["links"].as_array().unwrap();
+    assert_eq!(links.len(), 1);
+    assert_eq!(links[0]["object_type"], "page_link");
+    assert_eq!(links[0]["target_page_index"], json!(1));
+    // Mise à jour du lien : changer la cible reste valide dans un aller-retour.
+    let p3 = patch(
+        doc2,
+        json!([{"op":"update_page_link","page":0,"target":link_id,"target_page":1,"label":"Rapport"}]),
+    );
+    let out3 = agent::preview(doc2, &p3).unwrap();
+    assert_eq!(out3.document.link(link_id).unwrap().label, "Rapport");
+    // La suppression de l'objet source retire un lien orphelin.
+    let p4 = patch(
+        &out3.document,
+        json!([{"op":"delete","page":0,"target":doc2.nodes[0].id}]),
+    );
+    let out4 = agent::preview(&out3.document, &p4).unwrap();
+    assert!(out4.document.link(link_id).is_none());
+}

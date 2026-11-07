@@ -14,6 +14,7 @@ pub(super) enum Command {
     ExportPdf,
     ExportPng,
     ImportMermaid,
+    ImportCsv,
     ExportMermaid,
     ImportImage,
     PasteImage,
@@ -72,6 +73,7 @@ pub(super) enum Command {
     Pages,
     PageSettings,
     AddPage,
+    CreatePageLink,
     Validate,
     NextRegion,
     PreviousRegion,
@@ -138,6 +140,12 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
         "Importer du Mermaid…",
         "Fichier",
         "mermaid flowchart graph import texte"
+    ),
+    command!(
+        ImportCsv,
+        "Importer un CSV…",
+        "Fichier",
+        "csv données tableur import données colonnes lignes"
     ),
     command!(
         ExportMermaid,
@@ -300,6 +308,12 @@ pub(super) const COMMANDS: &[CommandSpec] = &[
         "nouvelle feuille multipage"
     ),
     command!(
+        CreatePageLink,
+        "Créer un lien vers une page…",
+        "Document",
+        "liaison navigation lien entre pages vers object selected selector"
+    ),
+    command!(
         Validate,
         "Vérifier le document",
         "Document",
@@ -384,10 +398,12 @@ impl DrawApp {
             || self.show_pdf_export
             || self.image_ui.png_open
             || self.mermaid_ui.is_some()
+            || self.csv_ui.is_some()
             || self.auto_layout_ui.is_some()
             || self.show_pages
             || self.show_layers
             || self.page_draft.is_some()
+            || self.link_draft.is_some()
             || self.agent_panel.is_some()
             || self.rich_editor.is_some()
             || self.object_search.open
@@ -490,6 +506,7 @@ impl DrawApp {
             }
             SelectAll if self.doc.object_count() == 0 => Some("La page ne contient aucun objet"),
             AddPage if self.doc.page_count() >= 100 => Some("La limite de 100 pages est atteinte"),
+            CreatePageLink if self.doc.page_count() < 2 => Some("Ajoutez d'abord une autre page"),
             _ => None,
         }
     }
@@ -543,6 +560,7 @@ impl DrawApp {
             ExportPdf => self.show_pdf_export = true,
             ExportPng => self.open_png_export(),
             ImportMermaid => self.open_mermaid(false),
+            ImportCsv => self.open_csv_import(),
             ExportMermaid => self.open_mermaid(true),
             ImportImage => self.import_image(),
             PasteImage => {
@@ -647,6 +665,7 @@ impl DrawApp {
             Pages => self.show_pages = true,
             PageSettings => self.open_page_settings(),
             AddPage => self.add_blank_page(),
+            CreatePageLink => self.create_page_link(),
             Validate => match self.doc.validate() {
                 Ok(()) => {
                     self.status = "Document vérifié : géométrie et références valides.".into()

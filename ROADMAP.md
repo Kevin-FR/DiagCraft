@@ -138,6 +138,8 @@ sans copier les bibliothèques, modèles ou marques des autres produits.
    colonnes, identifiants et relations, aperçu, limites de taille et diagnostics ;
    créer le résultat en une annulation. Étudier ensuite les mises à jour par clé
    stable et l’import SQL, sans accès réseau implicite ni exécution du contenu.
+   Le contrat du sous-ensemble est défini dans [csv.md](docs/csv.md) et la
+   préparation du lot dans [sprint-csv.md](docs/sprint-csv.md).
    Référence : [insertion CSV draw.io](https://www.drawio.com/docs/manual/insert/insert-from-csv/).
 3. **Interopérabilité progressive** : importer un sous-ensemble documenté des
    fichiers `.drawio`, avec aperçu et avertissements de perte, limites de lecture

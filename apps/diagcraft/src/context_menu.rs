@@ -29,6 +29,7 @@ pub(super) enum Action {
     SwapArrows,
     Detach(bool),
     NodeStyle(usize),
+    PageLink,
 }
 
 impl DrawApp {
@@ -175,6 +176,15 @@ impl DrawApp {
                 });
                 if menu_item(ui, "Ajouter à ma bibliothèque", None, true) {
                     action = Some(Action::Library);
+                }
+                ui.separator();
+                let (label, enabled) = if id.is_some_and(|id| self.doc.link_from(id).is_some()) {
+                    ("Modifier le lien vers une page…", true)
+                } else {
+                    ("Créer un lien vers une page…", self.doc.page_count() > 1)
+                };
+                if menu_item(ui, label, None, enabled) {
+                    action = Some(Action::PageLink);
                 }
             }
             if node.is_none()
@@ -639,6 +649,11 @@ impl DrawApp {
                         }
                         Err(e) => self.error = Some(e),
                     }
+                }
+            }
+            Action::PageLink => {
+                if let Some(source) = id.filter(|id| self.doc.node(*id).is_some()) {
+                    self.open_page_link(source);
                 }
             }
         }

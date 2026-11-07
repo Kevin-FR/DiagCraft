@@ -2661,6 +2661,48 @@ fn navigating_pages_is_clean_and_edits_on_inactive_pages_are_saved() {
     assert!(!app.dirty());
 }
 #[test]
+fn double_clicking_the_page_link_badge_navigates_to_the_target_page() {
+    let (_ctx, mut app) = setup();
+    app.doc = Document::demo();
+    app.history = History::new(&app.doc);
+    app.doc.page_name = "Accueil".into();
+    let source = app.doc.nodes[0].id;
+    app.doc.add_page(false).unwrap();
+    app.doc.page_name = "Détails".into();
+    let target_page = app.doc.page_id;
+    app.switch_page(0);
+    let link = app
+        .doc
+        .add_page_link(source, target_page, 0, "Détails".into())
+        .unwrap();
+    app.commit();
+    // Vue fixe (pas de recentrage) pour que les coordonnées écran == monde.
+    app.fit_next = false;
+    app.zoom = 1.;
+    app.pan = Vec2::ZERO;
+    app.set_tool(Tool::Select);
+    let anchor = app.screen(app.doc.link_anchor(app.doc.link(link).unwrap()));
+    assert_ne!(app.doc.page_index, 1);
+    // La navigation du badge se déclenche en deux étapes testées
+    // séparément : (1) la conversion écran→monde identifie le lien sous le
+    // pointeur ; (2) `navigate_link` résout l'identifiant permanent de la page
+    // cible et bascule vers elle. On évite de dépendre de la détection
+    // `response.double_clicked()` d'egui, peu fiable dans un `ctx.run` brut.
+    assert_eq!(
+        app.hit_page_link(anchor),
+        Some(link),
+        "le badge de lien est sous le pointeur"
+    );
+    let navigated = app.navigate_link(link);
+    assert_eq!(navigated, Some(1));
+    assert_eq!(app.doc.page_index, 1);
+    assert_eq!(
+        app.hit_page_link(anchor),
+        None,
+        "le badge appartient à la page cible, plus à la source"
+    );
+}
+#[test]
 fn page_dimensions_cancel_apply_and_navigation_preserve_other_pages() {
     let (ctx, mut app) = setup();
     app.doc = templates::multipage();

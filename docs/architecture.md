@@ -55,6 +55,25 @@ permanent (`Page.id`, voir `pages.rs`) ; son exploitation pour un retour
 robuste (liens entre pages) est traitée par le lot « Liens entre pages » du
 README.
 
+Les liens entre pages (`document.rs` : `add_page_link`, `update_page_link`,
+`link_anchor`, `hit_link`, `try_remove`) relient un objet source d’une page à un
+identifiant permanent de page cible (`Page.id`, indépendant de l’ordre des pages).
+La cible est résolue par `page_index_by_id`, jamais par un index positionnel, ce
+qui rend la navigation robuste au réordonnancement des onglets. Un lien porte une
+étiquette facultative affichée à la place du nom de la page cible. Les liens sont
+ombis en v8 quand la liste est vide. `document::try_remove` nettoie les liens dont
+la page cible ou l’objet source a disparu.
+
+`page_link_ui.rs` peint, à l’ancre de l’objet source, un badge `⧉` portant le nom
+de la page cible ; la couleur du badge est dérivée de celle du lien. Le survol et
+le clic utilisent un rayon d’interaction en coordonnées écran converti en monde.
+Un double-clic sur le badge avec l’outil Sélection sans modificateur navigue
+(`navigate_link`) vers la page cible, qui devient l’onglet actif. La navigation ne
+crée ni modification documentaire ni entrée d’historique ; elle réutilise le
+basculement de la barre des pages. Le formulaire `LinkDraft` crée ou modifie un
+lien (objet source choisi parmi la sélection, sinon le premier objet visible) en
+une seule annulation et vérifie la révision avant application.
+
 `interface_prefs.rs` conserve la disposition, la langue et les préférences de mise à jour dans un JSON local borné,
 avec écriture atomique. Les captures et tests n’accèdent pas aux préférences utilisateur.
 Les dimensions voulues restent distinctes des limites temporaires de fenêtre.

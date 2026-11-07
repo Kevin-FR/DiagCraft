@@ -497,6 +497,35 @@ impl Connector {
     }
 }
 
+/// Lien de navigation inter-pages : un trait porté par la page source qui relie
+/// un objet local à une cible située sur une autre page du document.
+///
+/// La source est un objet (`from`, id local de la page courante ; 0 = la page
+/// elle-même). La cible est un objet d'une autre page, référencée de façon
+/// permanente par `target_page` (identifiant stable de page, v8) et `target`
+/// (id local de l'objet cible sur cette page ; 0 = la page cible entière).
+/// Cibler une autre page par son identifiant permanent et non par son index
+/// garantit que la navigation reste correcte après réordonnancement,
+/// suppression ou insertion de pages.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PageLink {
+    pub id: u64,
+    pub from: u64,
+    pub target_page: u64,
+    pub target: u64,
+    #[serde(default)]
+    pub label: String,
+    #[serde(default)]
+    pub color: Color,
+    #[serde(default)]
+    pub width: f32,
+    #[serde(default = "default_page_link_arrow")]
+    pub arrow: bool,
+}
+fn default_page_link_arrow() -> bool {
+    true
+}
+
 #[derive(Clone, Debug)]
 pub struct Document {
     pub format_version: u32,
@@ -508,6 +537,7 @@ pub struct Document {
     pub page_size: Point,
     pub nodes: Vec<Node>,
     pub connectors: Vec<Connector>,
+    pub links: Vec<PageLink>,
     pub drawings: Vec<Drawing>,
     pub page_style: PageStyle,
     pub charts: Vec<crate::chart::Chart>,
@@ -530,6 +560,7 @@ impl Default for Document {
             page_size: [1280., 900.],
             nodes: vec![],
             connectors: vec![],
+            links: vec![],
             drawings: vec![],
             page_style: PageStyle::default(),
             charts: vec![],
@@ -550,12 +581,19 @@ impl Document {
     pub fn object_count(&self) -> usize {
         self.nodes.len()
             + self.connectors.len()
+            + self.links.len()
             + self.drawings.len()
             + self.charts.len()
             + self
                 .pages
                 .iter()
-                .map(|p| p.nodes.len() + p.connectors.len() + p.drawings.len() + p.charts.len())
+                .map(|p| {
+                    p.nodes.len()
+                        + p.connectors.len()
+                        + p.links.len()
+                        + p.drawings.len()
+                        + p.charts.len()
+                })
                 .sum::<usize>()
     }
     pub fn add_chart(&mut self, kind: crate::chart::ChartKind, center: Point) -> u64 {
@@ -592,6 +630,7 @@ impl Document {
             .iter()
             .map(|n| n.id)
             .chain(self.connectors.iter().map(|c| c.id))
+            .chain(self.links.iter().map(|l| l.id))
             .chain(self.drawings.iter().map(|d| d.id))
             .chain(self.charts.iter().map(|c| c.id))
             .collect();
@@ -725,6 +764,8 @@ impl Document {
         next.nodes.retain(|n| !ids.contains(&n.id));
         next.connectors
             .retain(|c| !ids.contains(&c.id) && !ids.contains(&c.from) && !ids.contains(&c.to));
+        next.links
+            .retain(|l| !ids.contains(&l.id) && (l.from == 0 || !ids.contains(&l.from)));
         next.drawings.retain(|d| !ids.contains(&d.id));
         next.charts.retain(|c| !ids.contains(&c.id));
         next.prune_organization();
@@ -782,6 +823,114 @@ impl Document {
             })
             .map(|(_, d)| d.id)
     }
+    /// Retourne le lien de page portant l'identifiant donné, s'il existe sur la
+    /// page active.
+    pub fn link(&self, id: u64) -> Option<&PageLink> {
+        self.links.iter().find(|l| l.id == id)
+    }
+    pub fn link_mut(&mut self, id: u64) -> Option<&mut PageLink> {
+        self.links.iter_mut().find(|l| l.id == id)
+    }
+    /// Retourne le lien émis par l'objet source donné (`from`), s'il existe.
+    /// Un objet de la page active porte au plus un lien de navigation.
+    pub fn link_from(&self, from: u64) -> Option<&PageLink> {
+        self.links.iter().find(|l| l.from == from)
+    }
+    /// Point d'ancrage d'un lien sur la page source : le centre de l'objet
+    /// `from`, ou un coin de la page si le lien est porté par la page entière
+    /// (`from == 0`). Ce point est utilisé pour dessiner la poignée cliquable
+    /// et pour le test de survol.
+    pub fn link_anchor(&self, link: &PageLink) -> Point {
+        if let Some(n) = self.node(link.from) {
+            return [
+                n.position[0] + n.size[0] / 2.,
+                n.position[1] + n.size[1] / 2.,
+            ];
+        }
+        let w = self.page_size[0].min(200.);
+        let h = self.page_size[1].min(120.);
+        [w / 2., h / 2.]
+    }
+    /// Crée un lien de navigation qui relie un objet local à une autre page.
+    /// `target_page` est un identifiant permanent de page (v8) ; `target` est
+    /// l'identifiant local de l'objet cible sur cette page (0 = toute la page).
+    pub fn add_page_link(
+        &mut self,
+        from: u64,
+        target_page: u64,
+        target: u64,
+        label: String,
+    ) -> Result<u64, String> {
+        self.validate()?;
+        if from != 0 && self.node(from).is_none() {
+            return Err("Objet source du lien introuvable.".into());
+        }
+        let Some(target_index) = self.page_index_by_id(target_page) else {
+            return Err("Page cible du lien introuvable.".into());
+        };
+        if target_index == self.page_index {
+            return Err("Le lien doit viser une autre page.".into());
+        }
+        if target != 0 {
+            let cible = Document::from_page(self.page(target_index).unwrap(), &self.title);
+            if !cible.object_exists(target) {
+                return Err("Objet cible du lien introuvable.".into());
+            }
+        }
+        let id = self.next_id();
+        self.links.push(PageLink {
+            id,
+            from,
+            target_page,
+            target,
+            label,
+            color: [37, 99, 235],
+            width: 2.,
+            arrow: true,
+        });
+        Ok(id)
+    }
+    /// Met à jour la cible d'un lien existant tout en conservant son identifiant.
+    pub fn update_page_link(
+        &mut self,
+        id: u64,
+        target_page: u64,
+        target: u64,
+        label: String,
+    ) -> Result<u64, String> {
+        self.validate()?;
+        if self.links.iter().all(|l| l.id != id) {
+            return Err("Lien introuvable.".into());
+        }
+        let Some(target_index) = self.page_index_by_id(target_page) else {
+            return Err("Page cible du lien introuvable.".into());
+        };
+        if target_index == self.page_index {
+            return Err("Le lien doit viser une autre page.".into());
+        }
+        if target != 0 {
+            let cible = Document::from_page(self.page(target_index).unwrap(), &self.title);
+            if !cible.object_exists(target) {
+                return Err("Objet cible du lien introuvable.".into());
+            }
+        }
+        let link = self.link_mut(id).expect("lien vérifié");
+        link.target_page = target_page;
+        link.target = target;
+        link.label = label;
+        Ok(id)
+    }
+    /// Test de survol : retourne l'identifiant du lien, dans une tolérance
+    /// donnée autour de son ancre, si sa source existe encore.
+    pub fn hit_link(&self, p: Point, tolerance: f32) -> Option<u64> {
+        self.links.iter().find_map(|l| {
+            if l.from != 0 && self.node(l.from).is_none() {
+                return None;
+            }
+            let a = self.link_anchor(l);
+            (segment_distance(p, a, a) <= tolerance).then_some(l.id)
+        })
+    }
     pub fn selection(&self, ids: &[u64]) -> Self {
         let ids: HashSet<_> = self.expand_groups(ids).into_iter().collect();
         let mut fragment = Self {
@@ -827,6 +976,12 @@ impl Document {
                 .charts
                 .iter()
                 .filter(|c| ids.contains(&c.id))
+                .cloned()
+                .collect(),
+            links: self
+                .links
+                .iter()
+                .filter(|l| l.from == 0 || ids.contains(&l.from))
                 .cloned()
                 .collect(),
             ..Self::default()
@@ -931,6 +1086,16 @@ impl Document {
                 c.position[a] += v;
             }
             target.charts.push(c);
+        }
+        for mut l in fragment.links.clone() {
+            let old = l.id;
+            l.id = target.next_id();
+            map.insert(old, l.id);
+            if l.from != 0 {
+                l.from = map[&l.from];
+            }
+            selected.push(l.id);
+            target.links.push(l);
         }
         target.paste_organization(fragment, &map, reuse_layers)?;
         target.validate()?;
@@ -1201,6 +1366,24 @@ impl Document {
                     .any(|v| !v.is_finite() || v.abs() > 100_000.)
             {
                 return Err("Points de connecteur invalides.".into());
+            }
+        }
+        for l in &self.links {
+            if l.id == 0
+                || l.id == u64::MAX
+                || !ids.insert(l.id)
+                || (l.from != 0 && !self.object_ids().contains(&l.from))
+                || l.label.len() > 4096
+                || !l.width.is_finite()
+                || !(0.5..=20.).contains(&l.width)
+            {
+                return Err("Lien de page invalide.".into());
+            }
+            let Some(ti) = self.page_index_by_id(l.target_page) else {
+                return Err("Page cible du lien absente.".into());
+            };
+            if ti == self.page_index {
+                return Err("Page cible du lien identique à la source.".into());
             }
         }
         self.validate_organization()?;
