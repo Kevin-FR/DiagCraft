@@ -13,22 +13,128 @@ pub(super) struct AgentPanel {
 enum PreviewView {
     Before,
     After,
+    Diff,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum DiffCategory {
+    Added,
+    Modified,
+    Removed,
+}
+
+/// Jeu de différences calculé une seule fois depuis le rapport du patch.
+/// Clé `(page, id)` : les identifiants d’objets sont uniques par page.
+#[derive(Default)]
+pub(super) struct DiffSet {
+    keys: std::collections::HashMap<(usize, u64), DiffCategory>,
+}
+
+impl DiffSet {
+    fn from_report(source: &Document, result: &Document, report: &serde_json::Value) -> Self {
+        let mut keys = std::collections::HashMap::new();
+        if let Some(changes) = report["changes"].as_array() {
+            for c in changes {
+                let Some(page) = c["page"].as_u64().map(|p| p as usize) else {
+                    continue;
+                };
+                // Un changement sans identifiant (ex. réorganisation de pages)
+                // reste décrit en texte mais n’est pas surlignable.
+                let Some(id) = c["id"].as_u64() else {
+                    continue;
+                };
+                let has = |doc: &Document| {
+                    doc.page_document(page)
+                        .map(|d| diagcraft::agent::object_ids(&d).contains(&id))
+                        .unwrap_or(false)
+                };
+                let category = match (has(source), has(result)) {
+                    (true, true) => DiffCategory::Modified,
+                    (false, true) => DiffCategory::Added,
+                    (true, false) => DiffCategory::Removed,
+                    (false, false) => continue,
+                };
+                keys.insert((page, id), category);
+            }
+        }
+        DiffSet { keys }
+    }
+
+    /// Surlignage pour la vue Après (mode Diff) : ajouts + modifications en
+    /// accent ; les suppressions n’y figurent plus.
+    fn after_highlight(
+        &self,
+        page: usize,
+    ) -> (
+        std::collections::HashSet<u64>,
+        std::collections::HashSet<u64>,
+    ) {
+        let mut accent = std::collections::HashSet::new();
+        for (&(p, id), cat) in &self.keys {
+            if p == page && matches!(cat, DiffCategory::Added | DiffCategory::Modified) {
+                accent.insert(id);
+            }
+        }
+        (accent, std::collections::HashSet::new())
+    }
+
+    /// Surlignage pour la vue Avant : les modifications en accent, les
+    /// suppressions en couleur d’avertissement (encore présentes avant).
+    fn before_highlight(
+        &self,
+        page: usize,
+    ) -> (
+        std::collections::HashSet<u64>,
+        std::collections::HashSet<u64>,
+    ) {
+        let mut accent = std::collections::HashSet::new();
+        let mut removed = std::collections::HashSet::new();
+        for (&(p, id), cat) in &self.keys {
+            if p == page {
+                match cat {
+                    DiffCategory::Modified => {
+                        accent.insert(id);
+                    }
+                    DiffCategory::Removed => {
+                        removed.insert(id);
+                    }
+                    DiffCategory::Added => {}
+                }
+            }
+        }
+        (accent, removed)
+    }
+
+    fn counts(&self) -> (usize, usize, usize) {
+        let (mut added, mut modified, mut removed) = (0, 0, 0);
+        for cat in self.keys.values() {
+            match cat {
+                DiffCategory::Added => added += 1,
+                DiffCategory::Modified => modified += 1,
+                DiffCategory::Removed => removed += 1,
+            }
+        }
+        (added, modified, removed)
+    }
 }
 
 struct Comparison {
     source: Document,
     result: agent::Preview,
+    diff: DiffSet,
     view: PreviewView,
     before_page: usize,
     after_page: usize,
 }
 impl Comparison {
     fn new(source: &Document, result: agent::Preview) -> Self {
+        let diff = DiffSet::from_report(source, &result.document, &result.report);
         let before_page = source.page_index;
         let after_page = result.document.page_index;
         Self {
             source: source.clone(),
             result,
+            diff,
             view: PreviewView::After,
             before_page,
             after_page,
@@ -135,16 +241,37 @@ impl DrawApp {
                         ui.horizontal_wrapped(|ui|{
                             ui.selectable_value(&mut comparison.view,PreviewView::Before,t("Avant"));
                             ui.selectable_value(&mut comparison.view,PreviewView::After,t("Après"));
+                            ui.selectable_value(&mut comparison.view,PreviewView::Diff,t("Différences"));
                         });
-                        ui.small(t("Les pages sont indépendantes et peuvent être réordonnées. Chaque vue est ajustée séparément ; les différences ne sont pas surlignées."));
-                        let (document,page)=match comparison.view {
-                            PreviewView::Before => (&comparison.source,&mut comparison.before_page),
-                            PreviewView::After => (&comparison.result.document,&mut comparison.after_page),
+                        ui.small(t("Les pages sont indépendantes et peuvent être réordonnées. Chaque vue est ajustée séparément ; les différences sont surlignées."));
+                        let (is_before, accent_set, removed_set, tint) = match comparison.view {
+                            PreviewView::Before => {
+                                let (a, r) = comparison.diff.before_highlight(comparison.before_page);
+                                (true, a, r, false)
+                            }
+                            PreviewView::After | PreviewView::Diff => {
+                                let (a, r) = comparison.diff.after_highlight(comparison.after_page);
+                                (false, a, r, comparison.view == PreviewView::Diff)
+                            }
                         };
-                        *page=(*page).min(document.page_count()-1);
-                        ui.horizontal(|ui|{ui.label(RichText::new(t("APERÇU")).strong().color(ACTION_TEXT));egui::ComboBox::from_id_salt(("agent_preview_page",comparison.view == PreviewView::Before)).selected_text(i18n::render("Page {0}", &[("0", format!("{}", *page+1))])).show_ui(ui,|ui|{for (i,name) in document.page_names().iter().enumerate(){ui.selectable_value(page,i,*name);}});});
+                        let (document, page): (&Document, &mut usize) = if is_before {
+                            (&comparison.source, &mut comparison.before_page)
+                        } else {
+                            (&comparison.result.document, &mut comparison.after_page)
+                        };
+                        let diff = library_ui::PreviewDiff {
+                            accent: &accent_set,
+                            removed: &removed_set,
+                            tint,
+                        };
+                        *page=(*page).min(document.page_count().saturating_sub(1));
+                        let (added,modified,removed)=comparison.diff.counts();
+                        ui.horizontal(|ui|{ui.label(RichText::new(t("APERÇU")).strong().color(ACTION_TEXT));egui::ComboBox::from_id_salt(("agent_preview_page",comparison.view == PreviewView::Before)).selected_text(i18n::render("Page {0}", &[("0", format!("{}", *page+1))])).show_ui(ui,|ui|{for (i,name) in document.page_names().iter().enumerate(){ui.selectable_value(page,i,*name);}});if comparison.view == PreviewView::Diff {ui.separator();ui.label(RichText::new(t("Comparaison visuelle")).strong());ui.colored_label(ACTION_TEXT,i18n::render("{0} ajout(s)", &[("0", format!("{}", added))]));ui.colored_label(ACTION_TEXT,i18n::render("{0} modification(s)", &[("0", format!("{}", modified))]));ui.colored_label(ERROR_TEXT,i18n::render("{0} suppression(s)", &[("0", format!("{}", removed))]));}});
                         let (r,_)=ui.allocate_exact_size(vec2(ui.available_width(),230.),Sense::hover());
-                        library_ui::paint_document_preview(ui.painter(),&document.page_document(*page).unwrap(),r);
+                        library_ui::paint_document_preview_with(ui.painter(),&document.page_document(*page).unwrap(),r,Some(&diff));
+                        if comparison.view == PreviewView::Diff {
+                            ui.small(t("Objets modifiés par l’agent, surlignés d’accent dans l’après ; les suppressions sont signalées dans l’avant."));
+                        }
                         let preview=&comparison.result;
                         ui.label(RichText::new(i18n::render("{0} opérations · {1} pages · {2} objets", &[("0", format!("{}", preview.report["changes"].as_array().unwrap().len())),("1", format!("{}", preview.document.page_count())),("2", format!("{}", preview.document.object_count()))])).strong());
                         egui::ScrollArea::vertical().id_salt("agent_report_scroll").max_height(125.).show(ui,|ui|{
@@ -416,5 +543,133 @@ mod tests {
             );
         }
         i18n::activate(Language::French);
+    }
+
+    #[test]
+    fn diff_set_categorizes_added_modified_and_removed() {
+        let mut doc = Document::default();
+        let keep = doc.add_node(ShapeKind::Rectangle, [50., 50.]);
+        let remove = doc.add_node(ShapeKind::Ellipse, [150., 50.]);
+        doc.node_mut(remove).unwrap().text = "À supprimer".into();
+        let page = doc.page_index;
+        let patch = format!(
+            r#"{{"api_version":1,"expected_revision":"{}","operations":[
+                {{"op":"add_node","page":{},"alias":"nouveau","kind":"rounded","position":[80,200],"size":[120,60],"text":"Ajouté"}},
+                {{"op":"update_node","page":{},"target":{},"changes":{{"text":"Modifié"}}}},
+                {{"op":"delete","page":{},"target":{}}}
+            ]}}"#,
+            agent::revision(&doc),
+            page,
+            page,
+            keep,
+            page,
+            remove
+        );
+        let parsed = agent::parse_patch(&patch).unwrap();
+        let result = agent::preview(&doc, &parsed).unwrap();
+        let diff = DiffSet::from_report(&doc, &result.document, &result.report);
+        let (added, modified, removed) = diff.counts();
+        assert_eq!(added, 1);
+        assert_eq!(modified, 1);
+        assert_eq!(removed, 1);
+        // Dans l’après (mode Diff), les ajouts et modifications sont surlignés en accent.
+        let (accent, accent_removed) = diff.after_highlight(page);
+        assert!(accent_removed.is_empty());
+        assert!(accent.contains(&keep));
+        let new_id = result
+            .document
+            .page_document(page)
+            .unwrap()
+            .nodes
+            .iter()
+            .find(|n| n.text == "Ajouté")
+            .unwrap()
+            .id;
+        assert!(accent.contains(&new_id));
+        // Dans l’avant, l’objet supprimé est signalé comme retiré.
+        let (before_accent, before_removed) = diff.before_highlight(page);
+        assert!(before_accent.contains(&keep));
+        assert!(before_removed.contains(&remove));
+    }
+
+    #[test]
+    fn switching_to_diff_view_renders_legend_and_counts() {
+        let (ctx, mut app) = app_with_pages();
+        ctx.enable_accesskit();
+        app.open_agent_panel();
+        let patch = example_patch(&app.doc);
+        let result = agent::preview(&app.doc, &agent::parse_patch(&patch).unwrap()).unwrap();
+        let comparison = Comparison::new(&app.doc, result);
+        let panel = app.agent_panel.as_mut().unwrap();
+        panel.tab = 1;
+        panel.patch = patch;
+        panel.preview = Some(comparison);
+        let frame = |app: &mut DrawApp, events| {
+            ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(Rect::from_min_size(Pos2::ZERO, vec2(1500., 1000.))),
+                    events,
+                    focused: true,
+                    ..Default::default()
+                },
+                |ctx| app.agent_dialog(ctx),
+            )
+        };
+        frame(&mut app, vec![]);
+        let output = frame(&mut app, vec![]);
+        // Bascule vers le mode Différences.
+        let label = t("Différences");
+        let point = output
+            .shapes
+            .iter()
+            .find_map(|shape| match &shape.shape {
+                egui::Shape::Text(text) if text.galley.text() == label => {
+                    Some(text.pos + text.galley.size() / 2.)
+                }
+                _ => None,
+            })
+            .expect("Différences button must be visible");
+        for pressed in [true, false] {
+            frame(
+                &mut app,
+                vec![
+                    egui::Event::PointerMoved(point),
+                    egui::Event::PointerButton {
+                        pos: point,
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+            );
+        }
+        assert_eq!(
+            app.agent_panel
+                .as_ref()
+                .unwrap()
+                .preview
+                .as_ref()
+                .unwrap()
+                .view,
+            PreviewView::Diff
+        );
+        // La légende de la comparaison visuelle est affichée avec les compteurs.
+        let frame_output = frame(&mut app, vec![]);
+        let texts: Vec<&str> = frame_output
+            .shapes
+            .iter()
+            .filter_map(|shape| match &shape.shape {
+                egui::Shape::Text(text) => Some(text.galley.text()),
+                _ => None,
+            })
+            .collect();
+        assert!(
+            texts.iter().any(|txt| *txt == t("Comparaison visuelle")),
+            "legend title missing in Diff view; got {texts:?}"
+        );
+        assert!(
+            texts.iter().any(|txt| txt.starts_with("0 ")),
+            "count labels missing in Diff view; got {texts:?}"
+        );
     }
 }

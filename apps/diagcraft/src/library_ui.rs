@@ -927,11 +927,50 @@ fn reveal_on_focus(ui: &egui::Ui, response: &egui::Response) {
         response.scroll_to_me(None);
     }
 }
+/// Surlignage optionnel d’une comparaison visuelle : les identifiants d’objets à
+/// souligner en accent (ajout/modification) et ceux signalés comme supprimés
+/// (d’une couleur d’avertissement). `tint` teinte l’intérieur des objets accent.
+pub(super) struct PreviewDiff<'a> {
+    pub accent: &'a std::collections::HashSet<u64>,
+    pub removed: &'a std::collections::HashSet<u64>,
+    pub tint: bool,
+}
+
 pub(super) fn paint_document_preview(p: &egui::Painter, d: &Document, r: Rect) {
+    paint_document_preview_with(p, d, r, None);
+}
+
+pub(super) fn paint_document_preview_with(
+    p: &egui::Painter,
+    d: &Document,
+    r: Rect,
+    diff: Option<&PreviewDiff<'_>>,
+) {
     p.rect_filled(r, 5, SURFACE);
     let scale = (r.width() / d.page_size[0]).min(r.height() / d.page_size[1]);
     let origin = r.center() - vec2(d.page_size[0], d.page_size[1]) * scale / 2.;
     let map = |point: Point| origin + vec2(point[0], point[1]) * scale;
+    let overlay = |point: Point, size: Point, id: u64| -> bool {
+        let Some(diff) = diff else { return false };
+        let in_accent = diff.accent.contains(&id);
+        let removed = diff.removed.contains(&id);
+        if !in_accent && !removed {
+            return false;
+        }
+        let rect = Rect::from_min_size(map(point), vec2(size[0], size[1]) * scale);
+        let accent_color = if in_accent { ACTION_TEXT } else { ERROR_TEXT };
+        if in_accent && diff.tint {
+            p.rect_filled(rect, 4, Color32::from_rgba_unmultiplied(64, 128, 255, 22));
+        }
+        p.rect(
+            rect.expand(1.5 * scale),
+            0,
+            Color32::TRANSPARENT,
+            Stroke::new((2.2 * scale).max(1.), accent_color),
+            StrokeKind::Middle,
+        );
+        true
+    };
     let page = Rect::from_min_size(origin, vec2(d.page_size[0], d.page_size[1]) * scale);
     p.rect(
         page,
@@ -943,12 +982,27 @@ pub(super) fn paint_document_preview(p: &egui::Painter, d: &Document, r: Rect) {
     let p = p.with_clip_rect(page.intersect(r));
     for edge in &d.connectors {
         let points: Vec<_> = d.route(edge).into_iter().map(map).collect();
+        let highlight = diff.and_then(|diff| {
+            if diff.accent.contains(&edge.id) {
+                Some(ACTION_TEXT)
+            } else if diff.removed.contains(&edge.id) {
+                Some(ERROR_TEXT)
+            } else {
+                None
+            }
+        });
         paint_pattern(
             &p,
             &points,
             Stroke::new((edge.width * scale).max(0.5), rgb(edge.color)),
             edge.pattern,
         );
+        if let Some(color) = highlight {
+            p.add(Shape::line(
+                points.clone(),
+                Stroke::new((2.0 * scale).max(1.), color),
+            ));
+        }
         if edge.arrow {
             paint_head(
                 &p,
@@ -979,12 +1033,28 @@ pub(super) fn paint_document_preview(p: &egui::Painter, d: &Document, r: Rect) {
             points.clone(),
             Stroke::new((drawing.width * scale).max(0.5), rgb(drawing.color)),
         ));
+        let highlight = diff.and_then(|diff| {
+            if diff.accent.contains(&drawing.id) {
+                Some(ACTION_TEXT)
+            } else if diff.removed.contains(&drawing.id) {
+                Some(ERROR_TEXT)
+            } else {
+                None
+            }
+        });
+        if let Some(color) = highlight {
+            p.add(Shape::line(
+                points.clone(),
+                Stroke::new((2.0 * scale).max(1.), color),
+            ));
+        }
         if drawing.arrow {
             paint_arrow(&p, &points, rgb(drawing.color), 3.);
         }
     }
     for n in &d.nodes {
         let rect = Rect::from_min_size(map(n.position), vec2(n.size[0], n.size[1]) * scale);
+        overlay(n.position, n.size, n.id);
         if n.kind != ShapeKind::Text {
             paint_geometry(
                 &p,
@@ -1005,6 +1075,7 @@ pub(super) fn paint_document_preview(p: &egui::Painter, d: &Document, r: Rect) {
         }
     }
     for c in &d.charts {
+        overlay(c.position, c.size, c.id);
         paint_chart(
             &p,
             c,

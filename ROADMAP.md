@@ -111,7 +111,7 @@ versionnés avec migration ; aucun numéro n’est promis ici.
 - [ ] Styles nommés avec propagation.
 - [ ] Composants réutilisables liés.
 - [x] Premier aperçu IA avant/après avec choix de pages indépendants (branche de développement, non publié).
-- [ ] Comparaison visuelle des modifications IA.
+- [x] Comparaison visuelle des modifications IA. Fait : trois vues Avant / Après / Différences dans le panneau agent ; les objets modifiés ou ajoutés sont surlignés d’accent et les suppressions signalées, avec légende et compteurs dérivés du rapport du patch (`docs/comparaison-visuelle.md`, `docs/sprint-comparaison-visuelle.md`).
 - [x] Mini-carte de navigation pour les grandes feuilles (0.12.1).
 
 La préparation 1.0 garde ses critères : essais sur MacBook 13 pouces, clavier

@@ -10295,15 +10295,6 @@
     "pt": "Corrija o texto antes de continuar.",
     "zh-Hans": "请先修正输入内容。"
   },
-  "Les pages sont indépendantes et peuvent être réordonnées. Chaque vue est ajustée séparément ; les différences ne sont pas surlignées.": {
-    "fr": "Les pages sont indépendantes et peuvent être réordonnées. Chaque vue est ajustée séparément ; les différences ne sont pas surlignées.",
-    "en": "Pages are independent and may be reordered. Each view is fitted separately; differences are not highlighted.",
-    "de": "Seiten sind unabhängig und können neu angeordnet werden. Jede Ansicht wird separat angepasst; Unterschiede werden nicht hervorgehoben.",
-    "es": "Las páginas son independientes y pueden cambiar de orden. Cada vista se ajusta por separado; las diferencias no se resaltan.",
-    "it": "Le pagine sono indipendenti e possono essere riordinate. Ogni vista viene adattata separatamente; le differenze non sono evidenziate.",
-    "pt": "As páginas são independentes e podem ser reordenadas. Cada vista é ajustada separadamente; as diferenças não são destacadas.",
-    "zh-Hans": "页面相互独立，顺序可能改变。每个视图单独缩放；差异不会高亮显示。"
-  },
   "Le document a changé. Fermez l’éditeur puis rouvrez l’objet.": {
     "fr": "Le document a changé. Fermez l’éditeur puis rouvrez l’objet.",
     "en": "The document has changed. Close the editor, then reopen the object.",
@@ -10825,5 +10816,68 @@
     "it": "Etichetta:",
     "pt": "Etiqueta:",
     "zh-Hans": "标签："
+  },
+  "Les pages sont indépendantes et peuvent être réordonnées. Chaque vue est ajustée séparément ; les différences sont surlignées.": {
+    "fr": "Les pages sont indépendantes et peuvent être réordonnées. Chaque vue est ajustée séparément ; les différences sont surlignées.",
+    "en": "Pages are independent and may be reordered. Each view is fitted separately; differences are highlighted.",
+    "de": "Seiten sind unabhängig und können neu angeordnet werden. Jede Ansicht wird separat angepasst; Unterschiede werden hervorgehoben.",
+    "es": "Las páginas son independientes y pueden cambiar de orden. Cada vista se ajusta por separado; las diferencias se resaltan.",
+    "it": "Le pagine sono indipendenti e possono essere riordinate. Ogni vista viene adattata separatamente; le differenze sono evidenziate.",
+    "pt": "As páginas são independentes e podem ser reordenadas. Cada vista é ajustada separadamente; as diferenças são destacadas.",
+    "zh-Hans": "页面相互独立，顺序可能改变。每个视图单独缩放；差异会高亮显示。"
+  },
+  "Différences": {
+    "fr": "Différences",
+    "en": "Differences",
+    "de": "Unterschiede",
+    "es": "Diferencias",
+    "it": "Differenze",
+    "pt": "Diferenças",
+    "zh-Hans": "差异"
+  },
+  "Comparaison visuelle": {
+    "fr": "Comparaison visuelle",
+    "en": "Visual comparison",
+    "de": "Visueller Vergleich",
+    "es": "Comparación visual",
+    "it": "Confronto visivo",
+    "pt": "Comparação visual",
+    "zh-Hans": "视觉对比"
+  },
+  "Objets modifiés par l’agent, surlignés d’accent dans l’après ; les suppressions sont signalées dans l’avant.": {
+    "fr": "Objets modifiés par l’agent, surlignés d’accent dans l’après ; les suppressions sont signalées dans l’avant.",
+    "en": "Objects changed by the agent are highlighted in the after view; removals are flagged in the before view.",
+    "de": "Vom Agenten geänderte Objekte werden in der Ansicht „Nachher“ hervorgehoben; Entfernungen werden in „Vorher“ gekennzeichnet.",
+    "es": "Los objetos modificados por el agente se resaltan en la vista posterior; las supresiones se señalan en la anterior.",
+    "it": "Gli oggetti modificati dall'agente sono evidenziati nella vista successiva; le rimozioni sono segnalate in quella precedente.",
+    "pt": "Os objetos modificados pelo agente são destacados na vista posterior; as remoções são sinalizadas na anterior.",
+    "zh-Hans": "代理修改的对象在“之后”视图中高亮显示；“之前”视图中会标记删除。"
+  },
+  "{0} ajout(s)": {
+    "fr": "{0} ajout(s)",
+    "en": "{0} added",
+    "de": "{0} hinzugefügt",
+    "es": "{0} añadidos",
+    "it": "{0} aggiunti",
+    "pt": "{0} adicionados",
+    "zh-Hans": "添加 {0}"
+  },
+  "{0} modification(s)": {
+    "fr": "{0} modification(s)",
+    "en": "{0} modified",
+    "de": "{0} geändert",
+    "es": "{0} modificados",
+    "it": "{0} modificati",
+    "pt": "{0} modificados",
+    "zh-Hans": "修改 {0}"
+  },
+  "{0} suppression(s)": {
+    "fr": "{0} suppression(s)",
+    "en": "{0} removed",
+    "de": "{0} entfernt",
+    "es": "{0} eliminados",
+    "it": "{0} rimossi",
+    "pt": "{0} removidos",
+    "zh-Hans": "删除 {0}"
   }
 }
