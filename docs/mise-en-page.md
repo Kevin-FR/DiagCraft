@@ -18,20 +18,22 @@ modification. La page peut s’agrandir pour contenir le résultat.
 
 Les blocs verrouillés, masqués et les textes libres isolés restent à leur place.
 Les blocs non sélectionnés restent aussi fixes. Les boîtes des blocs visibles et
-graphiques fixes sont évitées. Les dessins libres restent inchangés mais ne sont
-pas des obstacles de placement. Les autres pages ne changent pas.
+graphiques fixes sont évitées. Les dessins libres hors des groupes
+compatibles restent inchangés mais ne sont pas des obstacles de placement.
+Les autres pages ne changent pas.
 
 Un groupe compatible se déplace comme une seule unité, sans changer les écarts
-entre ses membres. Il peut contenir des blocs, des images, des textes et des
-connecteurs dont les deux extrémités sont attachées à des blocs du groupe ; il
-doit contenir au moins un bloc autre qu’un texte. Sélectionner un de ses membres
-suffit à inclure le groupe entier. Tous les membres doivent être visibles et
-modifiables : si un membre est protégé ou masqué, le groupe entier reste fixe.
-Les groupes contenant un graphique, un dessin libre ou un connecteur vers
-l’extérieur restent aussi fixes. Un groupe composé uniquement de textes reste
-fixe. L’enveloppe utilisée pour le placement comprend les blocs du groupe et les
-points manuels de ses connecteurs membres. Le compteur de blocs reste un compte
-des blocs individuels, et non des groupes.
+entre ses membres. Il peut contenir des blocs, des images, des textes, des
+connecteurs dont les deux extrémités sont attachées à des blocs du groupe, des
+graphiques et des dessins libres ; il doit contenir au moins un bloc autre
+qu’un texte. Sélectionner un de ses membres suffit à inclure le groupe entier.
+Tous les membres doivent être visibles et modifiables : si un membre est
+protégé ou masqué, le groupe entier reste fixe. Un groupe contenant un
+connecteur vers l’extérieur ou à extrémité libre reste aussi fixe. Un groupe
+composé uniquement de textes reste fixe. L’enveloppe utilisée pour le placement
+comprend les blocs du groupe, la boîte de ses graphiques, les points de ses
+dessins libres et les points manuels de ses connecteurs membres. Le compteur de
+blocs reste un compte des blocs individuels, et non des groupes.
 
 Le graphe des unités à déplacer donne des niveaux. Les boucles sont regroupées
 dans un même niveau ; les blocs déconnectés sont aussi disposés. Le résultat est
@@ -59,7 +61,7 @@ Cette version traite au maximum 500 blocs éligibles, en comptant chaque bloc de
 groupes inclus, y compris leurs textes. Une sélection plus petite permet de
 travailler sur les grands dessins. Les dimensions trop grandes sont refusées
 sans changement. Il ne s’agit pas d’un optimiseur de croisements globalement
-optimal ; la prise en charge des groupes mixtes reste prévue.
+optimal.
 
 L’ordre initial des unités de chaque niveau est déterminé par leur plus petit ID
 d’objet. Un bloc isolé constitue une unité, comme un groupe compatible. Le moteur
@@ -71,10 +73,13 @@ décalent des blocs de tailles différentes.
 
 Le score « Croisements entre niveaux voisins » compare le placement automatique
 initial et la proposition améliorée. Il compte les inversions des liaisons entre
-niveaux consécutifs, avec des lignes simplifiées entre centres des unités. Les liaisons avec
-un même départ ou une même arrivée ne sont pas comptées comme croisements.
-Ce score ne mesure pas les croisements du dessin source ni des routes finales :
-les liaisons longues, les boucles au sein d’un niveau, les coudes et les points
+niveaux voisins, avec des lignes simplifiées entre centres des unités ; les
+liaisons longues qui traversent plusieurs niveaux gardent leur rangée de départ
+sur les segments intermédiaires, puis rejoignent la rangée d’arrivée sur le
+dernier segment. Elles participent ainsi au score estimé. Les liaisons avec un même départ ou
+une même arrivée ne sont pas comptées comme croisements.
+Le calcul reste combinatoire et déterministe : il ne mesure pas les croisements
+des routes réelles, et les boucles au sein d’un niveau, les coudes et les points
 manuels peuvent produire un résultat visuel différent. L’aperçu et l’annulation
 restent donc nécessaires.
 

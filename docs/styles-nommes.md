@@ -16,7 +16,9 @@ ne casse pas le lien tant que la référence reste posée.
 
 - Un style nommé `NamedStyle` :
   `{ name, fill, stroke, text_color, stroke_width, font_size }`, avec
-  `name` unique et non vide dans le document.
+  `name` unique, non vide et limité à 64 octets dans le document. Taille de
+  police : 6 à 200 px ; épaisseur : 0 à 20 px, valeurs finies. Les mêmes
+  bornes sont utilisées dans l’inspecteur et par les formes.
 - Table document-globale `Document.named_styles: Vec<NamedStyle>` (partagée par
   toutes les pages). Aucune duplication par page.
 - Référence optionnelle `Node.style_ref: Option<String>` : le nom du style lié
@@ -68,3 +70,11 @@ Nouvelles clés (source `fr`, 7 langues) pour le panneau, les actions
 - Tests : aller-retour/compacité v8 et chargement sans le champ ; propagation
   d’une édition à toutes les pages ; renommage et suppression ; application et
   détachement ; référence via patch agent ; survie aux changements de page.
+
+## Revue du 8 novembre 2026
+
+Les définitions chargées sont validées (noms, doublons et bornes numériques).
+La création et la modification refusent les valeurs invalides avant mutation ;
+un refus ne modifie ni la définition ni les formes sur les autres pages.
+Les bornes de l’inspecteur ont été alignées sur celles du format pour éviter
+d’obtenir un document impossible à enregistrer après propagation.

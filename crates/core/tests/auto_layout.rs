@@ -341,29 +341,73 @@ fn protection_of_any_member_or_layer_keeps_whole_group_fixed() {
 }
 
 #[test]
-fn unsupported_mixed_external_free_and_text_only_groups_stay_fixed() {
+fn mixed_chart_and_drawing_groups_translate_together() {
     use diagcraft::{chart::ChartKind, document::DrawingKind};
-    for variant in 0..5 {
+    for variant in 0..2 {
         let mut doc = Document::default();
-        let first_kind = if variant == 4 {
+        let first = doc.add_node(ShapeKind::Rectangle, [400., 400.]);
+        let extra = if variant == 0 {
+            doc.add_chart(ChartKind::Bars, [600., 400.])
+        } else {
+            doc.add_drawing(DrawingKind::Line, [500., 400.], [600., 500.])
+        };
+        doc.group_objects(&[first, extra]).unwrap();
+        doc.add_node(ShapeKind::Rectangle, [1000., 800.]);
+        let result = preview(&doc, None, Direction::Horizontal).unwrap();
+        let next = &result.document;
+        assert_ne!(next.node(first), doc.node(first), "mixed group node moves");
+        let delta = [
+            next.node(first).unwrap().position[0] - doc.node(first).unwrap().position[0],
+            next.node(first).unwrap().position[1] - doc.node(first).unwrap().position[1],
+        ];
+        if variant == 0 {
+            let chart = doc.charts.iter().find(|c| c.id == extra).unwrap();
+            let mut expected = chart.clone();
+            for (axis, d) in delta.iter().enumerate() {
+                expected.position[axis] += d;
+            }
+            assert_eq!(
+                next.charts.iter().find(|c| c.id == extra).unwrap(),
+                &expected
+            );
+        } else {
+            let drawing = doc.drawings.iter().find(|d| d.id == extra).unwrap();
+            let mut expected = drawing.clone();
+            for point in [&mut expected.start, &mut expected.end] {
+                for (axis, d) in delta.iter().enumerate() {
+                    point[axis] += d;
+                }
+            }
+            assert_eq!(
+                next.drawings.iter().find(|d| d.id == extra).unwrap(),
+                &expected
+            );
+        }
+        assert_eq!(next.organization, doc.organization);
+        next.clone().validate().unwrap();
+    }
+}
+
+#[test]
+fn external_free_and_text_only_groups_stay_fixed() {
+    for variant in 0..3 {
+        let mut doc = Document::default();
+        let first_kind = if variant == 2 {
             ShapeKind::Text
         } else {
             ShapeKind::Rectangle
         };
         let first = doc.add_node(first_kind, [400., 400.]);
-        let extra = match variant {
-            0 => doc.add_chart(ChartKind::Bars, [600., 400.]),
-            1 => doc.add_drawing(DrawingKind::Line, [500., 400.], [600., 500.]),
-            2 | 3 => {
-                let external = doc.add_node(ShapeKind::Rectangle, [700., 400.]);
-                let edge = doc.connect(first, external, ConnectorKind::Elbow).unwrap();
-                if variant == 3 {
-                    doc.connectors[0].to = 0;
-                    doc.connectors[0].free_end = Some([700., 400.]);
-                }
-                edge
+        let extra = if variant == 2 {
+            doc.add_node(ShapeKind::Text, [600., 400.])
+        } else {
+            let external = doc.add_node(ShapeKind::Rectangle, [700., 400.]);
+            let edge = doc.connect(first, external, ConnectorKind::Elbow).unwrap();
+            if variant == 1 {
+                doc.connectors[0].to = 0;
+                doc.connectors[0].free_end = Some([700., 400.]);
             }
-            _ => doc.add_node(ShapeKind::Text, [600., 400.]),
+            edge
         };
         doc.group_objects(&[first, extra]).unwrap();
         doc.add_node(ShapeKind::Rectangle, [1000., 800.]);
@@ -475,5 +519,100 @@ fn rounded_group_envelopes_do_not_shift_successors_on_a_second_layout() {
         let repeated = preview(&next, None, direction).unwrap();
         assert_eq!(repeated.moved, 0, "axis {axis}");
         assert_eq!(repeated.document, next);
+    }
+}
+
+#[test]
+fn fractional_mixed_group_envelopes_keep_successors_stable() {
+    use diagcraft::{chart::ChartKind, document::DrawingKind};
+    for direction in [Direction::Horizontal, Direction::Vertical] {
+        for drawing in [false, true] {
+            let mut doc = Document::default();
+            let node = doc.add_node(ShapeKind::Rectangle, [0., 0.]);
+            doc.node_mut(node).unwrap().position = [-50.23; 2];
+            let extra = if drawing {
+                doc.add_drawing(DrawingKind::Line, [-50.23; 2], [409.83; 2])
+            } else {
+                let id = doc.add_chart(ChartKind::Bars, [0., 0.]);
+                doc.charts[0].position = [310.13; 2];
+                doc.charts[0].size = [129.7; 2];
+                id
+            };
+            doc.group_objects(&[node, extra]).unwrap();
+            let tail = doc.add_node(ShapeKind::Rectangle, [900., 900.]);
+            doc.connect(node, tail, ConnectorKind::Elbow).unwrap();
+            let next = preview(&doc, None, direction).unwrap().document;
+            let repeated = preview(&next, None, direction).unwrap();
+            assert_eq!(repeated.moved, 0, "{direction:?}, drawing={drawing}");
+            assert_eq!(repeated.document, next);
+        }
+    }
+}
+
+#[test]
+fn mixed_curved_group_preserves_labels_protection_and_its_full_envelope() {
+    use diagcraft::{chart::ChartKind, document::DrawingKind};
+    for direction in [Direction::Horizontal, Direction::Vertical] {
+        let mut doc = Document::default();
+        let node = doc.add_node(ShapeKind::Rectangle, [600., 600.]);
+        let chart = doc.add_chart(ChartKind::Bars, [950., 850.]);
+        let drawing = doc.add_drawing(DrawingKind::Bezier, [500., 800.], [900., 400.]);
+        doc.drawings[0].bend = 250.;
+        doc.drawings[0].label = "Curved group label".into();
+        doc.drawings[0].label_offset = [12., -8.];
+        doc.group_objects(&[node, chart, drawing]).unwrap();
+        let obstacle = doc.add_node(ShapeKind::Rectangle, [0., 0.]);
+        doc.node_mut(obstacle).unwrap().position = [40., 40.];
+        doc.node_mut(obstacle).unwrap().size = [200., 200.];
+        let before = doc.clone();
+        let next = preview(&doc, Some(&[drawing]), direction).unwrap();
+        assert_eq!(next.moved, 1);
+        assert_eq!(next.fixed, 1);
+        assert_eq!(next.document.node(obstacle), doc.node(obstacle));
+        let delta = [0, 1].map(|axis| {
+            next.document.node(node).unwrap().position[axis]
+                - doc.node(node).unwrap().position[axis]
+        });
+        let mut expected = doc.drawings[0].clone();
+        for point in [&mut expected.start, &mut expected.end] {
+            for axis in 0..2 {
+                point[axis] += delta[axis];
+            }
+        }
+        assert_eq!(next.document.drawings[0], expected);
+        assert_eq!(
+            next.document.drawings[0].label_position(),
+            expected.label_position()
+        );
+        for point in next.document.drawings[0].points().into_iter().chain([
+            next.document.charts[0].position,
+            [0, 1].map(|a| next.document.charts[0].position[a] + next.document.charts[0].size[a]),
+        ]) {
+            let cross = usize::from(direction == Direction::Horizontal);
+            assert!(
+                point[cross] >= 300.,
+                "group envelope avoids the fixed obstacle"
+            );
+            for (axis, coordinate) in point.into_iter().enumerate() {
+                assert!(coordinate >= 0. && coordinate + 40. <= next.document.page_size[axis]);
+            }
+        }
+        assert_eq!(
+            preview(&next.document, Some(&[chart]), direction)
+                .unwrap()
+                .document,
+            next.document
+        );
+        for member in [chart, drawing] {
+            let mut protected = doc.clone();
+            protected.set_objects_locked(&[member], true).unwrap();
+            assert!(preview(&protected, Some(&[node]), direction).is_err());
+            let mut hidden = doc.clone();
+            let layer = hidden.create_layer("Hidden member".into()).unwrap();
+            hidden.move_objects_to_layer(&[member], layer).unwrap();
+            hidden.update_layer(layer, None, Some(false), None).unwrap();
+            assert!(preview(&hidden, Some(&[node]), direction).is_err());
+        }
+        assert_eq!(doc, before);
     }
 }

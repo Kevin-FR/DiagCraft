@@ -93,8 +93,10 @@ versionnés avec migration ; aucun numéro n’est promis ici.
 - [x] Première mise en page automatique des blocs avec aperçu et annulation (0.13.1). Voir [le périmètre et les limites](docs/mise-en-page.md).
 - [x] Espacements indépendants entre niveaux et entre blocs, préréglages Compact/Normal/Aéré et aperçu recalculé (0.13.1).
 - [x] Réduire les croisements estimés entre niveaux voisins : balayages bornés, meilleur ordre retenu et score dans l’aperçu (0.13.1).
-- [x] Mise en page des groupes de blocs comme unités, avec disposition interne et points manuels des connecteurs internes groupés conservés (branche de développement, non publié). Les groupes mixtes restent fixes ; voir [le périmètre](docs/mise-en-page.md).
-- [ ] Affiner la mise en page : groupes mixtes contenant des graphiques ou dessins libres, et prise en compte des routes réelles/liaisons longues dans l’optimisation.
+- [x] Mise en page des groupes de blocs comme unités, avec disposition interne et points manuels des connecteurs internes groupés conservés (branche de développement, non publié). Les groupes mixtes compatibles sont désormais inclus ; voir [le périmètre](docs/mise-en-page.md).
+- [x] Groupes mixtes compatibles avec au moins un bloc autre qu’un texte : graphiques et dessins libres déplacés avec leur enveloppe, aperçu et annulation unique (branche de développement, non publié). Les connecteurs membres externes ou à extrémité libre gardent le groupe fixe. Voir [le contrat](docs/groupes-mixtes.md) et [la validation](docs/sprint-groupes-mixtes.md).
+- [x] Liaisons longues incluses dans le score estimé : segments intermédiaires à la rangée de départ, dernier segment relié à la rangée d’arrivée ; calcul déterministe et meilleurs candidats retenus (branche de développement, non publié).
+- [ ] Prendre en compte les routes réelles dans l’optimisation de mise en page : coudes, obstacles et points manuels ; définir un budget de calcul et comparer les résultats aux exports.
 - [x] Première arborescence : page active → calques → groupes → objets, sélecteur de page, filtre et navigation clavier (branche de développement, non publié).
 - [x] Retrouver la sélection et effacer le filtre dans l’arborescence (branche de développement, non publié).
 - [x] Recherche explicite de structure sur toutes les pages, limitée aux 300 premiers résultats (branche de développement, non publié).
@@ -118,6 +120,40 @@ La préparation 1.0 garde ses critères : essais sur MacBook 13 pouces, clavier
 seul et lecteurs d’écran, fluidité et latence mesurées, relecture des langues,
 robustesse des fichiers et distribution signée. Les certificats éditeur restent
 à configurer pour les signatures et l’installation intégrée des mises à jour.
+
+## Suite priorisée après la revue du 8 novembre 2026
+
+Les changements des groupes mixtes et du score des liaisons longues sont sur la
+branche de développement ; aucune nouvelle release n’est annoncée. Les lots
+CSV, import `.drawio`, description des exports, étiquettes/recherche, liens entre
+pages, styles nommés et comparaison visuelle IA sont également implémentés.
+La revue corrige aussi les bornes numériques et la validation des définitions
+de styles nommés pour préserver l’enregistrement après propagation.
+Les priorités ci-dessous portent sur les travaux encore ouverts :
+
+1. **Conteneurs et couloirs de processus** : définir appartenance, déplacement,
+   redimensionnement, connexions et comportement des calques/verrous. Exiger
+   aperçu, annulation atomique et tests d’import/export ; versionner le format
+   et l’API si le contrat les modifie.
+2. **Composants réutilisables liés** : préciser définition/instance, surcharges
+   locales, propagation et détachement ; vérifier les interactions avec les
+   styles nommés et les pages copiées avant implémentation.
+3. **Mise en page et interopérabilité** : mesurer les croisements des routes
+   réelles sous un budget borné ; traiter ensuite rotation et import SVG comme
+   des lots séparés avec corpus et diagnostics de pertes.
+4. **Exports réouvrables facultatifs** : définir les données embarquées et les
+   limites de lecture, avec activation explicite, avant tout changement PNG/SVG.
+5. **Validation 1.0 et maintenance** : parcours humains sur petit écran, clavier
+   et lecteurs d’écran, relecture des langues, latence du canevas et mesures avec
+   images sous Windows/Linux ; migration des cinq avis transitifs documentés
+   dans [maintenance.md](docs/maintenance.md). La signature/notarisation et
+   l’installation intégrée des mises à jour dépendent des certificats éditeur.
+
+Avant publication, rétablir l’exécution des jobs CI puis confirmer les builds
+Windows/Linux : les jobs ne démarrent pas lors de cette revue. Les contrôles
+locaux macOS ne remplacent ni ces jobs ni les essais humains. Chaque lot reste
+ouvert tant que ses critères ne sont pas validés ; l’optimisation des routes
+réelles reste explicitement à faire.
 
 ## Prochaines priorités après l’audit comparatif
 

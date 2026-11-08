@@ -26,7 +26,7 @@ pub struct Preview {
     pub document: Document,
     pub moved: usize,
     pub fixed: usize,
-    /// Straight centre-line crossings between consecutive levels, not routed geometry.
+    /// Estimated crossings between consecutive levels, including long-link segments.
     // Baseline is the automatic ID order, not the source drawing's geometry.
     pub crossings_before: u64,
     pub crossings_after: u64,
@@ -37,6 +37,8 @@ pub struct Preview {
 struct Unit {
     nodes: Vec<u64>,
     connectors: Vec<u64>,
+    charts: Vec<u64>,
+    drawings: Vec<u64>,
     position: Point,
     size: Point,
     geometry: Vec<(Point, Point)>,
@@ -45,7 +47,7 @@ impl Unit {
     // Measure the actual f32 result rather than translating the old envelope.
     // Otherwise rounding a member can change the next level/cursor on repetition.
     fn placed_extent(&self, axis: usize, origin: f32) -> f32 {
-        if self.nodes.len() == 1 || origin == self.position[axis] {
+        if self.geometry.len() == 1 || origin == self.position[axis] {
             return self.size[axis];
         }
         self.geometry
@@ -78,6 +80,8 @@ fn placement_units(
 ) -> Vec<Unit> {
     let nodes: BTreeMap<_, _> = doc.nodes.iter().map(|n| (n.id, n)).collect();
     let connectors: BTreeMap<_, _> = doc.connectors.iter().map(|e| (e.id, e)).collect();
+    let charts: BTreeMap<_, _> = doc.charts.iter().map(|c| (c.id, c)).collect();
+    let drawings: BTreeMap<_, _> = doc.drawings.iter().map(|d| (d.id, d)).collect();
     let mut units: BTreeMap<u64, Unit> = nodes
         .values()
         .filter(|n| {
@@ -92,6 +96,8 @@ fn placement_units(
                 Unit {
                     nodes: vec![n.id],
                     connectors: vec![],
+                    charts: vec![],
+                    drawings: vec![],
                     position: n.position,
                     size: n.size,
                     geometry: vec![(n.position, n.size)],
@@ -117,16 +123,24 @@ fn placement_units(
         {
             continue;
         }
-        // Charts, drawings, and connectors with an external/free endpoint are
-        // deliberately fixed until their complete geometry can be translated.
+        // A group is placeable only when every member is a node (block, image,
+        // text), a chart, a drawing, or an internal connector whose two
+        // endpoints are inside the group and not free. External or free
+        // connectors keep the whole group fixed, because moving them would
+        // break the outside connection.
+        let internal_connector = |id| {
+            connectors.get(id).is_some_and(|edge| {
+                member_nodes.contains(&edge.from)
+                    && member_nodes.contains(&edge.to)
+                    && edge.free_start.is_none()
+                    && edge.free_end.is_none()
+            })
+        };
         if group.members.iter().any(|id| {
             !member_nodes.contains(id)
-                && !connectors.get(id).is_some_and(|edge| {
-                    member_nodes.contains(&edge.from)
-                        && member_nodes.contains(&edge.to)
-                        && edge.free_start.is_none()
-                        && edge.free_end.is_none()
-                })
+                && !charts.contains_key(id)
+                && !drawings.contains_key(id)
+                && !internal_connector(id)
         }) {
             continue;
         }
@@ -135,6 +149,18 @@ fn placement_units(
             .iter()
             .copied()
             .filter(|id| connectors.contains_key(id))
+            .collect();
+        let member_charts: Vec<_> = group
+            .members
+            .iter()
+            .copied()
+            .filter(|id| charts.contains_key(id))
+            .collect();
+        let member_drawings: Vec<_> = group
+            .members
+            .iter()
+            .copied()
+            .filter(|id| drawings.contains_key(id))
             .collect();
         let mut geometry = Vec::new();
         let mut min = [f32::INFINITY; 2];
@@ -147,9 +173,26 @@ fn placement_units(
                 max[axis] = max[axis].max(node.position[axis] + node.size[axis]);
             }
         }
+        for id in &member_charts {
+            let chart = charts[id];
+            geometry.push((chart.position, chart.size));
+            for axis in 0..2 {
+                min[axis] = min[axis].min(chart.position[axis]);
+                max[axis] = max[axis].max(chart.position[axis] + chart.size[axis]);
+            }
+        }
         for id in &member_connectors {
             for point in &connectors[id].waypoints {
                 geometry.push((*point, [0.; 2]));
+                for axis in 0..2 {
+                    min[axis] = min[axis].min(point[axis]);
+                    max[axis] = max[axis].max(point[axis]);
+                }
+            }
+        }
+        for id in &member_drawings {
+            for point in drawings[id].points() {
+                geometry.push((point, [0.; 2]));
                 for axis in 0..2 {
                     min[axis] = min[axis].min(point[axis]);
                     max[axis] = max[axis].max(point[axis]);
@@ -161,6 +204,8 @@ fn placement_units(
             Unit {
                 nodes: member_nodes.into_iter().collect(),
                 connectors: member_connectors,
+                charts: member_charts,
+                drawings: member_drawings,
                 position: min,
                 size: [max[0] - min[0], max[1] - min[1]],
                 geometry,
@@ -204,6 +249,17 @@ pub fn preview_with_spacing(
         .iter()
         .enumerate()
         .flat_map(|(i, unit)| unit.nodes.iter().map(move |id| (*id, i)))
+        .collect();
+    let unit_members: BTreeSet<u64> = units
+        .iter()
+        .flat_map(|unit| {
+            unit.nodes
+                .iter()
+                .chain(&unit.connectors)
+                .chain(&unit.charts)
+                .chain(&unit.drawings)
+        })
+        .copied()
         .collect();
     let mut graph = vec![vec![]; units.len()];
     let mut reverse = graph.clone();
@@ -310,7 +366,7 @@ pub fn preview_with_spacing(
         .chain(
             doc.charts
                 .iter()
-                .filter(|c| view.is_object_visible(c.id))
+                .filter(|c| view.is_object_visible(c.id) && !unit_members.contains(&c.id))
                 .map(|c| (c.position, c.size)),
         )
         .collect();
@@ -368,6 +424,33 @@ pub fn preview_with_spacing(
             for id in &unit.connectors {
                 connector_placements.insert(*id, (unit.position, position));
             }
+            for id in &unit.charts {
+                let chart = next
+                    .charts
+                    .iter_mut()
+                    .find(|c| c.id == *id)
+                    .expect("chart member still present");
+                for (axis, coordinate) in position.iter().enumerate() {
+                    chart.position[axis] = translated_coordinate(
+                        chart.position[axis],
+                        unit.position[axis],
+                        *coordinate,
+                    );
+                }
+            }
+            for id in &unit.drawings {
+                let drawing = next
+                    .drawings
+                    .iter_mut()
+                    .find(|d| d.id == *id)
+                    .expect("drawing member still present");
+                for point in [&mut drawing.start, &mut drawing.end] {
+                    for (axis, coordinate) in position.iter().enumerate() {
+                        point[axis] =
+                            translated_coordinate(point[axis], unit.position[axis], *coordinate);
+                    }
+                }
+            }
         }
         occupied.push((position, size));
         cursors[level] = position[cross] + size[cross] + spacing.blocks;
@@ -407,14 +490,30 @@ fn row_positions(levels: &[Vec<usize>], count: usize) -> Vec<usize> {
 }
 
 /// Count edge inversions with a Fenwick tree, batching shared sources so fans
-/// are never counted as crossings. O(E log E + E log V), including dense graphs.
+/// are never counted as crossings. Long edges that span several levels are
+/// kept at the source's row until their final segment reaches the target row.
+/// O(S log S + S log V), where S is the number of level segments, including
+/// those spanned by long edges. This estimates crossings, not routed geometry.
 fn crossing_count(levels: &[Vec<usize>], rank: &[usize], graph: &[Vec<usize>]) -> u64 {
     let rows = row_positions(levels, graph.len());
     let mut edges = vec![vec![]; levels.len()];
     for (a, children) in graph.iter().enumerate() {
         for &b in children {
-            if rank[b] == rank[a] + 1 {
-                edges[rank[a]].push((rows[a], rows[b]));
+            let r1 = rank[a];
+            let r2 = rank[b];
+            if r2 <= r1 {
+                continue;
+            }
+            if r2 == r1 + 1 {
+                edges[r1].push((rows[a], rows[b]));
+            } else {
+                // Keep the intermediate stubs at the source row, but connect
+                // the final segment to the actual target. Otherwise shared
+                // targets can count as crossings and reversed long links do not.
+                for target in &mut edges[r1..r2] {
+                    target.push((rows[a], rows[a]));
+                }
+                edges[r2 - 1].last_mut().unwrap().1 = rows[b];
             }
         }
     }
@@ -519,20 +618,27 @@ mod tests {
     use super::*;
     fn oracle(levels: &[Vec<usize>], rank: &[usize], graph: &[Vec<usize>]) -> u64 {
         let rows = row_positions(levels, graph.len());
-        let edges: Vec<_> = graph
-            .iter()
-            .enumerate()
-            .flat_map(|(a, children)| children.iter().map(move |&b| (a, b)))
-            .filter(|(a, b)| rank[*b] == rank[*a] + 1)
-            .collect();
+        let mut segments = vec![vec![]; levels.len()];
+        for (a, children) in graph.iter().enumerate() {
+            for &b in children {
+                let r1 = rank[a];
+                let r2 = rank[b];
+                if r2 <= r1 {
+                    continue;
+                }
+                for (level, target) in segments.iter_mut().enumerate().take(r2).skip(r1) {
+                    let end = if level + 1 == r2 { rows[b] } else { rows[a] };
+                    target.push((rows[a], end));
+                }
+            }
+        }
         let mut count = 0;
-        for (index, &(a, b)) in edges.iter().enumerate() {
-            for &(c, d) in &edges[index + 1..] {
-                if rank[a] == rank[c]
-                    && ((rows[a] < rows[c] && rows[b] > rows[d])
-                        || (rows[a] > rows[c] && rows[b] < rows[d]))
-                {
-                    count += 1;
+        for segment in segments {
+            for (index, &(a, b)) in segment.iter().enumerate() {
+                for &(c, d) in &segment[index + 1..] {
+                    if (a < c && b > d) || (a > c && b < d) {
+                        count += 1;
+                    }
                 }
             }
         }
@@ -574,5 +680,48 @@ mod tests {
             crossing_count(&levels, &rank, &graph),
             oracle(&levels, &rank, &graph)
         );
+    }
+
+    #[test]
+    fn long_links_connect_to_their_destination_and_do_not_cross_shared_targets() {
+        let levels = vec![vec![0, 1], vec![2, 3, 4], vec![5, 6]];
+        let rank = [0, 0, 1, 1, 1, 2, 2];
+        let mut graph = vec![vec![]; 7];
+        graph[1] = vec![5];
+        graph[4] = vec![5];
+        assert_eq!(crossing_count(&levels, &rank, &graph), 0);
+        // Two long links with reversed destinations cross once.
+        graph[4].clear();
+        graph[0] = vec![6];
+        assert_eq!(crossing_count(&levels, &rank, &graph), 1);
+    }
+
+    #[test]
+    fn every_three_level_graph_matches_the_oracle_and_never_regresses() {
+        let original = vec![vec![0, 1], vec![2, 3], vec![4, 5]];
+        let ranks = [0, 0, 1, 1, 2, 2];
+        let pairs: Vec<_> = (0..6)
+            .flat_map(|a| (0..6).map(move |b| (a, b)))
+            .filter(|&(a, b)| ranks[a] < ranks[b])
+            .collect();
+        for mask in 0..(1 << pairs.len()) {
+            let mut graph = vec![vec![]; 6];
+            let mut reverse = graph.clone();
+            for (bit, &(a, b)) in pairs.iter().enumerate() {
+                if mask & (1 << bit) != 0 {
+                    graph[a].push(b);
+                    reverse[b].push(a);
+                }
+            }
+            let before = crossing_count(&original, &ranks, &graph);
+            assert_eq!(before, oracle(&original, &ranks, &graph));
+            let (after, score) = reduce_crossings(original.clone(), &ranks, &graph, &reverse);
+            assert_eq!(score, oracle(&after, &ranks, &graph));
+            assert!(score <= before);
+            assert_eq!(
+                (after, score),
+                reduce_crossings(original.clone(), &ranks, &graph, &reverse)
+            );
+        }
     }
 }

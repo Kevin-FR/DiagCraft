@@ -866,3 +866,55 @@ fn named_styles_round_trip_and_stay_backward_compatible() {
     assert!(reloaded.named_styles.0.is_empty());
     assert!(reloaded.nodes.iter().all(|n| n.style_ref.is_none()));
 }
+
+#[test]
+fn named_styles_reject_invalid_values_atomically_and_validate_loaded_definitions() {
+    let mut doc = Document::default();
+    doc.create_named_style("Accent", [1; 3], [2; 3], [3; 3], 2., 14.)
+        .unwrap();
+    let node = doc.add_node(ShapeKind::Rectangle, [200.; 2]);
+    doc.apply_named_style_to_nodes(&[node], "Accent").unwrap();
+    doc.add_page(false).unwrap();
+    let other = doc.add_node(ShapeKind::Rectangle, [300.; 2]);
+    doc.apply_named_style_to_nodes(&[other], "Accent").unwrap();
+    let before = doc.clone();
+    for value in [f32::NAN, f32::INFINITY, -1., 20.1, 32.] {
+        assert!(doc.edit_named_style_stroke_width("Accent", value).is_err());
+        assert!(
+            doc.create_named_style("Invalid", [1; 3], [2; 3], [3; 3], value, 12.)
+                .is_err()
+        );
+        assert_eq!(doc, before);
+    }
+    for value in [f32::NAN, f32::INFINITY, 1., 5.9, 200.1, 256.] {
+        assert!(doc.edit_named_style_font_size("Accent", value).is_err());
+        assert!(
+            doc.create_named_style("Invalid", [1; 3], [2; 3], [3; 3], 2., value)
+                .is_err()
+        );
+        assert_eq!(doc, before);
+    }
+    for (width, font) in [(0., 6.), (20., 200.)] {
+        doc.edit_named_style_stroke_width("Accent", width).unwrap();
+        doc.edit_named_style_font_size("Accent", font).unwrap();
+        doc.validate().unwrap();
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("styles.draw");
+        doc.save(&path).unwrap();
+        assert!(Document::load(&path).is_ok());
+    }
+    for invalid in ["empty", "duplicate", "width", "font"] {
+        let mut raw = serde_json::to_value(&before).unwrap();
+        match invalid {
+            "empty" => raw["named_styles"][0]["name"] = " ".into(),
+            "duplicate" => {
+                let duplicate = raw["named_styles"][0].clone();
+                raw["named_styles"].as_array_mut().unwrap().push(duplicate);
+            }
+            "width" => raw["named_styles"][0]["stroke_width"] = 32.into(),
+            _ => raw["named_styles"][0]["font_size"] = 256.into(),
+        }
+        let loaded: Document = serde_json::from_value(raw).unwrap();
+        assert!(loaded.validate().is_err(), "{invalid}");
+    }
+}

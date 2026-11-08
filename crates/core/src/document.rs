@@ -380,6 +380,21 @@ impl Default for NamedStyle {
         }
     }
 }
+impl NamedStyle {
+    pub(crate) fn validate(&self) -> Result<(), String> {
+        if self.name.trim().is_empty() || self.name.len() > 64 {
+            return Err("Nom de style invalide.".into());
+        }
+        if !self.font_size.is_finite()
+            || !(6.0..=200.0).contains(&self.font_size)
+            || !self.stroke_width.is_finite()
+            || !(0.0..=20.0).contains(&self.stroke_width)
+        {
+            return Err("Style ou texte de forme invalide.".into());
+        }
+        Ok(())
+    }
+}
 
 /// Série de styles nommés du document (`Vec<NamedStyle>`), sérialisé quand non
 /// vide pour préserver la compacité de v8.
@@ -1366,6 +1381,13 @@ impl Document {
     }
     pub fn validate(&self) -> Result<(), String> {
         self.validate_image_budget()?;
+        let mut style_names = HashSet::new();
+        for style in &self.named_styles.0 {
+            style.validate()?;
+            if !style_names.insert(&style.name) {
+                return Err("Un style porte déjà ce nom.".into());
+            }
+        }
         if self.format_version != FORMAT_VERSION {
             return Err(format!(
                 "Version de document non prise en charge : {}",

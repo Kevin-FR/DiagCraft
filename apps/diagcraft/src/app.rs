@@ -1731,12 +1731,12 @@ impl DrawApp {
                 appearance_ui::color(ui, "Remplissage", &mut edited.fill);
                 appearance_ui::color(ui, "Trait", &mut edited.stroke);
                 appearance_ui::color(ui, "Couleur du texte", &mut edited.text_color);
-                appearance_ui::scalar(ui, "Épaisseur", &mut edited.stroke_width, 0.0..=32.0, " px");
+                appearance_ui::scalar(ui, "Épaisseur", &mut edited.stroke_width, 0.0..=20.0, " px");
                 appearance_ui::scalar(
                     ui,
                     "Taille du texte",
                     &mut edited.font_size,
-                    1.0..=256.0,
+                    6.0..=200.0,
                     " px",
                 );
                 let _ = style;

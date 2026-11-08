@@ -5,6 +5,17 @@ et l’API agents sont versionnés indépendamment.
 
 ## Non publié — navigation, accessibilité et distribution
 
+- Mise en page des groupes mixtes comprenant au moins un bloc : graphiques et
+  dessins libres suivent le groupe, avec enveloppe complète, aperçu simplifié
+  et une seule annulation. Coordonnées décimales stables lors d’une répétition.
+- Le score estimé inclut les liaisons longues jusqu’à leur arrivée ; les routes
+  réelles restent hors du calcul. Aides précisées dans les sept langues.
+- Styles nommés : bornes de police/épaisseur alignées sur le moteur ;
+  définitions invalides ou dupliquées refusées, modifications invalides sans
+  changement partiel du document.
+- Dépendance transitive Linux `async-executor` mise à jour de 1.14.0 (retirée
+  du registre) à 1.14.1.
+
 - Le format `.draw` passe en **v8** : chaque page porte désormais un identifiant
   numérique permanent et unique (`Page.id`), base des futurs liens entre pages.
   Les documents v7 sont migrés automatiquement et de façon déterministe à

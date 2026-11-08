@@ -84,7 +84,7 @@ impl DrawApp {
                 ui.add(egui::DragValue::new(&mut panel.spacing.blocks).range(20. ..=300.).speed(1.).suffix(" px")).labelled_by(blocks.id);
             });
             if panel.spacing != previous { panel.refresh(); }
-            ui.label(t("Les groupes compatibles se déplacent ensemble, avec leurs points internes. Textes isolés et blocs protégés restent fixes.")).on_hover_text(t("Groupes de blocs et de connecteurs internes uniquement. Un membre sélectionné entraîne tout le groupe ; les autres points manuels restent fixes."));
+            ui.label(t("Les groupes compatibles se déplacent ensemble, avec leurs points internes. Textes isolés et blocs protégés restent fixes.")).on_hover_text(t("Groupes avec au moins un bloc, avec graphiques, dessins libres et connecteurs internes. Un membre sélectionné entraîne tout le groupe ; les autres points manuels restent fixes."));
             if !panel.current(self) {
                 ui.colored_label(theme_ui::ERROR_TEXT, t("Le document a changé. Actualisez l’aperçu avant de continuer."));
                 if ui.button(t("Actualiser")).clicked() {
@@ -95,7 +95,7 @@ impl DrawApp {
             match &panel.preview {
                 Ok(preview) => {
                     ui.label(i18n::render("{0} blocs déplacés · {1} blocs conservés", &[("0", preview.moved.to_string()), ("1", preview.fixed.to_string())]));
-                    ui.label(i18n::render("Croisements entre niveaux voisins : {0} → {1}", &[("0", preview.crossings_before.to_string()), ("1", preview.crossings_after.to_string())])).on_hover_text(t("Comparaison avec le placement automatique initial. Les routes finales peuvent différer."));
+                    ui.label(i18n::render("Croisements entre niveaux voisins : {0} → {1}", &[("0", preview.crossings_before.to_string()), ("1", preview.crossings_after.to_string())])).on_hover_text(t("Comparaison avec le placement automatique initial. Les liaisons longues sont comptées ; les routes réelles des connecteurs peuvent différer."));
                     ui.label(t("Aperçu des positions · liaisons simplifiées"));
                     let (rect, _) = ui.allocate_exact_size(vec2(ui.available_width(), (ctx.content_rect().height() - 425.).clamp(120., 280.)), Sense::hover());
                     paint_preview(ui.painter(), &preview.document, rect);
@@ -161,6 +161,14 @@ fn paint_preview(p: &egui::Painter, doc: &Document, rect: Rect) {
             painter.rect(r, 2, SURFACE, Stroke::new(1., BORDER), StrokeKind::Inside);
         }
     }
+    for drawing in &doc.drawings {
+        if view.is_object_visible(drawing.id) {
+            painter.add(egui::Shape::line(
+                drawing.points().into_iter().map(map).collect(),
+                Stroke::new(1., rgb(drawing.color)),
+            ));
+        }
+    }
     painter.rect_stroke(
         Rect::from_min_size(origin, vec2(doc.page_size[0], doc.page_size[1]) * scale),
         0,
@@ -182,6 +190,46 @@ mod tests {
         doc.connectors[0].waypoints = vec![[950., 650.]];
         doc.group_objects(&[a, b, edge]).unwrap();
         (doc, [a, b, edge, fixed])
+    }
+
+    fn mixed_group_flow() -> (Document, [u64; 4]) {
+        use diagcraft::{chart::ChartKind, document::DrawingKind};
+        let mut doc = Document::default();
+        let a = doc.add_node(ShapeKind::Rectangle, [750., 500.]);
+        let chart = doc.add_chart(ChartKind::Bars, [1050., 500.]);
+        let drawing = doc.add_drawing(DrawingKind::Line, [900., 700.], [1000., 800.]);
+        let fixed = doc.add_node(ShapeKind::Rectangle, [1600., 900.]);
+        doc.group_objects(&[a, chart, drawing]).unwrap();
+        (doc, [a, chart, drawing, fixed])
+    }
+
+    #[test]
+    fn preview_paints_visible_free_drawings_and_omits_hidden_ones() {
+        let ctx = egui::Context::default();
+        let (mut doc, ids) = mixed_group_flow();
+        doc.drawings[0].color = [201, 39, 87];
+        for hidden in [false, true] {
+            if hidden {
+                let layer = doc.create_layer("Hidden drawing".into()).unwrap();
+                doc.move_objects_to_layer(&[ids[2]], layer).unwrap();
+                doc.update_layer(layer, None, Some(false), None).unwrap();
+            }
+            let output = ctx.run(egui::RawInput::default(), |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    paint_preview(ui.painter(), &doc, ui.max_rect());
+                });
+            });
+            let count = output
+                .shapes
+                .iter()
+                .filter(|shape| {
+                    matches!(&shape.shape, egui::Shape::Path(path)
+                    if path.points.len() == 2 && matches!(path.stroke.color,
+                        egui::epaint::ColorMode::Solid(color) if color == rgb([201, 39, 87])))
+                })
+                .count();
+            assert_eq!(count, usize::from(!hidden));
+        }
     }
 
     #[test]
@@ -243,6 +291,78 @@ mod tests {
                 assert!(!app.history.can_redo());
             }
         }
+    }
+
+    #[test]
+    fn mixed_group_previews_and_applies_as_one_undoable_translation() {
+        for (direction, language) in [Direction::Horizontal, Direction::Vertical]
+            .into_iter()
+            .flat_map(|direction| {
+                Language::ALL
+                    .into_iter()
+                    .map(move |language| (direction, language))
+            })
+        {
+            let ctx = egui::Context::default();
+            let (doc, ids) = mixed_group_flow();
+            let before = doc.clone();
+            let mut app = DrawApp::from_context(&ctx, doc, None, None);
+            app.set_language(Some(language));
+            app.selected = vec![ids[0]];
+            app.open_auto_layout();
+            let mut panel = app.auto_layout_ui.take().unwrap();
+            panel.direction = direction;
+            panel.refresh();
+            let preview = panel.preview.as_ref().unwrap();
+            let expected = preview.document.clone();
+            let a = expected.node(ids[0]).unwrap();
+            let source_a = before.node(ids[0]).unwrap();
+            let delta = [
+                a.position[0] - source_a.position[0],
+                a.position[1] - source_a.position[1],
+            ];
+            assert_ne!(
+                delta,
+                [0., 0.],
+                "mixed group translates on axis {direction:?}"
+            );
+            let source_chart = before.charts.iter().find(|c| c.id == ids[1]).unwrap();
+            let expected_chart = expected.charts.iter().find(|c| c.id == ids[1]).unwrap();
+            assert_eq!(
+                expected_chart.position,
+                [
+                    source_chart.position[0] + delta[0],
+                    source_chart.position[1] + delta[1]
+                ]
+            );
+            let source_drawing = before.drawings.iter().find(|d| d.id == ids[2]).unwrap();
+            let expected_drawing = expected.drawings.iter().find(|d| d.id == ids[2]).unwrap();
+            assert_eq!(
+                expected_drawing.start,
+                [
+                    source_drawing.start[0] + delta[0],
+                    source_drawing.start[1] + delta[1]
+                ]
+            );
+            assert_eq!(
+                expected_drawing.end,
+                [
+                    source_drawing.end[0] + delta[0],
+                    source_drawing.end[1] + delta[1]
+                ]
+            );
+            assert_eq!(expected.node(ids[3]), before.node(ids[3]));
+            assert_eq!(expected.organization, before.organization);
+            assert_eq!(app.doc, before);
+            assert!(!app.history.can_undo());
+
+            assert!(app.apply_auto_layout(&panel));
+            assert_eq!(app.doc, expected);
+            app.undo();
+            assert_eq!(app.doc, before);
+            assert!(!app.history.can_undo());
+        }
+        i18n::activate(Language::French);
     }
 
     #[test]

@@ -355,14 +355,16 @@ impl Document {
         if self.named_styles.0.iter().any(|s| s.name == name) {
             return Err("Un style porte déjà ce nom.".into());
         }
-        self.named_styles.0.push(NamedStyle {
+        let style = NamedStyle {
             name: name.to_owned(),
             fill,
             stroke,
             text_color,
             stroke_width,
             font_size,
-        });
+        };
+        style.validate()?;
+        self.named_styles.0.push(style);
         Ok(())
     }
     /// Renomme un style et met à jour toutes les références, ou `Err` si le
@@ -424,7 +426,10 @@ impl Document {
             .iter()
             .position(|s| s.name == name)
             .ok_or_else(|| format!("Style «{name}» introuvable."))?;
-        f(&mut self.named_styles.0[idx]);
+        let mut next = self.named_styles.0[idx].clone();
+        f(&mut next);
+        next.validate()?;
+        self.named_styles.0[idx] = next;
         self.propagate_style(name);
         Ok(())
     }
@@ -438,6 +443,7 @@ impl Document {
             .find(|s| s.name == name)
             .cloned()
             .ok_or_else(|| format!("Style «{name}» introuvable."))?;
+        style.validate()?;
         for n in self.nodes.iter_mut() {
             if ids.contains(&n.id) {
                 n.style_ref = Some(name.to_owned());

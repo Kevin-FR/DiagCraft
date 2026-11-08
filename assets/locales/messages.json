@@ -9944,14 +9944,14 @@
     "pt": "Os grupos compatíveis movem-se juntos, com os seus pontos internos. Textos isolados e blocos protegidos permanecem fixos.",
     "zh-Hans": "符合条件的组连同内部路径点一起移动。独立文本和受保护的块保持原位。"
   },
-  "Groupes de blocs et de connecteurs internes uniquement. Un membre sélectionné entraîne tout le groupe ; les autres points manuels restent fixes.": {
-    "fr": "Groupes de blocs et de connecteurs internes uniquement. Un membre sélectionné entraîne tout le groupe ; les autres points manuels restent fixes.",
-    "en": "Only groups of blocks and internal connectors. Selecting one member moves the whole group; other manual waypoints stay fixed.",
-    "de": "Nur Gruppen aus Blöcken und internen Verbindungen. Die Auswahl eines Mitglieds bewegt die ganze Gruppe; andere manuelle Wegpunkte bleiben fest.",
-    "es": "Solo grupos de bloques y conectores internos. Seleccionar un miembro mueve todo el grupo; los demás puntos manuales permanecen fijos.",
-    "it": "Solo gruppi di blocchi e connettori interni. Selezionare un membro sposta tutto il gruppo; gli altri punti manuali restano fissi.",
-    "pt": "Apenas grupos de blocos e conectores internos. Selecionar um membro move todo o grupo; os outros pontos manuais permanecem fixos.",
-    "zh-Hans": "仅支持由块和内部连接线组成的组。选择任一成员会移动整个组；其他手动路径点保持原位。"
+  "Groupes avec au moins un bloc, avec graphiques, dessins libres et connecteurs internes. Un membre sélectionné entraîne tout le groupe ; les autres points manuels restent fixes.": {
+    "fr": "Groupes avec au moins un bloc, avec graphiques, dessins libres et connecteurs internes. Un membre sélectionné entraîne tout le groupe ; les autres points manuels restent fixes.",
+    "en": "Groups with at least one block, including charts, free drawings and internal connectors. Selecting one member includes the whole group; other manual points stay fixed.",
+    "de": "Gruppen mit mindestens einem Block, einschließlich Diagrammen, freien Zeichnungen und internen Verbindungen. Die Auswahl eines Mitglieds schließt die ganze Gruppe ein; andere manuelle Punkte bleiben unverändert.",
+    "es": "Grupos con al menos un bloque, incluidos gráficos, dibujos libres y conectores internos. Seleccionar un miembro incluye todo el grupo; los demás puntos manuales permanecen fijos.",
+    "it": "Gruppi con almeno un blocco, inclusi grafici, disegni liberi e connettori interni. Selezionare un membro include tutto il gruppo; gli altri punti manuali restano fissi.",
+    "pt": "Grupos com pelo menos um bloco, incluindo gráficos, desenhos livres e conectores internos. Selecionar um membro inclui todo o grupo; os outros pontos manuais ficam fixos.",
+    "zh-Hans": "至少包含一个块的组，可包括图表、自由绘图和内部连接器。选择一个成员会包含整个组；其他手动点保持不变。"
   },
   "{0} blocs déplacés · {1} blocs conservés": {
     "fr": "{0} blocs déplacés · {1} blocs conservés",
@@ -10070,14 +10070,14 @@
     "pt": "Cruzamentos entre níveis adjacentes: {0} → {1}",
     "zh-Hans": "相邻层级间的交叉数：{0} → {1}"
   },
-  "Comparaison avec le placement automatique initial. Les routes finales peuvent différer.": {
-    "fr": "Comparaison avec le placement automatique initial. Les routes finales peuvent différer.",
-    "en": "Compared with the initial automatic placement. Final routes may differ.",
-    "de": "Vergleich mit der ursprünglichen automatischen Platzierung. Die endgültigen Verläufe können abweichen.",
-    "es": "Comparación con la distribución automática inicial. Las rutas finales pueden diferir.",
-    "it": "Confronto con la disposizione automatica iniziale. I percorsi finali possono differire.",
-    "pt": "Comparação com a disposição automática inicial. Os trajetos finais podem diferir.",
-    "zh-Hans": "与初始自动排列比较。最终连接路径可能不同。"
+  "Comparaison avec le placement automatique initial. Les liaisons longues sont comptées ; les routes réelles des connecteurs peuvent différer.": {
+    "fr": "Comparaison avec le placement automatique initial. Les liaisons longues sont comptées ; les routes réelles des connecteurs peuvent différer.",
+    "en": "Compared with the initial automatic placement. Long links are counted; actual connector routes may differ.",
+    "de": "Vergleich mit der ursprünglichen automatischen Platzierung. Lange Verbindungen werden gezählt; die tatsächlichen Verbindungsverläufe können abweichen.",
+    "es": "Comparación con la distribución automática inicial. Las conexiones largas se cuentan; las rutas reales de los conectores pueden diferir.",
+    "it": "Confronto con la disposizione automatica iniziale. I collegamenti lunghi sono contati; i percorsi reali dei connettori possono differire.",
+    "pt": "Comparação com a disposição automática inicial. As ligações longas são contadas; os trajetos reais dos conectores podem diferir.",
+    "zh-Hans": "与初始自动排列比较。长连接会被计算；实际的连接器路径可能不同。"
   },
   "Oui": {
     "fr": "Oui",
