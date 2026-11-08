@@ -754,3 +754,115 @@ fn svg_refuses_invalid_documents() {
     doc.connectors[0].from = 999;
     assert!(svg::export(&doc).is_err());
 }
+
+#[test]
+fn named_styles_propagate_across_pages_and_apply_detach() {
+    let mut d = Document::demo();
+    d.create_named_style("Accent", [200, 20, 20], [10, 10, 10], [0, 0, 0], 2.0, 14.0)
+        .unwrap();
+    // Nom invalide ou dupliqué refusé.
+    assert!(
+        d.create_named_style("  ", [1, 1, 1], [1, 1, 1], [1, 1, 1], 1., 12.)
+            .is_err()
+    );
+    assert!(
+        d.create_named_style("Accent", [1, 1, 1], [1, 1, 1], [1, 1, 1], 1., 12.)
+            .is_err()
+    );
+    let n0 = d.nodes[0].id;
+    d.apply_named_style_to_nodes(&[n0], "Accent").unwrap();
+    assert_eq!(d.nodes[0].style_ref.as_deref(), Some("Accent"));
+    assert_eq!(d.nodes[0].fill, [200, 20, 20]);
+    assert!(d.apply_named_style_to_nodes(&[n0], "Inconnu").is_err());
+
+    // Deuxième page avec une forme liée au même style.
+    d.add_page(false).unwrap();
+    d.add_node(ShapeKind::Rectangle, [100., 100.]);
+    let n1 = d.nodes[d.nodes.len() - 1].id;
+    d.apply_named_style_to_nodes(&[n1], "Accent").unwrap();
+    assert_eq!(d.nodes[d.nodes.len() - 1].fill, [200, 20, 20]);
+
+    // L'édition du style propage la valeur à toutes les pages.
+    d.edit_named_style_fill("Accent", [10, 200, 30]).unwrap();
+    assert_eq!(d.nodes[d.nodes.len() - 1].fill, [10, 200, 30]);
+    d.switch_page(0).unwrap();
+    assert_eq!(d.nodes[0].fill, [10, 200, 30]);
+    d.edit_named_style_stroke_width("Accent", 4.).unwrap();
+    assert_eq!(d.nodes[0].stroke_width, 4.);
+    // La table document-globale survit au changement de page.
+    assert_eq!(d.named_style_names(), vec!["Accent"]);
+
+    // Détacher ne change pas les valeurs courantes.
+    d.detach_named_style(&[n0]);
+    assert_eq!(d.nodes[0].style_ref, None);
+    assert_eq!(d.nodes[0].fill, [10, 200, 30]);
+
+    // Supprimer un style détache toutes les formes qui le référencent.
+    d.switch_page(1).unwrap();
+    d.remove_named_style("Accent").unwrap();
+    assert!(d.named_style_names().is_empty());
+    assert_eq!(d.nodes[0].style_ref, None);
+}
+
+#[test]
+fn named_styles_rename_updates_references_everywhere() {
+    let mut d = Document::demo();
+    d.create_named_style("Actuel", [1, 2, 3], [4, 5, 6], [7, 8, 9], 2., 12.)
+        .unwrap();
+    let id = d.nodes[0].id;
+    d.apply_named_style_to_nodes(&[id], "Actuel").unwrap();
+    d.add_page(false).unwrap();
+    d.add_node(ShapeKind::Rectangle, [50., 50.]);
+    d.apply_named_style_to_nodes(&[d.nodes[d.nodes.len() - 1].id], "Actuel")
+        .unwrap();
+    d.rename_named_style("Actuel", "Nouveau").unwrap();
+    assert_eq!(d.named_style_names(), vec!["Nouveau"]);
+    assert_eq!(
+        d.nodes[d.nodes.len() - 1].style_ref.as_deref(),
+        Some("Nouveau")
+    );
+    d.switch_page(0).unwrap();
+    assert_eq!(d.nodes[0].style_ref.as_deref(), Some("Nouveau"));
+    // Doublon et nom vide refusés.
+    assert!(d.rename_named_style("Nouveau", "Actuel").is_ok());
+    assert!(
+        d.rename_named_style("Nouveau", "Actuel").is_err(),
+        "Le renommage du style restant vers « Actuel » est un doublon"
+    );
+    d.rename_named_style("Actuel", "Nouveau").unwrap();
+    assert!(d.rename_named_style("Nouveau", "  ").is_err());
+}
+
+#[test]
+fn named_styles_round_trip_and_stay_backward_compatible() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("styles.rdraw");
+    let mut doc = Document::demo();
+    doc.create_named_style("Accent", [200, 30, 30], [20, 20, 20], [0, 0, 0], 2.0, 14.0)
+        .unwrap();
+    let id = doc.nodes[0].id;
+    doc.apply_named_style_to_nodes(&[id], "Accent").unwrap();
+    doc.save(&path).unwrap();
+    let raw = fs::read_to_string(&path).unwrap();
+    assert!(raw.contains("\"named_styles\""));
+    assert!(raw.contains("\"style_ref\""));
+    let loaded = Document::load(&path).unwrap();
+    assert_eq!(loaded.named_styles.0.len(), 1);
+    assert_eq!(loaded.named_styles.0[0].name, "Accent");
+    assert_eq!(loaded.nodes[0].style_ref.as_deref(), Some("Accent"));
+
+    // Absent quand vide (rétrocompatible) : rien n'écrit le champ.
+    let mut empty = Document::demo();
+    for n in empty.nodes.iter_mut() {
+        n.style_ref = None;
+    }
+    empty.save(&path).unwrap();
+    assert!(
+        !fs::read_to_string(&path)
+            .unwrap()
+            .contains("\"named_styles\"")
+    );
+    let reloaded = Document::load(&path).unwrap();
+    assert!(reloaded.named_styles.0.is_empty());
+    assert!(reloaded.nodes.iter().all(|n| n.style_ref.is_none()));
+}

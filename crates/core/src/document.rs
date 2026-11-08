@@ -356,6 +356,42 @@ impl Annotations {
     }
 }
 
+/// Un style nommé du document, référencé par des formes (`Node.style_ref`).
+/// Regroupe les valeurs d’apparence propagées aux formes qui l’utilisent.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct NamedStyle {
+    pub name: String,
+    pub fill: Color,
+    pub stroke: Color,
+    pub text_color: Color,
+    pub stroke_width: f32,
+    pub font_size: f32,
+}
+impl Default for NamedStyle {
+    fn default() -> Self {
+        Self {
+            name: String::new(),
+            fill: [233, 246, 241],
+            stroke: [39, 128, 107],
+            text_color: [32, 53, 64],
+            stroke_width: 1.5,
+            font_size: 12.,
+        }
+    }
+}
+
+/// Série de styles nommés du document (`Vec<NamedStyle>`), sérialisé quand non
+/// vide pour préserver la compacité de v8.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct NamedStyles(pub Vec<NamedStyle>);
+impl NamedStyles {
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Node {
     pub id: u64,
@@ -381,6 +417,9 @@ pub struct Node {
     pub appearance: crate::appearance::Appearance,
     #[serde(default, skip_serializing_if = "Annotations::is_empty")]
     pub annotations: Annotations,
+    /// Nom du style nommé du document auquel cette forme est liée, s’il y a.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub style_ref: Option<String>,
 }
 
 impl Node {
@@ -602,6 +641,8 @@ pub struct Document {
     pub charts: Vec<crate::chart::Chart>,
     pub organization: crate::organization::Organization,
     pub page_id: u64,
+    /// Styles nommés du document, partagés par toutes les pages.
+    pub named_styles: NamedStyles,
 }
 
 pub(crate) fn default_page_name() -> String {
@@ -626,6 +667,7 @@ impl Default for Document {
             charts: vec![],
             organization: Default::default(),
             page_id: 1,
+            named_styles: NamedStyles::default(),
         }
     }
 }
@@ -752,6 +794,7 @@ impl Document {
             image: None,
             appearance: Default::default(),
             annotations: Annotations::default(),
+            style_ref: None,
         });
         id
     }

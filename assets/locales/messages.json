@@ -10879,5 +10879,104 @@
     "it": "{0} rimossi",
     "pt": "{0} removidos",
     "zh-Hans": "删除 {0}"
+  },
+  "STYLES NOMMÉS": {
+    "fr": "STYLES NOMMÉS",
+    "en": "NAMED STYLES",
+    "de": "BENANNTE STILE",
+    "es": "ESTILOS NOMBRADOS",
+    "it": "STILI NOMINATI",
+    "pt": "ESTILOS NOMEADOS",
+    "zh-Hans": "命名样式"
+  },
+  "STYLE NOMMÉ": {
+    "fr": "STYLE NOMMÉ",
+    "en": "NAMED STYLE",
+    "de": "BENANNTER STIL",
+    "es": "ESTILO NOMBRADO",
+    "it": "STILE NOMINATO",
+    "pt": "ESTILO NOMEADO",
+    "zh-Hans": "命名样式"
+  },
+  "Nom du nouveau style…": {
+    "fr": "Nom du nouveau style…",
+    "en": "New style name…",
+    "de": "Name des neuen Stils…",
+    "es": "Nombre del nuevo estilo…",
+    "it": "Nome del nuovo stile…",
+    "pt": "Nome do novo estilo…",
+    "zh-Hans": "新样式名称…"
+  },
+  "Aucun style nommé pour l’instant.": {
+    "fr": "Aucun style nommé pour l’instant.",
+    "en": "No named styles yet.",
+    "de": "Noch keine benannten Stile.",
+    "es": "Aún no hay estilos nombrados.",
+    "it": "Nessuno stile nominato finora.",
+    "pt": "Ainda não há estilos nomeados.",
+    "zh-Hans": "尚无命名样式。"
+  },
+  "Créer un style nommé avec des valeurs par défaut": {
+    "fr": "Créer un style nommé avec des valeurs par défaut",
+    "en": "Create a named style with default values",
+    "de": "Benannten Stil mit Standardwerten erstellen",
+    "es": "Crear un estilo nombrado con valores predeterminados",
+    "it": "Crea uno stile nominato con valori predefiniti",
+    "pt": "Criar um estilo nomeado com valores padrão",
+    "zh-Hans": "使用默认值创建命名样式"
+  },
+  "Supprimer le style": {
+    "fr": "Supprimer le style",
+    "en": "Delete the style",
+    "de": "Stil löschen",
+    "es": "Eliminar el estilo",
+    "it": "Elimina lo stile",
+    "pt": "Excluir o estilo",
+    "zh-Hans": "删除样式"
+  },
+  "Un style nommé est partagé par le document : le modifier se propage automatiquement aux formes qui l’appliquent.": {
+    "fr": "Un style nommé est partagé par le document : le modifier se propage automatiquement aux formes qui l’appliquent.",
+    "en": "A named style is shared by the document: editing it automatically propagates to the shapes that use it.",
+    "de": "Ein benannter Stil wird vom Dokument geteilt: Bearbeiten wirkt sich automatisch auf die Formen aus, die ihn verwenden.",
+    "es": "Un estilo nombrado es compartido por el documento: editarlo se propaga automáticamente a las formas que lo aplican.",
+    "it": "Uno stile nominato è condiviso dal documento: modificarlo si propaga automaticamente alle forme che lo usano.",
+    "pt": "Um estilo nomeado é compartilhado pelo documento: editá-lo propaga automaticamente às formas que o aplicam.",
+    "zh-Hans": "命名样式由文档共享：编辑它会自动传播到应用该样式的形状。"
+  },
+  "Appliquer un style recopie ses valeurs ; modifier le style plus tard met à jour la forme automatiquement.": {
+    "fr": "Appliquer un style recopie ses valeurs ; modifier le style plus tard met à jour la forme automatiquement.",
+    "en": "Applying a style copies its values; editing the style later updates the shape automatically.",
+    "de": "Ein Stil kopiert seine Werte beim Anwenden; spätere Änderungen aktualisieren die Form automatisch.",
+    "es": "Aplicar un estilo copia sus valores; editar el estilo más tarde actualiza la forma automáticamente.",
+    "it": "Applicare uno stile copia i suoi valori; modificare lo stile in seguito aggiorna la forma automaticamente.",
+    "pt": "Aplicar um estilo copia seus valores; editar o estilo mais tarde atualiza a forma automaticamente.",
+    "zh-Hans": "应用样式会复制其值；之后编辑样式会自动更新形状。"
+  },
+  "Créer": {
+    "fr": "Créer",
+    "en": "Create",
+    "de": "Erstellen",
+    "es": "Crear",
+    "it": "Crea",
+    "pt": "Criar",
+    "zh-Hans": "创建"
+  },
+  "Renommer": {
+    "fr": "Renommer",
+    "en": "Rename",
+    "de": "Umbenennen",
+    "es": "Renombrar",
+    "it": "Rinomina",
+    "pt": "Renomear",
+    "zh-Hans": "重命名"
+  },
+  "OK": {
+    "fr": "OK",
+    "en": "OK",
+    "de": "OK",
+    "es": "Aceptar",
+    "it": "OK",
+    "pt": "OK",
+    "zh-Hans": "确定"
   }
 }

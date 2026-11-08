@@ -224,6 +224,10 @@ pub struct DrawApp {
     /// Étiquette en cours de saisie pour un objet (id, texte), validée à la
     /// perte de focus ou par Entrée ; un seul champ au niveau de l'inspecteur.
     pending_tag: Option<(u64, String)>,
+    /// Brouillon du nom du nouveau style nommé (champ texte persistant).
+    new_style_name: String,
+    /// Renommage en cours d’un style nommé : (nom courant, brouillon saisi).
+    renaming_style: Option<(String, String)>,
     rich_editor: Option<rich_text_ui::Editor>,
     text_click: Option<(u64, Pos2, f64)>,
     line_label_click: Option<line_label_ui::Click>,
@@ -856,6 +860,8 @@ impl DrawApp {
             paste_position: None,
             focus_text: None,
             pending_tag: None,
+            new_style_name: String::new(),
+            renaming_style: None,
             rich_editor: None,
             text_click: None,
             line_label_click: None,
@@ -1499,6 +1505,7 @@ impl DrawApp {
                     if ui.button(t("Gérer les pages…")).clicked(){self.show_pages=true;}
                     ui.add_space(12.);ui.separator();
                     ui.label(RichText::new(t("Sélectionnez un objet pour modifier son texte, ses couleurs et sa taille.")).size(12.).color(INFO_TEXT));
+                    self.named_styles_inspector(ui);
                 }
                 });
             });
@@ -1578,6 +1585,188 @@ impl DrawApp {
             .on_hover_text(t(
                 "Note interne : texte long pour documenter l’objet, non affiché",
             ));
+        }
+        self.named_style_picker(ui, id);
+    }
+    /// Sélecteur de style nommé pour un objet (forme/texte). Applique ou détache
+    /// le style en une annulation via `commit()`.
+    fn named_style_picker(&mut self, ui: &mut egui::Ui, id: u64) {
+        let is_node = self.doc.node(id).is_some();
+        if !is_node {
+            return;
+        }
+        ui.add_space(12.);
+        ui.separator();
+        field_label(ui, "STYLE NOMMÉ");
+        let names = self.doc.named_style_names();
+        let current = self
+            .doc
+            .node(id)
+            .and_then(|n| n.style_ref.clone())
+            .unwrap_or_default();
+        let mut selected = current.clone();
+        let display_current = current.clone();
+        egui::ComboBox::from_id_salt(("node_style", id))
+            .selected_text(if display_current.is_empty() {
+                t("Aucun")
+            } else {
+                display_current
+            })
+            .show_ui(ui, |ui| {
+                ui.selectable_value(&mut selected, String::new(), t("Aucun"));
+                for name in names {
+                    ui.selectable_value(&mut selected, name.to_owned(), name);
+                }
+            });
+        if selected != current {
+            if selected.is_empty() {
+                self.doc.detach_named_style(&[id]);
+            } else {
+                let _ = self.doc.apply_named_style_to_nodes(&[id], &selected);
+            }
+        }
+        ui.small(t(
+            "Appliquer un style recopie ses valeurs ; modifier le style plus tard met à jour la forme automatiquement.",
+        ));
+    }
+    /// Panneau de gestion des styles nommés du document (branch « Document »).
+    /// Toute mutation passe par `self.doc` et devient une annulation via `commit()`.
+    fn named_styles_inspector(&mut self, ui: &mut egui::Ui) {
+        ui.add_space(12.);
+        ui.separator();
+        field_label(ui, "STYLES NOMMÉS");
+        ui.small(t(
+            "Un style nommé est partagé par le document : le modifier se propage automatiquement aux formes qui l’appliquent.",
+        ));
+
+        // Nouveau style
+        ui.horizontal(|ui| {
+            let response = ui.add(
+                egui::TextEdit::singleline(&mut self.new_style_name)
+                    .hint_text(t("Nom du nouveau style…"))
+                    .char_limit(64)
+                    .desired_width(f32::INFINITY),
+            );
+            let created = ui
+                .button(t("Créer"))
+                .on_hover_text(t("Créer un style nommé avec des valeurs par défaut"))
+                .clicked();
+            if created {
+                let name = self.new_style_name.trim().to_string();
+                let style = document::NamedStyle::default();
+                if !name.is_empty() {
+                    let _ = self.doc.create_named_style(
+                        &name,
+                        style.fill,
+                        style.stroke,
+                        style.text_color,
+                        style.stroke_width,
+                        style.font_size,
+                    );
+                }
+                self.new_style_name.clear();
+                let _ = response;
+            }
+        });
+        ui.add_space(6.);
+
+        let names: Vec<String> = self
+            .doc
+            .named_style_names()
+            .into_iter()
+            .map(|s| s.to_owned())
+            .collect();
+        if names.is_empty() {
+            ui.label(
+                RichText::new(t("Aucun style nommé pour l’instant."))
+                    .size(12.)
+                    .color(INFO_TEXT),
+            );
+        }
+        let mut rename_request: Option<(String, String)> = None;
+        let mut delete_request: Option<String> = None;
+        for name in &names {
+            ui.separator();
+            // En-tête : nom (édition ou renommage) + supprimer
+            let renaming_here = self
+                .renaming_style
+                .as_ref()
+                .is_some_and(|(orig, _)| orig == name);
+            ui.horizontal(|ui| {
+                if renaming_here {
+                    let buf = &mut self.renaming_style.as_mut().unwrap().1;
+                    ui.add(
+                        egui::TextEdit::singleline(buf)
+                            .char_limit(64)
+                            .desired_width(120.),
+                    );
+                    let mut ok = false;
+                    if ui.button(t("OK")).clicked() {
+                        ok = true;
+                    }
+                    if ui.small_button("×").clicked() {
+                        self.renaming_style = None;
+                    }
+                    if ok {
+                        rename_request =
+                            Some((name.clone(), self.renaming_style.take().unwrap().1));
+                    }
+                } else {
+                    ui.label(RichText::new(name.as_str()).strong().color(ACTION_TEXT));
+                    if ui.small_button(t("Renommer")).clicked() {
+                        self.renaming_style = Some((name.clone(), name.clone()));
+                    }
+                }
+                if ui
+                    .small_button("×")
+                    .on_hover_text(t("Supprimer le style"))
+                    .clicked()
+                {
+                    delete_request = Some(name.clone());
+                }
+            });
+            // Valeurs éditables avec propagation (édition d’un clone puis comparaison).
+            if let Some(style) = self.doc.named_style(name).cloned() {
+                let mut edited = style.clone();
+                appearance_ui::color(ui, "Remplissage", &mut edited.fill);
+                appearance_ui::color(ui, "Trait", &mut edited.stroke);
+                appearance_ui::color(ui, "Couleur du texte", &mut edited.text_color);
+                appearance_ui::scalar(ui, "Épaisseur", &mut edited.stroke_width, 0.0..=32.0, " px");
+                appearance_ui::scalar(
+                    ui,
+                    "Taille du texte",
+                    &mut edited.font_size,
+                    1.0..=256.0,
+                    " px",
+                );
+                let _ = style;
+                // Appliquer uniquement les valeurs modifiées → propagation.
+                if edited.fill != self.doc.named_style(name).unwrap().fill {
+                    let _ = self.doc.edit_named_style_fill(name, edited.fill);
+                }
+                if edited.stroke != self.doc.named_style(name).unwrap().stroke {
+                    let _ = self.doc.edit_named_style_stroke(name, edited.stroke);
+                }
+                if edited.text_color != self.doc.named_style(name).unwrap().text_color {
+                    let _ = self
+                        .doc
+                        .edit_named_style_text_color(name, edited.text_color);
+                }
+                if edited.stroke_width != self.doc.named_style(name).unwrap().stroke_width {
+                    let _ = self
+                        .doc
+                        .edit_named_style_stroke_width(name, edited.stroke_width);
+                }
+                if edited.font_size != self.doc.named_style(name).unwrap().font_size {
+                    let _ = self.doc.edit_named_style_font_size(name, edited.font_size);
+                }
+            }
+        }
+        if let Some(name) = delete_request {
+            let _ = self.doc.remove_named_style(&name);
+        }
+        if let Some((old, new)) = rename_request {
+            let _ = self.doc.rename_named_style(&old, &new);
         }
     }
     fn footer(&mut self, ctx: &egui::Context) {

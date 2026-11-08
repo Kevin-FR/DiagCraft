@@ -108,7 +108,7 @@ versionnés avec migration ; aucun numéro n’est promis ici.
 - [x] Identifiants de page permanents et uniques dans le format `.draw` v8, avec migration explicite et déterministe v7→v8 (branche de développement, non publié).
 - [x] Liens de navigation entre pages.
 - [ ] Conteneurs et couloirs de processus.
-- [ ] Styles nommés avec propagation.
+- [x] Styles nommés avec propagation. Fait : styles nommés définis au niveau document et référencés par les formes (`style_ref`, détachable à vide) ; création/renommage/suppression et édition des valeurs avec propagation automatique à toutes les pages, sélecteur par objet dans l’inspecteur, format v8 rétrocompatible et agent (`docs/styles-nommes.md`, `docs/sprint-styles-nommes.md`).
 - [ ] Composants réutilisables liés.
 - [x] Premier aperçu IA avant/après avec choix de pages indépendants (branche de développement, non publié).
 - [x] Comparaison visuelle des modifications IA. Fait : trois vues Avant / Après / Différences dans le panneau agent ; les objets modifiés ou ajoutés sont surlignés d’accent et les suppressions signalées, avec légende et compteurs dérivés du rapport du patch (`docs/comparaison-visuelle.md`, `docs/sprint-comparaison-visuelle.md`).

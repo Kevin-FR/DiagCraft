@@ -369,3 +369,38 @@ fn page_links_can_be_added_updated_and_seen_in_inspection() {
     let out4 = agent::preview(&out3.document, &p4).unwrap();
     assert!(out4.document.link(link_id).is_none());
 }
+
+#[test]
+fn update_node_assigns_and_clears_named_style_ref() {
+    let mut d = Document::default();
+    d.create_named_style("Accent", [200, 40, 40], [5, 5, 5], [1, 2, 3], 2.5, 16.)
+        .unwrap();
+    let id = d.add_node(ShapeKind::Rectangle, [200., 200.]);
+    let assign = patch(
+        &d,
+        json!([{"op":"update_node","page":0,"target":id,"changes":{"style_ref":"Accent"}}]),
+    );
+    let out = agent::preview(&d, &assign).unwrap();
+    assert_eq!(out.document.nodes[0].style_ref.as_deref(), Some("Accent"));
+    assert_eq!(out.document.nodes[0].fill, [200, 40, 40]);
+    assert_eq!(out.document.nodes[0].stroke_width, 2.5);
+    // Référence à un style inconnu → erreur.
+    let bad = patch(
+        &d,
+        json!([{"op":"update_node","page":0,"target":id,"changes":{"style_ref":"Absent"}}]),
+    );
+    assert!(agent::preview(&d, &bad).is_err());
+    // Retrait de la référence (chaîne vide) via patch : les valeurs restent.
+    let d2 = out.document;
+    let detach = patch(
+        &d2,
+        json!([{"op":"update_node","page":0,"target":id,"changes":{"style_ref":""}}]),
+    );
+    let out2 = agent::preview(&d2, &detach).unwrap();
+    assert_eq!(out2.document.nodes[0].style_ref, None);
+    assert_eq!(out2.document.nodes[0].fill, [200, 40, 40]);
+    // Le contexte d'inspection expose les styles nommés.
+    let ctx = agent::inspect(&d2).unwrap();
+    assert_eq!(ctx["named_styles"][0]["name"], "Accent");
+    assert_eq!(ctx["named_styles"][0]["fill"][0], 200);
+}

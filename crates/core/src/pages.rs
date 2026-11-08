@@ -184,10 +184,14 @@ impl Document {
     }
     fn replace_pages(&mut self, mut pages: Vec<Page>, active: usize) {
         let title = self.title.clone();
+        // Les styles nommés sont document-globaux : `from_page` les réinitialise
+        // via `..Self::default()`, on les préserve explicitement.
+        let named_styles = std::mem::take(&mut self.named_styles);
         let p = pages.remove(active);
         *self = Self::from_page(p, &title);
         self.pages = pages;
         self.page_index = active;
+        self.named_styles = named_styles;
     }
     pub fn switch_page(&mut self, index: usize) -> Result<(), String> {
         if index >= self.page_count() {
@@ -290,6 +294,171 @@ impl Document {
         self.replace_pages(pages, active);
         Ok(())
     }
+
+    // ---- Styles nommés (lot 111) ----
+
+    fn apply_style_to_nodes(nodes: &mut [Node], name: &str, style: &NamedStyle) {
+        for n in nodes.iter_mut() {
+            if n.style_ref.as_deref() == Some(name) {
+                n.fill = style.fill;
+                n.stroke = style.stroke;
+                n.text_color = style.text_color;
+                n.stroke_width = style.stroke_width;
+                n.font_size = style.font_size;
+            }
+        }
+    }
+    fn style_nodes_mut(&mut self) -> impl Iterator<Item = &mut Node> {
+        self.pages
+            .iter_mut()
+            .flat_map(|p| p.nodes.iter_mut())
+            .chain(self.nodes.iter_mut())
+    }
+    /// Liste des noms de styles nommés du document, dans l’ordre.
+    pub fn named_style_names(&self) -> Vec<&str> {
+        self.named_styles
+            .0
+            .iter()
+            .map(|s| s.name.as_str())
+            .collect()
+    }
+    /// Retourne la définition d’un style nommé, ou `None`.
+    pub fn named_style(&self, name: &str) -> Option<&NamedStyle> {
+        self.named_styles.0.iter().find(|s| s.name == name)
+    }
+    /// Applique les valeurs d’un style nommé à toutes les formes (toutes pages)
+    /// qui le référencent. Appelée après toute édition de la définition.
+    fn propagate_style(&mut self, name: &str) {
+        let Some(style) = self.named_styles.0.iter().find(|s| s.name == name).cloned() else {
+            return;
+        };
+        Self::apply_style_to_nodes(&mut self.nodes, name, &style);
+        for p in self.pages.iter_mut() {
+            Self::apply_style_to_nodes(&mut p.nodes, name, &style);
+        }
+    }
+    /// Crée un style nommé à partir d’une apparence. `Err` si le nom est vide,
+    /// trop long ou déjà pris.
+    pub fn create_named_style(
+        &mut self,
+        name: &str,
+        fill: Color,
+        stroke: Color,
+        text_color: Color,
+        stroke_width: f32,
+        font_size: f32,
+    ) -> Result<(), String> {
+        let name = name.trim();
+        if name.is_empty() || name.len() > 64 {
+            return Err("Nom de style invalide.".into());
+        }
+        if self.named_styles.0.iter().any(|s| s.name == name) {
+            return Err("Un style porte déjà ce nom.".into());
+        }
+        self.named_styles.0.push(NamedStyle {
+            name: name.to_owned(),
+            fill,
+            stroke,
+            text_color,
+            stroke_width,
+            font_size,
+        });
+        Ok(())
+    }
+    /// Renomme un style et met à jour toutes les références, ou `Err` si le
+    /// nouveau nom est vide/trop long/déjà pris.
+    pub fn rename_named_style(&mut self, old: &str, new: &str) -> Result<(), String> {
+        let new = new.trim();
+        if new.is_empty() || new.len() > 64 {
+            return Err("Nom de style invalide.".into());
+        }
+        if old == new {
+            return Ok(());
+        }
+        if self.named_styles.0.iter().any(|s| s.name == new) {
+            return Err("Un style porte déjà ce nom.".into());
+        }
+        for s in self.named_styles.0.iter_mut() {
+            if s.name == old {
+                s.name = new.to_owned();
+            }
+        }
+        for n in self.style_nodes_mut() {
+            if n.style_ref.as_deref() == Some(old) {
+                n.style_ref = Some(new.to_owned());
+            }
+        }
+        Ok(())
+    }
+    /// Supprime un style nommé et détache toutes les formes qui le référencent.
+    pub fn remove_named_style(&mut self, name: &str) -> Result<(), String> {
+        self.named_styles.0.retain(|s| s.name != name);
+        for n in self.style_nodes_mut() {
+            if n.style_ref.as_deref() == Some(name) {
+                n.style_ref = None;
+            }
+        }
+        Ok(())
+    }
+    /// Met à jour une valeur d’un style nommé et la propage à toutes les formes
+    /// qui le référencent.
+    pub fn edit_named_style_fill(&mut self, name: &str, fill: Color) -> Result<(), String> {
+        self.set_style_prop(name, |s| s.fill = fill)
+    }
+    pub fn edit_named_style_stroke(&mut self, name: &str, stroke: Color) -> Result<(), String> {
+        self.set_style_prop(name, |s| s.stroke = stroke)
+    }
+    pub fn edit_named_style_text_color(&mut self, name: &str, c: Color) -> Result<(), String> {
+        self.set_style_prop(name, |s| s.text_color = c)
+    }
+    pub fn edit_named_style_stroke_width(&mut self, name: &str, w: f32) -> Result<(), String> {
+        self.set_style_prop(name, |s| s.stroke_width = w)
+    }
+    pub fn edit_named_style_font_size(&mut self, name: &str, size: f32) -> Result<(), String> {
+        self.set_style_prop(name, |s| s.font_size = size)
+    }
+    fn set_style_prop(&mut self, name: &str, f: impl Fn(&mut NamedStyle)) -> Result<(), String> {
+        let idx = self
+            .named_styles
+            .0
+            .iter()
+            .position(|s| s.name == name)
+            .ok_or_else(|| format!("Style «{name}» introuvable."))?;
+        f(&mut self.named_styles.0[idx]);
+        self.propagate_style(name);
+        Ok(())
+    }
+    /// Applique un style nommé aux formes données de la page active : pose la
+    /// référence et recopie les valeurs du style. `Err` si le style n’existe pas.
+    pub fn apply_named_style_to_nodes(&mut self, ids: &[u64], name: &str) -> Result<(), String> {
+        let style = self
+            .named_styles
+            .0
+            .iter()
+            .find(|s| s.name == name)
+            .cloned()
+            .ok_or_else(|| format!("Style «{name}» introuvable."))?;
+        for n in self.nodes.iter_mut() {
+            if ids.contains(&n.id) {
+                n.style_ref = Some(name.to_owned());
+                n.fill = style.fill;
+                n.stroke = style.stroke;
+                n.text_color = style.text_color;
+                n.stroke_width = style.stroke_width;
+                n.font_size = style.font_size;
+            }
+        }
+        Ok(())
+    }
+    /// Détache les formes données de tout style nommé (sans changer les valeurs).
+    pub fn detach_named_style(&mut self, ids: &[u64]) {
+        for n in self.nodes.iter_mut() {
+            if ids.contains(&n.id) {
+                n.style_ref = None;
+            }
+        }
+    }
+
     pub fn resize_page(
         &mut self,
         name: String,
@@ -362,6 +531,8 @@ impl Serialize for Document {
             #[serde(flatten)]
             first: PageRef<'a>,
             pages: Vec<PageRef<'a>>,
+            #[serde(skip_serializing_if = "crate::document::NamedStyles::is_empty")]
+            named_styles: &'a crate::document::NamedStyles,
         }
         File {
             format_version: self.format_version,
@@ -369,6 +540,7 @@ impl Serialize for Document {
             description: &self.description,
             first: self.page_ref(0),
             pages: (1..self.page_count()).map(|i| self.page_ref(i)).collect(),
+            named_styles: &self.named_styles,
         }
         .serialize(s)
     }
@@ -405,6 +577,11 @@ impl<'de> Deserialize<'de> for Document {
             // étant toujours l'index 0, cet identifiant est celui de la page 0.
             #[serde(default)]
             id: u64,
+            #[serde(
+                default,
+                skip_serializing_if = "crate::document::NamedStyles::is_empty"
+            )]
+            named_styles: crate::document::NamedStyles,
         }
         let raw = Raw::deserialize(d)?;
         Ok(Document {
@@ -424,6 +601,7 @@ impl<'de> Deserialize<'de> for Document {
             charts: raw.charts,
             organization: raw.organization,
             page_id: raw.id,
+            named_styles: raw.named_styles,
         })
     }
 }
