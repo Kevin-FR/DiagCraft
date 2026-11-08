@@ -221,6 +221,9 @@ pub struct DrawApp {
     show_quick_toolbar: bool,
     paste_position: Option<Point>,
     focus_text: Option<u64>,
+    /// Étiquette en cours de saisie pour un objet (id, texte), validée à la
+    /// perte de focus ou par Entrée ; un seul champ au niveau de l'inspecteur.
+    pending_tag: Option<(u64, String)>,
     rich_editor: Option<rich_text_ui::Editor>,
     text_click: Option<(u64, Pos2, f64)>,
     line_label_click: Option<line_label_ui::Click>,
@@ -852,6 +855,7 @@ impl DrawApp {
             show_quick_toolbar: true,
             paste_position: None,
             focus_text: None,
+            pending_tag: None,
             rich_editor: None,
             text_click: None,
             line_label_click: None,
@@ -1481,6 +1485,7 @@ impl DrawApp {
                         if d.kind==DrawingKind::Bezier {ui.add(egui::Slider::new(&mut d.bend,-300.0..=300.0).clamping(egui::SliderClamping::Edits).text(t("Courbure")));}
                         for (label,p) in [("Départ",&mut d.start),("Arrivée",&mut d.end)] {ui.label(t(label));ui.horizontal(|ui|{ui.add(egui::DragValue::new(&mut p[0]).clamp_existing_to_range(false).prefix("X ").range(-100_000.0..=100_000.0));ui.add(egui::DragValue::new(&mut p[1]).clamp_existing_to_range(false).prefix("Y ").range(-100_000.0..=100_000.0));});}
                     }
+                    self.annotations_inspector(ui, id);
                 } else if self.selected.len()>1 {
                     self.selection_inspector(ui);
                 } else {
@@ -1506,6 +1511,73 @@ impl DrawApp {
         );
         if self.doc != before && ctx.input(|i| i.pointer.primary_down()) {
             self.property_edit = true;
+        }
+    }
+    fn annotations_inspector(&mut self, ui: &mut egui::Ui, id: u64) {
+        ui.add_space(12.);
+        ui.separator();
+        field_label(ui, "ÉTIQUETTES");
+        let mut remove: Option<usize> = None;
+        if let Some(ann) = self.doc.annotations_mut(id) {
+            for (i, tag) in ann.tags.iter().enumerate() {
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new(tag.as_str()).strong().color(ACTION_TEXT));
+                    if ui
+                        .small_button("×")
+                        .on_hover_text(t("Supprimer l’étiquette"))
+                        .clicked()
+                    {
+                        remove = Some(i);
+                    }
+                });
+            }
+            if let Some(i) = remove {
+                ann.tags.remove(i);
+            }
+        }
+        if self.pending_tag.as_ref().map(|(i, _)| *i) != Some(id) {
+            self.pending_tag = Some((id, String::new()));
+        }
+        let buf = &mut self.pending_tag.as_mut().unwrap().1;
+        let mut commit = false;
+        ui.horizontal(|ui| {
+            let response = ui
+                .add(
+                    egui::TextEdit::singleline(buf)
+                        .hint_text(t("Nouvelle étiquette…"))
+                        .char_limit(64)
+                        .desired_width(f32::INFINITY),
+                )
+                .on_hover_text(t(
+                    "Ajouter une étiquette : mot-clé court pour retrouver l’objet",
+                ));
+            if response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+                commit = true;
+            }
+        });
+        if commit && !buf.trim().is_empty() {
+            let tag = buf.trim().to_string();
+            let can_add = self
+                .doc
+                .annotations_mut(id)
+                .map(|ann| !ann.tags.iter().any(|x| x == &tag) && ann.tags.len() < 16)
+                .unwrap_or(false);
+            if can_add {
+                self.doc.annotations_mut(id).unwrap().tags.push(tag);
+            }
+            buf.clear();
+        }
+        field_label(ui, "NOTE");
+        if let Some(ann) = self.doc.annotations_mut(id) {
+            ui.add(
+                egui::TextEdit::multiline(&mut ann.note)
+                    .char_limit(4096)
+                    .desired_width(f32::INFINITY)
+                    .desired_rows(3),
+            )
+            .on_hover_text(t(
+                "Note interne : texte long pour documenter l’objet, non affiché",
+            ));
         }
     }
     fn footer(&mut self, ctx: &egui::Context) {

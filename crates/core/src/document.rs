@@ -85,6 +85,8 @@ pub struct Drawing {
     pub label_offset: Point,
     #[serde(default, skip_serializing_if = "crate::appearance::Line::is_default")]
     pub appearance: crate::appearance::Line,
+    #[serde(default, skip_serializing_if = "Annotations::is_empty")]
+    pub annotations: Annotations,
 }
 impl Drawing {
     pub fn label_position(&self) -> Point {
@@ -302,6 +304,58 @@ impl ShapeKind {
     }
 }
 
+/// Métadonnées d'organisation d'un objet : étiquettes (mots-clés courts) et
+/// note (texte long facultatif). Enregistrées dans le `.draw` v8 de façon
+/// rétrocompatible ; n'apparaissent pas dans le rendu visuel.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct Annotations {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tags: Vec<String>,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub note: String,
+}
+impl Annotations {
+    /// Rétrocompatibilité : champ non écrit quand l'objet n'a aucune
+    /// métadonnée, pour laisser les fichiers existants invariants à l'écriture.
+    pub fn is_empty(&self) -> bool {
+        self.tags.is_empty() && self.note.is_empty()
+    }
+    /// Chaîne normalisée (minuscules, sans accents) incorporée dans la
+    /// recherche d'objets et dans l'attribut `aria-label` du SVG.
+    pub fn search_text(&self) -> String {
+        let mut parts = self.tags.clone();
+        if !self.note.is_empty() {
+            parts.push(self.note.clone());
+        }
+        parts.join(" ")
+    }
+    /// Validation des contraintes du contrat : au plus 16 étiquettes, chacune
+    /// de 1 à 64 caractères sans retour de ligne ni doublon, et note d'au plus
+    /// 4096 caractères.
+    pub fn validate(&self) -> Result<(), String> {
+        if self.tags.len() > 16 {
+            return Err("Trop d'étiquettes.".into());
+        }
+        let mut seen = HashSet::new();
+        for tag in &self.tags {
+            if !seen.insert(tag) {
+                return Err("Étiquette en double.".into());
+            }
+            if tag.is_empty()
+                || tag.chars().count() > 64
+                || tag.contains('\n')
+                || tag.contains('\r')
+            {
+                return Err("Étiquette invalide.".into());
+            }
+        }
+        if self.note.len() > 4096 {
+            return Err("Note trop longue.".into());
+        }
+        Ok(())
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Node {
     pub id: u64,
@@ -325,6 +379,8 @@ pub struct Node {
         skip_serializing_if = "crate::appearance::Appearance::is_default"
     )]
     pub appearance: crate::appearance::Appearance,
+    #[serde(default, skip_serializing_if = "Annotations::is_empty")]
+    pub annotations: Annotations,
 }
 
 impl Node {
@@ -485,6 +541,8 @@ pub struct Connector {
     pub end_head: crate::stroke_style::ArrowHead,
     #[serde(default, skip_serializing_if = "crate::appearance::Line::is_default")]
     pub appearance: crate::appearance::Line,
+    #[serde(default, skip_serializing_if = "Annotations::is_empty")]
+    pub annotations: Annotations,
 }
 
 impl Connector {
@@ -693,6 +751,7 @@ impl Document {
             text_runs: vec![],
             image: None,
             appearance: Default::default(),
+            annotations: Annotations::default(),
         });
         id
     }
@@ -725,6 +784,7 @@ impl Document {
             start_head: Default::default(),
             end_head: Default::default(),
             appearance: Default::default(),
+            annotations: Annotations::default(),
         });
         Some(id)
     }
@@ -733,6 +793,23 @@ impl Document {
     }
     pub fn node_mut(&mut self, id: u64) -> Option<&mut Node> {
         self.nodes.iter_mut().find(|n| n.id == id)
+    }
+    /// Accès mutable aux métadonnées d'organisation (étiquettes, note) d'un
+    /// objet identifié par son id local, quelle que soit sa catégorie.
+    pub fn annotations_mut(&mut self, id: u64) -> Option<&mut Annotations> {
+        if let Some(n) = self.nodes.iter_mut().find(|n| n.id == id) {
+            return Some(&mut n.annotations);
+        }
+        if let Some(c) = self.connectors.iter_mut().find(|c| c.id == id) {
+            return Some(&mut c.annotations);
+        }
+        if let Some(d) = self.drawings.iter_mut().find(|d| d.id == id) {
+            return Some(&mut d.annotations);
+        }
+        self.charts
+            .iter_mut()
+            .find(|c| c.id == id)
+            .map(|c| &mut c.annotations)
     }
     pub fn hit_node(&self, p: Point) -> Option<u64> {
         let organization = self.organization_view();
@@ -803,6 +880,7 @@ impl Document {
             label_t: 0.5,
             label_offset: [0., 0.],
             appearance: Default::default(),
+            annotations: Annotations::default(),
         });
         id
     }
@@ -1296,6 +1374,7 @@ impl Document {
         let mut ids = HashSet::new();
         for n in &self.nodes {
             n.appearance.validate()?;
+            n.annotations.validate()?;
             if let Some(image) = &n.image {
                 image.validate()?;
             }
@@ -1329,6 +1408,7 @@ impl Document {
                 return Err("Identifiant de graphique invalide.".into());
             }
             c.validate()?;
+            c.annotations.validate()?;
         }
         for d in &self.drawings {
             if d.id == 0
@@ -1348,9 +1428,11 @@ impl Document {
                 return Err("Tracé invalide.".into());
             }
             d.appearance.validate()?;
+            d.annotations.validate()?;
         }
         for c in &self.connectors {
             c.appearance.validate()?;
+            c.annotations.validate()?;
             if c.id == 0
                 || c.id == u64::MAX
                 || !ids.insert(c.id)

@@ -411,6 +411,7 @@ impl Document {
             start_head: Default::default(),
             end_head: Default::default(),
             appearance: Default::default(),
+            annotations: Default::default(),
         });
         next.validate()?;
         let r = next.route(next.connectors.last().unwrap());

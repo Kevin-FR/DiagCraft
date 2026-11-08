@@ -171,6 +171,7 @@ impl DrawApp {
             start_head: ArrowHead::Triangle,
             end_head: ArrowHead::Triangle,
             appearance: Default::default(),
+            annotations: Default::default(),
         })
     }
     pub(super) fn finish_connection(&mut self, pos: Pos2) -> bool {

@@ -1,4 +1,4 @@
-use crate::document::{Color, Point, TextAlign};
+use crate::document::{Annotations, Color, Point, TextAlign};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -76,6 +76,8 @@ pub struct Chart {
     pub categories: Vec<String>,
     pub series: Vec<Series>,
     pub legend: bool,
+    #[serde(default, skip_serializing_if = "Annotations::is_empty")]
+    pub annotations: Annotations,
 }
 #[derive(Clone, Debug)]
 pub enum Primitive {
@@ -126,6 +128,7 @@ impl Chart {
                 },
             ],
             legend: true,
+            annotations: Annotations::default(),
         }
     }
     pub fn validate(&self) -> Result<(), String> {

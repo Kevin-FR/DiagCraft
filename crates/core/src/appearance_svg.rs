@@ -446,10 +446,26 @@ pub fn node(n: &Node) -> String {
     } else {
         content = body;
     }
+    let label = aria_label(&n.annotations);
     format!(
-        "<g transform=\"translate({} {})\"><defs>{defs}</defs>{content}</g>\n",
+        "<g{label} transform=\"translate({} {})\"><defs>{defs}</defs>{content}</g>\n",
         n.position[0], n.position[1]
     )
+}
+
+/// Attribut `aria-label` du SVG à partir des étiquettes de l'objet, échappé
+/// pour une valeur d'attribut entre guillemets. Chaîne vide quand il n'y a
+/// aucune étiquette, de sorte que le rendu du document reste inchangé.
+fn aria_label(ann: &crate::document::Annotations) -> String {
+    if ann.tags.is_empty() {
+        return String::new();
+    }
+    let joined = ann.tags.join(" ");
+    let escaped = joined
+        .replace('&', "&amp;")
+        .replace('"', "&quot;")
+        .replace('<', "&lt;");
+    format!(" aria-label=\"{escaped}\"")
 }
 pub fn node_image(n: &Node) -> (String, [f32; 4]) {
     let mut local = n.clone();
@@ -559,5 +575,6 @@ pub fn drawing_edge(d: &crate::document::Drawing) -> Connector {
         start_head: Default::default(),
         end_head: Default::default(),
         appearance: d.appearance.clone(),
+        annotations: d.annotations.clone(),
     }
 }

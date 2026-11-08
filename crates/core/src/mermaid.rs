@@ -535,6 +535,7 @@ pub fn import(source: &str) -> Result<Import, Vec<Notice>> {
             start_head: ArrowHead::Triangle,
             end_head: ArrowHead::Triangle,
             appearance: Default::default(),
+            annotations: Default::default(),
         });
     }
     document.page_size = [

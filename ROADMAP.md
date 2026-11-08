@@ -167,6 +167,17 @@ sans copier les bibliothèques, modèles ou marques des autres produits.
 6. **Retrouver et organiser** : étudier des étiquettes et notes d’objets,
    filtres et recherche complète, en précisant ce qui est enregistré et exporté.
    Compléter les conteneurs/couloirs, styles nommés et composants déjà prévus.
+   Fait : des **étiquettes** (mots-clés ≤ 16, de 1 à 64 caractères, sans doublon)
+   et une **note** (≤ 4096 caractères) sur formes/textes, connecteurs, traits et
+   graphiques, éditables à l’interface en une annulation, indexées par la
+   recherche d’objets, exposées à l’inspection CLI/MCP, et rétrocompatibles avec
+   le format `.draw` v8 (champs vides non écrits, fichiers existants inchangés).
+   Les étiquettes des formes et textes sont exportées en `aria-label` SVG
+   accessible ; la note n’est jamais exportée. Le contrat du sous-ensemble est
+   défini dans [etiquettes-notes.md](docs/etiquettes-notes.md) et la préparation
+   du lot dans [sprint-etiquettes-notes.md](docs/sprint-etiquettes-notes.md).
+   Voir aussi la recherche étendue dans [recherche-objets.md](docs/recherche-objets.md).
+   Études séparées, non implémentées : édition par patch agent de ces champs.
    Référence : [liens, infobulles et étiquettes draw.io](https://www.drawio.com/docs/manual/links-tooltips-tags/).
 7. **Automatisation et 1.0** : compléter la comparaison visuelle IA et les
    diagnostics CLI/MCP existants ; mesurer réactivité et mémoire sur les trois

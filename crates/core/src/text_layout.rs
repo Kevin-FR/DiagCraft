@@ -197,6 +197,7 @@ pub fn line_label(label: &str) -> Layout {
         font_size: 14.,
         text_style: TextStyle::default(),
         appearance: Default::default(),
+        annotations: Default::default(),
     })
 }
 /// Includes the white backing margin, in document coordinates.

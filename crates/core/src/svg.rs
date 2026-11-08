@@ -288,7 +288,7 @@ fn render_layer(
             hex(n.stroke),
             n.stroke_width
         );
-        if !n.appearance.is_default() || n.image.is_some() {
+        if !n.appearance.is_default() || n.image.is_some() || !n.annotations.tags.is_empty() {
             out.push_str(&crate::appearance_svg::node(n));
         } else {
             match n.kind {
@@ -758,5 +758,28 @@ mod accessibility_tests {
         let pdf2 = crate::pdf::export_current(&doc, crate::pdf::PageFormat::Drawing).unwrap();
         assert!(pdf2.starts_with(b"%PDF-"));
         assert!(!pdf2.windows(b"/Subject".len()).any(|w| w == b"/Subject"));
+    }
+
+    #[test]
+    fn tagged_nodes_export_an_escaped_aria_label_without_changing_the_drawing() {
+        let mut doc = Document::default();
+        let id = doc.add_node(ShapeKind::Rectangle, [200., 200.]);
+        doc.node_mut(id)
+            .unwrap()
+            .annotations
+            .tags
+            .push(r#"clé"#.into());
+        doc.node_mut(id)
+            .unwrap()
+            .annotations
+            .tags
+            .push("a&b \"c\"".into());
+        let svg = export(&doc).unwrap();
+        // Tags are joined with a space and escaped for an attribute value.
+        assert!(svg.contains(r#"aria-label="clé a&amp;b &quot;c&quot;""#));
+        // Without tags, the document renders exactly as before (no aria-label).
+        doc.node_mut(id).unwrap().annotations = Default::default();
+        let plain = export(&doc).unwrap();
+        assert!(!plain.contains("aria-label"));
     }
 }

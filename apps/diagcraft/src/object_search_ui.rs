@@ -60,7 +60,14 @@ impl Search {
     }
 }
 
-fn entry(id: u64, kind: Kind, text: &str, label: &str, position: Point) -> Entry {
+fn entry(
+    id: u64,
+    kind: Kind,
+    text: &str,
+    label: &str,
+    position: Point,
+    ann: &diagcraft::document::Annotations,
+) -> Entry {
     let title = text
         .lines()
         .find(|line| !line.trim().is_empty())
@@ -69,15 +76,23 @@ fn entry(id: u64, kind: Kind, text: &str, label: &str, position: Point) -> Entry
     if title.chars().count() > 80 {
         short.push('…');
     }
+    let mut detail = format!(
+        "{} · #{} · X {:.0} · Y {:.0} px",
+        label, id, position[0], position[1]
+    );
+    if let Some(tag) = ann.tags.first() {
+        detail.push_str(&format!(" · {tag}"));
+    }
     Entry {
         id,
         kind,
         label: short,
-        detail: format!(
-            "{} · #{} · X {:.0} · Y {:.0} px",
-            label, id, position[0], position[1]
-        ),
-        search: commands_ui::normalize(&format!("{text} {label} {} #{id}", t(kind.label()))),
+        detail,
+        search: commands_ui::normalize(&format!(
+            "{text} {label} {} #{id} {}",
+            t(kind.label()),
+            ann.search_text()
+        )),
     }
 }
 fn entries(doc: &Document) -> Vec<Entry> {
@@ -86,9 +101,23 @@ fn entries(doc: &Document) -> Vec<Entry> {
         .iter()
         .map(|n| {
             if let Some(image) = &n.image {
-                entry(n.id, Kind::Images, &image.alt, &t("Image"), n.position)
+                entry(
+                    n.id,
+                    Kind::Images,
+                    &image.alt,
+                    &t("Image"),
+                    n.position,
+                    &n.annotations,
+                )
             } else {
-                entry(n.id, Kind::Nodes, &n.text, &t(n.kind.label()), n.position)
+                entry(
+                    n.id,
+                    Kind::Nodes,
+                    &n.text,
+                    &t(n.kind.label()),
+                    n.position,
+                    &n.annotations,
+                )
             }
         })
         .chain(doc.connectors.iter().map(|e| {
@@ -98,6 +127,7 @@ fn entries(doc: &Document) -> Vec<Entry> {
                 &e.label,
                 &t("Connecteur"),
                 doc.route(e).first().copied().unwrap_or([0., 0.]),
+                &e.annotations,
             )
         }))
         .chain(doc.drawings.iter().map(|d| {
@@ -111,13 +141,19 @@ fn entries(doc: &Document) -> Vec<Entry> {
                     "Courbe de Bézier"
                 }),
                 d.start,
+                &d.annotations,
             )
         }))
-        .chain(
-            doc.charts
-                .iter()
-                .map(|c| entry(c.id, Kind::Charts, &c.title, &t(c.kind.label()), c.position)),
-        )
+        .chain(doc.charts.iter().map(|c| {
+            entry(
+                c.id,
+                Kind::Charts,
+                &c.title,
+                &t(c.kind.label()),
+                c.position,
+                &c.annotations,
+            )
+        }))
         .filter(|e| view.is_object_visible(e.id))
         .collect()
 }

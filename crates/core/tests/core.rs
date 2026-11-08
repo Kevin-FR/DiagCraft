@@ -529,6 +529,58 @@ fn document_description_round_trips_and_stays_backward_compatible() {
 }
 
 #[test]
+fn object_annotations_round_trip_and_stay_backward_compatible() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("ann.rdraw");
+    let mut doc = Document::demo();
+    // Non-empty annotations: written, reloaded and preserved without error.
+    doc.nodes.first_mut().unwrap().annotations.tags = vec!["client".into(), "urgent".into()];
+    doc.nodes.first_mut().unwrap().annotations.note = "Rappel du contrat du 2 janvier.".into();
+    doc.save(&path).unwrap();
+    let raw = fs::read_to_string(&path).unwrap();
+    assert!(raw.contains("\"annotations\""));
+    assert!(raw.contains("\"client\""));
+    assert_eq!(Document::load(&path).unwrap(), doc);
+    // Empty annotations: absent from the canonical form (backward compatible),
+    // so existing v8 files without the field keep loading with an empty value.
+    for n in doc.nodes.iter_mut() {
+        n.annotations = Default::default();
+    }
+    doc.save(&path).unwrap();
+    assert!(
+        !fs::read_to_string(&path)
+            .unwrap()
+            .contains("\"annotations\"")
+    );
+    let reloaded = Document::load(&path).unwrap();
+    assert!(reloaded.nodes.iter().all(|n| n.annotations.is_empty()));
+    assert_eq!(reloaded, doc);
+}
+
+#[test]
+fn annotations_validation_enforces_contract_limits() {
+    let mut doc = Document::demo();
+    doc.nodes[0].annotations.tags = vec!["ok".into(), "valide".into()];
+    doc.validate().unwrap();
+    // More than 16 tags.
+    doc.nodes[0].annotations.tags = (0..17).map(|i| format!("tag-{i}")).collect();
+    assert!(doc.validate().unwrap_err().contains("Trop d'étiquettes"));
+    // A tag longer than 64 characters.
+    doc.nodes[0].annotations.tags = vec!["x".repeat(65)];
+    assert!(doc.validate().unwrap_err().contains("Étiquette invalide"));
+    // A tag containing a line break.
+    doc.nodes[0].annotations.tags = vec!["a\nb".into()];
+    assert!(doc.validate().unwrap_err().contains("Étiquette invalide"));
+    // A duplicated tag.
+    doc.nodes[0].annotations.tags = vec!["double".into(), "double".into()];
+    assert!(doc.validate().unwrap_err().contains("Étiquette en double"));
+    // A note longer than 4096 characters.
+    doc.nodes[0].annotations.tags = vec![];
+    doc.nodes[0].annotations.note = "x".repeat(4097);
+    assert!(doc.validate().unwrap_err().contains("Note trop longue"));
+}
+
+#[test]
 fn atomic_write_replaces_existing_bytes_and_cleans_failed_temporary_files() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("export.svg");
