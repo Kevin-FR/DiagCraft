@@ -106,7 +106,7 @@ versionnés avec migration ; aucun numéro n’est promis ici.
 - [ ] Mesurer la réactivité avec des images sur Windows et Linux.
 - [x] Retour entre les deux dernières pages visitées, indépendant par onglet et protégé si le document change (branche de développement, non publié).
 - [x] Identifiants de page permanents et uniques dans le format `.draw` v8, avec migration explicite et déterministe v7→v8 (branche de développement, non publié).
-- [ ] Liens de navigation entre pages.
+- [x] Liens de navigation entre pages.
 - [ ] Conteneurs et couloirs de processus.
 - [ ] Styles nommés avec propagation.
 - [ ] Composants réutilisables liés.
