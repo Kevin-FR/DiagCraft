@@ -10798,5 +10798,32 @@
     "it": "Nota interna: testo lungo per documentare l’oggetto, non mostrato",
     "pt": "Nota interna: texto longo para documentar o objeto, não exibido",
     "zh-Hans": "内部备注：用于记录对象的较长文本，不显示"
+  },
+  "Toutes les pages": {
+    "fr": "Toutes les pages",
+    "en": "All pages",
+    "de": "Alle Seiten",
+    "es": "Todas las páginas",
+    "it": "Tutte le pagine",
+    "pt": "Todas as páginas",
+    "zh-Hans": "所有页面"
+  },
+  "Portée :": {
+    "fr": "Portée :",
+    "en": "Scope:",
+    "de": "Bereich:",
+    "es": "Alcance:",
+    "it": "Ambito:",
+    "pt": "Âmbito:",
+    "zh-Hans": "范围："
+  },
+  "Étiquette :": {
+    "fr": "Étiquette :",
+    "en": "Tag:",
+    "de": "Etikett:",
+    "es": "Etiqueta:",
+    "it": "Etichetta:",
+    "pt": "Etiqueta:",
+    "zh-Hans": "标签："
   }
 }

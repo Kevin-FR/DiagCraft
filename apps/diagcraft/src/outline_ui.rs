@@ -162,13 +162,17 @@ fn rows(doc: &Document) -> Vec<Row> {
                 } else {
                     t(n.kind.label())
                 },
+                n.annotations.search_text(),
             )
         })
-        .chain(
-            doc.connectors
-                .iter()
-                .map(|c| (c.id, short(&c.label), t("Connecteur"))),
-        )
+        .chain(doc.connectors.iter().map(|c| {
+            (
+                c.id,
+                short(&c.label),
+                t("Connecteur"),
+                c.annotations.search_text(),
+            )
+        }))
         .chain(doc.drawings.iter().map(|d| {
             (
                 d.id,
@@ -178,14 +182,18 @@ fn rows(doc: &Document) -> Vec<Row> {
                 } else {
                     "Courbe de Bézier"
                 }),
+                d.annotations.search_text(),
             )
         }))
-        .chain(
-            doc.charts
-                .iter()
-                .map(|c| (c.id, short(&c.title), t(c.kind.label()))),
-        );
-    for (id, mut label, kind) in objects {
+        .chain(doc.charts.iter().map(|c| {
+            (
+                c.id,
+                short(&c.title),
+                t(c.kind.label()),
+                c.annotations.search_text(),
+            )
+        }));
+    for (id, mut label, kind, annotations) in objects {
         if label.is_empty() {
             label = kind.clone();
         }
@@ -211,7 +219,7 @@ fn rows(doc: &Document) -> Vec<Row> {
             .push(Row {
                 key: TreeKey::Object(id),
                 depth: if group.is_some() { 2 } else { 1 },
-                search: commands_ui::normalize(&format!("{label} {detail}")),
+                search: commands_ui::normalize(&format!("{label} {detail} {annotations}")),
                 label,
                 detail,
                 ancestors,
@@ -896,6 +904,29 @@ mod tests {
         assert!(results.hits.is_empty());
         assert!(same_snapshot);
         assert_eq!(revision, diagcraft::agent::revision(&results.snapshot));
+    }
+    #[test]
+    fn multipage_search_indexes_tags_and_notes() {
+        i18n::activate(Language::French);
+        let mut doc = Document::default();
+        let a = doc.add_node(ShapeKind::Rectangle, [100., 100.]);
+        doc.node_mut(a)
+            .unwrap()
+            .annotations
+            .tags
+            .push("sprint".into());
+        doc.node_mut(a).unwrap().annotations.note = "note de synthèse pour la revue".into();
+        let b = doc.add_node(ShapeKind::Rectangle, [300., 100.]);
+        doc.node_mut(b).unwrap().text = "Tableau".into();
+        // rows() indexe les annotations pour la recherche d'arborescence.
+        let rows = super::rows(&doc);
+        assert!(rows.iter().any(|r| r.search.contains("sprint")));
+        assert!(rows.iter().any(|r| r.search.contains("synth")));
+        // La recherche de pages retrouve l'objet par étiquette et par note.
+        let results = search_pages(&doc, "sprint");
+        assert!(results.hits.iter().any(|h| h.key == TreeKey::Object(a)));
+        let results = search_pages(&doc, "synthèse");
+        assert!(results.hits.iter().any(|h| h.key == TreeKey::Object(a)));
     }
     #[test]
     fn search_button_runs_worker_and_displays_results() {

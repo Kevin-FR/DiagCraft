@@ -177,6 +177,14 @@ sans copier les bibliothèques, modèles ou marques des autres produits.
    défini dans [etiquettes-notes.md](docs/etiquettes-notes.md) et la préparation
    du lot dans [sprint-etiquettes-notes.md](docs/sprint-etiquettes-notes.md).
    Voir aussi la recherche étendue dans [recherche-objets.md](docs/recherche-objets.md).
+   Fait : **filtres & recherche complète** — un filtre par étiquette (combiné au
+   texte et au type en ET logique), une portée **Page active / Toutes les pages**
+   dans la recherche d’objets (⌘F / Ctrl+F) qui retrouve et ouvre des objets sur
+   d’autres pages (300 premiers résultats au plus), et l’indexation des
+   étiquettes et de la note dans la recherche multipage de l’arborescence.
+   Préférences de session uniquement, rien d’enregistré dans le `.draw` v8.
+   Contrat : [filtres-recherche.md](docs/filtres-recherche.md), préparation :
+   [sprint-filtres-recherche.md](docs/sprint-filtres-recherche.md).
    Études séparées, non implémentées : édition par patch agent de ces champs.
    Référence : [liens, infobulles et étiquettes draw.io](https://www.drawio.com/docs/manual/links-tooltips-tags/).
 7. **Automatisation et 1.0** : compléter la comparaison visuelle IA et les
